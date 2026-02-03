@@ -1,0 +1,122 @@
+cff-version: 1.2.0
+message: If you use this model, please use the licence stated in the LICENCE file, and cite it as below.
+type: software
+title: IMACLIM-R World - IMpact Assessment of CLIMate policies
+abstract: IMACLIM-R is a multi-sectoral, macroeconomic process-based Integrated Assessment Model (IAM)
+  that simulates the co-evolution of economic systems, energy systems, and technological 
+  change within a consistent framework. Unlike aggregated IAMs, IMACLIM-R explicitly
+  represents the interplay between macroeconomic dynamics and sector-specific constraints
+  through a hard coupling of a general equilibrium core—based on Leontief production
+  functions and operating under market imperfections—and bottom-up techno-economic
+  sectoral modules.
+
+  The model’s recursive-dynamic resolution ensures that macroeconomic trajectories
+  are shaped by energy and technological constraints, reflecting the physical and economic
+  limits of substitution in production and consumption patterns. This approach contrasts
+  with traditional CGE models by embedding input-output representations where technical
+  coefficients evolve only through the recursive dynamics and sectoral modules, rather than
+  assuming perfect substitutability or market clearing. IMACLIM-R thus captures how energy
+  systems and technological rigidities fundamentally influence macroeconomic outcomes,
+  offering a robust framework for exploring pathways aligned with climate and sustainability goals.
+
+version: "2.0"
+date-released: 2024-01-01
+authors:
+
+  - family-names: "Bibas"
+    given-names: "Ruben"
+    orcid: https://orcid.org/0000-0002-4788-5278
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Briera"
+    given-names: "Thibault"
+    orcid: https://orcid.org/0000-0002-9143-9291
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Crassous"
+    given-names: "Olivier"
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Dabbaghian"
+    given-names: "Gabriele"
+    orcid: https://orcid.org/0009-0000-3647-939X
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Danneaux"
+    given-names: "Augustin"
+    orcid: https://orcid.org/0009-0009-4445-1210
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Defosse"
+    given-names: "Liesbeth"
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Dumas"
+    given-names: "Patrice"
+    orcid: https://orcid.org/0000-0002-3896-7589
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Gaucher"
+    given-names: "Yann"
+    orcid: https://orcid.org/0000-0001-9170-0632
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Graves"
+    given-names: "Nicolas"
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Guivarch"
+    given-names: "Céline"
+    orcid: https://orcid.org/0000-0002-9405-256X
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Le-Gallic"
+    given-names: "Thomas"
+    orcid: https://orcid.org/0000-0001-6760-5483
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Leblanc"
+    given-names: "Florian"
+    orcid: https://orcid.org/0000-0001-9154-5847
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+    email: florian.leblanc.dr.code@gmail.fr
+
+  - family-names: "Lefèvre"
+    given-names: "Julien"
+    orcid: https://orcid.org/0000-0001-9702-7266
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Méjean"
+    given-names: "Aurélie"
+    orcid: https://orcid.org/0000-0003-2859-3613
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Rozenberg"
+    given-names: "Julie"
+    orcid: https://orcid.org/0000-0003-0569-590
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Sassi"
+    given-names: "Olivier"
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Vogt-Schilb"
+    given-names: "Adrien"
+    orcid: https://orcid.org/0000-0001-8802-4207
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Waisman"
+    given-names: "Henri"
+    orcid: https://orcid.org/0000-0001-7450-4912
+    affiliation: "Centre International de Recherche sur l'Environnement et le Développement (CIRED)"
+
+  - family-names: "Wiltgen"
+    given-names: "Séverine"
+
+license: AGPL-3.0-or-later
+repository-code: https://github.com/CIRED/IMACLIM-R_World
+keywords:
+  - economy
+  - energy
+  - modeling
+  - model
