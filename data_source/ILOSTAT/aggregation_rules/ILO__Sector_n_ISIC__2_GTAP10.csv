@@ -1,0 +1,44 @@
+#gtap to ISIC4: https://www.gtap.agecon.purdue.edu/databases/contribute/concordinfo.asp
+#gtap to ISIC3: https://www.gtap.agecon.purdue.edu/databases/contribute/concordinfo57.asp
+#ISIC rev4 p51: https://unstats.un.org/unsd/publication/seriesm/seriesm_4rev4f.pdf
+#ISIC3 ISIC4 concordance: https://www.gtap.agecon.purdue.edu/databases/contribute/concordinfo.asp
+#dwe: gtap sector, rent of dwelling, goes nowhere in ISIC
+#The following rules does not deal with ISIC4_X, ISIC3_X, SECTOR_X: jobs with no ISIC classification
+#distributon of elec. gas and water (ely, gdt, wtr) put in industry
+#trade services (trd); accomodation and restaurant (afs); telecommunication (cmn): all put in SER (services)
+ISIC4_A|frs|fsh|pdr|wht|gro|v_f|osd|c_b|pfb|ocr|ctl|oap|rmk|wol
+ISIC4_B|gas|oil|coa|oxt
+ISIC4_C|ppp|i_s|nmm|ome|fmp|ele|eeq|nfm|tex|wap|lea|lum|chm|bph|mvh|otn|omf|rpp|b_t|cmt|omt|vol|mil|pcr|sgr|ofd|p_c
+ISIC4_D|ely|gdt
+ISIC4_E|wtr
+ISIC4_F|cns
+ISIC4_G|trd
+ISIC4_H|atp|wtp|otp|whs
+ISIC4_I|afs
+ISIC4_J|cmn
+ISIC4_K|ofi|ins
+ISIC4_L|rsa
+ISIC4_M,ISIC4_N|obs
+ISIC4_O,ISIC4_U|osg
+ISIC4_P|edu
+ISIC4_Q|hht
+ISIC4_R,ISIC4_S,ISIC4_T|ros
+ISIC3_A|fsh|frs|pdr|wht|gro|v_f|osd|c_b|pfb|ocr|ctl|oap|rmk|wol
+ISIC3_B|fsh
+ISIC3_C|gas|oil|coa|oxt
+ISIC3_D|ppp|i_s|nmm|ome|fmp|ele|eeq|nfm|tex|wap|lea|lum|chm|bph|mvh|otn|omf|rpp|b_t|cmt|omt|vol|mil|pcr|sgr|ofd|p_c
+ISIC3_E|ely|gdt|wtr
+ISIC3_F|cns
+ISIC3_G|trd
+ISIC3_H|afs
+ISIC3_I|atp|wtp|otp|whs|cmn
+ISIC3_J|ofi|ins
+ISIC3_K|rsa|obs
+ISIC3_L,ISIC3_Q|osg
+ISIC3_O|wtr,osg,ros
+ISIC3_N|hht
+ISIC3_M|edu
+ISIC3_P|ros
+SECTOR_AGR|fsh|frs|pdr|wht|gro|v_f|osd|c_b|pfb|ocr|ctl|oap|rmk|wol
+SECTOR_IND|gas|oil|coa|oxt|ppp|i_s|nmm|ome|fmp|ele|eeq|nfm|tex|wap|lea|lum|chm|bph|mvh|otn|omf|rpp|b_t|cmt|omt|vol|mil|pcr|sgr|ofd|p_c|cns|atp|wtp|otp|whs
+SECTOR_SER|ofi|ins|rsa|obs|osg|edu|hht|ros|cmn|afs|trd|ely|gdt|wtr

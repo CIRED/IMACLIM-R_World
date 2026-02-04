@@ -1,0 +1,40 @@
+
+
+
+F-gases are only available for v4.2 (V6 soon)
+https://data.jrc.ec.europa.eu/dataset/jrc-edgar-emissiontimeseriesv42
+
+
+
+Crippa, Monica; Guizzardi, Diego; Muntean, Marilena; Schaaf, Edwin; Lo Vullo, Eleonora; Solazzo, Efisio; Monforti-Ferrario, Fabio; Olivier, Jos; Vignati, Elisabetta (2021): EDGAR v6.0 Greenhouse Gas Emissions. European Commission, Joint Research Centre (JRC) [Dataset] PID: http://data.europa.eu/89h/97a67d67-c62e-4826-b873-9d972c4f670b
+
+Crippa, Monica; Guizzardi, Diego; Muntean, Marilena; Schaaf, Edwin; Oreggioni, Gabriel (2019): EDGAR v5.0 Global Air Pollutant Emissions. European Commission, Joint Research Centre (JRC) [Dataset] PID: http://data.europa.eu/89h/377801af-b094-4943-8fdc-f79a7c0c2d19:w
+
+
+metadata web link: https://publications.jrc.ec.europa.eu/repository/handle/JRC122516?mode=full
+
+metadata:;
+Full metadata record
+DC Field	Value	Language
+dc.contributor.author	CRIPPA Monica	en_GB
+dc.contributor.author	GUIZZARDI Diego	en_GB
+dc.contributor.author	MUNTEAN Marilena	en_GB
+dc.contributor.author	SCHAAF Edwin	en_GB
+dc.date.accessioned	2021-02-08	en_GB
+dc.date.available	2021-02-08	en_GB
+dc.date.created	2021-01-18	en_GB
+dc.date.issued	2021	en_GB
+dc.date.submitted	2020-11-05	en_GB
+dc.description.abstract	EDGARv5.0 provides emissions not only for the greenhouse gases per sector and country but also for the airpollutants: - Ozone precursor gases: Carbon Monoxide (CO), Nitrogen Oxides (NOx), Non-Methane Volatile OrganicCompounds (NMVOC) and Methane (CH4). - Acidifying gases: Ammonia (NH3), Nitrogen oxides (NOx) and SulfurDioxide (SO2). - Primary particulates: Fine Particulate Matter (PM10 and PM2.5 and Carbonaceous speciation (BC,OC). Emissions from large scale biomass burning with Savannah burning, forest fires, and sources and sinks fromland-use, land-use change and forestry (LULUCF) are excluded. For the energy related sectors the activity data aremainly based on the energy balance statistics of IEA (2017) (Internet:http://www.oecd-ilibrary.org/energy/co2-emissions-from-fuel-combustion-2017_co2_fuel-2017-en), whereas theactivity data for the agricultural sectors originate mainly from FAO (2018) (Internet:http://www.fao.org/faostat/en/#home). Additional information can be found in Crippa et al. (2019). Noveltiescompared to previous EDGAR release (EDGARv4.3.2 (Crippa et al., 2018)) are: - new temporal profiles to computemonthly and hourly emissions (Crippa et al., 2020, in press), - new spatial proxies to distribute population-relatedemissions based on the Global Human Settlements Layer product (Pesaresi et al., 2019), - updates in thetechnologies, emission factors and end-of-pipe reductions for the power generation sector (for Europe, China andUSA) based on the Platts 2018 database, and the implementation of the regulation taking place in these regions, -updates in the technologies, emission factors and end-of-pipe reductions for the road transport sector (for Europeonly). These updates are based on the EMISIA 2018 data, -Estimates of particulate matter emissions from roadsurface wear and road vehicle tyre and break wear based on the EMEP/EEA guidebook 2019 Tier 1 approach(https://www.eea.europa.eu/publications/emep-eea-guidebook-2019).	en_GB
+dc.description.sponsorship	JRC.C.5 - Air and Climate	en_GB
+dc.format.medium	Online	en_GB
+dc.identifier.citation	Crippa, M., Guizzardi, D., Muntean, M. and Schaaf, E., EDGAR v5.0 Global Air Pollutant Emissions, European Commission, 2021, JRC122516.	en_GB
+dc.identifier.uri	http://data.europa.eu/89h/377801af-b094-4943-8fdc-f79a7c0c2d19	en_GB
+dc.identifier.uri	http://data.jrc.ec.europa.eu/collection/edgar	en_GB
+dc.identifier.uri	https://publications.jrc.ec.europa.eu/repository/handle/JRC122516	en_GB
+dc.language	ENG	en_GB
+dc.publisher	European Commission	en_GB
+dc.relation.ispartofseries	JRC122516	en_GB
+dc.subject	Energy and transport	en_GB
+dc.title	EDGAR v5.0 Global Air Pollutant Emissions	en_GB
+dc.type	Scientific methods, data and information	en_GB

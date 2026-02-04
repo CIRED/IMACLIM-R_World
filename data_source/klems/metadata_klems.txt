@@ -1,0 +1,26 @@
+depository: Ruben Bibas (Ruben)
+title: KLEMS databases
+source: 
+source: downloaded from the websites
+date: 2016
+rights: public
+Freely available on the websites.
+Except capital file for France (raw/france/FRA_capital_11i-1.xlsx), given by Laurence Nayman <laurence.nayman@cepii.fr> on June 15 2016 (supposed to change soon)
+Except capital file for Brazil (raw/brazil/20160705-brazilKFile.xlsx), given by Thiago Moraes <thiago.moraes@petrobras.com.br> on July 5 2016
+
+description:
+This project aims to create a database on measures of economic growth, productivity, employment creation, capital formation and technological change at the industry level for all European Union member states from 1970 onwards. This work will provide an important input to policy evaluation, in particular for the assessment of the goals concerning competitiveness and economic growth potential as established by the Lisbon and Barcelona summit goals. The database should facilitate the
+sustainable production of high quality statistics using the methodologies of national accounts and input-output analysis. The input measures will include various categories of capital, labour, energy, material and service inputs. Productivity measures will be developed, in particular with growth accounting techniques. Several measures on knowledge creation will also be constructed. Substantial methodological and data research on these measures will be carried out to improve
+international comparability. There will be ample attention for the development of a flexible database structure, and for the progressive implementation of the database in official statistics over the course of the project. The database will be used for analytical and policy-related purposes, in particular by studying the relationship between skill formation, technological progress and innovation on the one hand, and productivity, on the other. To facilitate this type of
+analysis a link will also be sought with existing micro (firm level) databases. The balance in academic, statistical and policy input in this project is realised by the participation of 14 organisations from across the EU, representing a mix of academic institutions and national economic policy research institutes and with the support from various statistical offices and the OECD.
+
+coverage: by database:
+EU for euklems
+china for CIP2015 (rieti)
+world for worldklems
+creator: 
+publisher: 
+BibliographicResource:
+For world database
+Dale W. Jorgenson, Mun S. Ho, and Jon Samuels, “A Prototype Industry‐Level Production Account for the United States, 1947‐2010,” Second World KLEMS Conference, Harvard University, August 9, 2012.
+

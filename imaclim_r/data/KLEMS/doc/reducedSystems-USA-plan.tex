@@ -1,0 +1,52 @@
+\section{Investment in the USA, 1970 - 2007}
+\subsection{Choosing variables for answering questions}
+The data available for the USA over these 38 years are: for each year, what industry invests in what product. One of the sources the US capital inupt data are based on is the BEA capital flow table for 1997 \todo{insert reference}. Referring to this table provides a more concrete description of in what products precisely the different industry-levels are investing in.    
+
+First questions considered:
+\begin{enumerate}
+	\item Over the years, has there been an evolution in the overall level of investment, was there an increase or decrease ? To answer this question, we need to define what an increase or decrease in investment would be. The most basic variable - basic in the sense of defined in a straightforward way, without making many hypothesis - in the KLEMS database is nominal investment $I$. But an increase in nominal investment does not mean that capital formation increased, it means more money in the current currency was spent, which might be due to a price increase. The standard solution to this problem is to correct for price increases by using price indices. The KLEMS database provides, albeit with some missing values, price indices specific for the 8 asset-levels and differentiated by industry-level. The price index used is a hedonic price index (see section \ref{hedonic}, \pageref{hedonic}), which specifies a relationship between the prices and the characteristics of products. A hedonic price index changes faster than a more traditional price index for products whose characteristics evolve fast. One of the features of KLEMS is that it distinguishes investment in information and communication technology (ICT) related assets (disaggregated in CT, IT and Software).\footnote{Indeed, the database is constructed amongst other reasons to evaluate the impact on productivity and growth of the new type of capital introduced in the information technology age. To attest of the sincerity of purpose, in addition to the 60 industry-levels for which supply- and use-tables are available for most EU countries, 8 extra industry-levels were added in the KLEMS database: 8 industries that ``either stand out in terms of skill and R\&D intensity, or in terms of ICT investment intensity or ICT share in output' \cite{timmer_eu_2007}}. Since ICT assets have known dramatic improvements in characteristics such as processing power and memory, this leads to a price index that decreases much more for IT assets than for other types of assets. Hence, using real investment $I_q$ (KLEMS notation), introduces (a lot of) information on the quality change of this asset type, which is strictly speaking true for all asset types, but which is faster changing for IT assets. So if one would want to evaluate scenarios of future investment against past patterns on the basis of the KLEMS real investment variable, one needs to make a hypothesis on the evolution of the price index of ICT assets and thus of their quality improvements. Possible alternatives are:
+	\begin{itemize}
+		%\item Use nominal investment corrected with the over-all-industries price index of non-ICT assets. The evolution of the price index on non-ICT assets is more what we expect, increasing steadily over time. The evolution of the ICT-price index increases up to 1984 after which it decreases faster up to 2007 than the nonICT index increases over the period 1970-2007. (One can decompose the evolution in the evolutions of IT, CT and Soft.) The interpretation of this measure is a bit tricky: real variables typically allow comparison in the sense of larger or smaller value of something (in price of a baseyear), from one year to another. For the case under consideration this would be: more value directed towards investment than the previous year. If we correct the price of computers with a general price index, 
+		\item Use nominal investment corrected for value added $I/VA$. This variable addresses the question ``What share of national income has been allocated to capital formation by industry-level $x$ in product-level $y$''. Here, an increase in investment means that a larger of share of national income has been used for capital formation. The drawback of this variable is that it introduces, into the measure of investment evolution, variablity of VA. 
+		\item A variable that in the spirit of  $I/VA$ conveys whether a larger or smaller portion of the national budget has been directed towards capital formation, but without adding new variablility, is nominal investment $I$ corrected for the best linear approximation of VA, instead of year-by-year comparing I with the actual measurement of $VA$. \todo{Explain how variable is constructed}%This variable does not introduce extra variability and loosely conveys what portion of national income has been directed towards investment.    
+	\end{itemize} 
+	\item For a specific, or a few specific years, what industries invest in what products? What industries have (dis)simular investment profiles, and what assets are the most similar in the sense of being formed by the same industrial sectors ? \label{question2}
+	%\begin{itemize}
+		%\item To perform CA for systemetic evaluation of what industries invest in what products, etc., ponder once more on what variable to compare with what metric.
+	%\end{itemize} 
+
+	\item How did what was described in question \ref{question2} evolve over the 38-year period under consideration?
+	%\begin{itemize}
+		\item Table with min and max growth rate of I and maybe other vars too. Min and Max portion of VA, min and max share.
+		%\item To consider the evolution over the period, ponder once more on what variable to compare with what metric.
+	%\end{itemize} 
+\end{enumerate} 
+
+% latex table generated in R 3.3.0 by xtable 1.8-2 package
+% Tue Sep 06 11:50:36 2016
+\begin{table}[ht]
+\setlength\tabcolsep{6pt}
+\centering
+\begingroup\footnotesize
+\begin{tabular}{lrrrrrrrrr}
+  \hline
+growthrates& nobs & NAs & Minimum & Maximum & Mean & Stdev & Skewness & Kurtosis & period\\ 
+  \hline
+I & 41 & 4 & -4.1 \% & 20.7 \% & 7.5 \% & 5.9 \% & 0.1 \% & -0.4 \% & 1970-2007 \\ 
+  VA & 41 & 11 & 3.2 \% & 13.1 \% & 6.6 \% & 2.5 \% & 1.0 \% & 0.3 \% & 1977-2007 \\ 
+ I/VA & 41 & 11 & -7.0 \% & 6.8 \% & -0.1 \% & 3.7 \% & -0.2 \% & -1.1 \% & 1977-2007 \\ 
+   I/$\mathrm{VA_{trend}}$ & 41 & 11 & -13.7 \% & 7.4 \% & -1.2 \% & 5.6 \% & -0.4 \% & -0.8 \% & 1977-2007 \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{Statistics on growthrates, total industry, 1970-2007, USA} 
+\label{table:Summary, growthrates_USA}
+\end{table}
+ 
+To evaluate the variability introduced by deflating $I$ by $VA$, \Cref{table:Summary, growthrates_USA} shows statistics of the growthrates of both variables.  Both the spread between the maximum and the minimum growth rate and the standard deviation point towards nominal investment being the most variable variable ; deflating I for the trend of VA takes away some variability but is much more reduced by yearly deflating I by measured VA. The latter is due to the fact that both are influenced by common chocks. 
+
+
+% Insert graph: evolution I, I/VA, I/trendVA, Iq, I/IpnonGFCF for USA, 1970 - 2007.  
+% For I, I/VA and maybe also the variable chosen (I/trendVA?),  
+
+

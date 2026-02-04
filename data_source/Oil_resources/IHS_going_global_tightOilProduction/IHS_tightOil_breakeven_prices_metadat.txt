@@ -1,0 +1,4 @@
+// breakeven prices for global tight oil formations
+// from "going global : tight oil production"
+// IHS, july 2014, presentation, p7
+// source : http://www.eia.gov/conference/2014/pdf/presentations/webster.pdf

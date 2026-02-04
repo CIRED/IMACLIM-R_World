@@ -1,0 +1,60 @@
+From EMF27_final_round_global_scenarios_v4_210212.docx
+
+
+
+1. TECHNOLOGIES
+
+* Energy intensity (FE/GDP)
+    REFERENCE: Annual reduction rate should reflect in baseline
+        - 1.2% globally
+        - 1  % in industrial countries
+        - 1.7% in developing countries
+        - ind_EEI = 0
+    LOW: Global final energy demand should reflect in baseline:
+        - 20 to 30 % reduction in 2050
+        - 35 to 45 % reduction in 2100
+        - GWP not significantly altered (only EEI)
+        - ind_EEI = 1
+    LOW: Global final energy demand should reflect in baseline:
+* CCS:
+    ON  (ind_CCS = 1)
+    OFF (ind_CCS = 0)
+* Nuclear:
+    ON (fully available)                               (ind_NUC = 1)
+    OFF (Phase out after 2010 + no lifetime extensions (ind_NUC = 0)
+* Solar and wind
+    CONSERVATIVE: Share of solar and wind in electricity limited to 20%   (ind_ENR = 0)
+    ADVANCED    : Constraint less stringent than in the conservative case (ind_ENR = 1)
+* Bioenergy:
+    LOW : Total bioenergy supply limited to 100 EJ/year (ind_bioEnergy = 0)
+    HIGH: No exogenous constraint                       (ind_bioEnergy = 1)
+
+
+
+2. POLICY CASES
+* Rules
+    - target in 2100
+    - overshooting allowed
+    - full when-flexibility
+    - full where-flexibility
+* Groups
+    - I  :
+    - II :
+    - III:
+* Baseline: no climate policies beyond January 1, 2009 (no replacement for Kyoto protocol after 2012).
+* 2.6W/m2 (450ppm):
+    - 1200 GtCO2 entre 2005 et 2050 (tolérance: 1030-1240)
+    - 1140 GtCO2 entre 2005 et 2100 (tolérance: 1120-1340)
+* 3.7W/m2 (550ppm): 1140 GtCO2 entre 2005 et 2100 (tolérance: 1120-1340)
+    - 1500 GtCO2 entre 2005 et 2050 (tolérance: 1320-1520)
+    - 2250 GtCO2 entre 2005 et 2100 (tolérance: 1960-2380)
+* G8:
+    - 50% reduction of CO2e in 2050/1990
+    - Groups I & II: 50% reduction of CO2e in 2050/1990
+    - Groups I & II: -2%/year after 2050
+    - Group I      : -80% in 2050/1990
+    - Group II     : Copenhagen pledges (with grandfathering)
+    - Group III    : Unconstrained
+    - When&Where flexibility for grI after 2012, grI&II after 2020 (in 2 periods: before and after 2050)
+* Muddling-Through
+    - same as before

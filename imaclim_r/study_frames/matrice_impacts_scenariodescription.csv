@@ -1,0 +1,42 @@
+This describes what the combinations correspond to;;;;//combi;ind_climat;ind_productivity_st;ind_catchup;ind_productivity;ind_impacts;ind_pop;ind_develo;ind_EEI;ind_clim_sensi;ind_lctechno;ind_altern;ind_charbo;ind_techno;ind_trade;ind_K;ind_labour;ind_trade_agri
+Name;croissance leader (from 1 to 5);catchup (from 1 to 3);;//; ;;;;;;;;;;;;;;;;
+Central scenario (SSP 2);2;2;NoCC;1;0;0;2;2;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante catchup;2;1;NoCC;2;0;0;1;2;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante catchup;2;3;NoCC;3;0;0;3;2;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;1;2;NoCC;4;0;0;2;1;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;1;1;NoCC;5;0;0;1;1;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;1;3;NoCC;6;0;0;3;1;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;3;2;NoCC;7;0;0;2;3;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;3;1;NoCC;8;0;0;1;3;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;3;3;NoCC;9;0;0;3;3;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;4;2;NoCC;10;0;0;2;4;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;4;1;NoCC;11;0;0;1;4;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;4;3;NoCC;12;0;0;3;4;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;5;2;NoCC;13;0;0;2;5;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;5;1;NoCC;14;0;0;1;5;0;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;5;3;NoCC;15;0;0;3;5;0;2;1;5;1;4;2;5;1;0;0;0;0
+SSP 2 + High climate sensitivity;2;2;NoCC;16;0;0;2;2;0;2;1;5;2;4;2;5;1;0;0;0;0
+SSP 2 + Low climate sensitivity;2;2;NoCC;17;0;0;2;2;0;2;1;5;0;4;2;5;1;0;0;0;0
+SSP 2 + Low trade;2;2;NoCC;18;0;0;2;2;0;2;1;5;1;4;2;5;1;1;0;0;0
+SSP 2 + High labour markets;2;2;NoCC;19;0;0;2;2;0;2;1;5;1;4;2;5;1;0;0;1;0
+SSP 2 + Very high labour markets;2;2;NoCC;20;0;0;2;2;0;2;1;5;1;4;2;5;1;0;0;1;0
+Central scenario (SSP 2);2;2;CC;21;0;0;2;2;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante catchup;2;1;CC;22;0;0;1;2;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante catchup;2;3;CC;23;0;0;3;2;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;1;2;CC;24;0;0;2;1;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;1;1;CC;25;0;0;1;1;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;1;3;CC;26;0;0;3;1;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;3;2;CC;27;0;0;2;3;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;3;1;CC;28;0;0;1;3;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;3;3;CC;29;0;0;3;3;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;4;2;CC;30;0;0;2;4;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;4;1;CC;31;0;0;1;4;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;4;3;CC;32;0;0;3;4;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;5;2;CC;33;0;0;2;5;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;5;1;CC;34;0;0;1;5;1;2;1;5;1;4;2;5;1;0;0;0;0
+Variante growth;5;3;CC;35;0;0;3;5;1;2;1;5;1;4;2;5;1;0;0;0;0
+SSP 2 + High climate sensitivity;2;2;CC;36;0;0;2;2;1;2;1;5;2;4;2;5;1;0;0;0;0
+SSP 2 + Low climate sensitivity;2;2;CC;37;0;0;2;2;1;2;1;5;0;4;2;5;1;0;0;0;0
+SSP 2 + Low trade;2;2;CC;38;0;0;2;2;1;2;1;5;1;4;2;5;1;1;0;0;0
+SSP 2 + High labour markets;2;2;CC;39;0;0;2;2;1;2;1;5;1;4;2;5;1;0;0;1;0
+SSP 2 + Very high labour markets;2;2;;40;0;0;2;2;1;2;1;5;1;4;2;5;1;0;0;1;0

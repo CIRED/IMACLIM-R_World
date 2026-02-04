@@ -1,0 +1,10 @@
+Mean weekly hours actually worked per employed person by sex and economic activity -- Annual
+Description: Data on hours of work are presented, whenever possible, on the basis of the mean number of hours of work per week, and with reference to hours worked in all jobs of employed persons and in all types of working time arrangements (e.g. full-time and part-time). Data are disaggregated by economic activity according to the latest version of the International Standard Industrial Classification of All Economic Activities (ISIC) available for that year. For more information, refer to the concepts and definitions page.
+Subject: Working time
+Collection: YI -- Annual indicators
+Id: HOW_TEMP_SEX_ECO_NB_A
+Time period: 1948 - 2019
+Last updated: 20/12/2020 06:43:06
+Number of records: 156803
+￼Close
+

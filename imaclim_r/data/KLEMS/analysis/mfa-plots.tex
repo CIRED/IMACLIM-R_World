@@ -1,0 +1,360 @@
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+%\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{textcomp}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{gensymb}
+
+\usepackage{float}
+\usepackage[caption = false]{subfig}
+\usepackage{graphicx}
+
+
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+\usepackage{babel}
+ \usepackage[version=3]{mhchem}
+ 
+ \title{}
+ \author{}
+\date{}
+ 
+ 
+\begin{document}
+\section{Methodology}
+
+%\todo{Same graph for K. Is USA still on the lower end for K? Is GFCF/VA low in the USA because of high K already, low labour costs, accounting differences, less redistribution (residential structures, travel equipment) ? }
+The variables in the KLEMS capital input database, amongst which nominal investment ($I$) and real investment ($Iq$), are detailed according to 4 categorical variables: country, year, product, industry. We will first consider the data for one country, USA, and perform a multifactor analysis for contingency tables (MFACT) designed for the simultaneaous analysis of several contingency tables sharing at least one variable (ie rows or columns). The methodology is detailed in \citep{becue2004principal} and its application using R is aided with \citep{kostov2013multiple}. 
+
+
+
+\section{Investment in the USA, 1970 - 2007, reduced system analysis} 
+
+\section{Grouping industries with similar investment structure}
+The KLEMS database provides GFCF data for a disagregation of total industry into 32 sectors. To simplify analysis of the temporal evolution of the investment structure of the sectors, we will first determine whether hte following subdivisions have a similar structure:
+\begin{itemize}
+\item the 14 sectors that make up the manufacturing sector (D), 
+\item the 3 sectors that make up Wholesale and Retail Trade (G) and Hotels (H),
+\item Transport and Storage and Post and Telecommunications, the two components of I,
+\item Financial Intermediation (J), Real Estate Activities (70) and Renting of M\&Eq and Other Business Activities (71t74). 
+\end{itemize}
+The temporal evolution of the structure of "traditional" capital assets and of "ICT" assets are analyzed independently. The traditional capital assets are Residential structures (RStruc), Other construction (OCon = Residential structures + Infrastructure), Other Machinery (OMach), Travel equipment (TraEq) and Other, and the ICT assets are Inforamtion technology (IT), Communication technology (IT) and Software (Soft).
+
+\renewcommand{\arraystretch}{1.15}
+\begin{table}[!h]
+	\footnotesize
+\vskip-0.0cm\hskip0cm\begin{tabular}{| p{130 pt} | l | p{300 pt}| }
+\hline
+	&	code	&	EU KLEMS			\\
+\hline							
+AtB & AtB & Agriculture, Hunting, Forestry And Fishing  \\
+\hline 
+C & C & Mining And Quarrying  \\
+\hline 
+D & 15t16 & Food , Beverages And Tobacco  \\
+Total Manufacturing & 17t19 & Textiles, Textile , Leather And Footwear \\
+& 20 & Wood And Of Wood And Cork \\
+& 21t22 & Pulp, Paper, Paper , Printing And Publishing  \\
+& 23t25 & Chemical, Rubber, Plastics And Fuel \\
+& 23 & Coke, Refined Petroleum And Nuclear Fuel  \\
+& 24 & Chemicals And Chemical Products  \\
+& 25 & Rubber And Plastics  \\
+& 26 & Other Non-Metallic Mineral\\
+& 27t28 & Basic Metals And Fabricated Metal  \\
+& 29 & Machinery, nec  \\
+& 30t33 & Electrical and Optical Equipment  \\
+& 34t35 & Transport Equipment  \\
+& 36t37 & Manufacturing nec; Recycling  \\
+\hline 
+E & E & Electricity, Gas and Water Supply  \\
+\hline 
+F & F & Construction  \\
+\hline 
+G & 50 & Sale, Maintenance and Repair of Motor Vehicles and Motorcycles; Retail Sale of Fuel  \\
+Wholesale and Retail Trade & 51 & Wholesale Trade and Commission Trade, Except of Motor Vehicles and Motorcycles \\
+& 52 & Retail Trade, Except of Motor Vehicles and Motorcycles; Repair of Household Goods  \\
+\hline 
+H & H & Hotels and Restaurants  \\
+\hline 
+I & 60t63 & transport and storage  \\
+Transport and Storage and Communication & 64 & Post and Telecommunications  \\
+\hline 
+JtK & J & Financial Intermediation  \\
+\begin{flushleft}Finance, Insurance, Real Estate and Business Services \end{flushleft}& 70 & Real Estate Activities  \\
+K & 71t74 & Renting of M\&Eq and Other Business Activities  \\
+\hline 
+LtQ & L & Public Admin and Defence; Compulsory Social Security  \\
+Community Social & M & Education  \\
+and Personal Services & N & Health and Social Work  \\
+ & O & Other Community, Social and Personal Services  \\
+ & P & Private Households With Employed Persons  \\
+& Q & Extra-Territorial Organizations and Bodies  \\
+\hline
+\end{tabular}
+\caption{Industrial levels used in KLEMS.}
+\label{IndKLEMSGTAP}
+\end{table}
+
+\clearpage
+
+
+\begin{figure}[!h]
+   \centering
+   \includegraphics[width=\textwidth]{plots/plotted_bars_structure/Iq_ShareGFCF-bar5xManu.pdf}
+    \caption{Evolution of GFCF structure of 14 sectors making up the Manufacturing sector (D), for the "traditional" assets Residential structures (RStruc), Other construction (OCon = Residential structures + Infrastructure), Other Machinery (OMach), Travel equipment (TraEq) and Other. USA, 1970-2007 (source: klems).}
+\end{figure} 
+
+\begin{figure}[!h]
+   \centering
+   \includegraphics[width=\textwidth]{plots/plotted_bars_structure/I_ShareGFCF-bar5x11.pdf}
+    \caption{Evolution of GFCF structure of 11 sectors making up Total industry, for the assets Residential structures (RStruc), Other construction (OCon = Residential structures + Infrastructure), Other Machinery (OMach), Travel equipment (TraEq) and Other. USA, 1970-2007 (source: klems).}
+\end{figure} 
+
+\begin{figure}[!h]
+   \centering
+   \includegraphics[width=\textwidth]{plots/plotted_bars_structure/I_ShareGFCF-bar5x_GHIJK.pdf}
+    \caption{Evolution of GFCF structure of the sectors 50, 51, 52 making up G, H, 60t63 and 64 (I), J, 70 and 71t74 (K) for the assets Residential structures (RStruc), Other construction (OCon = Residential structures + Infrastructure), Other Machinery (OMach), Travel equipment (TraEq) and Other. USA, 1970-2007 (source: klems).}
+\end{figure} 
+
+
+
+
+[Present descriptive stats of all and show variation is less then ...]
+
+
+
+
+\clearpage
+\section{The dimensions}
+\newpage
+\subsection{Contributions to the dimensions, shares, more dimensions}
+Contributions to the dimensions, Ind-Prod, USA 
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 90.3 * \mathrm{Real\ estate} &&+\  1.3 * \mathrm{RE\ Business} &&+\  1.2 * \mathrm{Finance}  \nonumber \\ 
+ &\mathrm{dim}2 = 69.2 * \mathrm{TransComm} &&+\  8.5 * \mathrm{Agri} &&+\  4.9 * \mathrm{Manufact} &&+\  4.3 * \mathrm{RE\ Business} &&+\  4.3 * \mathrm{Elec Gas} &&+\  3.4 * \mathrm{Mining}  \nonumber \\ 
+ &\mathrm{dim}3 = 24.4 * \mathrm{Mining} &&+\  22.1 * \mathrm{Community} &&+\  19.3 * \mathrm{RE\ Business} &&+\  9.9 * \mathrm{Construc} &&+\  6.1 * \mathrm{Finance} &&+\  6.1 * \mathrm{Elec Gas} &&+\  4.4 * \mathrm{Manufact} &&+\  3.9 * \mathrm{TransComm} &&+\  3.8 * \mathrm{Agri}  \nonumber \\ 
+ &\mathrm{dim}4 = 29.4 * \mathrm{Finance} &&+\  17.1 * \mathrm{Agri} &&+\  15.1 * \mathrm{RE\ Business} &&+\  15 * \mathrm{TransComm} &&+\  14.7 * \mathrm{Construc} &&+\  5.3 * \mathrm{Community}  \nonumber \\ 
+ &\mathrm{dim}5 = 66.7 * \mathrm{Sales} &&+\  11.3 * \mathrm{Manufact} &&+\  7.6 * \mathrm{Agri} &&+\  5.3 * \mathrm{Elec Gas} &&+\  4.4 * \mathrm{Construc} &&+\  3.3 * \mathrm{Mining}  \nonumber \\ 
+ &\mathrm{dim}6 = 36.6 * \mathrm{Manufact} &&+\  20.3 * \mathrm{Construc} &&+\  19 * \mathrm{Finance} &&+\  6.8 * \mathrm{Mining} &&+\  6.6 * \mathrm{RE\ Business} &&+\  4.4 * \mathrm{Elec Gas} &&+\  3.3 * \mathrm{Agri} &&+\  2.5 * \mathrm{Sales}  \nonumber \\ 
+ &\mathrm{dim}7 = 30.3 * \mathrm{Finance} &&+\  26.8 * \mathrm{RE\ Business} &&+\  18.2 * \mathrm{Construc} &&+\  7.4 * \mathrm{Manufact} &&+\  7.2 * \mathrm{Agri} &&+\  4.1 * \mathrm{Community} &&+\  2.6 * \mathrm{Mining}  \nonumber \\ 
+ &\mathrm{dim}8 = 38.8 * \mathrm{Agri} &&+\  18.9 * \mathrm{Construc} &&+\  16.6 * \mathrm{RE\ Business} &&+\  13.1 * \mathrm{Sales} &&+\  6.2 * \mathrm{Manufact} &&+\  3.6 * \mathrm{Mining}  \nonumber \\ 
+ &\mathrm{dim}9 = 51.9 * \mathrm{Community} &&+\  36.8 * \mathrm{Mining} &&+\  6.2 * \mathrm{Sales} &&+\  3.1 * \mathrm{Agri}  
+ \end{alignat} 
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 90.6 * \mathrm{RStruc} &&+\  3.2 * \mathrm{OMach} &&+\  2.1 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}2 = 63.2 * \mathrm{CT} &&+\  23.1 * \mathrm{OMach} &&+\  8 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}3 = 59 * \mathrm{OCon} &&+\  10.2 * \mathrm{OMach} &&+\  9.7 * \mathrm{TraEq} &&+\  9.6 * \mathrm{IT} &&+\  8.7 * \mathrm{Soft}  \nonumber \\ 
+ &\mathrm{dim}4 = 26.9 * \mathrm{IT} &&+\  21.9 * \mathrm{OMach} &&+\  20.7 * \mathrm{Soft} &&+\  15.2 * \mathrm{CT} &&+\  7.6 * \mathrm{TraEq} &&+\  6.7 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}5 = 82.9 * \mathrm{Other} &&+\  9.5 * \mathrm{Soft} &&+\  2.4 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}6 = 50.8 * \mathrm{TraEq} &&+\  18.9 * \mathrm{Soft} &&+\  9.5 * \mathrm{IT} &&+\  8 * \mathrm{CT} &&+\  5.2 * \mathrm{OMach} &&+\  3.9 * \mathrm{Other} &&+\  3.4 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}7 = 25.7 * \mathrm{Soft} &&+\  25.3 * \mathrm{IT} &&+\  19 * \mathrm{OMach} &&+\  13.2 * \mathrm{TraEq} &&+\  11 * \mathrm{CT}  \nonumber \\ 
+ &\mathrm{dim}8 = 36.2 * \mathrm{Other} &&+\  18.9 * \mathrm{Soft} &&+\  9.2 * \mathrm{IT} &&+\  9.1 * \mathrm{OCon} &&+\  8.2 * \mathrm{OMach} &&+\  7.5 * \mathrm{TraEq} &&+\  6.8 * \mathrm{RStruc} &&+\  4.1 * \mathrm{CT}  \nonumber \\ 
+ &\mathrm{dim}9 = 33.9 * \mathrm{OCon} &&+\  28.5 * \mathrm{OMach} &&+\  13.6 * \mathrm{Other} &&+\  11.4 * \mathrm{Soft} &&+\  4.6 * \mathrm{TraEq} &&+\  4.5 * \mathrm{IT}  
+ \end{alignat} Contributions to the dimensions, Prod-Ind, USA 
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 90.6 * \mathrm{RStruc} &&+\  3.2 * \mathrm{OMach} &&+\  2.1 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}2 = 55.3 * \mathrm{CT} &&+\  18.7 * \mathrm{OMach} &&+\  10.8 * \mathrm{TraEq} &&+\  6.7 * \mathrm{OCon} &&+\  4.4 * \mathrm{IT} &&+\  3.7 * \mathrm{Soft}  \nonumber \\ 
+ &\mathrm{dim}3 = 56.1 * \mathrm{OCon} &&+\  18.6 * \mathrm{OMach} &&+\  6.4 * \mathrm{Soft} &&+\  6.4 * \mathrm{IT} &&+\  6.2 * \mathrm{CT} &&+\  5.7 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}4 = 33 * \mathrm{IT} &&+\  23.6 * \mathrm{Soft} &&+\  19.6 * \mathrm{OMach} &&+\  18.3 * \mathrm{CT} &&+\  4.6 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}5 = 43.4 * \mathrm{TraEq} &&+\  21.9 * \mathrm{Other} &&+\  17.7 * \mathrm{Soft} &&+\  8.8 * \mathrm{CT} &&+\  7.8 * \mathrm{OMach}  \nonumber \\ 
+ &\mathrm{dim}6 = 68.8 * \mathrm{Other} &&+\  22.7 * \mathrm{TraEq} &&+\  5.3 * \mathrm{CT}  \nonumber \\ 
+ &\mathrm{dim}7 = 48.3 * \mathrm{IT} &&+\  40.9 * \mathrm{Soft} &&+\  6.5 * \mathrm{Other}  
+ \end{alignat} 
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 90.2 * \mathrm{Real\ estate} &&+\  1.3 * \mathrm{RE\ Business} &&+\  1.2 * \mathrm{TransComm}  \nonumber \\ 
+ &\mathrm{dim}2 = 58.2 * \mathrm{TransComm} &&+\  9.2 * \mathrm{RE\ Business} &&+\  7.5 * \mathrm{Mining} &&+\  6.7 * \mathrm{Agri} &&+\  6.2 * \mathrm{Elec Gas} &&+\  3.7 * \mathrm{Finance} &&+\  3.3 * \mathrm{Manufact} &&+\  3.1 * \mathrm{Community}  \nonumber \\ 
+ &\mathrm{dim}3 = 21.2 * \mathrm{Mining} &&+\  20.7 * \mathrm{Community} &&+\  12.8 * \mathrm{RE\ Business} &&+\  12.2 * \mathrm{Construc} &&+\  10.8 * \mathrm{TransComm} &&+\  7.4 * \mathrm{Agri} &&+\  7.1 * \mathrm{Manufact} &&+\  4 * \mathrm{Elec Gas} &&+\  3.4 * \mathrm{Finance}  \nonumber \\ 
+ &\mathrm{dim}4 = 24.3 * \mathrm{Finance} &&+\  22.7 * \mathrm{RE\ Business} &&+\  17.9 * \mathrm{TransComm} &&+\  15.8 * \mathrm{Agri} &&+\  10 * \mathrm{Construc} &&+\  5.3 * \mathrm{Community}  \nonumber \\ 
+ &\mathrm{dim}5 = 28.1 * \mathrm{Manufact} &&+\  17.1 * \mathrm{Construc} &&+\  13.9 * \mathrm{Sales} &&+\  9.8 * \mathrm{Agri} &&+\  9.3 * \mathrm{Finance} &&+\  8 * \mathrm{TransComm} &&+\  5.7 * \mathrm{Elec Gas} &&+\  4.9 * \mathrm{RE\ Business}  \nonumber \\ 
+ &\mathrm{dim}6 = 39 * \mathrm{Sales} &&+\  19.3 * \mathrm{Construc} &&+\  16.4 * \mathrm{Agri} &&+\  6.2 * \mathrm{Finance} &&+\  5.3 * \mathrm{Mining} &&+\  5.2 * \mathrm{RE\ Business} &&+\  2.7 * \mathrm{TransComm} &&+\  2.3 * \mathrm{Real\ estate}  \nonumber \\ 
+ &\mathrm{dim}7 = 25.9 * \mathrm{RE\ Business} &&+\  17.7 * \mathrm{Manufact} &&+\  16.2 * \mathrm{Finance} &&+\  8.7 * \mathrm{Real\ estate} &&+\  8.6 * \mathrm{Community} &&+\  7 * \mathrm{Construc} &&+\  4.5 * \mathrm{Sales} &&+\  3.3 * \mathrm{TransComm} &&+\  3.2 * \mathrm{Mining} &&+\  2.6 * \mathrm{Agri} &&+\  2.4 * \mathrm{Elec Gas}  
+ \end{alignat}
+\newpage
+
+\subsection{Contributions to the dimensions, shares}
+\subsubsection{Ind-Prod} 
+Contributions to the dimensions in an MFA with the industries as individuals (rows)
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 90.3 * \mathrm{Real\ estate} &&+\  1.3 * \mathrm{RE\ Business} &&+\  1.2 * \mathrm{Finance}  \nonumber \\ 
+ &\mathrm{dim}2 = 69.2 * \mathrm{TransComm} &&+\  8.5 * \mathrm{Agri} &&+\  4.9 * \mathrm{Manufact}  \nonumber \\ 
+ &\mathrm{dim}3 = 24.4 * \mathrm{Mining} &&+\  22.1 * \mathrm{Community} &&+\  19.3 * \mathrm{RE\ Business} &&+\  9.9 * \mathrm{Construc}  \nonumber \\ 
+ &\mathrm{dim}4 = 29.4 * \mathrm{Finance} &&+\  17.1 * \mathrm{Agri} &&+\  15.1 * \mathrm{RE\ Business} &&+\  15 * \mathrm{TransComm} &&+\  14.7 * \mathrm{Construc}  \nonumber \\ 
+ &\mathrm{dim}5 = 66.7 * \mathrm{Sales} &&+\  11.3 * \mathrm{Manufact} &&+\  7.6 * \mathrm{Agri}  
+ \end{alignat} 
+Contributions to the dimensions in an MFA with the products as variables (columns)
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 90.6 * \mathrm{RStruc} &&+\  3.2 * \mathrm{OMach} &&+\  2.1 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}2 = 63.2 * \mathrm{CT} &&+\  23.1 * \mathrm{OMach} &&+\  8 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}3 = 59 * \mathrm{OCon} &&+\  10.2 * \mathrm{OMach} &&+\  9.7 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}4 = 26.9 * \mathrm{IT} &&+\  21.9 * \mathrm{OMach} &&+\  20.7 * \mathrm{Soft} &&+\  15.2 * \mathrm{CT}  \nonumber \\ 
+ &\mathrm{dim}5 = 82.9 * \mathrm{Other} &&+\  9.5 * \mathrm{Soft} &&+\  2.4 * \mathrm{TraEq}  
+ \end{alignat} 
+\subsubsection{Prod-Ind}  
+ Contributions to the dimensions in an MFA with the products as individuals (rows)
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 90.6 * \mathrm{RStruc} &&+\  3.2 * \mathrm{OMach} &&+\  2.1 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}2 = 55.3 * \mathrm{CT} &&+\  18.7 * \mathrm{OMach} &&+\  10.8 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}3 = 56.1 * \mathrm{OCon} &&+\  18.6 * \mathrm{OMach} &&+\  6.4 * \mathrm{Soft}  \nonumber \\ 
+ &\mathrm{dim}4 = 33 * \mathrm{IT} &&+\  23.6 * \mathrm{Soft} &&+\  19.6 * \mathrm{OMach} &&+\  18.3 * \mathrm{CT}  \nonumber \\ 
+ &\mathrm{dim}5 = 43.4 * \mathrm{TraEq} &&+\  21.9 * \mathrm{Other} &&+\  17.7 * \mathrm{Soft}  
+ \end{alignat}
+ Contributions to the dimensions in an MFA with the industries as variables (columns)
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 90.2 * \mathrm{Real\ estate} &&+\  1.3 * \mathrm{RE\ Business} &&+\  1.2 * \mathrm{TransComm}  \nonumber \\ 
+ &\mathrm{dim}2 = 58.2 * \mathrm{TransComm} &&+\  9.2 * \mathrm{RE\ Business} &&+\  7.5 * \mathrm{Mining}  \nonumber \\ 
+ &\mathrm{dim}3 = 21.2 * \mathrm{Mining} &&+\  20.7 * \mathrm{Community} &&+\  12.8 * \mathrm{RE\ Business} &&+\  12.2 * \mathrm{Construc} &&+\  10.8 * \mathrm{TransComm}  \nonumber \\ 
+ &\mathrm{dim}4 = 24.3 * \mathrm{Finance} &&+\  22.7 * \mathrm{RE\ Business} &&+\  17.9 * \mathrm{TransComm} &&+\  15.8 * \mathrm{Agri} &&+\  10 * \mathrm{Construc}  \nonumber \\ 
+ &\mathrm{dim}5 = 28.1 * \mathrm{Manufact} &&+\  17.1 * \mathrm{Construc} &&+\  13.9 * \mathrm{Sales} &&+\  9.8 * \mathrm{Agri} &&+\  9.3 * \mathrm{Finance}  
+ \end{alignat}
+
+
+\subsection{Contributions to the dimensions}
+\subsubsection{Ind-Prod} 
+Contributions to the dimensions in an MFA with the industries as individuals (rows)
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 72.2 * \mathrm{Real\ estate} &&+\  6.2 * \mathrm{Manufact} &&+\  5.6 * \mathrm{Community}  \nonumber \\ 
+ &\mathrm{dim}2 = 76.5 * \mathrm{TransComm} &&+\  14.9 * \mathrm{Manufact} &&+\  3.1 * \mathrm{Agri}  \nonumber \\ 
+ &\mathrm{dim}3 = 45.1 * \mathrm{Community} &&+\  17.1 * \mathrm{Manufact} &&+\  12 * \mathrm{RE\ Business} &&+\  11.1 * \mathrm{Mining}  \nonumber \\ 
+ &\mathrm{dim}4 = 32.9 * \mathrm{Finance} &&+\  27.2 * \mathrm{RE\ Business} &&+\  11.9 * \mathrm{Manufact} &&+\  10.2 * \mathrm{Agri}  \nonumber \\ 
+ &\mathrm{dim}5 = 65.7 * \mathrm{Sales} &&+\  14.8 * \mathrm{Manufact} &&+\  9 * \mathrm{Agri}  
+ \end{alignat}
+ Contributions to the dimensions in an MFA with the products as variables (columns)
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 73.9 * \mathrm{RStruc} &&+\  9.3 * \mathrm{OMach} &&+\  7.3 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}2 = 62.8 * \mathrm{CT} &&+\  24.5 * \mathrm{OMach} &&+\  11.5 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}3 = 60.3 * \mathrm{OCon} &&+\  17 * \mathrm{OMach} &&+\  8.8 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}4 = 27.2 * \mathrm{IT} &&+\  24.9 * \mathrm{OMach} &&+\  16.5 * \mathrm{Soft} &&+\  14.3 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}5 = 70 * \mathrm{Other} &&+\  15.5 * \mathrm{Soft} &&+\  4.6 * \mathrm{TraEq}  
+ \end{alignat} 
+ \subsubsection{Prod-Ind}
+  Contributions to the dimensions in an MFA with the products as individuals (rows)
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 73.5 * \mathrm{RStruc} &&+\  9.6 * \mathrm{OMach} &&+\  7.8 * \mathrm{OCon}  \nonumber \\ 
+ &\mathrm{dim}2 = 57.9 * \mathrm{CT} &&+\  21.1 * \mathrm{OMach} &&+\  17.3 * \mathrm{TraEq}  \nonumber \\ 
+ &\mathrm{dim}3 = 59.8 * \mathrm{OCon} &&+\  25.8 * \mathrm{OMach} &&+\  5.6 * \mathrm{IT}  \nonumber \\ 
+ &\mathrm{dim}4 = 32.7 * \mathrm{IT} &&+\  23.6 * \mathrm{OMach} &&+\  19.3 * \mathrm{CT} &&+\  18 * \mathrm{Soft}  \nonumber \\ 
+ &\mathrm{dim}5 = 33.3 * \mathrm{Other} &&+\  30.5 * \mathrm{Soft} &&+\  28.8 * \mathrm{TraEq}  
+ \end{alignat} 
+  Contributions to the dimensions in an MFA with the industries as variables (columns)
+ \begin{alignat}{4} \nonumber \\ 
+ &\mathrm{dim}1 = 72.8 * \mathrm{Real\ estate} &&+\  5.8 * \mathrm{Community} &&+\  5.5 * \mathrm{Manufact}  \nonumber \\ 
+ &\mathrm{dim}2 = 72 * \mathrm{TransComm} &&+\  10.8 * \mathrm{Manufact} &&+\  4.6 * \mathrm{Community}  \nonumber \\ 
+ &\mathrm{dim}3 = 41.5 * \mathrm{Community} &&+\  23.1 * \mathrm{Manufact} &&+\  10.2 * \mathrm{RE\ Business} &&+\  9.2 * \mathrm{Mining}  \nonumber \\ 
+ &\mathrm{dim}4 = 30.5 * \mathrm{Finance} &&+\  28.5 * \mathrm{RE\ Business} &&+\  14.2 * \mathrm{TransComm} &&+\  9.2 * \mathrm{Manufact}  \nonumber \\ 
+ &\mathrm{dim}5 = 33.9 * \mathrm{Sales} &&+\  15.3 * \mathrm{Manufact} &&+\  14 * \mathrm{Agri} &&+\  9.8 * \mathrm{TransComm}  
+ \end{alignat}
+
+\subsection{Interpretation of the dimensions, shares (and compared to levels)}
+
+\begin{itemize}
+\item \textbf{dim1} The first dimension captures that the Real estate sector is the only one to invest in residential structures.
+\item \textbf{dim2} The second dimension opposes investment share in communication technology (CT) and machinery that is not transport equipment or ICT (OMach). Both seem to be negatively correlated over industries, that is, an industry that invests a large share of its budget in OMach does not invest in CT assets and vice versa. The industries at either ends of this spectrum are TransComm which directs on average, over the 38 year period, 31 $\pm$ 3 \% towards CT, and Agri, Mining and Manufacturing which adress resp. 0.25 $\pm$ 0.19 \%, 0.47 $\pm$ 0.36 \%, 1.89 $\pm$ 0.91 \% towards CT. The investment share in OMach is lowest over industries for TransComm with 7.3 $\pm$ 2.3 \% and highest for Agri and Manufacturing with 57 $\pm$ 5 \% and 55 $\pm$ 3\%. On the graph, TransComm travels along axis of the second dimension because, with the point for 1970 the furthest away from the Agri and Manufacturing cloud, since at that point it differs the most from the average profile. The average profile for CT is an increasing one from 1970 on (0 \% for many sectors). TransComm has a relatively constant constant I share for CT over the years. Thus in 1970 it was even further away from Agri then later on. Also, TransComm directs an increasing share of investment towards OMach over the years, which equally results in a dynamic of moving its trajectory along the 2nd dimension closer to Agri.
+
+\item \textbf{dim3} The third dimension opposes investment in OCon versus investment in OMach, TraEq, when looking at shares or levels, and Soft when looking at shares. The negative part of the third dimension captures high investment shares in Other construction (Infrastructure and non-residential buildings such as warehouses, hospitals, ...). They are the highest for the Mining sector (wells) and Community (hospitals, schools etc. no roads). The Mining sector and Community both spend about 65\% of their budget on OCon, which is reflected in their similar contributions to the third dimension (24 and 22 \% respectively). Looking at the dimensions of the analysis of levels, instead of shares, the biggest contributer is Community (45\%) and Mining is pushed to the 4th place with a contribution of 10\%. This is because while Mining spends a lot on OCon, it is a much smaller sector than Community and contributes only 18 \% (in 2007, a peak year for Mining), while Community contributes 45 \% to OCon formation (the types of assets they invest in are very different though). The pendants of Mining are RE Business and Construction that spend the smallest share on OCon (both about 11\% $\pm$ 6\%). RE Business and Construction spend the lowest share on OCon, while both being high spenders on TraEq and OMach.
+
+\item \textbf{dim4} On the negative side of hte dimenstion There is hight investment in CT and OMach, on the positivie side there is IT and Soft.
+
+\item \textbf{dim5} On the negative side there is Other and Travel Equipment, on the positive side there is Soft.
+
+
+\end{itemize}
+
+\input{plots/plotted_I_K_VA/SummaryShares_USA_Agr.tex}
+\input{plots/plotted_I_K_VA/SummaryShares_USA_Manufact.tex}
+\input{plots/plotted_I_K_VA/SummaryShares_USA_Trans-Comm.tex}
+
+\subsection{Shares versus levels MFA}
+
+The ranges of the axes show that the overall variance in the data, when looking at shares, is squished ; this is normal since when looking at shares, part of the variance --- coming from relative sizes of industries from year to year --- is eliminated, with a more technological view of the sectors prevailing. (MFA corrects for overall volume effect from year to year (growth and inflation) by dividing each subtable by the first eigenvalue of the seperate analysis.)
+
+Along dimension 2, the distance between the industry TransComm (its center just under 10) on the one hand and Manufacturing and Agri (let's say their 2007 points) on the other hand are about the same whether looking at the analysis on shares or levels, which tells us the structural difference between these sectors according to investment in CT or Other machinery. 
+
+The trajectory within TransComm follows roughly the same dynamic, but is a little squished along the 2nd axis : its different investment pattern in CT versus the other sectors is mainly structural.
+
+The trajectories of the agricultural sector and the manufacturing sector along dim2 are much more spread out on the levels plot then on the shares plot. Thus, their investment behaviour in OMach versus CT has not structurally changed over time (figure \ref{barplots} below), but did change in levels. In 2007 they spent more on OMach, as a part of total-industry-annual-VA, than in 2007, contributing to a large extent to their total decline in investment (as fraction of VA). The 1970 points further to the right say that both industries spent even more on OMach relative to CT in 1970 then in 2007. Manufacturing's contribution to dim2 is larger in levels (14.9 \%) than in shares (4.9 \%), and overtakes Agri's contribution (see equations above). They both spend about half their investment budget on OMach, but Manufact spends 4 times as much. When looking at shares, this level effect --- between industries --- is not picked up, nor is the effect picked up that for each of them industries, the level of investment in OMach has been going down over the period considered. For example, for the Manufacturing industry, investment in OMach has gone down from about 1.7 \% of value added (total, over all industries) to 0.7 \% and is as such the main contributer to the decline in the total investment as a share of VA of the industry. 
+
+
+\begin{figure}[!h]
+\subfloat[Agriculture]{\includegraphics[width = 3.6in]{plots/plotted_I_K_VA/I_ShareGFCF-bar-Agr.pdf}} 
+\subfloat[Manufacturing]{\includegraphics[width = 3.6in]{plots/plotted_I_K_VA/I_ShareGFCF-bar-Manufact.pdf}}\\
+
+
+\caption{USA, 1977-2007, source, KLEMS.\label{barplots}}
+
+\end{figure}
+
+\begin{figure}
+\subfloat[MFA on levels.]{\includegraphics[width = 3.6in]{mfa/plots_Prod-Ind-Joint/USA-1970-2007_joint_dim2-3-level.pdf}} 
+\subfloat[MFA on shares.]{\includegraphics[width = 3.6in]{mfa/plots_Prod-Ind-Joint-share/USA-1970-2007_joint_dim2-3-share.pdf}}\\
+
+\subfloat[MFA on levels.]{\includegraphics[width = 3.6in]{mfa/plots_Prod-Ind-Joint/USA-1970-2007_joint_v2_dim2-3.pdf}} 
+\subfloat[MFA on shares.]{\includegraphics[width = 3.6in]{mfa/plots_Prod-Ind-Joint-share/USA-1970-2007_joint_v2_dim2-3.pdf}}
+
+\caption{The plots are based on coordinates from the individuals. Thus the industry plots are based on an MFA with the industries as inidividuals and the product plots are based on an MFA with the products as individuals. The largest contributers to the 2nd dimension are the same whether analysis is done on shares or on levels, and the size of the contributions are similar, the only main difference coming from the manufacturing industry. The manufacturing industry contributes more in levels then in shares towards the second dimension. %Agri and Manufact both spend about have their investment budget on OMach, but Manufact spends 4 times as much. When looking at shares this level effect --- between industries --- is not picked up, nor is the effect picked up that for each of them industries, the level of investment in OMach has been going down over the period considered. For example, for the Manufacturing industry, investment in OMach has gone down from about 1.7 \% of value added (total, over all industries) to 0.7 \% and is as such the main contributer to the decline in the total investment as a share of VA of the industry.  
+}
+\label{mfaLevelShares}
+\end{figure}
+
+
+
+
+
+
+%\begin{figure}
+%\subfloat[Real estate activities (ISIC 3.1 70)]{\includegraphics[width = 3.6in]{mfa/plots_Prod-Ind-Joint/USA-1970-2007_ind_70_dim1-2.pdf}} 
+%\subfloat[Residential constructions]{\includegraphics[width = 3.6in]{mfa/plots_Prod-Ind-Joint/USA-1970-2007_prod_RStruc_dim1-2.pdf}}\\
+%\subfloat[Real estate activities (ISIC 3.1 70)]{\includegraphics[width = 3.6in]{mfa/plots_Prod-Ind-Joint/USA-1970-2007_ind_70_dim3-4.pdf}}
+%\subfloat[Residential construction]{\includegraphics[width = 3.6in]{mfa/plots_Prod-Ind-Joint/USA-1970-2007_prod_RStruc_dim3-4.pdf}} 
+%\caption{Sur la dimension 4, real estate activities and RStruc font une trajectoire opposée, contrairement aux dimensions 1-2-3. Reste à donner une interprétation aux dimensions.}
+%\label{acfDF}
+%\end{figure}
+
+
+
+%\begin{figure}[!h]
+%   \centering
+%    \includegraphics{mfa/plots_Prod-Ind-Joint/USA-1970-2007_joint_dim2-3.pdf}
+%    \caption{USA, 1970-2007 (source: klems).}
+%\end{figure} 
+
+
+%\begin{figure}[!h]
+%   \centering
+%    \includegraphics{mfa/plots_Prod-Ind-Joint/USA-1970-2007_joint_dim3-4.pdf}
+%    \caption{USA, 1970-2007 (source: klems). Les  bleus violets en haut à droite sont 71t74 business service type activities et J Financial intermediation.}
+%\end{figure} 
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

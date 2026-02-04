@@ -1,0 +1,54 @@
+export basedata=/data/shared/
+export public_data=/data/public_data/
+
+export GTAP_data=$basedata/GTAP/GTAP_raw/GTAP6/ss/
+
+export EDGAR_data=$public_data/EDGAR_JRC/results/
+export PRIMAP_data=$public_data/PRIMAP-hist/download/Guetschow-et-al-2023-PRIMAP-hist_v2.4.1_final_no_extrap_16-Feb-2023.csv
+export Global_Carbon_Budget=$public_data/Global_Carbon_Budget/extracted/
+export Minx_et_al_2022=$public_data/Minx_et_al_2022/extracted/
+
+export gas_resource_data=$basedata/Gas_resources/
+
+export oil_resource_data=$basedata/Oil_resources/
+export bauer_FF_resource=$public_data/Bauer_Fossil_Fuel_availability_SSP/extracted/
+
+export tight_oil_projection=$public_data/Energy_Information_Administration/Frack_Lab/data/oil/EIA/
+export tight_oil_projection_2015=$public_data/Energy_Information_Administration/AEO2015/
+
+export enerdata_path=$basedata/enerdata/enerdata_300916/
+export ISO2ISO_path=$public_data/country-codes/data/
+export ISO3GTAP_path=$basedata/GTAP/
+export ISO_wiki=$public_data/ISO_wikipedia/results/
+
+export buildings_data=$public_data/deetman_marinova_buildings/
+
+export UNO_population_data=$public_data/UNO_world_population_prospect/normalized/
+export SSP_Koch_Leimbach_data=$public_data/SSP_update_NAVIGATE/extracted/
+
+export ilostat_data=$public_data/ILOSTAT/ 
+
+export econmap_data=$public_data/CEPII/EconMap/extracted/
+
+export IRENA_data=$public_data/IRENA/extracted/
+export Damodaran_data=$public_data/Damodaran/extracted
+export IAEA_data=$public_data/IAEA
+export GEM_data=$public_data/Global_Energy_Monitor
+export GPPD_data=$public_data/Global_Power_Plant_Database/extracted
+export KPMG_data=$public_data/KPMG/manual_download/
+export ADVANCE_data=$public_data/ADVANCE/
+export Hydro_data=$basedata/enerdata/POLES_output/manual
+export WACC_data=$public_data/ETH_WACC/manual_download
+export OECD_DAC=$public_data/OECD_DAC/download
+
+export WB_data_common=$public_data/World_Bank_Data_Catalog/extracted/
+export WB_data=$public_data/World_Bank_Data_Catalog_21052022/
+export WB_data_WDI=$WB_data/extracted/
+
+export klems_data=$basedata/klems/
+export klems_data_EU=$klems_data/raw/euklems/www.euklems.net/data/
+export klems_data_france=$klems_data/raw/france/
+
+export aviationintegratedmodel_data=$basedata/AviationIntegratedModel_TIAM_UCL/data/
+
+export path_data_ndc=$public_data/VandeVenetal_NDC

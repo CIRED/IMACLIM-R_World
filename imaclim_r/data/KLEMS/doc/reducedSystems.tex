@@ -1,0 +1,669 @@
+\clearpage
+\section{Investment in the USA, 1970 - 2007, reduced system analysis} 
+\subsection{Reduced systems}
+%\todo{Same graph for K. Is USA still on the lower end for K? Is GFCF/VA low in the USA because of high K already, low labour costs, accounting differences, less redistribution (residential structures, travel equipment) ? }
+The variables in the KLEMS capital input data, amongst which nominal investment ($I$) and capital stock ($K$), are detailed according to 4 categorical variables: country, year, product, industry. For each quantitative variable, 6 types of contingency tables can be considered: product x year, industry x product, industry x year, country x product, country x year, country x industry. In the following sections, the first 3 types of contingency tables will be considered for the USA. 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.88]{img/plotted_I_K_VA/I_ShareVA-Prod-yScaleFree.pdf}
+    \caption{\label{fig:I_ShareVA-gridCountries-TOT}Capital formation as share of value added (\%), source: KLEMS.}
+\end{figure} 
+\clearpage
+
+\subsection{Choosing variables for answering questions}
+The questions considered, which will by addressed by analysing the different types of reduced systems, are:
+\begin{enumerate}
+	\item Over the years, has there been an evolution in the overall, per asset and/or per industry, level of investment, was there an increase or decrease? \label{question1}
+	\item For a specific, or a few specific years, what industries invest in what products? What industries have (dis)simular investment profiles, and what assets are the most similar in the sense of being formed by the same industrial sectors? \label{question2}
+	%\begin{itemize}
+		%\item To perform CA for systemetic evaluation of what industries invest in what products, etc., ponder once more on what variable to compare with what metric.
+	%\end{itemize} 
+	\item How did what was described in question \ref{question2} evolve over the 38-year period under consideration?
+	%\begin{itemize}
+	\todo{Table with min and max growth rate of I and maybe other vars too. Min and Max portion of VA, min and max share.}
+		%\item To consider the evolution over the period, ponder once more on what variable to compare with what metric.
+	%\end{itemize} 
+\end{enumerate} 
+
+To answer question \ref{question1} and compare investment levels over years, using the nominal variable for investment $I$ doesn't distinguish between increasing levels originating in price-increases due to inflation, or in actual increasing amounts of durable assets.
+
+The standard solution to the problem of correcting for price increases, is by using price indices. The price index provided by the KLEMS database  is a hedonic price index (see section \ref{hedonic}, \pageref{hedonic}), which specifies a relationship between the prices and the characteristics of products. Since ICT assets are fast changing in quality, using real investment $I_q$ introduces (a lot of) information on the quality change of this asset type%, which is strictly speaking true for all asset types, but which is faster changing for IT assets
+. To evaluate scenarios of future investment against past patterns on the basis of the KLEMS real investment variable, hypothesis are needed on the future evolution of the price index of ICT assets and thus of their quality improvements. (An objection or not? ICT investment is only a few percentages of GFCF.) Possible alternatives are:
+%One of the sources the US capital inupt data are based on is the BEA capital flow table for 1997 \todo{insert reference}. Referring to this table provides a more concrete description of in what products precisely the different industry-levels are investing in.    
+
+	%\item The standard solution to the problem is to correct for price increases by using price indices. The KLEMS database provides, albeit with some missing values, price indices specific for the 8 asset-levels and differentiated by industry-level. The price index used is a hedonic price index (see section \ref{hedonic}, \pageref{hedonic}), which specifies a relationship between the prices and the characteristics of products. A hedonic price index changes faster than a more traditional price index for products whose characteristics evolve fast. One of the features of KLEMS is that it distinguishes investment in information and communication technology (ICT) related assets (disaggregated in CT, IT and Software).\footnote{Indeed, the database is constructed amongst other reasons to evaluate the impact on productivity and growth of the new type of capital introduced in the information technology age. To attest of the sincerity of purpose, in addition to the 60 industry-levels for which supply- and use-tables are available for most EU countries, 8 extra industry-levels were added in the KLEMS database: 8 industries that ``either stand out in terms of skill and R\&D intensity, or in terms of ICT investment intensity or ICT share in output' \cite{timmer_eu_2007}}. Since ICT assets have known dramatic improvements in characteristics such as processing power and memory, this leads to a price index that decreases much more for IT assets than for other types of assets. Hence, using real investment $I_q$ (KLEMS notation), introduces (a lot of) information on the quality change of this asset type, which is strictly speaking true for all asset types, but which is faster changing for IT assets. So if one would want to evaluate scenarios of future investment against past patterns on the basis of the KLEMS real investment variable, one needs to make a hypothesis on the evolution of the price index of ICT assets and thus of their quality improvements. Possible alternatives are:
+	\begin{itemize}
+		%\item Use nominal investment corrected with the over-all-industries price index of non-ICT assets. The evolution of the price index on non-ICT assets is more what we expect, increasing steadily over time. The evolution of the ICT-price index increases up to 1984 after which it decreases faster up to 2007 than the nonICT index increases over the period 1970-2007. (One can decompose the evolution in the evolutions of IT, CT and Soft.) The interpretation of this measure is a bit tricky: real variables typically allow comparison in the sense of larger or smaller value of something (in price of a baseyear), from one year to another. For the case under consideration this would be: more value directed towards investment than the previous year. If we correct the price of computers with a general price index, 
+		\item Use nominal investment corrected for value added $I/V\!\!A$. This variable addresses the question ``What share of national income has been allocated to capital formation by industry-level $x$ in product-level $y$''. Here, an increase in investment means that a larger of share of national income has been used for capital formation. The drawback of this variable is that it introduces, into the measure of investment evolution, variablity of VA. 
+		\item A variable that in the spirit of  $I/V\!\!A$ conveys whether a larger or smaller portion of the national budget has been directed towards capital formation, but without adding new variablility, is nominal investment $I$ corrected for the best linear approximation of VA, instead of year-by-year comparing I with the actual measurement of $V\!\!A$. \todo{Explain how variable is constructed}%This variable does not introduce extra variability and loosely conveys what portion of national income has been directed towards investment.    
+	\end{itemize} 
+
+
+% latex table generated in R 3.3.0 by xtable 1.8-2 package
+% Tue Sep 06 11:50:36 2016
+\begin{table}[ht]
+\setlength\tabcolsep{6pt}
+\centering
+\begingroup\footnotesize
+\begin{tabular}{lrrrrrrrrr}
+  \hline
+growthrates& nobs & NAs & Minimum & Maximum & Mean & Stdev & Skewness & Kurtosis & period\\ 
+  \hline
+I & 41 & 4 & -4.1 \% & 20.7 \% & 7.5 \% & 5.9 \% & 0.1 \% & -0.4 \% & 1970-2007 \\ 
+  VA & 41 & 11 & 3.2 \% & 13.1 \% & 6.6 \% & 2.5 \% & 1.0 \% & 0.3 \% & 1977-2007 \\ 
+ I/VA & 41 & 11 & -7.0 \% & 6.8 \% & -0.1 \% & 3.7 \% & -0.2 \% & -1.1 \% & 1977-2007 \\ 
+   I/$\mathrm{VA_{trend}}$ & 41 & 11 & -13.7 \% & 7.4 \% & -1.2 \% & 5.6 \% & -0.4 \% & -0.8 \% & 1977-2007 \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{Statistics on growthrates, total industry, 1970-2007, USA} 
+\label{table:Summary_growthrates_USA}
+\end{table}
+ 
+To evaluate the variability introduced by deflating $I$ by $VA$, \cref{table:Summary_growthrates_USA} shows statistics of the growthrates of both variables.  Both the spread between the maximum and the minimum growth rate and the standard deviation point towards nominal investment being the most variable variable ; deflating I for the trend of $V\!\!A$ takes away some variability but is much more reduced by yearly deflating I by measured $V\!\!A$. The latter is due to the fact that both are influenced by common chocks. 
+
+
+When comparing investment data across countries, using the variables $\frac{I}{GFCF}$ and $\frac{I}{V\!\!A}$, has the added advantage of also correcting for the sizes of the economies and for exchange rates compared to the nominal investment series $I$.
+%In the following sections, these reduced systems will be considered for the variables $\frac{I}{GFCF}$ and $\frac{I}{VA}$, which correct for the size of an economy and for exchange rates compared to the nominal series.
+
+
+\subsection{VA, I, K shares and levels per industry-level}
+\input{img/summarizeIndustries/VA-I-K_indSummary_USA_2007.tex}
+%\Cref{table:VA-I-K_indSummary_USA_2007} shows for the USA, for 2007, several variables related to the investment profile for the 11 industry-levels.% specified in the rows according to which the total industry is disaggregated. 
+%\begin{itemize}
+%\item The first 3 columns are respectively the shares per industry in total value added (shareVA), capital formation (shareI) and capital stock (shareK) (\SI{}{\percent}).
+%\item The last 3 columns are the levels per industry of value added (VA) and capital formation (I) in billions current dollars, and capital stock (K) in billions constant 1995 dollars. 
+%\end{itemize}
+
+\subsection{Product $\times$ industry}
+
+
+\todo{Retail and hotels lumped together in G+H: similar investment strucuture?}
+\Cref{table:I_USA_2007} constitutes the reduced system product $\times$ industry for nominal investment in the USA in 2007. The table, which forms a use-table, details investment allocated by 11 industry-levels\footnote{
+    The 11 industry-levels considered correspond to aggregated levels of the original 32 levels of KLEMS : \cref{IndustriesKLEMS}: Agr is AtB Agriculture, Mining is C Mining and quarrying, Manufact is D Total Manufacturing, including for example food, refined petroleum products, telecommunication equipment and transport equipment, Elec Gas is level E and includes water supply, Construc is F Construction, Sales is G+H, where G is Wholesale and retail trade and H Hotels and restaurant, Trans Comm is I Transport, storage, post and communication, Finance is J Financial intermediation, Real estate is 70 real estate activities and RE Business 71t74 Renting of machinery and business activities like R\&D and advertising, Community LtQ represents service activities, both social, provided by the state such as public administration, defense and education, and personal serivces, such as personnel employed by private households.
+} to the asset-levels specified in the columns. The left half of the table considers the 8 KLEMS asset-levels, the right part of the table aggregates these 8 levels in 2: assets related to information and communication technologies (ICT) and other types of capital (nonICT) \footnote{A detailed description of the 8 asset-levels can be found in section \ref{ProductTypes} and \cref{table:CapAssetsDetailed} therein}.%in each of the 8 KLEMS product-types. On the right-hand side of the table, the columns NonICT and ICT are an aggregation of the same data\footnote{ICT=CT+IT+Soft, NonICT=RStruc + OCon + TraEq + OMach + Other. See section \ref{ProductTypes}, page \pageref{ProductTypes}}. 
+In what follows the question ``Who invests in what'' will be answered by analysing the contingency table with correspondance analysis.
+
+\input{img/summarizeIndustries/I_USA_2007.tex}
+
+Concentrating on the left part of \cref{table:I_USA_2007}, several transformations of this $11 \times 8$ contingency table clarify which sectors invest mostly in what products and which sectors have (dis)similar investment profiles:
+
+\begin{itemize}
+\item \cref{table:I-rowProfiles_USA_2007} shows the rowprofiles, which detail for every industry what share of its total investment level is allocated to a specific product, $I_{ip}/I_i$, where $I_i = \sum_{p} I_{ip}/n_p$, 
+\item \cref{table:I-colProfiles_USA_2007} shows the columns profiles, which detail for every capital asset what share of its formation is done by what industry, $I_{ip}/I_p$, where $I_p = \sum_i I_{ip}/n_i$,
+\item table \ref{table:distancesInd_USA_2007} shows the distances $d_{ij}$ between the rowprofiles, i.e. between the investment profiles of the different industries, \begin{equation}
+    d_{ij}=\sum_p \frac{ (I_{ip}/I_i - I_{jp}/I_j)^2}{\frac{1}{n_i} \sum_k I_{kp} / I_k},
+\end{equation}  
+\item \cref{table:I-independence_USA_2007} shows what the investment levels per industry and product would be in case both categorical variables are independent, $$
+I^{dep}_{ip}= \frac{I_i I_p}{GFCF},
+$$
+\item \cref{table:I-deviations_USA_2007} shows how actual investment levels differ from what the levels would be under the independency hypothesis, 
+$$
+I_{ip}- I^{dep}_{ip},
+$$
+\item \cref{table:I-chi2_USA_2007} shows the contributions of each data point to the chi square of independance statistic, $\chi^2_{ip}$ which are easurements of to what extent the data differ with the linear dependency hypothesis: 
+$$
+\chi^2_{ip} = \frac{(I_{ip}- I^{dep}_{ip})^2}{I^{dep}_{ip}}.
+$$
+\end{itemize}
+
+\input{img/summarizeIndustries/I-rowProfiles_USA_2007.tex}
+\input{img/summarizeIndustries/I-colProfiles_USA_2007.tex}
+\input{img/summarizeIndustries/distancesInd_USA_2007.tex}
+\input{img/summarizeIndustries/I-independence_USA_2007.tex}
+\input{img/summarizeIndustries/I-deviations_USA_2007.tex}
+\input{img/summarizeIndustries/I-chi2_USA_2007.tex}
+
+Referring to \cref{table:I-rowProfiles_USA_2007}, the real estate sector stands out in that \SI{94}{\percent} of its investments are allocated to residential structures. Conversely, it is virtually the only sector investing in residential structures: \SI{98}{\percent} of capital formation of residential structures is done by the real estate sector (\cref{table:I-colProfiles_USA_2007}).
+
+Continuing to look at industries which allocate a lot of investment in a specific asset class, the mining sector spends close to \SI{80}{\percent} on non-residential investment, which includes both non-residential structures and infrastructure. A few other industries allocate a large share of investment on non-residential structures: Community (\SI{63}{\percent}), Elec Gas(\SI{52}{\percent}), and Finance, Trans Comm and Sales around (\SI{30}{\percent}).
+
+The other asset that receives large shares of investment of some industries is Other machinery and equipment: the agricultural sector's share in investment in this asset is \SI{59}{\percent}, Construction sector's \SI{53}{\percent}, the manufacturing sector's \SI{51}{\percent} and the retail sector's  \SI{30}{\percent}.
+
+Apart from the transport and communications sector which allocates \SI{28}{\percent} of its capital investment to communication technology-related assets and the Real estate business industry which allocates \SI{34}{\percent} to software, there is no other case where an industry spends more than \SI{25}{\percent} of its fixed capital  investment on one of the asset-levels under consideration.
+
+
+\subsubsection{(Dis)similarity between industries' investment profiles}
+%It was mentioned above that the Real estate sector has a very different investment profile than the other sectors, since there is an almost 1 to 1 correspondancy between this sector and the capital formed by residential structures.
+
+%To evaluate to what extent the different industries have similar or different investment profiles, the distance $d_{ij}$ between the different rowprofiles is used:
+%\begin{equation}
+%    d_{ij}=\sum_p \frac{ (I_i^p - s_j^p)^2}{\sum_k I_k^p / n_i}
+%\end{equation}
+%where $I_i^p$ are the shares presented in \cref{table:I-rowProfiles_USA_2007}: $p$ runs over asset-levels, i, j, k run over industries and $n_i$ is the number of industrial sectors. The results for the USA, 2007 are represented in table \ref{table:distancesInd_USA_2007}. 
+
+The distances between the investment profiles confirm that the real estate sector stands apart in its profile from the other sectors: the $d_{Real\ estate ,j}$ where $j$ is any of the other sectors, fluctuates around 100, which is three times higher than the next highest distance between investment profiles: the mining sector has a quite different profile from the Construction sector ($d=28$) and the Real estate business sector ($d=34$) (\cref{table:distancesInd_USA_2007}). 
+\begin{itemize}
+\item The most similar investment profiles are between Community and both Elec Gas ($d= 1.3$) and Mining ($d=1.6$). Both Community and Mining invest larger than average levels in Other construction, which contributes 4-\SI{5}{\percent} to $\chi^2$, and they overall deviate or not in a similar manner form the average profile, the only exception being Software investment: the Mining sector investing $3 \times$ less than average, which places it just before the Agricultural and Real estate sector (\cref{table:I-deviations_USA_2007}). Together with Elec and Gas, they overall do less than average investment in ICT-assets, again after Agri and RE. Community and Elec and Gas are similar overall, except for Elec and Gas doing proportianally twice as much investment in Other machinery. 
+\item The Manufacturing and Construction sectors both invest three times the average in Other machinery, and also in ICT assets, specifically in Software, in which they invest double share of the average.
+\end{itemize}
+
+To establish whether the investment profiles are overall significantly linearly independant, the chi square of independence statistic ($\chi^2$) compares actual data with data under the hypothesis of linear dependency (\cref{table:I-independence_USA_2007}), i.e. under the hypothesis that the amount of investment in a given asset-level is independent of industry and vice versa.
+
+%Investment data under the hypothesis of linear dependency, as presented in (\cref{table:I-independence_USA_2007}, are:
+%$$ I^{dep}_{ij}= \frac{I_p I_i}{GFCF},$$
+%where $I_p$ is investment per product by all industrial sectors, $I_i$ is investment in all products per industry and $GFCF$ is total investment.
+Summing the deviations of the actual data from the linear dependency hypothesis gives $\chi^2$:
+$$
+\chi^2 = \sum_{i,p} \chi^2_{ip} \ .
+$$
+
+\Cref{table:I-chi2_USA_2007} represents the individual contributions of each data point to total $\chi^2$ which equals 3624186. Under the independency hypothesis the $\chi^2$ statistic follows a $\chi^2$ distribution of ($n_i-1$, $n_p-1$)\footnote{$n_i$, $n_p$ are respectively the number of industry- and asset-levels.} degrees of freedom. The hypothesis of linear dependancy is rejected with almost certainty (p-value=0).
+
+\subsubsection{CA}
+Correspondance analysis (CA) allows for a systematic evaluation of which industries invest mostly in what products, what industries have more or less similar investment profiles, and what fixed assets are the most similar in the sense of being formed by the same industrial sectors.
+
+The method seeks to explain overall variance in the data with new variables which are linear combinations of the original categorical variables. The new variables are referred to as dimensions. One can consider an amount of new dimensions up to the number of categories in the categorical variables, at which point \SI{100}{\percent} of original variance is explained. Albeit, the last dimensions might not explain much nor offer significant inisght. The point of CA is to reduce the amount of dimensions and identify the main sources of variance.
+
+The amount of dimensions to consider can be chosen with respect to the eigenvalues of each axis\footnote{\href{http://www.sthda.com/english/wiki/correspondence-analysis-in-r-the-ultimate-guide-for-the-analysis-the-visualization-and-the-interpretation-r-software-and-data-mining\#summary-of-ca-outputs}{Correspondance analysis interpretation, handy online source}}. If the data were randomly distributed, the expected value of the eigenvalues of each axis would equal $1/(1-n_i)$ and $1/(1-n_p)$ in terms of the rows/columns. One can use the rule of thumb that any contribution larger than the maximum of those eigenvalues is important. In our case that is max (1/10,1/7)= \SI{14.2}{\percent}. \todo{Insert dim2-dim3 plot.} Following this rule, 3 dimensions are retained for the investment matrix under consideration (\cref{table:I_CA_ProdInd_contributions}). 
+
+
+\begin{table}[ht]
+	\setlength{\tabcolsep}{4pt}
+	\centering
+	\footnotesize
+  	 \vskip-0.0cm\hskip-2.0cm\begin{tabular}{p{30pt} |l|c| c  c  c  c  c  c  c  c  c  c  c | c  c  c  c  c  c  c  c }
+  \hline
+	&		&	\rot{eigenvalue}	&	\rot{Agri}	&	\rot{Mining}	&	\rot{Manufacturing}	&	\rot{Elec Gas Wtr}	&	\rot{Construction}	&	\rot{Sale}	&	\rot{Transport Communication}	&	\rot{Finance}	&	\rot{Real estate}	&	\rot{Real Estate Business}	&	\rot{Community}	&	\rot{RStruc}	&	\rot{OCon}	&	\rot{TraEq}	&	\rot{OMach}	&	\rot{Other}	&	\rot{CT}	&	\rot{IT}	&	\rot{Soft}	\\
+   \hline
+Total	&	dim1\ 	&	90.3	&		&		&	3.4	&		&		&	3.3	&		&		&	73.4	&	3.5	&	6.7	&	74.4	&	8.1	&		&	6.6	&		&		&		&		\\
+	&	dim2	&	27.3	&		&	22.7	&		&		&		&		&		&	6.0	&	0.1	&	32.0	&	25.8	&		&	51.6	&	18.0	&		&		&	7.8	&	9.4	&	11.9	\\
+	&	dim3	&	15.1	&	8.8	&		&	32.0	&		&		&		&	49.9	&		&		&		&		&		&		&		&	45.1	&		&	43.8	&		&		\\
+
+   \hline
+\end{tabular}
+%\endgroup
+\caption{\label{table:I_CA_ProdInd_contributions}Contributions by industry and asset to the first two dimensions after CA.} 
+\end{table}
+
+To interpret the new axes after orthogonalization, the contributions to the definition of the dimensions of each industry and product - which are the projections of the dimensions on the original categories - are evaluated again with respect to what the contributions would be if the data were randomly distributed. Under random distribution, the contribution of each industry would equal $1/n_i =  \SI{9.1}{\percent}$ ; for the asset-levels, the contributions with randomly dsitributed data would be  \SI{12.5}{\percent}. \Cref{table:I_CA_ProdInd_contributions} mentions the eigenvalues for the most important dimensions and the most important contributions to the dimensions. For the total system the dimensions are:
+
+\begin{alignat}{2}
+&\mathrm{dim}1 = 73.4 * \mathrm{Real\ estate} && (+\ 6.7 * \mathrm{Community}) \nonumber \\
+&\mathrm{dim}2 = 32.0 * \mathrm{RE\ Business} &&+ 25.8 * \mathrm{Community} + 22.7 * \mathrm{Mining} \label{eq:dim_industry} \\
+&\mathrm{dim}3 = 49.9 * \mathrm{TransComm} &&+ 32.0 * \mathrm{Manufact} \nonumber \\ \nonumber \\
+&\mathrm{dim}1 = 74.4 * \mathrm{RStruc} &&(+ \ 8.1 * \mathrm{OCon}) \nonumber \\
+&\mathrm{dim}2 = 51.6 * \mathrm{OCon} &&+ 18.0 * \mathrm{TraEq} + (11.9 * \mathrm{Soft})  \label{eq:dim_product} \\
+&\mathrm{dim}3 = 45.1 * \mathrm{OMach} &&+ 43.8 * \mathrm{CT} \nonumber
+\end{alignat}
+
+
+The dimensions analysis makes more precise the remarks made earlier based on inspecting the distances between the investment profiles: 
+\begin{itemize}
+\item The first dimension captures the previously mentioned correspondance between the Real estate sector and Residential structures. 
+\item The second dimension groups 3 industrial sectors that seperate themselves from the other sectors by their investment behaviour in the asset-levels Other construction, Travel equipment and Software. Community and Mining both invest a large share in Other construction, whereas RE Business invests a much smaller share than average in Other construction, but a lot in Travel equipment, contrary to the first 2.\todo{Use detailed tables from BEA to find out what is invested in by whom?}
+\item The third dimension opposes the Transport and communication sector which does a lot of investing in communication technology, and the Manufacturing sector which invest is Machinery and equipment other than transport equipment.  
+\end{itemize}
+
+One might summarize that the first dimension captures variations in investment according to whether a sector in question invests in residential structures, the second dimension seperates investment in infrastructure from travel equipment, and the the third dimension seperates machinery from CT. 
+
+To get a more detailed picture of what ``Other structures (OCon)'' the industry-levels Community and Mining are investing in, one can, for the USA, refer to the Bureau of Economic Analysis' (BEA) 1997 capital flow table which decomposes capital formation in 123 industries and 180 products (appendix \ref{appendix:classifications}, page \pageref{BEA_capital_flow}). This capital flow table is one of the sources on which the USA KLEMS capital input data are based. It reveals that:
+\begin{itemize}
+\item investment in ``New highways, bridges and other horizontal construction' is entirely attributed to the Real estate sector,
+\item the KLEMS inustry-level Community LtQ's investment in OCon is mainly in public service buildings: hospitals, academic facilities, office buildings, recreation facilities, residential, institutional, and other health facilities, waste treatment plants, 
+\item railroad construction is attributed to the Transport and Storage and Communication sector (I, level 60),
+\item the Mining industries' investment in OCon mainly represents the wells themselves,
+\item the RE Business investment in travel equipment comes from the NAICS industry 5321 consisting of Automotive equipment rental and leasing investing in Automobiles and light trucks.
+\end{itemize}
+
+The asset-level Other, which groups both specific types of tangible and intangible assets, finds itself in between Soft and Other machinery.
+Elec Gas and Wtr invests both more than average in Other construction and Other machinery. ``Sales'' has the most average profile.
+
+
+\subsubsection{Contributions to the dimensions}
+
+\emph{France}
+\input{img/reducedSystemProdInd/I-dimensions_FRA_1970.tex}
+\input{img/reducedSystemProdInd/I-dimensions_FRA_1980.tex}
+\input{img/reducedSystemProdInd/I-dimensions_FRA_1990.tex}
+\input{img/reducedSystemProdInd/I-dimensions_FRA_2001.tex}
+\input{img/reducedSystemProdInd/I-dimensions_FRA_2007.tex}
+\clearpage
+\emph{USA}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_1970_ProdInd.pdf}
+    \caption{\label{fig:CA-I-USA-1970}Correspondance analysis on 8 asset and 11 industry-levels, USA, 1970 source: KLEMS, dimensions 1 and 2.}
+\end{figure} 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_1970_ProdInd_dim2-3.pdf}
+    \caption{\label{fig:CA-I-USA-1970-dim23}Correspondance analysis on 8 asset and 11 industry-levels, USA, 1970 source: KLEMS, dimensions 2 and 3.}
+\end{figure}
+\input{img/reducedSystemProdInd/I-dimensions_USA_1970.tex}
+\clearpage
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_1980_ProdInd.pdf}
+    \caption{\label{fig:CA-I-USA-1980}Correspondance analysis on 8 asset and 11 industry-levels, USA, 1980 source: KLEMS, dimensions 1 and 2.}
+\end{figure} 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_1980_ProdInd_dim2-3.pdf}
+    \caption{\label{fig:CA-I-USA-1980-dim23}Correspondance analysis on 8 asset and 11 industry-levels, USA, 1980 source: KLEMS, dimensions 2 and 3.}
+\end{figure}
+\input{img/reducedSystemProdInd/I-dimensions_USA_1980.tex}
+\clearpage
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_1990_ProdInd.pdf}
+    \caption{\label{fig:CA-I-USA-1990}Correspondance analysis on 8 asset and 11 industry-levels, USA, 1990 source: KLEMS, dimensions 1 and 2.}
+\end{figure} 
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_1990_ProdInd_dim2-3.pdf}
+    \caption{\label{fig:CA-I-USA-1990-dim23}Correspondance analysis on 8 asset and 11 industry-levels, USA, 1990 source: KLEMS, dimensions 2 and 3.}
+\end{figure}
+\input{img/reducedSystemProdInd/I-dimensions_USA_1990.tex}
+\clearpage
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_2001_ProdInd.pdf}
+    \caption{\label{fig:CA-I-USA-2001}Correspondance analysis on 8 asset and 11 industry-levels, USA, 2001 source: KLEMS, dimensions 1 and 2.}
+\end{figure} 
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_2001_ProdInd_dim2-3.pdf}
+    \caption{\label{fig:CA-I-USA-2001-dim23}Correspondance analysis on 8 asset and 11 industry-levels, USA, 2001 source: KLEMS, dimensions 2 and 3.}
+\end{figure}
+\input{img/reducedSystemProdInd/I-dimensions_USA_2001.tex}
+\clearpage
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_2007_ProdInd.pdf}
+    \caption{\label{fig:CA-I-USA-2007}Correspondance analysis on 8 asset and 11 industry-levels, USA, 2007 source: KLEMS, dimensions 1 and 2.}
+\end{figure} 
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystemProdInd/USA_2007_ProdInd_dim2-3.pdf}
+    \caption{\label{fig:CA-I-USA-2007-dim23}Correspondance analysis on 8 asset and 11 industry-levels, USA, 2007 source: KLEMS, dimensions 2 and 3.}
+\end{figure}
+\input{img/reducedSystemProdInd/I-dimensions_USA_2007.tex}
+\clearpage
+
+%\Cref{fig:CA-I-USA-2007} shows, again, the close correspondance between the real estate sector and residential structures.To get a better view on the pattern amongst the other sectors and products, another figure \cref{fig:CA-USA-2007-noResCon} shows the CA representation omitting the aforementioned industrial and asset level.
+
+\input{caVsPca.tex}
+
+\ruben{CA vs. PCA pourquoi? For ruben}
+
+
+%\clearpage
+%\input{img/summarizeIndustries/I_USA_2007_noResCon.tex}
+%\input{img/summarizeIndustries/I-rowProfiles_USA_2007_noResCon.tex}
+%\input{img/summarizeIndustries/I-colProfiles_USA_2007_noResCon.tex}
+%\input{img/summarizeIndustries/I-independence_USA_2007_noResCon.tex}
+%\input{img/summarizeIndustries/I-deviations_USA_2007_noResCon.tex}
+%\input{img/summarizeIndustries/I-chi2_USA_2007_noResCon.tex}
+%\clearpage
+
+%$\chi^22$ =1011616 For the system excluding the real estate sector and residential structures.
+
+%\todo{work with the residuals of investment after acounting for capital stock structure, K}
+%\todo{K/VA, the smaller, the less "capital intensive" the economy (or lower energy cost, labour cost ?)}
+%\todo{multiply individuals ? create individuals, 1 column, productxindustryxcountry and consider that against years ?} 
+
+\clearpage
+
+\subsection{Year $\times$ product}
+The product $\times$ year reduced system is summarized, for a given industry-level and (group of) country(ies), by the matrix detailing - for some measure of investment ($I$, $I/VA$, $I/GFCF$) - how much went to what product per year. It's analysis addresses the questions: ``Is the investment pattern similar over the years for all or some products?'' and ``Are there years for which the product-profile of capital formation is similar or significantly different than for other years ?''. 
+
+\subsubsection{Overall investment trends per product}
+
+\Cref{fig:I_ShareVA-gridCountries-TOT} gives a first impression of the evolution of investment per value added $\frac{I_p}{VA}$ for several product-levels $p$, for all countries, over the period 1970-2007. The visual impression of the upper row of the figure suggests that overall investment as a share of the total national budgets has been going down, on average, over all countries; the same trend in nonICT assets seems slightly clearer. The share of national budgets allocated to ICT investment increases. Beween all the asset-types, the evolution of Software stands out with its evident consistent rise over the period considered. 
+
+The impressions above are put into numbers by performing a simple linear regression on $I_p/V\!\!A$, and thus evaluating whether there is for each asset-level a significant global trend $t_p$over all countries grouped together, over the 38 years under consideration. 
+\begin{equation}
+\frac{I_{yp}}{VA_y}= i_p + t_p y + u_yp
+\end{equation}
+The results are in the last 2 columns of \cref{table:I_ShareVA-GFCF-global}. The first 8 columns give statistics of $I/V\!\!A$ per asset-level: the minima and maxima for example state the lowest and highest shares of VA that have been allocated to the formation of the capital asset in question, over all countries, in between 1970 and 2007. In the following sections (appendix...), similar tables per asset-level and statistics per country are presented. 
+
+\Cref{table:I_VA-trends-assets} summarizes for the USA and France whether the share of the national budgets allocated to investment in each asset-level shows a significant trend or not.
+
+\begin{table}[ht]
+\setlength\tabcolsep{6pt}
+\centering
+\begingroup\footnotesize
+\begin{tabular}{rrrrrrrrrrr}
+  \hline
+ & nobs & NAs & Minimum & Maximum & Mean & Stdev & Skewness & Kurtosis & trend & t.pvalue \\ 
+  \hline
+  GFCF & 615 & 157 & 0.165 & 0.356 & 0.242 & 0.037 & 0.418 & -0.229 & -0.00097 & *** \\ 
+\hline
+  NonICT & 615 & 157 & 0.137 & 0.338 & 0.218 & 0.040 & 0.246 & -0.520 &  -0.00162 & *** \\ 
+  ICT & 615 & 157 & 0.009 & 0.050 & 0.024 & 0.009 & 0.283 & -0.660 & 0.00064 & *** \\ 
+\hline
+  Con & 615 & 157 & 0.066 & 0.241 & 0.137 & 0.030 & 0.313 & 0.242 & -0.00112 & *** \\ 
+  RStruc & 615 & 157 & 0.016 & 0.130 & 0.061 & 0.018 & 0.671 & 1.581 & -0.00062 & *** \\ 
+ OCon & 615 & 157 & 0.042 & 0.159 & 0.076 & 0.019 & 0.680 & 0.351 & -0.00050 & *** \\ 
+ TraEq & 615 & 157 & 0.009 & 0.045 & 0.022 & 0.006 & 0.870 & 1.044 & -0.00005 & * \\
+ OMach & 615 & 157 & 0.022 & 0.103 & 0.052 & 0.014 & 0.622 & 0.050 & -0.00033 & *** \\ 
+ Other & 615 & 172 & 0.000 & 0.056 & 0.007 & 0.008 & 2.258 & 5.977 & -0.00010 & ** \\ 
+ CT & 615 & 157 & 0.000 & 0.015 & 0.006 & 0.003 & 0.154 & -0.092 & 0.00005 & *** \\ 
+ IT & 615 & 157 & 0.002 & 0.029 & 0.009 & 0.005 & 1.147 & 1.423 & 0.00014 & *** \\ 
+ Soft & 615 & 157 & 0.000 & 0.029 & 0.009 & 0.006 & 0.800 & 0.205 & 0.00046 & *** \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{\label{table:I_ShareVA-GFCF-global}I / VA, 1970 - 2010, all industries} 
+\end{table}
+
+
+
+\begin{table}[t]
+\setlength\tabcolsep{6pt}
+\centering
+\begingroup\footnotesize
+\begin{tabular}{l|c|cc|c|ccccccccc}
+  \hline
+ &  GFCF & NonICT  & ICT & Con\footnote{Con = RStruc +OCon} & RStruc & OCon & TraEq & OMach & Other & CT & IT & Soft \\ 
+  \hline
+ All countries &  $\downarrow^{***}$ & $\downarrow^{***}$  & $\uparrow^{***}$ & $\downarrow^{***}$ & $\downarrow^{***}$ & $\downarrow^{***}$ & $\downarrow^{*}$ & $\downarrow^{***}$ & $\downarrow^{**}$ & $\uparrow^{**}$ & $\uparrow^{***}$ & $\uparrow^{***}$ \\ 
+ USA 		& $\_$ & $\downarrow^{***}$  & $\uparrow^{***}$ & $\downarrow^{*}$ & $\_$  & $\downarrow^{***}$ & $\downarrow^{**}$ & $\downarrow^{***}$ & $\uparrow^{***}$  & $\_$ & $\uparrow^{***}$ & $\uparrow^{***}$ \\ 
+ France 	&  $\downarrow^{***}$ & $\downarrow^{***}$  & $\uparrow^{***}$ & $\downarrow^{***}$ & $\downarrow^{***}$           & $\downarrow^{***}$ & $\_$ & $\downarrow^{***}$ & $\downarrow^{*}$ & $\_$ & $\uparrow^{***}$ & $\uparrow^{***}$ \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption[\label{table:I_VA-trends-assets}Trends of $I_p$ / VA, all industries, France: 1970 - 2010, USA: 1977-2007.]{\label{table:I_VA-trends-assets}Trends of $I_p$ / VA, all industries, France: 1970 - 2010, USA: 1977-2007. \protect\footnotemark}
+
+\end{table}
+\footnotetext{The asterisks indicate the p-value: *** = 0 - 0.001, ** = 0.001 - 0.01, * = 0.01 - 0.05, $\_$ = not significant}
+
+
+\subsubsection{(Dis)similarities between assets' investment-evolution}
+
+To account for more complex similarities in evolutions than a linear trend, the contingency matrix is analysed with CA.
+
+To evaluate similarities in evolution in investment in the different products, the distance between the investment evolutions over the years is determined using the variable $I/V\!\!A$:
+\begin{equation}  \label{eq:distanceCol_year-prod}
+d_{pq} = \sum_y \frac{( \frac{I_{yp}/V\!\!A_y}{\sum_z I_{zp}/V\!\!A_z}  -\frac{I_{yq}/V\!\!A_y}{\sum_z I_{zq}/V\!\!A_z} )^2}{    \frac{1}{n_p}  \sum_r      \frac{I_{yr}/V\!\!A_y}{\sum_z I_{zr}/V\!\!A_z}       }.
+\end{equation}
+where $p$, $q$ and $r$ run over product-levels and $y$ and $z$ over years. The choice of the variable $I_p/V\!\!A$ instead of $I_p$ is made because calculating (distances between) asset-profiles involves summing, or averaging, the measure for investment over years. For nominal investment $I_yp$ this is not meaningful. The measures that allow for comparibility over years are $I_{yp}/GFCF_y$ and $I_{yp}/V\!\!A_y$. The latter is here chosen for the following reason: if the overall level of investment goes up or down\footnote{Whatever going up or down means. Here to be taken as what part of ... hence the choice of I/V\!\!A. See section ...}, say hypothetically due to a marked evolution in only one product-level, then using shares of GFCF will show a change in all asset-levels. $I_{yp}/V\!\!A_y$ will show no evolution in the product-levels for all but one. 
+
+%Using $I_{py}/GFCF_y$ comes down to doing a standard contingency table analysis, where the year-profiles would be calculated by weighting the data by the sum of the year-profile. Using $I_{py}/V\!\!A_y$ thus diverges slightly from the standard contingency-table method.
+ 
+%The product x year system can be analysed by considering the contingency matrix products x years, for the variables $\frac{I_p}{I_{GFCF}}$ (what share of total investment is directed towards a particular product) and/or $\frac{I_p}{VA}$ (what share of total national income is directed towards the investment in a particular product).
+
+\input{img/summarizeYears/distancesYears_USA_I_VA_prod.tex}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.8]{img/summarizeYears/I_ShareVA_evol-USA-TOT.pdf}
+    \caption{\label{fig:I_VA-I_evol-USA-TOT}Relative evolution of nominal investment I in 8 asset-levels, USA, source: KLEMS.}
+\end{figure} 
+
+\Cref{table:distancesYears_USA_I_VA_prod} shows what was remarked by looking at already mentioned \cref{fig:I_ShareVA-gridCountries-TOT}: the investment evolution of software is distinctly different from that of the other assets. It is most different from OCon, TraEq and OMach, which are the three assets that know a downward trend (\cref{table:I_VA-trends-assets}), in contrast to Software which knows a clear upward trend. The next ``most different'' from Soft assets are RStruc and CT which both do not show a clear trend for the USA, and the closest profiles to Soft are IT and Other which are together with Software the asset-levels that all show an upward trend. \Cref{fig:I_VA-I_evol-USA-TOT}.
+
+The most similar industry-levels are OCon, TraEq and OMach which are the ones that show a significant downward trend. Inspecting \cref{fig:I_VA-I_evol-USA-TOT} shows that OCon and OMach follow a similar evolution ; their profiles are the most similar (d=0.04).
+
+The two asset-levels that show no overall trend, CT and RStruc, are more different from one another (d=0.21) than from Other \& the three that know an overall downward trend. Thus it is not the overall trend that explains their modest dissimilarity. From \cref{fig:I_VA-I_evol-USA-TOT} we learn that they follow opposite tendencies during the first and last third of the period considered; they only converge from the mid-eighties to the mid-nineties.
+\clearpage
+
+\subsubsection{(Dis)similarities between year-profiles}
+\input{img/summarizeYears/distancesYears_USA_I_VA_part1.tex}
+\input{img/summarizeYears/distancesYears_USA_I_VA_part2.tex}
+\input{img/summarizeYears/distancesYears_USA_noSoft_I_VA_part1.tex}
+\input{img/summarizeYears/distancesYears_USA_noSoft_I_VA_part2.tex}
+
+Tables \ref{table:distancesYears_USA_I_VA_part1} to \ref{table:distancesYears_USA_nonSoft_I_VA_part2} compare investment profiles in the different products per year, as measured by the metric $d_{yy'}$\footnote{This distance measure is slightly different from the one typically proposed by contingency table analysis. For more details   see appendix \ref{metrics}}:
+\begin{equation}  \label{eq:distanceRow_year-prod_alt}
+d_{yy'}= \sum_p \frac{( I_{yp}/VA_y - I_{y'p}/VA_{y'})^2 }{\frac{1}{n_y}\sum_z I_{zp}/VA_z}
+\end{equation}
+
+By comparing the case where all 8 asset-levels are included (tables \ref{table:distancesYears_USA_I_VA_part1} and \ref{table:distancesYears_USA_I_VA_part2}) with the case where Software was excluded (tables \ref{table:distancesYears_USA_nonSoft_I_VA_part1} and \ref{table:distancesYears_USA_nonSoft_I_VA_part2}), it is clear that a large part of the variability between year-profiles comes from Software.
+
+Unsurprisingly, following years differ on average less than years further apart, although there are exceptions to this rule, mostly so in the distances calculated over 7 assets, excluding software \footnote{The metric used to calculate the distances puts all asset-levels on equal footing, even though over the period considered, in between 1970 and 2000, investment in software goes up from $0 \%$ to levels around $1 - 2.5\%$ as share of added value, whereas TraEq + OCon + OMach varies around levels of $15 \%$ of VA. Thus, the fact that Soft has a different profile over time, even though its relative weight is low, has a big effect. Correspondancy analysis picks this effect up in the first dimension ; the efect is not present anymore in dimensions 2 and 3. Excluding Soft is an alternative way to look at the data beyond the evolution of Soft.}. For example, the distance between the 2007-investment profile is quite close to the ones of 1987-1990 and the distance increases before and after. Inspecting the graphical representation of the CA without Soft (\cref{fig:CA_I_VA_NoSoft_TOT_USA}) one can see that this is due to a decrease in 2007 in investing in residential structures. 
+
+%The stacked bar graphs of product x year show for many countries decreasing total investment as a percentage of value added. Since growth has been slow for many countries, this indicates an even slower investment behaviour.
+
+%On the basis of the available graphs, a product per product discussion can be made whether investment in that product has been going up or not, whether there are outliers (example Spain doing a lot of residential construction at some point, Australia doing a lot of Other investing in the 1970s and going down since (creation of agricultural land, deforestation)).
+
+\subsubsection{Correspondance analysis}
+
+Figures \ref{fig:CA_I_VA_TOT_USA}, \ref{fig:CA_I_VA_TOT_USA_dim2-3} and \ref{fig:CA_I_VA_NoSoft_TOT_USA} are a graphical representation of the correspondance analysis of the contingency-matrix products $\times$ years, for the USA, 1977 - 2007. The contributions to the dimensions are :
+ \begin{alignat}{7}
+ \mathrm{dim}1 =\ & 8.1 * \mathrm{1981} &&+\  7.9 * \mathrm{1980} &&+\  7.2 * \mathrm{1979} &&+\  6.8 * \mathrm{1982} &&+\  6.8 * \mathrm{1978}  \nonumber \\
++ \ & 6.1 * \mathrm{1977} &&+\  5.7 * \mathrm{2004} &&+\  5.5 * \mathrm{2003} &&+\  5.4 * \mathrm{2000} &&+\  5.2 * \mathrm{2002} \nonumber \\
++\ & 5.1 * \mathrm{2001} &&+\  4.9 * \mathrm{2005} &&+\  4.1 * \mathrm{1999} &&+\  3.7 * \mathrm{2006} &&+\  3.3 * \mathrm{2007}  \nonumber \\ 
+ \mathrm{dim}2 =\ & 14.5 * \mathrm{2005} &&+\  12.2 * \mathrm{1977} &&+\  11 * \mathrm{1978} &&+\  9.3 * \mathrm{1982} &&+\  9.3 * \mathrm{2004} \\
++\ & 6.3 * \mathrm{2006} &&+\  5.2 * \mathrm{2000} &&+\  4.9 * \mathrm{1979} &&+\  3.4 * \mathrm{1997}  \nonumber \\ 
+ \mathrm{dim}3 =\ & 16.2 * \mathrm{2007} &&+\  10.4 * \mathrm{1982} &&+\  7.9 * \mathrm{1995} &&+\  7.9 * \mathrm{1994} &&+\  6.1 * \mathrm{1999} \nonumber \\
++\ & 5.4 * \mathrm{1996} &&+\  5.2 * \mathrm{1977} &&+\  4.7 * \mathrm{1978} &&+\  4.7 * \mathrm{1997} &&+\  4.3 * \mathrm{1998} +\ & 3.9 * \mathrm{1981}  \nonumber
+ \end{alignat} 
+ \begin{alignat}{4} 
+ &\mathrm{dim}1 = 68.8 * \mathrm{Soft} &&+\  11.6 * \mathrm{OCon} &&+\  9.4 * \mathrm{OMach} &&+\  5.5 * \mathrm{IT}  \nonumber \\ 
+ &\mathrm{dim}2 = 60.5 * \mathrm{RStruc} &&+\  19.9 * \mathrm{IT} &&+\  10.7 * \mathrm{CT} &&+\  4.9 * \mathrm{OCon}   \\ 
+ &\mathrm{dim}3 = 45.9 * \mathrm{TraEq} &&+\  40.7 * \mathrm{OCon} &&+\  4.5 * \mathrm{OMach} &&+\  4.2 * \mathrm{IT}  \nonumber
+ \end{alignat}
+
+The first dimension picks up the difference, between assets, in linear trends mentioned before: it opposes the evolution of Soft (contributes \SI{69}{\percent} to the dimension) to that of OCon ($\downarrow$) and OMach ($\downarrow$). There is also a small contribution from IT ($\uparrow$). It is the years 1999-2007, at the end of the period considered, that are associated with the upwards trend in Soft and where investment in OCon and OMach is lower than before. During the beginning of the period, years 1977- 1982, investment in Soft is lowest and in OCon and OMach highest. 
+
+The second dimension opposes investment in residential structures to CT and IT. As mentioned before, RStruc and CT do not show a significant linear trend over the period, so the dimension picks up another type of dynamic: investment in RStruc is associated with 1977-1979 and 2004-2006, which correspponds to two booms (see \cref{fig:I_VA-I_evol-USA-TOT}). It is negatively associated with 1982, year at which investment in RStruc as a share of VA reaches its lowest point. The years 1997 and 2000 correpond to booms in IT and CT investment. The second dimension describes marked highs and lows in RStruc on the one hand, and IT and CT investment on the other hand. 
+
+The third dimension 
+
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystem_Prod-Year/I_VA_TOT_USA.pdf}
+    \caption{\label{fig:CA_I_VA_TOT_USA}CA analysis of the reduced system asset x years, USA, 2007, source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystem_Prod-Year/I_VA_TOT_USA_dim2-3.pdf}
+    \caption{\label{fig:CA_I_VA_TOT_USA_dim2-3}CA analysis of the reduced system asset x years, USA, 2007, source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystem_Prod-Year/I_VA_NoSoft_TOT_USA.pdf}
+    \caption{\label{fig:CA_I_VA_NoSoft_TOT_USA}CA analysis of the reduced system asset x years, without considering software assets, USA, 2007, source: KLEMS.}
+\end{figure} 
+
+%The CA factor maps show graphically which row and column profiles are (dis)similar. The measure used to evaluate ``distances'' between rows and columns puts all industries and all products on an equal footing, even though some take up a larger share of capital formation than others. This has as effect that even though over the period considered, in between 1970 and 2000, investment in software goes up from $0 \%$ to levels around $1 - 2.5\%$ as share of added value, whereas TraEq + OCon + OMach varies around levels of $15 \%$ of VA, the fact that Soft has a different profile over time, even though its relative weight is low, has a big effect. Differently put, even though NonICT investment has an average level of say $22 \%$ of VA, and ICT investment an average level of $2 \%$, using centered variables eliminates this level effect (its as if growth rates are used as variables). So the assessment is really one of variations, not on whether the bulk of the investment profile is similar or different
+
+%To answer the question whether 2 profiles are similar, it might seem more appropriate to give row profiles their respective weight and not center the variables. This is not evident though, since even though a small portion of a total budget is allocated to a specific product, this product might play an important role in the economy and should not be ``washed away'' by bigger players when evaluating the similarity between profiles. \footnote{One might consider the analogy with doping materials.}
+
+
+
+%France, 1970
+%eigenvalues: dim1 - 0.84, dim2 - 0.18, dim3 - 0.14
+%\begin{alignat}{3}
+%&\mathrm{dim}1 = 56.2 * \mathrm{Real\ estate} && +\ 12.5 * \mathrm{Manufacturing} \nonumber \\
+%&\mathrm{dim}2 = 52.3 * \mathrm{TransComm} &&+\ 21.7 * \mathrm{Community} &&+\ 11.6 * \mathrm{Agri} \label{eq:dim_industry_FRA1970} \\
+%&\mathrm{dim}3 = 37.9 * \mathrm{Community} &&+\ 33.9 * \mathrm{Manufact} &&+\ 13.0 * \mathrm{Agri}\nonumber \\ \nonumber \\
+%&\mathrm{dim}1 = 60.1 * \mathrm{RStruc} &&+ \ 17.3 * \mathrm{OMach} &&+ (13.2 * \mathrm{OCon}) \nonumber \\
+%&\mathrm{dim}2 = 66.5 * \mathrm{TraEq} &&+\ 22.7 * \mathrm{OCon}   \label{eq:dim_product_FRA1970} \\
+%&\mathrm{dim}3 = 50.0 * \mathrm{OMach} &&+\ 30.3 * \mathrm{OCon} \nonumber
+%\end{alignat}
+
+%France, 1980
+%eigenvalues: dim1 - 0.86, dim2 - 0.18, dim3 - 0.15
+%\begin{alignat}{3}
+%&\mathrm{dim}1 = 58.8 * \mathrm{Real\ estate} && + (9.8 * \mathrm{Manufacturing}) \nonumber \\
+%&\mathrm{dim}2 = 47.8 * \mathrm{Community} &&+\ 12.3 * \mathrm{RE Business} &&+\ 11.6 * \mathrm{Manufact} \label{eq:dim_industry_FRA1970} \\
+%&\mathrm{dim}3 = 38.6 * \mathrm{Agri} &&+\ 15.2 * \mathrm{RE Business} &&+\ 15.1 * \mathrm{TransComm}\nonumber \\ \nonumber \\
+%&\mathrm{dim}1 = 62.0 * \mathrm{RStruc} &&+ \ 15.5 * \mathrm{OMach} &&+ (13.3 * \mathrm{OCon}) \nonumber \\
+%&\mathrm{dim}2 = 45.2 * \mathrm{OCon} &&+\ 20.5 * \mathrm{OMach} &&+ (11.9 * \mathrm{TraEq})   \label{eq:dim_product_FRA1970} \\
+%&\mathrm{dim}3 = 32.6 * \mathrm{Other} &&+\ 31.6 * \mathrm{TraEq} &&+\ 25.5 * \mathrm{OMach} \nonumber
+%\end{alignat}
+
+
+
+
+\clearpage
+
+\subsection{Industry $\times$ year}
+\todo{graphs equivalent of prod graph, GFCF for every industry on 1 graph, divide variables by mean over the period } 
+Analysing the reduced system Industry $\times$ year shows during which years the way total investment is spread over the different industry-levels is (dis)similar, and whether different industry-levels displayed a more or less similar investment evolution over the period considered. 
+
+The variable used is $I/VA$. The choice of this vairable is explained in... The metric used in the CA analysis below measures, for the distance between:
+\begin{itemize}
+\item industry-profiles, invilves comparing for 2 industry-olevels, for eac
+\item year-profiles, comes down to comparing shares. The distance between year-profiles is the same as when te varriable $I$ would have been used. The effect of corercting for the total growth of the economy as measured by $VA$ disappears when comparing 2 years. Thus the distance between year-profiles used in the CA analysis are different than the ones in tables ....
+\end{itemize}
+The first 3 dimensions of the CA analysis are graphically represented in figures \ref{fig:CA-I_VA_USA-GFCF} and \ref{fig:CA-I_VA_USA-GFCF-dim23}. The industries lying close to the origin of the factor map of dimensions 2 and 3 are the ones showing some variability but no clear trend. The first dimensions opposes industries that show either high/low investment levels during the period ... with industries whowing the reverse phenomenon.
+
+The industries close 
+
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.7]{img/reducedSystem_Ind-Year/I_VA_USA_GFCF.pdf}
+    \caption{\label{fig:CA-I_VA_USA-GFCF}Correspondance analysis on 8 asset and 11 industry-levels, 1977-2007, USA, dimensions 1 and 2 (source: KLEMS).}
+\end{figure} 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.8]{img/reducedSystem_Ind-Year/I_VA_USA_GFCF_dim2-3.pdf}
+    \caption{\label{fig:CA-I_VA_USA-GFCF-dim23}Correspondance analysis on 11 industry-levels, 1977-2007, USA, dimensions 2 and 3 (source: KLEMS).}
+\end{figure}
+
+Contributions to the dimensions, USA, 2010 
+\begin{alignat}{7}
+ \mathrm{dim}1 =\ & 18.3 * \mathrm{1981} &&+\  14.4 * \mathrm{1982} &&+\  10.3 * \mathrm{1980} &&+\  6.9 * \mathrm{1979} &&+\  5.7 * \mathrm{1999} \nonumber \\
++\ & 5.4 * \mathrm{1978} &&+\  4.5 * \mathrm{2000} &&+\  4.1 * \mathrm{1977} &&+\  3.7 * \mathrm{2004} &&+\  3.5 * \mathrm{2003} &&+\  3.4 * \mathrm{2002}  \nonumber \\ 
+ \mathrm{dim}2 =\ & 18.2 * \mathrm{2006} &&+\  14 * \mathrm{2007} &&+\  13.7 * \mathrm{2005} &&+\  8.5 * \mathrm{2004} &&+\  5.5 * \mathrm{2003} &&  \\
++\ & 4.5 * \mathrm{1992} &&+\  3.7 * \mathrm{1991} &&+\  3.6 * \mathrm{1990}  \nonumber \\ 
+ \mathrm{dim}3 =\ & 12.5 * \mathrm{2000} &&+\  10.9 * \mathrm{1999} &&+\  10 * \mathrm{1986} &&+\  9.9 * \mathrm{1987} &&+\  8.6 * \mathrm{1997} \nonumber \\
++\ & 6.8 * \mathrm{1998} &&+\  5.3 * \mathrm{1988} &&+\  4.3 * \mathrm{2001} &&+\  3.9 * \mathrm{1985} &&+\  3.9 * \mathrm{1981} \nonumber 
+\end{alignat} 
+%\begin{flalign}
+ \begin{alignat}{4}
+ \mathrm{dim}1 =\ & 38.9 * \mathrm{Mining} &&+\  31.5 * \mathrm{RE\ Business} &&+\  9 * \mathrm{Agr} & \nonumber \\ 
++& \  6.6 * \mathrm{Manufact} &&+\  4 * \mathrm{Elec\ Gas} &&+\  3.9 * \mathrm{Finance} & \nonumber \\ 
+ \mathrm{dim}2 =\ & 39.2 * \mathrm{Mining} &&+\  19.7 * \mathrm{Manufact} &&+\  17.6 * \mathrm{RE\ Business} & \ \ \  \ \ \  \ \ \  \\ 
++&\  7.9 * \mathrm{Finance} &&+\  5.2 * \mathrm{Trans\ Comm} &&+\  5.1 * \mathrm{Real\ estate}&  \nonumber \\ 
+ \mathrm{dim}3 =\ & 31.7 * \mathrm{Real\ estate} &&+\  21.9 * \mathrm{Trans\ Comm} &&+\  20 * \mathrm{RE\ Business}&  \nonumber \\ 
++&\  7.4 * \mathrm{Elec\ Gas} &&+\  7.1 * \mathrm{Construc} &&+\  6.7 * \mathrm{Manufact} &  \nonumber
+%\end{flalign}
+\end{alignat}
+\begin{itemize}
+\item The first dimension opposes 4 sectors that peak or know higher investment levels in the beginning of the period (1977 - 1982) - Mining, Agriculture, Manufatcturing and Elec, Gas Water - to RE Business which peaks at the end of the period (2003 - 2005). 
+\item The second dimension identifies a dip in investment in the beginning of the nineties. The second dimension involves again the Miining sector. It opposes total investment levels in 2003-2007 to levels in 1990-1992. The increased investment by the mining sector after the year 2000 is due to the shale gas boom. The Mining sector is opposed the the Finance and Manufacturing sector 
+\end{itemize}
+Figures \ref{fig:I-VA-Product-Mining-USA} to .. show what underlies - to what assets investment was directed more or less - the variations in total investment for the different industries.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.5]{img/plotted_perCountry/I-VA-Product-Mining-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Mining-USA}Investment as share of VA by the Mining sector in 8 asset-levels, 1977-2007, USA (source: KLEMS).}
+\end{figure} 
+
+%From the distances between industries and comparing with CA analysis of the reduced system prod $\times$ industry over the years 1970, 1980, 1990, 2001 up to 2007, one observes :
+%\begin{itemize}
+%\item The Real estate sector is over the whole period the main investor in residential strucutures. 
+%\item The Transport and communication sector is the main contributer to dimension 2, together with a negative contribution from Manfacturing. TransComm is the main investor in CT, up untill 1990. During the 90's, the previous pattern of dim 2 is overtaken.
+%\item
+%\item
+%\end{itemize}
+\input{img/summarizeIndustries/distancesInd_USA_1970.tex}
+\input{img/summarizeIndustries/distancesInd_USA_1980.tex}
+\input{img/summarizeIndustries/distancesInd_USA_1990.tex}
+\input{img/summarizeIndustries/distancesInd_USA_2001.tex}
+\input{img/summarizeIndustries/distancesInd_USA_2007.tex}
+
+
+
+%Possible industry aggregations :
+%\begin{itemize}
+%\item Agriculture (AtB), Manufacturing (D), Mining \& Quarrying (C), Electricity, Gas \& Water (E), Construction \& Services (FtQ) (better not lump)
+%\item Agriculture (AtB), Mining (C), Manufacturing (D), Electricity, Gas \& Water (E), Construction (F), Sales (GtH), Transport \& Communication (I), Finance (J), Real estate (70), Real estate Business activities (71t74), Community (LtQ)
+%\end{itemize}
+
+%Are there years where industries do different investing then in other years ? Do every year all industries do the same investing relative to one another ? 
+%Look at product GFCF, ICT, NonICT, for every country.
+
+%\subsection{Investment by industry}
+
+%The content of NACE 1 industry-level K, Real estate activities:
+
+%K	 	Real estate, renting and business activities	   
+%KA	 	Real estate, renting and business activities	   
+%70	 	Real estate activities
+%70.1 = 70.11 + 70.12	 	Real estate activities with own property = Development and selling of real estate + Buying and selling of own real estate
+   
+%70.2	=70.20 	Letting of own property 
+
+%70.3	 = 70.31	 + 70.32	Real estate activities on a fee or contract basis = Real estate agencies + Management of real estate on a fee or contract basis
+	
+%71	 	Renting of machinery and equipment without operator and of personal and household goods 
+   
+%72	 	Computer and related activities 
+   
+%73	 	Research and development 
+   
+%74	 	Other business activities 
+   
+
+  
+
+
+
+%	Real estate, renting and business activities	   
+%   		KA	 	Real estate, renting and business activities	   
+%      		70	 	Real estate activities	   
+%         		70.1	 	Real estate activities with own property	   
+%            		70.11	 	Development and selling of real estate 
+   
+%            		70.12	 	Buying and selling of own real estate 
+   
+
+
+%\subsection{Country x year}
+
+%Is country correlated with year ? Are there countries whos investment profile over the years, GFCF or for a particular product, is different from the average, is for every country the evolution of investment over the years the same ? 
+
+%\subsection{Country x product}
+
+%The stacked bar charts of country x GFCF$/$VA 
+
+%Is there a difference between countries as to in what assets they invest ?
+
+%First answer : no.
+
+%\subsection{Country x industry}
+
+%Industrial structure (as measured by I/K; I/VA)
+
+
+\clearpage
+\subsubsection{Variables and units}
+
+$K$, real capital stock is measured in:
+\begin{itemize}
+\item 1995 local currency for the KLEMS data 2009 release (update 2011), ISIC 3.1,
+\item volume indices with $2005= 100$, for the KLEMS 2012 release, ISIC 4.
+\end{itemize}
+
+
+VA: the following value added related variables are available:
+\begin{itemize}
+\item $VA$, gross value added at current basic prices, in local currency
+\item $VA\_P$, price index for gross value added, with $1995 = 100$
+\item $VA\_QI$, volume index for gross value added, with $1995=100$ (does not mean valuation at 1995 prices\footnote{For more information see \cite{timmer_eu_2007}, section 4, page 18.})
+\end{itemize}
+
+
+I, capital formation variables:
+\begin{itemize}
+\item $I$, nominal gross capital formation in current currency
+\item $Iq$, real gross capital formation:
+    \begin{itemize}
+    \item in 1995 prices, for the 2009 release,
+    \item volume indices were $2005 = 100$, for the 2012 release
+    \end{itemize}
+\end{itemize}
+
+For comparison accross countries,the following measures have units:
+\begin{itemize}
+\item $I/VA$ : current local currency/current local currency.
+\item $(K/VA)*(VA\_P/100)$ : (1995 local currency$/$current local currency) $*$ (current currency$/$ 1995 currency), for the 2009 release.
+
+\end{itemize}
+
+
+
+
+

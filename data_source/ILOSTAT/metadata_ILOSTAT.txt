@@ -1,0 +1,81 @@
+depository: Patrice Dumas (dumas)
+title: International Labour Office database on labour statistics
+source: https://www.ilo.org/ilostat/faces/ilostat-home/home?_adf.ctrl-state=74pghr2ha_91&_afrLoop=3730952184378389#!
+source: https://ilostat.ilo.org/data/bulk/
+date: 2019
+rights: https://www.ilo.org/global/copyright/request-for-permission/lang--en/index.htm#data
+https://www.ilo.org/global/copyright/request-for-permission/lang--en/index.htm
+https://www.ilo.org/global/copyright/lang--en/index.htm
+
+Copyright © 1996-2018 International Labour Organization. All rights reserved.
+
+The ILO holds copyright in the information available on this Web site, unless otherwise stated. Copyright in any third-party materials found on this Web site must also be respected. You may request permission to reproduce the ILO materials available on this Web site as follows:
+
+Permissions
+ILO Publications and Data
+If you would like to copy, translate or otherwise reproduce the ILO material for commercial or non-commercial purposes, consult the page Permissions to Reproduce ILO Publications and Data  for further instructions.
+
+The reproduction of ILO material is generally authorized for non-commercial purposes and within established limits. However, you may need to submit a formal request in certain circumstances.
+
+2. Reproduction of data
+For non-commercial purposes, any required permission is hereby granted and no further permission must be obtained from the ILO, but acknowledgement to the ILO as the original source must be made.
+
+For the re-use of ILO data for commercial purposes, please submit a formal request using the online form at form for reproduction of extracts .
+
+description:
+Labour statistics.
+
+coverage: World
+creator: Countries
+publisher: ILO
+
+BibliographicResource:
+
+Notes:
+Some records have different values per sources
+
+To find the variables files, you can look at
+download/www.ilo.org/ilostat-files/WEB_bulk_download/dic/indicator_*.csv
+Prepend a frequency code to the variable name (A, Q, M).
+Then the data is, for example for variable EAR_4MNP_NOC_NB annually, in 
+indicator/EAR_4MNP_NOC_NB_A.csv.gz
+The meaning of the column values with header some_header (classif1, 
+note_indicator...) are in files
+dic/some_header_en.csv
+
+Replaces Laborsta which is in ../LABORSTA_ILO.
+
+Important difference with GGDC:
+
+Argentina, ARG, agricultural employment only from cities.  
+"S4:32","Geographical coverage: Main city or metropolitan area",70
+In EMP_TEMP_SEX_ECO_NB_A, and it is reused in reconstruction
+EMP_2EMP_SEX_ECO_NB_A.  Other countries which also report 
+agricultural employment in cities, the reconstruction 
+are based on other data.
+
+The following note_source correspond to cities: S4:31, S4:32, S4:33
+
+Bolivia, BOL, source BA:74 has a coverage of S4:33 Main cities or 
+metropolitan areas, until 1999.
+
+Botswana, BWA, lower value in ILOSTAT than in GGDC.  No clear reason.
+
+Colombia, COL. BA:358 has a coverage of S4:33 Main cities or 
+metropolitan areas, until 2000 
+
+Mexico, MEX, source AA:1399, which is used in 1990 is half of 
+the remaining.  GGDC is similar to other dates, though lower.
+
+Breaking points in 1990, though no change in magnitude, showing
+a difference between GGDC and ILO, but nothing important:
+Costa Rica?, Egypt?, Ethiopia, India, Kenya, Malawi
+
+Some data on earnings are too big and clearly incorrect. For
+indicators like *_EAR_*
+BRA source BA:356
+BLR except for 2016
+GHA 2006
+VEN 2005,2006,2007
+
+

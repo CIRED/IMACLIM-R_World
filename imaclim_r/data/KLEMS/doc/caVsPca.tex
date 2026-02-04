@@ -1,0 +1,27 @@
+
+\fbox{
+    \parbox{\textwidth}{
+        \textbf{CA vs. PCA:}\newline
+            \begin{itemize}
+                \item[ANSWER Frank]
+                    CA is a form of PCA where distance is not euclidian norm but $\chi_2$.
+                    What that means is that data is weighted by row totals and column totals (everything is to be understood as barycenters).
+        \item[ANSWER 1]
+            PCA works on the values where as CA works on the relative values.
+            Both are fine for relative abundance data of the sort you mention (with one major caveat, see later).
+            With \% data you already have a relative measure, but there will still be differences.
+            Ask yourself do you want to emphasise the pattern in the abundant species/taxa (i.e. the ones with large \%cover), or do you want to focus on the patterns of relative composition?
+            If the former, use PCA.
+            If the latter use CA.
+            What I mean by the two questions is would you want (50, 20, 10) and (5,  2,  1) to be considered different or the the same?
+            PCA would consider these very different because of the Euclidean distance used, but CA would consider these two samples as being very similar because the have the same       relative profile.
+
+            The big caveat here is the closed compositional nature of the data.
+            If you have a few groups (Sand, Silt, Clay, for example) that sum to 1 (100\%) then neither approach is correct and you could move to a more appropriate analysis via Aitchison's Log-ratio   PCA which was designed for closed compositional data.
+            (IIRC to do this you need to centre by rows and columns, and log transform the data.) There are other approaches too.
+            If you use R, then one book that would be useful is
+            Analyzing Compositional Data with R.
+            \end{itemize}
+    }
+}
+

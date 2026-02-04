@@ -1,0 +1,82 @@
+#!/bin/bash
+
+if [ $HOSTNAME = "poseidon.centre-cired.fr" ] || [ $HOSTNAME = "belenus.centre-cired.fr" ]
+then
+    scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab -nb'
+elif [ $HOSTNAME = "inari.centre-cired.fr" ]
+then
+    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+else
+    scilabExe='scilab -nb'
+fi
+
+case $1 in
+    a|analyze)
+        cd model/
+        nice $scilabExe -nwni -e "exec meta_Extraction.sce;quit(0);"
+        ;;
+    at|atclear)
+        atclear
+        ;;
+    b|batch)
+        cd batch
+        sh batch.sh c
+        ;;
+    c|cleanSavedir)
+        cd model
+        $scilabExe -nwni -e "exec preamble.sce;clean_savedir();"
+        ;;
+    compile)
+        cd source
+        $scilabExe -nwni -e "exec ext12c.sce;quit(0)"
+        ;;
+    e|edit)
+        test="$scilabExe -nw -e \""
+        shift
+        for arg in "$@"
+        do
+            test="$test edit $arg;"
+        done
+        test="$test \""
+        eval "$test"
+        ;;
+    i|imaclim)
+        cd model
+        $scilabExe -nwni -f imaclimr.sce
+        ;;
+    r|run)
+        cd model/
+
+        if [[ $# -lt 2 ]]
+        then
+            $scilabExe -nwni -e "combi= 1;exec imaclimr.sce"
+        else
+            $scilabExe -nwni -e "combi=$2;exec imaclimr.sce"
+        fi
+        ;;
+    s|runStatus)
+        cd model
+        ps x | grep -vw grep | grep --color=auto scilab-cli
+        $scilabExe -nwni -e "funcprot(0);exec preamble.sce;testDirList();exit"
+        cd ../
+        #wcgrep WARNING | grep negative | grep -v wcgrep
+        ;;
+    u|usual)
+        cd model/
+        gnome-terminal -e "nice $scilabExe -nwni -e 'combi=1;exec imaclimr.sce'"
+        ;;
+    h|help|*)
+        echo "Your choices are
+        [a]nalyze
+        [at]clear
+        [b]atch
+        [c]leanSavedir
+        [compile]
+        [e]dit
+        [i]maclim
+        [r]un
+        [s]tatus
+        [u]usual
+        "
+        ;;
+esac

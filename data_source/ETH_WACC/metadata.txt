@@ -1,0 +1,10 @@
+depository: Thibault Briera (briera)
+title: ETH Weighted Average Cost of Capital data
+source: dataset provided by the ETH Zurich team
+date: 2023
+description: The WACC_data csv file (in /manual_download) was provided by the ETH Zurich team for the Global WACC Model Intercomparison Project. It contains estimates for the Cost of Capital of various electricity generation technologies for a wide range of countries.
+
+
+coverage: World
+
+Notes : The dataset is not publicly available for the moment (03/01/2023) but will be freely accessible once the paper published. Please ask the owner (Thibault Briera, briera.cired@gmail.com) before using this dataset as long as it has not become public . An update will be needed to include a link to the dataset when it does.

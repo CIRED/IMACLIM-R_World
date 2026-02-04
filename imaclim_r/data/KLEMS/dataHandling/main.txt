@@ -1,0 +1,33 @@
+/data/shared/klems/raw/euklems/www.euklems.net/data/09i/all_countries_09I.txt (fileD)
+/data/shared/klems/raw/euklems/www.euklems.net/data/09i/all_capital_09I.txt   (fileK)
+
+*************************** Irregularites on the above data and how they are treated:
+
+* all_capital
+
+- For the countries SVN and JPN, data are available up till 2006 included, and NA for 2007. 
+  This is easily verifiable in the xls files located in 
+  /data/shared/klems/raw/euklems/www.euklems.net/data/09I and ../09i
+
+  For these 2 countries (JPN SVN), "NA" values have been added for 2007 by the process
+  processDataEurope.py called by processData-europe.sh called by main.sh
+
+- For JPN, data are provided with extra, more detailed industry-levels then for the other 
+  countries in all_capital_09I.txt
+
+  However, while more detailed industry-levels are present in the file, no actual data 
+  are given. 
+
+  For this reason, these industry-levels are deleted by processData-europe.sh called by main.sh
+
+
+***************************
+
+* all_countries
+
+- For the countries SVN ,JPN, POL and PRT, data are available up till 2006 included, and NA for 2007. 
+  This is easily verifiable in the xls files located in 
+  /data/shared/klems/raw/euklems/www.euklems.net/data/09I and ../09i
+
+  For these 2 countries (JPN SVN), "NA" values have been added for 2007 by the process
+  processDataEurope.py called by processData-europe.sh called by main.sh

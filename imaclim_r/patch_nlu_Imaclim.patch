@@ -1,0 +1,98 @@
+Index: externals/land-use/nexus_land-use/trunk/get_results.sce
+===================================================================
+--- externals/land-use/nexus_land-use/trunk/get_results.sce	(révision 27182)
++++ externals/land-use/nexus_land-use/trunk/get_results.sce	(copie de travail)
+@@ -100,6 +100,7 @@
+ 
+ prod_rumi=(dfoodrumi+exportsrumi-importsrumi).*(1+rumi_swof);
+ // FIXME at this point, if do_compute_lcb is not true, density_lcbio_new is 0
++density_lcbio_newp = density_lcbio_new;
+ [density_veg_new, density_ML_new, density_P_new, density_lcbio_new]=wfdensity(jint, jint_smooth, distrib_info_upd, lvstck_residue_info, prod_rumi, igood4lcb, share_igood4lcb, igood4lcb_prev);
+ 
+ surfML=sum(density_ML_new, "c")' .* dsurfagri;
+@@ -392,7 +393,7 @@
+ // - rent should be net of cost?
+ // - why is rent only associated with intensive pastures?  If the
+ // grass needed tends to 0, rent will tend to infinity
+-rent_int_noinacc = sum(density_veg_new .* rate_profit_crop,"c")' + pprod_rumi_int .* (1+rumi_swof) .* rdtint .* sum(density_ML_new,"c")';
++rent_int_noinacc = sum(density_veg_new .* rate_profit_crop,"c")' ;
+ // FIXME
+ // - to obtain the value, should be multiplied by surfagri, the value per
+ //   unit of land would be
+@@ -422,8 +423,8 @@
+ scarcity_rent = max(rent_ext.*surfext,0.00001)+max(rent_int,0.00001).*(surfinacc+surfML+surfcrop_Dyn);
+ Land_rent_cost = zeros(surf_P_ML_Dyn);
+ Land_rent_cost = scarcity_rent(surf_P_ML_Dyn > 0) ./ surf_P_ML_Dyn(surf_P_ML_Dyn > 0);
+-Land_rent4lcbio = max(rent_int_noinacc,0.00001);
+ 
++
+ //[fn_lc_bioener_price_plc,fn_Landcost]=fct_lcbioener_price_plc(pcalveg,pcalrumi,input_prod_info,prices_info, fert_info, lvstck_residue_info, distrib_info_in, dem_bal_yld_info, coutfixeint,jint,jint_smooth,jint_prev, jint_smooth_from_dc,density_agri, density_veg_from_dc, density_ML_from_dc, density_P_from_dc,importsrumi, exportsrumi, surfagri_for_density)
+ scarcity_rent_per_ha = zeros(scarcity_rent);
+ scarcity_rent_per_ha(surf_P_ML_Dyn > 0)=scarcity_rent(surf_P_ML_Dyn > 0)./surf_P_ML_Dyn(surf_P_ML_Dyn > 0);
+@@ -432,6 +433,35 @@
+ tmp_cost_CI = wfcost_CI(cur_rhoveg, input_prod_info, prices_info, fert_info);
+ cost_CI = sum(tmp_cost_CI.*density_Dyn_new, "c") .*dsurfagri';
+ 
++// compute the land rent over all land classes
++surfcrop_total_class = density_veg_new .* (ones(60,1)*dsurfagri)' + distrib_remain . * (ones(60,1)*surf_remain)';
++last_veg_class = zeros(12,1);
++for ii=1:12
++  last_veg_class(ii) = min( [find(surfcrop_total_class(ii,:)==0) 60]);
++end
++rent_ext_allclass = (pprod_rumi_ext .* rdtext)' * ones(1,60);
++rent_int_allclass = rate_profit_crop + ( (pprod_rumi_ext .* (1+rumi_swof) .* rdtext)' * ones(1,60)) .* density_inacc;
++rent_all_class = rent_ext_allclass + rent_int_allclass;
++scarcityrent_perha_lastc = zeros(1,12);
++scarcityrent_perha_allc = zeros( rate_profit_crop);
++for ii=1:12
++    jj = last_veg_class(ii);
++    //jj=10;
++    scarcity_rent_temp = max( rent_ext_allclass(ii,jj) * ( density_P_new(ii,jj)*surfagri(ii)-density_inacc(ii,jj) * dsurfagri(ii)), 0.00001) + max( rent_int_allclass(ii,jj), 0.00001) * ( density_inacc(ii,jj)*dsurfagri(ii) + density_ML_new(ii,jj) * surfagri(ii) + density_Dyn_new(ii,jj)*dsurfagri(ii)) ;
++    if ( density_P_new(ii,jj)* surfagri(ii) + density_ML_new(ii,jj)* surfagri(ii) + density_Dyn_new(ii,jj)*dsurfagri(ii))  > 0
++      scarcityrent_perha_lastc(ii) = scarcity_rent_temp / ( density_P_new(ii,jj)* surfagri(ii) + density_ML_new(ii,jj)* surfagri(ii) + density_Dyn_new(ii,jj)*dsurfagri(ii)) ;
++    end
++end
++
++scarcityrent_perha_allc = zeros( rate_profit_crop);
++for ii=1:12
++    for jj=1:60
++        scarcity_rent_temp = max( rent_ext_allclass(ii,jj) * ( density_P_new(ii,jj)*surfagri(ii)-density_inacc(ii,jj) * dsurfagri(ii)), 0.00001) + max( rent_int_allclass(ii,jj), 0.00001) * ( density_inacc(ii,jj)*dsurfagri(ii) + density_ML_new(ii,jj) * surfagri(ii) + density_Dyn_new(ii,jj)*dsurfagri(ii)) ;
++        scarcityrent_perha_allc(ii,jj) = divide(  scarcity_rent_temp,  ( density_P_new(ii,jj)* surfagri(ii) + density_ML_new(ii,jj)* surfagri(ii) + density_Dyn_new(ii,jj)*dsurfagri(ii)), 0);
++    end
++end
++
++
+ // cost without pchi evolution
+ tmp_cost_crop_nopchi = wfcost_CI(cur_rhoveg, input_prod_info, prices_info_clb, fert_info);
+ cost_crop_nopchi = sum(tmp_cost_crop_nopchi.*density_Dyn_new,"c").*dsurfagri';
+@@ -637,6 +667,13 @@
+ //    W_Cellulosic_cost_del_jl=0;
+ //  else
+ 
++// Since we use the rent that comes out of the equilibrium,
++// Landcost and Cellul_bioelec_price will be different from 
++// the Landcost_prev and Cellul_price_prod_dc from before the equilibrium.
++// As a consequence, the regional production and the share of forest and
++// energy crops used in the equilibrium are not consistent with the 
++// Cellul_bioelec_price obtained here.
++Landcost = Landcost_prev .* Land_rent4lcbio./Land_rent4lcbio_prev;
+ 
+ W_Tradi_ener_demand=sum(woodfuel_demand * Mkcal2Exajoule);
+ reg_Tradi_ener_demand=woodfuel_demand * Mkcal2Exajoule;
+@@ -649,6 +686,8 @@
+ //if bioelec_scenario=="imaclim" then
+ ibiozero=find(prod_cellul_bioelec'-export_ec_biom+import_ec_biom==0);  
+ ibionotzero=find(prod_cellul_bioelec'-export_ec_biom+import_ec_biom>0);  
++
++Cellul_bioelec_price =(((Bioelec_cost+Landcost)./mean_bioener_yield)./Mkcal2Gigajoule+taxeC.*(em_tCO2eq_diesel_SRC+N_cont_past_tCO2eq./hhv_biomass))';
+ Cellul_bioelec_price(ibionotzero)=(Cellul_bioelec_price(ibionotzero).*(prod_cellul_bioelec(ibionotzero)'-export_ec_biom(ibionotzero))+W_imp_lcbio_price.*import_ec_biom(ibionotzero))./(prod_cellul_bioelec(ibionotzero)'-export_ec_biom(ibionotzero)+import_ec_biom(ibionotzero));
+ Cellul_bioelec_price(ibiozero)=Cellul_bioelec_price(ibiozero);
+ //else
+@@ -813,7 +852,6 @@
+ 
+ // This is important to do that after the computations needing the
+ // Landcost that was used to set bioenergy cost.
+-Landcost = Landcost_prev .* Land_rent4lcbio./Land_rent4lcbio_prev;
+ 
+ Food_dem_percap = dfoodveg .* Mkcal2kcal ./ (pop .* Year2Days) + (dfoodmonog+dfoodrumi) .* Mkcal2kcal ./ (pop.*Year2Days);
+ W_Food_dem_percap=sum((dfoodveg+dfoodrumi+dfoodmonog) .* Mkcal2kcal) ./ sum(pop .* Year2Days);

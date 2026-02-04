@@ -1,0 +1,24 @@
+=================
+=  URGENT BUGS  =
+=================
+* LCC computation in elec is wrong
+
+=================
+=    WISHLIST   =
+=================
+
+* retrieve sav_endo from whenflexi_savingendo
+
+=================
+= POSSIBLE BUGS =
+=================
+
+* Penergieutileagric calibrated and used in calibration.industry.sce, then modified in calibration.fuel.substitution.sce
+* l for biofuels and ctl is 0, should it be put to l(:,et)?
+* in dynamic, ci(:,[coal gaz],:) is kept constant (after being modified), why?
+* where is computed emi_evitee ? check with reporting outputs
+
+=================
+= CLEANING      =
+=================
+* in the static equilibrium, energ_sec is always zero and non_energ_sec always one. some line like "(FCCtemp[k][j] * energ_sec[k][j] + non_energ_sec[k][j])" OR "(energ_sec[k][j] + FCCtemp[k][j] * non_energ_sec[k][j])" should be cleaned for better readibility. This is to be propagated into extraction files and other .sce file using those 2 vectors.

@@ -1,0 +1,6 @@
+#!/bin/bash
+file=Invest_KLEMS_GTAP.tex
+pdflatex -interaction=batchmode $file > /dev/null
+bibtex "${file%tex}aux"
+pdflatex -interaction=batchmode $file > /dev/null
+pdflatex $file

@@ -1,0 +1,52 @@
+#from https://www.gtap.agecon.purdue.edu/resources/download/10041.pdf Appendix D
+#for 1A3B: In the case of households, 1A3B emissions are linked to the “p_c” use only
+#In the case of households, 1A4 emissions are linked to the use of “coa”, “oil”, “gas” and “gdt”
+IPCC 2006 category code|IPCC 1996 category code|Category description|GTAP emission drivers|GTAP emission agents
+1A1A||Fuel Combustion Activities: Main Activity Electricity and Heat Production|coa,oil,gas,p_c,gdt|ely
+1A1BC||Fuel Combustion Activities: Petroleum Refining; Manufacture of Solid Fuels and Other Energy Industries|coa,oil,gas,p_c,gdt|coa,oil,gas,p_c,gdt
+1A2||Fuel Combustion Activities: Manufacturing Industries and Construction|coa,oil,gas,p_c,gdt|oxt,cmt,omt,vol,mil,pcr,sgr,ofd,b_t,tex,wap,lea,lum,ppp,chm,bph,rpp,nmm,i_s,nfm,fmp,ele,eeq,ome,mvh,otn,omf,cns
+1A3A||Fuel Combustion Activities: Civil Aviation|coa,oil,gas,p_c,gdt|atp
+1A3B||Fuel Combustion Activities: Road|coa,oil,gas,p_c,gdt|otp,HHs
+1A3C||Fuel Combustion Activities: Railways|coa,oil,gas,p_c,gdt|otp
+1A3D||Fuel Combustion Activities: Waterborne Navigation|coa,oil,gas,p_c,gdt|wtp
+1A3E||Fuel Combustion Activities: Other Transportation|coa,oil,gas,p_c,gdt|otp
+1A4||Fuel Combustion Activities: Other Sectors|coa,oil,gas,p_c,gdt|pdr,wht,gro,v_f,osd,c_b,pfb,ocr,ctl,oap,rmk,wol,frs,fsh,wtr,trd,afs,whs,cmn,ofi,ins,rsa,obs,ros,osg,edu,hht,dwe,HHs
+1A5||Fuel Combustion Activities: Non-Specified|coa,oil,gas,p_c,gdt|wtr,trd,afs,whs,cmn,ofi,ins,rsa,obs,ros,osg,edu,hht,dwe
+1B1||Fugitive Emissions from Fuels: Solid Fuels|Output|coa
+1B2||Fugitive Emissions from Fuels: Oil and Natural Gas|Output|oil,gas,p_c,gdt
+2B||Industrial processes and product use: chemical Industry|Output|chm
+2C||Industrial processes and product use: Metal Industry|Output|i_s,nfm
+2C3||Process emissions of primary aluminium production|Output|nfm
+2C4A||Process emissions of SF6 used in aluminium production|Output|nfm
+2C4B||Process emissions of SF6 used in magnesium foundries|Output|nfm
+|2E|Byproduct emissions of production of halocarbons and sulphur hexafluoride|Output|chm
+|2F1A|Consumption of halocarbons and sulphur hexafluoride: refrigerator and air conditioning|Output|ele
+|2F2|Consumption of halocarbons and sulphur hexafluoride: foam blowing|Output|chm
+|2F3|Consumption of halocarbons and sulphur hexafluoride: fire extinguishers|Output|chm
+|2F4|Consumption of halocarbons and sulphur hexafluoride: aerosols|Output|chm
+|2F7A|Consumption of halocarbons: semiconductors manufacturing|Output|ele
+|2F7B|Consumption of halocarbons: flat panel display production|Output|ele
+|2F7C|Consumption of halocarbons: photovoltaic cells manufacturing|Output|ele
+|2F8|Consumption of halocarbons: electrical equipment|Output|ele
+|2F8B|Consumption of halocarbons: electrical equipment use|Output|eeq
+|2F9|Other F-gas use and SF6|Output|ele,eeq,ome
+|2F9A|Other F-gas use and SF6: adiabatic prop: shoes and others|Output|lea
+|2F9B|Other F-gas use and SF6: adiabatic prop: tires|Output|rpp
+|2F9C|Other F-gas use and SF6: sound proof windows|Output|rpp
+|2F9D|Other F-gas use and SF6: accelerators|Output|eeq
+|2F9E|Other F-gas use and SF6: AWACS, other military, misc.|Output|eeq
+|2F9F|Other F-gas use and SF6: unknown SF6 use|Output|ele,eeq,ome
+2G||Other Product Manufacture and Use|chm,bph|ofd,hht
+3A1||Enteric Fermentation|NA|NA
+3A2||Manure Management|NA|NA
+3C1||Emissions from biomass burning|NA|NA
+3C4||Direct N2O Emissions from managed soils|NA|NA
+3C5||Indirect N2O Emissions from managed soils|NA|NA
+3C6||Indirect N2O Emissions from manure management|NA|NA
+3C7||Rice cultivations|NA|NA
+4A||Solid Waste Disposal|Output|wtr
+4B||Biological Treatment of Solid Waste|Output|wtr
+4C||Incineration and Open Burning of Waste|Output|coa,oil,gas,oxt,cmt,omt,vol,mil,pcr,sgr,ofd,b_t,tex,wap,lea,lum,ppp,p_c,,chm,bph,rpp,nmm,i_s,nfm,fmp,ele,eeq,ome,mvh,otn,omf,wtr
+4D||Wastewater Treatment and Discharge|Output|wtr
+5A||Indirect N2O emissions from the atmospheric deposition of nitrogen in NOx and NH3|NA|NA
+5B||Other|Output|coa,oil

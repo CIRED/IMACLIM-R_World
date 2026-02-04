@@ -1,0 +1,31 @@
+depository: Florian Leblanc (leblanc)
+
+title: SSP update - NAVIGATE project
+source: https://www.navigate-h2020.eu/navigator/apply/
+
+date: 2023-04-19
+
+rights: 
+Don’t apply
+
+description:
+This module includes updated SSP GDP per capita scenarios (covering the Covid shock), related PPP/MER conversion rates, and a set of structural change scenarios. The latter is represented by sectoral shares on employment, value added and final energy use. The sectoral resolution contains agriculture, manufacturing and services. The development of these key variables of economic activity is projected until 2050 and is available for each the five SSP scenarios. GDP per capita scenarios are available until 2100. The data set also includes historical data (from 1998 onwards) for GDP, population and sectoral shares.
+The scenarios are available on a country and region level.
+A more in-depth description of the scenarios is available here:
+https://www.navigate-h2020.eu/wp-content/uploads/2022/02/navigate_gdp_info2.pdf
+
+publication:
+Leimbach, M., Marcolino, M., Koch, J. (2021). Structural change scenarios within the SSP framework. Futures (submitted).
+Koch, J. and Leimbach, M. (2021). Update of SSP GDP projections: capturing recent changes in national accounting, PPP conversion and Covid 19 impacts. Working paper.
+Koch, Johannes and Leimbach, Marian, Update of Ssp GDP Projections: Capturing Recent Changes in National Accounting, PPP Conversion and Covid 19 Impacts. Ecological Economics, Vol. 206, 2023, Available at SSRN: https://ssrn.com/abstract=4011838 or http://dx.doi.org/10.2139/ssrn.4011838 
+
+coverage:  World, country and region level
+1998-2100
+
+creator: PIK
+publisher: NAVIGATE project
+
+notes:
+
+Obsolete:
+

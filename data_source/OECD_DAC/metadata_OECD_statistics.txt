@@ -1,0 +1,16 @@
+depository: Thibault Briera (briera)
+title: OECD Development Assistance Committee Statitics
+source: https://www.oecd.org/dac/financing-sustainable-development/development-finance-topics/climate-change.htm
+date: 2023-09
+rights: https://www.oecd-ilibrary.org/oecd/copyright
+
+description:
+
+OECD development finance statistics capture an integrated picture of both bilateral and multilateral climate-related external development finance flows.
+
+coverage: World (all recipient countries of Official Development Assistance)
+
+notes:
+
+Used in climate finance scenarios of IMACLIM-R
+

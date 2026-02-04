@@ -1,0 +1,37 @@
+depository: Thibault Briera (briera.cired@gmail.com)
+title: Country and Equity Risk Premiums, Damodaran dataset
+source: https://pages.stern.nyu.edu/~adamodar/pc/archives/ctryprem19.xls
+date: 2020
+rights:
+
+description:
+
+Country Default Spreads and Risk Premiums
+
+Last updated: January 8, 2021	
+
+This table summarizes the latest bond ratings and appropriate default spreads for different countries. 
+While you can use these numbers as rough estimates of country risk premiums, you may want to modify the premia to reflect the additonal risk of equity markets. 
+To estimate the long term country equity risk premium, I start with a default spread, which I obtain in one of two ways:
+(1) I use the local currency sovereign rating (from Moody's: www.moodys.com) and estimate the default spread for that rating (based upon traded country bonds) over a default free government bond rate. 
+For countries without a Moody's rating but with an S&P rating, I use the Moody's equivalent of the S&P rating. 
+To get the default spreads by sovereign rating, I use the CDS spreads and compute the average CDS spread by rating. 
+Using that number as a basis, I extrapolate for those ratings for which I have no CDS spreads.
+(2) I start with the CDS spread for the country, if one is available and subtract out the US CDS spread, since my mature market premium is derived from the US market. 
+That difference becomes the country spread. For the few countries that have CDS spreads that are lower than the US, I will get a negative number.
+You can add just this default spread to the mature market premium to arrive at the total equity risk premium. I add an additional step. 
+In the short term especially, the equity country risk premium is likely to be greater than the country's default spread. 
+You can estimate an adjusted country risk premium by multiplying the default spread by the relative equity market volatility for that market (Std dev in country equity market/Std dev in country bond).  
+Sicnce government   bonds are  not available or traded in most countries, I approximate the relative equity market volatility by estimating the standard deviations in two indices, 
+the S&P emerging market equity index (for equities) and the S&P emerging market government bond index (for government bonds), and using that ratio for all countries to estimate the additional country risk premium. 
+Finally, I add that country risk premium to my estimate of a mature market equity risk premium, for which I use the implied equity ris premium of the S&P 500. 
+publisher:
+
+BibliographicResource: Aswath Damodaran (2020) http://dx.doi.org/10.2139/ssrn.3653512 
+
+Notes:
+Country premiums for 2019 (for 01/2020) from Damodaran dataset. Can be use to measure the Weighted Average Cost of Capital, which serves as a proxy for discount factors
+
+
+
+

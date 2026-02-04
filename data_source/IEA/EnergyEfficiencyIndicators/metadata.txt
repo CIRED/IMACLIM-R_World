@@ -1,0 +1,18 @@
+depository: Florian Leblanc (leblanc)
+title: International Energy Agency (IEA) data base
+source: https://www.iea.org/reports/energy-efficiency-indicators-overview
+date: download 15-12-2021; release/update update: 14/12/2021 (Decembner 2021 edition)
+	new scheduled update 17/06/2022
+rights: 
+https://iea.blob.core.windows.net/assets/3bf6ce57-3df6-4639-bf60-d73ee8f017c0/IEA-Terms-April-2020.pdf
+https://iea.blob.core.windows.net/assets/c75d5e46-f83b-4422-99cc-d1b622262d5c/PAMS-Terms.pdf
+
+PLEASE ask Florian (leblanc@centre-cired.fr) the permission before using those data, as the licence only covers one users.
+
+description:
+https://iea.blob.core.windows.net/assets/6d9daa77-45f0-41c9-978b-c23a3759b073/Efficiencyindicators_Documentation_December2021.pdf
+
+notes:
+Some treatment in the estimation made by
+use alternative data, manually downloaded and treated in excel spreadsheet file.
+Those file are added manually in other_data.

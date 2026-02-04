@@ -1,0 +1,12 @@
+author: leblanc
+date:
+souce: https://doi.org/10.1016/j.energy.2012.07.048
+
+manual extraction
+
+// light tight oil estimates (Rogner like methods for shale gas)
+// from "A review of the uncertainties in estimates of global oil resources"
+// C.E. McGlade - Energy 47 (2012) 262-270
+// table 2
+// units : Gb (giga barrels)
+

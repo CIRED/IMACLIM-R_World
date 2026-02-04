@@ -1,0 +1,19 @@
+Other Africa|Burkina Faso|Burundi|Cabo Verde|Central African Republic|Chad|Comoros|Djibouti|Equatorial Guinea|Gambia|Guinea|Guinea-Bissau|Lesotho|Liberia|Madagascar|Malawi|Mali|Mauritania|Rwanda|Sao Tome and Principe|Seychelles|Sierra Leone|Somalia|Swaziland|Uganda
+Other non-OECD Americas|Antigua and Barbuda|Bahamas|Barbados|Belize|Dominica|Grenada|Guyana|Saint Kitts and Nevis|Saint Lucia|Saint Vincent and the Grenadines|Aruba|Turks and Caicos Islands
+Other non-OECD Asia|Afghanistan|Bhutan|Fiji|Kiribati|Lao People's Democratic Republic|China, Macao Special Administrative Region|Maldives|Palau|Papua New Guinea|Samoa|Solomon Islands|Timor-Leste|Tonga|Vanuatu
+Wrl|Micronesia (Federated States of)|Faeroe Islands|Nauru|Northern Mariana Islands|Marshall Islands|Tuvalu|American Samoa|Andorra
+# See IEA world balances documentation
+# Not included (cited by IEA, but not found in our country_codes.csv)|British Indian Ocean Territory|French Southern and Antarctic Lands|Bouvet Island|South Georgia and the South Sandwich Islands|Antarctica|Cocos (Keeling) Islands|Christmas Island|Heard Island and McDonald Islands|United States Minor Outlying Islands
+# Other not included (cited by IEA, found in our country_codes.csv, but no World Bank GDP found):
+#    Other non-OECD Asia|Cook Islands|French Polynesia|New Caledonia
+#    Other non_OECD Americas|Montserrat|Saint Pierre and Miquelon|British Virgin Islands|Cayman Islands|Bermuda|Falkland Islands (Malvinas)|Anguilla
+#    Added|Saint Martin (French part)|Western Sahara|Niue|Svalbard and Jan Mayen Islands|Norfolk Island|Saint Barthélemy|Mayotte|Wallis and Futuna Islands|Saint Helena|Tokelau|Pitcairn
+# Other forgotten (present in GTAP but not cited by IEA, not included for now)|Sark|San Martino|Guernsey|Guam|...(not finished)
+#
+# Inconsistencies :
+# Svalbard and Jan Mayen Islands are present in GTAP under country Norway, not considered in IEA. Special case ignored, since we don't have World Blank GDP data on these islands.  
+# Lichtenstein is present in GTAP under XEF, not considered in IEA. Lichtenstein oil data is included in Euro area. Treated as a special case. 
+# The kingdom of Eswatini (cited by IEA) changed names in 2018. GTAP and country-codes.csv still report it as Swaziland, and so do we.
+# Puerto Rico is included in US for oil and coal statistics, but inputs and outputs from electricity and heat generation and natural gas data are included under Other OECD Americas. Special case ignored for now, long to implement. 
+# IEA's 2020 documentation says Greenland and Malawi are not present in statistics (since 1990 for Greenland), but it is in our .ivt. 
+# We account Greenland as in our .ivt data, but discard Malawi's data. For Malawi, the way to implement it would be to substract the DataFrame from OTHER_AFRICA before applying the algorithm for repartition, and delete it in this file.  

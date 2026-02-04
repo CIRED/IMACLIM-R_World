@@ -1,0 +1,36 @@
+depository: Florian Leblanc (leblanc)
+title:  PRIMAP-hist
+source:
+https://zenodo.org/record/7585420#use-of-the-dataset-and-full-description
+https://zenodo.org/badge/DOI/10.5281/zenodo.7585420.svg
+date: 2023-06
+rights: default license.
+description:
+
+The PRIMAP-hist dataset combines several published datasets to create a comprehensive set of greenhouse gas emission pathways for every country and Kyoto gas, covering the years 1750 to 2021, and almost all UNFCCC (United Nations Framework Convention on Climate Change) member states as well as most non-UNFCCC territories. The data resolves the main IPCC (Intergovernmental Panel on Climate Change) 2006 categories. For CO2, CH4, and N2O subsector data for Energy, Industrial Processes and Product Use (IPPU), and Agriculture are available. The "country reported data priority" (CR) scenario of the PRIMAP-hist datset prioritizes data that individual countries report to the UNFCCC. For developed countries, AnnexI in terms of the UNFCCC, this is the data submitted anually in the "common reporting format" (CRF). For developing countries, non-AnnexI in terms of the UNFCCC, this is the data available through the UNFCCC DI interface (di.unfccc.int) with additional country submissions read from pdf and where available xls(x) or csv files. For a list of these submissions please see below. For South Korea the 2021 official GHG inventory has not yet been submitted to the UNFCCC but is included in PRIMAP-hist. PRIMAP-hist also includes official data for Taiwan which is not recognized as a party to the UNFCCC.
+
+Gaps in the country reported data are filled using third party data such as CDIAC, BP (fossil CO2), Andrew cement emissions data (cement), FAOSTAT (agriculture), and EDGAR v7.0 (all sectors). Lower priority data are harmonized to higher priority data in the gap-filling process.
+
+For the third party priority time series gaps in the third party data are filled from country reported data sources.
+
+Data for earlier years which are not available in the above mentioned sources are sourced from EDGAR-HYDE, CEDS, and RCP (N2O only) historical emissions.
+
+The v2.4 release of PRIMAP-hist reduced the time-lag from 2 to 1 years. Thus we include data for 2021 while the 2.3.1 version included data for 2019 only. For energy CO$_2$ growth rates from the BP statistical review of world energy are used to extend the country reported (CR) or CDIAC (TP) data to 2021. For CO$_2$ from cement production Andrew cement data are used. For other gases and sectors, EDGAR 7.0 is used in PRIMAP-hist v2.4.1 (v2,4 had to rely on numerical methods ).
+
+Version 2.4.1 of the PRIMAP-hist dataset does not include emissions from Land Use, Land-Use Change, and Forestry (LULUCF) in the main file. LULUCF data are included in the file with increased number of significant digits and have to be used with care as they are constructed from different sources using different methodologies and are not harmonized.
+
+The PRIMAP-hist v2.4.1 dataset is an updated version of
+
+Gütschow, J.; Pflüger, M. (2021): The PRIMAP-hist national historical emissions time series v2.4 (1750-2021). zenodo. doi:10.5281/zenodo.7179775
+
+The Changelog indicates the most important changes. You can also check the issue tracker on github.com/JGuetschow/PRIMAP-hist for additional information on issues found after the release of the dataset.
+
+coverage: World
+creator: 
+publisher: 
+BibliographicResource:
+
+Gütschow, J.; Pflüger, M. (2023): The PRIMAP-hist national historical emissions time series v2.4.1 (1750-2021). zenodo. doi:10.5281/zenodo.7585420.
+Gütschow, J.; Jeffery, L.; Gieseke, R.; Gebel, R.; Stevens, D.; Krapp, M.; Rocha, M. (2016): The PRIMAP-hist national historical emissions time series, Earth Syst. Sci. Data, 8, 571-603, doi:10.5194/essd-8-571-2016
+
+notes:

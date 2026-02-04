@@ -1,0 +1,11 @@
+depository: Thibault Briera (briera)
+title: Global Energy Monitor data
+source: https://docs.google.com/spreadsheets/d/1xUOYq8tUZi2dcHLRZ3W1viZHyGgUlbrMxG5xIXyTOug/edit#gid=81921775
+date: July 2021
+description:
+Retired Coal Plants, 2000-2021 (MW) Global Coal Plant Tracker,” Global Energy Monitor.
+
+coverage: World
+
+notes:
+Retired Coal Plants database, used to track down 2014-2019 new coal capacity additions

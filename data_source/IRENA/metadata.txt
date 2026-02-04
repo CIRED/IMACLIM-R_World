@@ -1,0 +1,32 @@
+depository: Florian Leblanc (leblanc)
+title: IRENA adata
+title: International Renewable Energy Agency
+source: https://www.irena.org/Statistics/Download-Data
+source: https://www.irena.org/publications/2020/Jun/Renewable-Power-Costs-in-2019
+date: 2021
+rights:
+
+description:
+
+Detailed, accurate and timely data and statistics are essential for the monitoring and evaluation of renewable energy policies and deployment. IRENA helps analysts, policy makers and the public make informed decisions by providing access to comprehensive and up-to-date renewable energy data.
+IRENA publishes detailed statistics on renewable energy capacity, power generation and renewable energy balances. This data is collected directly from members using the IRENA Renewable Energy Statistics questionnaire and is also supplemented by desk research where official statistics are not available. Renewable power-generation capacity statistics are released annually in March. Additionally, renewable power generation and renewable energy balances data sets are released in July.
+IRENA’s statistics unit helps members to strengthen their data collection and reporting activities through training and methodological guidance. Member countries are encouraged to participate in this process. Explore IRENA data and statistics by browsing a wide range of topics such as Capacity and Generation, Costs, Finance and more on the menu.
+
+coverage: World, 2014-2019 at least
+creator: International Renewable Energy Agency (IRENA)
+
+publisher:
+
+BibliographicResource:
+
+Notes:
+Excel tables in:
+/data/public_data/IRENA
+
+In order to generate aggregate values for installed capacity and electricity production at any base year, one must before extract
+raw csv's from IRENA_Stats_Tool
+
+To do so, in IRENA_Stats_Tool get to tab "Menu", select the year and "Electricity Generation"/"Electricity installed Capacity". Go to "Data" and save "Data" as csv,
+named "Prod_year.csv" or "Cap_year.csv" in data/IRENA/prod or data/IRENA/installed_cap.
+
+

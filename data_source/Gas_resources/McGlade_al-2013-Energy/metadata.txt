@@ -1,0 +1,6 @@
+author: leblanc
+date:
+
+source:
+https://doi.org/10.1016/j.energy.2013.01.048
+McGlade et al 2013

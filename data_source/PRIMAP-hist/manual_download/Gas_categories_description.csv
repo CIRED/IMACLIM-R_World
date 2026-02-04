@@ -1,0 +1,15 @@
+Code                   Description
+----                   -----------
+CH4                    Methane
+CO2                    Carbon Dioxide
+N2O                    Nitrous Oxide
+HFCS (SARGWP100)       Hydrofluorocarbons (SAR)
+HFCS (AR4GWP100)       Hydrofluorocarbons (AR4)
+PFCS SARGWP100         Perfluorocarbons (SAR)
+PFCS (AR4GWP100)       Perfluorocarbons (AR4)
+SF6                    Sulfur Hexafluoride
+NF3                    Nitrogen Trifluoride
+FGASES SARGWP100       Fluorinated Gases (SAR): HFCs, PFCs, SF$_6$, NF$_3$
+FGASES (AR4GWP100)     Fluorinated Gases (AR4): HFCs, PFCs, SF$_6$, NF$_3$
+KYOTOGHG SARGWP100     Kyoto greenhouse gases (SAR)
+KYOTOGHG (AR4GWP100)   Kyoto greenhouse gases (AR4)

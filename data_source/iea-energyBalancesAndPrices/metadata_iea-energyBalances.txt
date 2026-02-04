@@ -1,0 +1,36 @@
+depository: Ruben Bibas (bibas)
+title: IEA energy balances data set
+source: bought for Gaelle Le Treut for the Shift project
+date: 2012-11
+rights: default license
+description:
+Detailed energy balances from IEA
+
+coverage: World (by countries and regions), 1971-2010
+creator: 
+publisher:IEA
+BibliographicResource:
+Notes:
+In original dataset, x means not applicable while .. means not available.
+Unit is ktoe.
+
+.ivt files can be converted into .csv using the beyond2020 software:
+https://support.beyond2020.com/support/solutions/articles/44001980867-converting-ivt-files-to-csv-format
+One version of the software is available in tools/ProBrowser71.zip
+
+/data/shared/iea-energyBalancesAndPrices/IEA_2017/wbig.ivt file
+has been partially exported in
+/data/shared/iea-energyBalancesAndPrices/IEA_2017/rawData/
+by Nicolas Graves and Florian Leblanc
+
+//Description of the tables
+
+//rdd_budgets and rdd_budgets_summary : RD&D budgets by energy sector and country, years 2012-2016
+//rdd_indicators : $US exchange rate, PPP, nominal GDP, GDP deflator, 2012-2016
+//rdd_per_gdp : RD&D/GDP by country, years 2012-2016
+//rdd_region_budgets : RD&D budgets by energy sector and by region
+
+//wbal : Energy balances by country, 1971-2015
+//wbig : Detailed energy balances by country, 1971-2015
+//wconv : net calorific values by energy source and country, 1978-2015
+//wind : Various indices linked to energy balances : share of economic sectors in GDP, self-sufficiency, TPES..., 2008-2015

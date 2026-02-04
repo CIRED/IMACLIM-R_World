@@ -1,0 +1,13 @@
+data creation information
+date : 30-12-2015
+author : Florian Leblanc
+
+data information
+source : Annual Energy outlook 2015 - figure 21 - p18
+link to report : http://www.eia.gov/forecasts/aeo/pdf/0383(2015).pdf
+link to datas : http://www.eia.gov/beta/aeo/#/?id=14-AEO2015&region=0-0&cases=ref2015~highmacro~lowmacro~highprice~lowprice~highresource~aeo2014full&start=2012&end=2040&f=A&linechart=~~~~~~~ref2015-d021915a.10-14-AEO2015~highmacro-d021915a.10-14-AEO2015~lowmacro-d021915a.10-14-AEO2015~highprice-d021915a.10-14-AEO2015~lowprice-d021915a.10-14-AEO2015~highresource-d021915b.10-14-AEO2015~aeo2014full-d102413a.10-14-AEO2015&sourcekey=0
+
+Oil and Gas Crude Oil
+http://www.eia.gov/beta/aeo/#/?id=14-AEO2015&region=0-0&cases=ref2015~highmacro~lowmacro~highprice~lowprice~highresource~aeo2014full&start=2012&end=2040&f=A&linechart=ref2015-d021915a.5-14-AEO2015~highmacro-d021915a.5-14-AEO2015~lowmacro-d021915a.5-14-AEO2015~highprice-d021915a.5-14-AEO2015~lowprice-d021915a.5-14-AEO2015~highresource-d021915b.5-14-AEO2015~aeo2014full-d102413a.5-14-AEO2015~ref2015-d021915a.10-14-AEO2015~highmacro-d021915a.10-14-AEO2015~lowmacro-d021915a.10-14-AEO2015~highprice-d021915a.10-14-AEO2015~lowprice-d021915a.10-14-AEO2015~highresource-d021915b.10-14-AEO2015~aeo2014full-d102413a.10-14-AEO2015&sourcekey=0
+14:41:35 GMT+0100 (CET)
+Source: U.S. Energy Information Administration

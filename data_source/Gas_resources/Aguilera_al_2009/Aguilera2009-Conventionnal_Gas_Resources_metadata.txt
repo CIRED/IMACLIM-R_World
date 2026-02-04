@@ -1,0 +1,128 @@
+Region|USGS_province|Country|Reserve|Reserve_plus|Capital_cost|Operating_cost|Total_cost
+Middle East and North Africa|Mesopotamian Foredeep Basin|Iraq, Kuwait|61.479667|95.8529488197|Nan|Nan|0.72
+Middle East and North Africa|Zagros Fold Belt|Iraq, Iran|100.186333|156.2005117803|Nan|Nan|0.72
+Middle East and North Africa|Khleisha Uplift|Iraq, Iran|0.465|0.7249815|Nan|Nan|0.72
+Middle East and North Africa|Widyan Basin-Interior Platform|Iraq, Saudi Arabia|17.006833|26.5153533303|Nan|Nan|0.72
+Middle East and North Africa|Rutbah Uplift|Iraq, Iran|0.215|0.3352065|Nan|Nan|0.72
+Middle East and North Africa|Anah Graben|Iraq, Iran|0.0065|0.01013415|Nan|Nan|0.72
+Middle East and North Africa|Greater Ghawar Uplift|Saudi Arabia|74.837567|116.6792507097|Nan|Nan|1.37
+Middle East and North Africa|Rub Al Khali Basin|Saudi Arabia, U.A.E|99.941|155.8180131|Nan|Nan|1.37
+Middle East and North Africa|Interior Homocline-Central Arch|Saudi Arabia|21.983167|34.2739556697|Nan|Nan|1.37
+Middle East and North Africa|Qatar Arch|Saudi Arabia, Qatar|80.327833|125.2391244303|Nan|Nan|1.37
+Asia Pacific|Greater Sarawak Basin|South China Sea|16.58|25.849878|0.97|0.68|1.66
+Asia Pacific|Malay Basin|Gulf of Thailand|12.520333|19.5204511803|0.97|0.68|1.66
+Asia Pacific|Baram Delta/Brunei-Sabah Basin|Malaysia Baram Delta, OFFSHORE|8.373|13.0543443|0.97|0.68|1.66
+Central and South America|Magallanes Basin|Argentina Faro Virenes, ON/OFFSHORE|0.273606|0.4265791146|0.17|1.69|1.66
+Central and South America|Santa Cruz-Tarija Basin|Argentina Ramos|6.860657|10.6964503287|0.94|1.03|1.96
+Central and South America|Magallanes Basin|Argentina Tierra del Fuego, ON/OFFSHORE|1.575451|2.4562856541|0.71|1.33|2.04
+Central and South America|Magallanes Basin|Argentina Santa Cruz II|1.043681|1.6272030471|0.59|1.57|2.16
+Middle East and North Africa||Libya|7.878833|12.2838885303|1.37|1.02|2.39
+North America|Alberta Basin|Alberta|5.445653|8.4903175923|Nan|Nan|2.5
+Middle East and North Africa|North Egypt Basin|Egypt West Bakr|0.212414|0.3311746674|1.94|0.77|2.71
+Middle East and North Africa|Red Sea Basin|Red Sea|11.446667|17.8464985197|Nan|Nan|2.74
+Middle East and North Africa|Chad|Chad Sedigui Oil Project|0.003007|0.0046882137|1.67|1.1|2.76
+Sub-Saharan Africa and Antartica|Niger Delta|Nigeria|36.715667|57.2433964197|0.79|1.98|2.77
+Sub-Saharan Africa and Antartica|West-Central Coastal|OFFSHORE Angola, Congo, Gabon, Eq. Guinea, Cameroon|16.512167|25.7441195697|0.79|1.98|2.77
+Middle East and North Africa|Nile Delta Basin|Egypt El Mansoura|0.684067|1.0665288597|1.48|1.47|2.96
+Middle East and North Africa|Abu Gharadiq Basin|Egype Badr El Din|1.387747|2.1636363477|1.98|0.99|2.97
+North America|Alberta Basin|Canada Artic Cameron Hills|0.680707|1.0612902837|1.72|1.26|2.98
+Middle East and North Africa|Remaining Provinces|Middle East and North Africa – remaining|12.042032|18.7747320912|Nan|Nan|3.14
+Middle East and North Africa|North Egypt Basin|Egypt Oarun|0.443|0.6906813|1.91|1.29|3.19
+Central and South America|Magallanes Basin|Argentina Santa Cruz II|1.138561|1.7751304551|1.57|1.67|3.24
+Central and South America|Neuquen Basin|Argentina Faro Virenes, ON/OFFSHORE|4.247167|6.6217580697|1.57|1.67|3.24
+Asia Pacific|Pearl River Mouth Basin|China Xijiang Area, OFFSHORE|0.727229|1.1338227339|2.08|1.44|3.52
+Central and South America|Lianos Basin|Colombia|2.585333|4.0307926803|1.76|1.98|3.74
+Central and South America|Middle Magdalena|Colombia|0.997333|1.5549418803|1.76|1.98|3.74
+Middle East and North Africa|Illizy Basin|Algeria Gassi Touil Integrated Gas Project|12.074833|18.8258721303|2.24|1.51|3.75
+Central and South America|Maracaibo Basin|Venezuela|7.216333|11.2509847803|1.88|1.88|3.76
+Central and South America|East Venezuela Basin|Venezuela|33.271|51.8728161|1.88|1.88|3.76
+Central and South America|Tobago Trough|Caribbean Sea|7.117167|11.0963750697|1.88|1.88|3.76
+Central and South America|Guyana-Suriname Basin|Guyana, Suriname, French Guiana|7.009667|10.9287718197|1.88|1.88|3.76
+Central and South America|Campos Basin|Brazil Chinook, OFFSHORE|2.935602|4.5768970782|1.62|2.28|3.9
+Asia Pacific|Pearl River Mouth Basin|China Block 15/34 (Panyu 4-2 and Panyu 5-1), OFFSHORE|0.260147|0.4055951877|2.21|2.02|4.24
+Former Soviet Union|Chu-Sarysu Basin|Kazakhstan Amangeld Area|0.708738|1.1049934158|1.52|2.74|4.26
+Europe|Northwest German Basin|Germany, Netherlands, North Sea|12.709|19.8146019|2.12|2.19|4.3
+Europe|Provence Basin|Mediterranean Sea|8.535|13.3069185|2.12|2.19|4.3
+Europe|Po Basin|Italy, Adriatic Sea|4.553833|7.0998810303|2.12|2.19|4.3
+Europe|Transylvanian Basin|Romania|1.936667|3.0194575197|2.12|2.19|4.3
+Asia Pacific|Kutei Basin|Indonesia Makassar, OFFSHORE|16.919833|26.3797116303|2.12|2.26|4.38
+Central and South America|Remaining Provinces|Central and South America Remaining Provinces|10.941628|17.0590922148|||4.48
+Asia Pacific|Bohaiwan Basin|China Block 11/05 (Peng Lai 19-3), OFFSHORE|2.477149|3.8621230059|2.63|1.89|4.52
+Sub-Saharan Africa and Antartica|Remaining Provinces|Sub-Saharan Africa and Antartica – Remaining provinces|3.599|5.6112009|||4.56
+Central and South America|Santos Basin|Brazil Lagosta, OFFSHORE|13.61|21.219351|3.29|1.33|4.62
+Former Soviet Union|North Caspian Basin|Kazakhstan Aktyubinsknelt Contract Area|3.918396|6.1091712036|0.69|4.04|4.73
+Central and South America|Potigar Basin|Brazil Koch|1.018888|1.5885482808|||4.93
+North America|Alberta Basin|Alberta|0.358267|0.5585740797|||5
+Europe|Remaining Provinces|Europe - Remaining Provinces|5.421167|8.4521414697|||5.08
+Europe|North Sea Graben|Northern North Sea Brent, OFFSHORE|27.724833|43.2257871303|3.85|1.4|5.24
+Europe|Vestlord-Helgeland|OFFSHORE Norway|30.1438833|46.997328453|3.85|1.4|5.24
+South Asia|Indus|Pakistan|4.529167|7.0614242697|||5.31
+Former Soviet Union|North Caspian Basin|Kazakhstan Kashagan Contract Area, OFFSHORE|41.260053|64.3285486323|1.13|4.31|5.44
+Asia Pacific|Remaining Provinces|Asia Pacific - Remaining Provinces|8.304096|12.9469160736|||5.52
+Middle East and North Africa|Chad|Chad Doba Oil project|0.166578|0.2597117598|2.72|2.82|5.54
+Central and South America|Magallanes Basin|Argentina Area Magallanes, OFFSHORE|0.767867|1.1971814397|2.5|3.09|5.58
+Middle East and North Africa|North Egypt Basin|Egypt Obaiyed|1.068362|1.6656831942|3.81|1.8|5.61
+Sub-Saharan Africa and Antartica|Senegal|Mauritania PSC B Tiof, OFFSHORE|0.085516|0.1333279956|3.73|2.17|5.91
+Asia Pacific|Bohaiwan Basin|China Caofedian Blocks 04/35 and 05/36, OFFSHORE|0.946484|1.4756632044|2.57|3.48|6.04
+Asia Pacific|Central Sumatra Basin|Indonesia Far East Offshore Shelf, OFFSHORE|1.172333|1.8277843803|2.39|3.76|6.15
+Asia Pacific|North Sumatra Basin|Indonesia Far East Offshore Shelf, OFFSHORE|4.450833|6.9392937303|2.39|3.76|6.15
+Asia Pacific|Northwest Shelf|OFFSHORE Austria|19.852667|30.9522931197|2.39|3.76|6.15
+Asia Pacific|Browse Basin|OFFSHORE Austria|6.342167|9.8880725697|2.39|3.76|6.15
+Asia Pacific|Bonaparte Gulf Basin|Northern Autralia, Timor Sea|6.1326667|9.561440652|2.39|3.76|6.15
+North America|Alberta Basin|Canada Artic Norman Wells|0.680707|1.0612902837|3.45|2.72|6.17
+North America|Vitahermosa Uplift|Gulf of Mexico|7.171167|11.1805664697|||6.33
+North America|Remaining Provinces|North America - Remaining Provinces|21.268833|33.1602375303|||6.41
+Central and South America|Reconcavo Basin|Brazil PetroReconcavo|2.090317|3.2590132347|||6.5
+Central and South America|Sergipe-Alagoas Bsain|Brazil Tartaruga, ON/OFFSHORE|1.5655|2.44077105|4.21|2.49|6.7
+Central and South America|Espirito Santo Basin|Brazil Frade, OFFSHORE|5.301901|8.2661938491|3.86|2.91|6.77
+Sub-Saharan Africa and Antartica|Senegal|Mauritania PSC B Chinguetti and Tevet, OFFSHORE|0.06465|0.100795815|4.31|2.48|6.79
+Former Soviet Union|South Turgay Basin|Kazakhstan South Kumkol Area|1.003039|1.5638381049|0.5|6.34|6.85
+Middle East and North Africa|Abu Gharadiq Basin|Egypt El Diyur|0.013795|0.0215077845|4.53|2.44|6.97
+Asia Pacific|Bohaiwan Basin|China Chengdaoxi, ON/OFFSHORE|0.109534|0.1707744594|4.34|2.71|7.05
+Central and South America|Espirito Santo Basin|Brazil Sardinha, OFFSHORE|0.442599|0.6900561009|4.12|2.96|7.08
+Former Soviet Union|Middle Caspian Basin|Kazakhstan ADE Contract Area|9.4735|14.77013385|1.01|6.12|7.13
+Former Soviet Union|South Caspian Basin|Caspian Sea|33.452167|52.1552735697|1.01|6.12|7.13
+North America||United States|116.833333|182.1548494803|||7.18
+Central and South America|Campos Basin|Brazil Bijupira-Salema, OFFSHORE|0.917026|1.4297352366|4.7|2.52|7.22
+Asia Pacific|Sichuan Basin|China Chuanzhong|2.766833|4.3137693303|5.77|1.52|7.3
+Middle East and North Africa|Trias/Ghadames Basin|Algeria Hamra|6.974167|10.8734237697|5.32|2.05|7.36
+Middle East and North Africa|Grand Erg/Ahnet Basin|Algeria Gassi Touil Integrated Gas Project|19.6195|30.58876245|5.32|2.05|7.36
+Europe|Anglo-Dutch Basin|North Sea UK Sector, OFFSHORE|7.6425|11.91542175|3.66|4.2|7.86
+South Asia|Remaining Provinces|South Asia - Remaining Provinces|5.007667|7.8074536197|||7.97
+Former Soviet Union|Remaining Provinces|Former Soviet Union - Remaining Provinces|-1.71161|-2.668571151|||8.04
+Central and South America|Campos Basin|Brazil Polvo, OFFSHORE|0.419372|0.6538428852|4.47|3.65|8.12
+Former Soviet Union|North Ustyurt Basin|Kazakhstan Karazhanbas, ON/OFFSHORE|1.462552|2.2802648232|1.76|6.54|8.3
+Former Soviet Union|Amu-Darya Basin|Turkmenistant|52.58|81.977478|1.76|6.54|8.3
+Asia Pacific|South China Continental Shelf Slope|China Block 16/06 (Lufeng 13-1), OFFSHORE|0.483174|0.7533165834|4.85|3.69|8.54
+Asia Pacific|Yingehai Basin|China Yacheng 13-1, OFFSHORE|1.601186|2.4964090926|5.65|2.95|8.6
+Former Soviet Union|West Siberian Basin|Russia|282.419667|440.3205028197|||8.62
+Former Soviet Union|Volga-Ural Ragion|Russia|14.4485|22.52665635|||8.62
+Former Soviet Union|Timan-Pechora Basin|Russia|12.723333|19.8369484803|||8.62
+Former Soviet Union|South Barents Basin|Russia|38.4795|59.99338845|||8.62
+Former Soviet Union|North Sakhalin Basin|Russia|13.278833|20.7030285303|||8.62
+Former Soviet Union|Nepa-Botuoba Arch|Russia|8.667667|13.5137596197|||8.62
+Former Soviet Union|Azov-Kuban Basin|Russia|3.894833|6.0724341303|||8.62
+Former Soviet Union|Angara-Lena Terrace|Russia|3.13|4.879983|||8.62
+Former Soviet Union|Baylit Arch|Russia|3.6725|5.72579475|||8.62
+Former Soviet Union|Cis-Palbm Foredeep|Russia|0.910667|1.4198209197|||8.62
+Former Soviet Union|Dnieper-Donets Basin|Ukraine|7.949333|12.3938050803|||8.62
+Former Soviet Union|North Barents Basin|Barents Sea|9.97|15.544227|||8.62
+North America|Rody Mountain Deformed Belt|Canada Artic Kotaneelee|0.665185|1.0370899335|2.23|6.42|8.65
+South Asia|Ganges-Bahmaputra Delta|India, Bangladesh, Bay of Bengal|10.785167|16.8151538697|||8.85
+South Asia|Bombay|India|5.1515|8.03170365|||8.85
+South Asia|Kawady|Myanmar|4.968167|7.7458691697|||8.85
+North America|Rody Mountain Deformed Belt|Canada Artic Nahanni South|0.940315|1.4660451165|2.91|6|8.91
+Middle East and North Africa|Pelegian Basin|Tunisia Ashtat, OFFSHORE|3.787167|5.9045720697|5.69|3.68|9.37
+Former Soviet Union|North Caspian Basin|Kazakhstan Alibec South|0.52355|0.816266805|2.02|7.4|9.42
+Asia Pacific|Tarim Basin|China|10.9185|17.02303335|||9.44
+Former Soviet Union|North Ustyurt Basin|Kazakhstan Armen, ON/OFFSHORE|0.140245|0.2186559795|3.75|6.09|9.83
+North America|East Greenland Rit Basins|OFFSHORE Greenland|13.4515|20.97223365|||10
+Former Soviet Union|North Ustyurt Basin|Kazakhstan Buzachi North, ON/OFFSHORE|0.59437|0.926682267|2.74|7.44|10.18
+Europe|||29.63|46.196133|||10.22
+Central and South America|||34.038|53.0686458|||10.56
+South Asia|||9.142|14.2532922|||11.51
+Middle East and North Africa|||160.436|250.1357676|||12.18
+Asia Pacific|||36.228|56.4830748|||12.27
+North America|||50.299|78.4211709|||13
+Former Soviet Union|||163.048|254.2081368|||13.23
+Sub-Saharan Africa and Antartica|||17.11|26.676201|||17.65

@@ -1,0 +1,22 @@
+aggregagation-country.sh requires as input: 
+
+aggregation/input/KLEMStoIMACLIM_industries.csv
+
+#this file specifies how to aggregate the industry-levels of KLEMS data to 12 sector IMACLIM format. A different correspondence table is needed for KLEMS data version 2008 and 9 (?) based on ISIC3.1 versus more recent (2012 release ?) KLEMS data based on ISIC4.  
+
+
+aggregation/input/KLEMStoIMACLIM_products.csv
+
+#this file specifies how to aggregate the asset-levels of KLEMS data to 12 sector IMACLIM format
+
+
+aggregation/input/dicoRegionKLEMS.csv
+
+#this file specifies the correspondance between KLEMS country codes and IMACLIM world regions
+
+
+aggregation/input/Capshares.csv
+
+#specifies which KLEMS industry-levels to disaggregate according to shares of which aggregated sectors issued from GTAP data
+
+Other variables are set in aggregagation-country.sh

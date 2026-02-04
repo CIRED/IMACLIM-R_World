@@ -1,0 +1,45 @@
+\clearpage
+\section{Metrics for the system year $\times$ product/industry} \label{metrics}
+
+If a contingency-matrix years $\times$ product/industry is considered, with years in the rows and products/industries indexed by $p$ and $r$ in the columns, with the variable $I_{yp}/V\!\!A_y$, then the rowprofiles, indexed by $y$, look like:
+\begin{equation}  \label{row_year-prod}
+\frac{I_{yp}/V\!\!A_y}{\sum_r I_{yr}/V\!\!A_y} = \frac{I_{yp}}{GFCF_y} , 
+\end{equation}
+
+with as the average rowprofile :
+\begin{equation}  \label{eq:rowAvrg_year-prod}
+\frac{1}{n_y}\sum_y \frac{I_{yp}}{GFCF_y} . 
+\end{equation}
+
+The distance between the rowprofiles is then :
+\begin{equation}  \label{eq:distanceRow_year-prod}
+d_{yy'}= \sum_p \frac{( I_{yp}/GFCF_y - I_{y'p}/GFCF_{y'})^2 }{\frac{1}{n_y}\sum_z I_{zp}/GFCF_z}.
+\end{equation}
+
+The column profiles, indexed by $p$, look like :
+\begin{equation}  \label{eq:col_year-prod}
+\frac{I_{yp}/V\!\!A_y}{\sum_z I_{zp}/V\!\!A_z},
+\end{equation}
+
+with as average column profile :
+\begin{equation}  \label{eq:colAvrg_year-prod}
+\frac{1}{n_p}  \sum_p      \frac{I_{yp}/V\!\!A_y}{\sum_z I_{zp}/V\!\!A_z}.
+\end{equation}
+
+The distance between the column profiles :
+\begin{equation}  \label{eq:distanceCol_year-prod}
+d_{pq} = \sum_y \frac{( \frac{I_{yp}/V\!\!A_y}{\sum_z I_{zp}/V\!\!A_z}  -\frac{I_{yq}/V\!\!A_y}{\sum_z I_{zq}/V\!\!A_z}              )^2}{    \frac{1}{n_p}  \sum_r      \frac{I_{yr}/V\!\!A_y}{\sum_z I_{zr}/V\!\!A_z}       }.
+\end{equation}
+
+From \ref{eq:distanceRow_year-prod} one can see that the correction for value added does not play any role in the standard calculation of the distances between row profiles. This is normal since correcting for value added per year comes down to weighting every row with a factor. The method is precisely designed to give equal total weights to all rows by constructing rowprofiles of which the elements sum to 1. In the calculation of the distance between the column profiles, weighting by VA does play a role.
+
+Equation \ref{eq:distanceRow_year-prod} can be replaced by another measure of distance that compares I to VA in stead of to GFCF :
+\begin{equation}  \label{eq:distanceRow_year-prod_alt}
+d_{yy'}= \sum_p \frac{( I_{yp}/VA_y - I_{y'p}/VA_{y'})^2 }{\frac{1}{n_y}\sum_z I_{zp}/VA_z}.
+\end{equation}
+In the case of the system year $\times$ product, this measure will pick up whether a larger share of the national budget is allocated to formation of some fixed asset, without the overall level of investment affecting the individual levels. It is the overall level of VA which will affect individual levels. VA is less variable though than I, and I/VA is less variable than I (see ...). One could also correct I with the approximations of VA by the best linear regression of VA (see...). 
+
+
+
+
+

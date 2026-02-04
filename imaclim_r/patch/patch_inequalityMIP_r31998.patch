@@ -1,0 +1,795 @@
+Index: lib/diagnostic.sci
+===================================================================
+--- lib/diagnostic.sci	(révision 31998)
++++ lib/diagnostic.sci	(copie de travail)
+@@ -36,4 +36,5 @@
+         - energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
+         + energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+         ) )/1e6;
++    end
+ endfunction
+Index: model/diagnostic.sce
+===================================================================
+--- model/diagnostic.sce	(révision 32723)
++++ model/diagnostic.sce	(copie de travail)
+@@ -163,7 +163,7 @@
+ 	year_peak_CO2_budget=base_year_simulation+current_time_im;
+     end
+     //NPi & NDC testing
+-    if ind_npi_ndc~=0 & ind_npi_ndc<>3
++    if ind_npi_ndc~=0
+         var_observed=sum(E_reg_use(ind_usa,:))/1e6 + sum(emi_evitee(ind_usa,:))/1e6; 
+         select ind_npi_ndc
+         case 1 // NPi case
+@@ -227,7 +227,7 @@
+ end
+ 
+ if current_time_im==2025-base_year_simulation
+-    if ind_npi_ndc~=0 & ind_npi_ndc<>3
++    if ind_npi_ndc~=0
+ 
+         var_observed=sum(E_reg_use(mk_2,:))/1e6 + sum(emi_evitee(mk_2,:))/1e6; 
+         select ind_npi_ndc
+@@ -252,11 +252,6 @@
+     exo_CO2_LUCCCF_nonan = exo_CO2_LUCCCF;
+     exo_CO2_LUCCCF_nonan( exo_CO2_LUCCCF_nonan<>exo_CO2_LUCCCF_nonan) =0;
+     emi_CO2_ener_2019 = sum(emi_evitee)/1e6+sum(E_reg_use)/1e6 ;
+-
+-    for m=1:nbMKT
+-        emi_MKT_NPi_2019(m) = sum(E_reg_use(whichMKT_reg_use==m))/1e6;
+-    end
+-
+     emi_CO2_tot_2019 = sum(emi_evitee)/1e6+sum(E_reg_use)/1e6 +  sum(CO2_indus_process + exo_CO2_agri_direct_nonan(:,current_time_im+1)+exo_CO2_LUCCCF_nonan(:,current_time_im+1)) ;
+ end
+ if current_time_im==2025-base_year_simulation
+@@ -275,7 +270,7 @@
+     end 
+     Emi_CCS_2030 = compute_emi_ccs(energy_balance,msh_elec_techno,coef_Q_CO2_ref,share_CCS_CTL);
+    
+-    if ind_npi_ndc~=0 & ind_npi_ndc<>3
++    if ind_npi_ndc~=0
+         var_observed=sum(E_reg_use(ind_usa,:))/1e6 + sum(emi_evitee(ind_usa,:))/1e6; 
+         select ind_npi_ndc
+         case 1 // NPi case
+@@ -560,52 +555,7 @@
+ end
+ 
+ 
+-//-----------------------------------------------------------------------------------------------
+-// NPi-NDC calibration checks
+-//-----------------------------------------------------------------------------------------------
+ 
+-if current_time_im ==  2030- base_year_simulation  & ind_npi_ndc==3// 2025
+-
+-    for m=1:nbMKT
+-        emi_MKT_NPi_2030(m) = sum(E_reg_use(whichMKT_reg_use==m))/1e6;
+-    end
+-    sum(emi_MKT_NPi_2030)
+-    sum(emi_MKT_NPi_2019 .* reduc_30)
+-    // using tol of 5% lower and 1% higher
+-    test_emi_2030_up = emi_MKT_NPi_2030 < emi_MKT_NPi_2019 .* reduc_30*(1+tol_up_emi);
+-    test_emi_2030_down = emi_MKT_NPi_2030 > emi_MKT_NPi_2019 .* reduc_30 *(1-tol_down_emi);
+-    test_emi_2030 = test_emi_2030_up & test_emi_2030_down;
+-    // if test_emi_2030 is true, the test is passed: nothing happen
+-    delta_tax_run = 5;
+-
+-    // too much emission: reduce the tax & too few emission: increase the tax
+-    delta_tax_2030 = delta_tax_run*ones(test_emi_2030_up).* (1-test_emi_2030_up) + -delta_tax_run*ones(test_emi_2030_down).* (1-test_emi_2030_down)
+-
+-    // load the corresponding csv
+-    tax_profile = csvRead(DATA + "NPi_NDC/tax_profile" + "_"+ + scen_calib + "_"+ ag_rule +".csv");
+-
+-
+-    for s=1:nbMKT
+-        if test_emi_2030(s)
+-            tax2030(s) = tax_profile(s+1,3);
+-        else
+-            tax2030(s) = tax_profile(s+1,3) + delta_tax_2030(s);
+-        end
+-    end
+-
+-    //Rule for NPi-NDC : prio is long term trend 2020 - 2030 and consistency of carbon prices
+-    // So we prevent decreasing carbon prices between 2025 and 2030
+-    // first checking that the target is reached in 2030
+-    // if target is reached but not in 2025 AND that the tax in 2025 is lower than in 2030, we consider that the target is reached
+-    //modifying the csv (in string)
+-    //tax_profile(2:$,2) = max(tax2025,0);
+-    tax_profile(2:$,3) = max(tax2030,0);
+-    tax_profile(2:$,2) = tax_profile(2:$,3)/1.5;
+-    //exporting the csv
+-    csvWrite(tax_profile,DATA + "NPi_NDC/tax_profile" + "_"+ + scen_calib + "_"+ ag_rule +".csv");
+-end
+-
+-
+ //-----------------------------------------------------------------------------------------------
+ // End of run diagnostic
+ //-----------------------------------------------------------------------------------------------
+@@ -699,116 +649,7 @@
+     end
+ end
+ 
+-if current_time_im == 2019-base_year_simulation
+-
+ // Variable to be integrated to test the new OT dynamics
+-    // LDV share 2019
+-    var_observed= (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) +  + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_LDV_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Public transport share 2019
+-    var_observed= (sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass))*10^9 / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_public_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-	
+-	// Active mode share 2019
+-	var_observed= (sum(TNM.*pkmautomobileref./100)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_active_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// air pkm 2019
+-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014);
+-    test_string="pkm_airdom_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// air pkm 2019
+-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100);
+-    test_string="pkm_airtot_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-    // LDV pkm 2019
+-    var_observed=sum((Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT)/ 1e9);
+-    test_string="pkm_LDV_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// tkm freight 2019
+-    var_observed=sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
+-	tkm_freight = sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
+-    test_string="tkm_freight_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// tkm shipping 2019
+-    var_observed=sum(Q(:,indice_mer)-DF(:,indice_mer)./convfactorOT_tkmtoDF);
+-    test_string="tkm_shipping_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// electricity in trucks and bus in 2019
+-    var_observed=	sum(alpharoad_passenger(:,indice_elec)		.*EnergyServices_road_pass(:) + alpharoad_freight(:,indice_elec)	.*EnergyServices_road_fret(:)) ..
+-	/ sum(alpharoad_passenger(:,energyIndexes)	.*(EnergyServices_road_pass(:) * ones(1,nbsecteurenergie)) + alpharoad_freight(:,energyIndexes).*(EnergyServices_road_fret(:) * ones(1,nbsecteurenergie)));
+-    test_string="truck_elec_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Final Energy 2019 
+-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
+-    test_string="Final_Energy_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Final Energy for transport 2019
+-    var_observed=sum(energy_balance(conso_transport_eb,:,:))*Mtoe_EJ;
+-    test_string="FE_trans_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// GDP MER 2019
+-    var_observed=sum(GDP_MER_real(:))/ 1e3*usd_year1_year2;
+-    test_string="gdp_mer_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency freight 2019
+-    var_observed=sum(final_energy_freight)/tkm_freight;
+-    test_string="freight_eff_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency of trucks
+-    var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
+-    test_string="truck_eff_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency of cars
+-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto)) / (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="cars_eff_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Electrification of trucks
+-    var_observed=sum(alpharoad_freight(:,indice_elec) .* EnergyServices_road_fret) / sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret);
+-    test_string="truck_elec_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Electrification of cars
+-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT, "c") .* alphaelecauto) / sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto));
+-    test_string="cars_elec_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-
+-end
+-
+ if current_time_im == 2050-base_year_simulation
+ 
+ // Variable to be integrated to test the new OT dynamics
+@@ -886,11 +727,6 @@
+     string_for_diag = test_string;
+     if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+ 
+-	// Efficiency freight 2050
+-    var_observed=sum(final_energy_freight)/tkm_freight;
+-    test_string="freight_eff_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+ 
+ 	// Efficiency of trucks
+     var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
+@@ -996,12 +832,6 @@
+     string_for_diag = test_string;
+     if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+ 
+-	// Efficiency freight 2100
+-    var_observed=sum(final_energy_freight)/tkm_freight;
+-    test_string="freight_eff_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+ 	// Efficiency of trucks
+     var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
+     test_string="truck_eff_2100";
+@@ -1028,6 +858,3 @@
+ 
+ end
+ 
+-if indice_LED>=1
+-	exec(MODEL + "extraction.specific.led.sce");
+-end
+Index: model/extraction-generic.sce
+===================================================================
+--- model/extraction-generic.sce	(révision 32723)
++++ model/extraction-generic.sce	(copie de travail)
+@@ -289,7 +289,7 @@
+ GRB  =  Rdisp.*(1-IR).*(1-ptc)+(1-div).*sum(p.*Q.*markup.*FCCmarkup_oil.*(FCC.*energ_sec+non_energ_sec),'c');
+ NRB = ones(reg,1);
+ NRB = (GRB.*(1-partExpK)+partImpK.*(ones(reg,1)*sum(GRB.*partExpK)));
+-DI = DIinfra + DIprod.*(((NRB-sum(DIinfra.*pArmDI,'c'))./sum(DIprod.*pArmDI,'c'))*ones(1,sec));
++DI = DIinfra + DIprodref.*(((NRB-sum(DIinfra.*pArmDI,'c'))./sum(DIprodref.*pArmDI,'c'))*ones(1,sec));
+ 
+ partInvestFirms = (1-div).*sum(p.*Q.*markup.*FCCmarkup_oil.*(FCC.*energ_sec+non_energ_sec),'c') ./ GRB;
+ partInvestHH    = Rdisp.*(1-IR).*(1-ptc) ./ GRB;
+@@ -360,34 +360,20 @@
+ 
+ EBE = p.*Q.*markup.*FCCmarkup_oil.*(FCC.*energ_sec+non_energ_sec);
+ 
+-taxCI_dom = [
+-sum((p(1,:)'*ones(1,sec)).*taxCIdom(:,:,1).*partDomCI(:,:,1).*CI(:,:,1).*(ones(sec,1)*(A(1,:).*Q(1,:))), 'c')';
+-sum((p(2,:)'*ones(1,sec)).*taxCIdom(:,:,2).*partDomCI(:,:,2).*CI(:,:,2).*(ones(sec,1)*(A(2,:).*Q(2,:))), 'c')';
+-sum((p(3,:)'*ones(1,sec)).*taxCIdom(:,:,3).*partDomCI(:,:,3).*CI(:,:,3).*(ones(sec,1)*(A(3,:).*Q(3,:))), 'c')';
+-sum((p(4,:)'*ones(1,sec)).*taxCIdom(:,:,4).*partDomCI(:,:,4).*CI(:,:,4).*(ones(sec,1)*(A(4,:).*Q(4,:))), 'c')';
+-sum((p(5,:)'*ones(1,sec)).*taxCIdom(:,:,5).*partDomCI(:,:,5).*CI(:,:,5).*(ones(sec,1)*(A(5,:).*Q(5,:))), 'c')';
+-sum((p(6,:)'*ones(1,sec)).*taxCIdom(:,:,6).*partDomCI(:,:,6).*CI(:,:,6).*(ones(sec,1)*(A(6,:).*Q(6,:))), 'c')';
+-sum((p(7,:)'*ones(1,sec)).*taxCIdom(:,:,7).*partDomCI(:,:,7).*CI(:,:,7).*(ones(sec,1)*(A(7,:).*Q(7,:))), 'c')';
+-sum((p(8,:)'*ones(1,sec)).*taxCIdom(:,:,8).*partDomCI(:,:,8).*CI(:,:,8).*(ones(sec,1)*(A(8,:).*Q(8,:))), 'c')';
+-sum((p(9,:)'*ones(1,sec)).*taxCIdom(:,:,9).*partDomCI(:,:,9).*CI(:,:,9).*(ones(sec,1)*(A(9,:).*Q(9,:))), 'c')';
+-sum((p(10,:)'*ones(1,sec)).*taxCIdom(:,:,10).*partDomCI(:,:,10).*CI(:,:,10).*(ones(sec,1)*(A(10,:).*Q(10,:))), 'c')';
+-sum((p(11,:)'*ones(1,sec)).*taxCIdom(:,:,11).*partDomCI(:,:,11).*CI(:,:,11).*(ones(sec,1)*(A(11,:).*Q(11,:))), 'c')';
+-sum((p(12,:)'*ones(1,sec)).*taxCIdom(:,:,12).*partDomCI(:,:,12).*CI(:,:,12).*(ones(sec,1)*(A(12,:).*Q(12,:))), 'c')'];
++taxCI = [
++sum((p(1,:)'*ones(1,sec)).*taxCIdom(:,:,1).*partDomCI(:,:,1).*CI(:,:,1).*(ones(sec,1)*(A(1,:).*Q(1,:))))+sum(((wp.*(1+mtax(1,:))+nit(1,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,1).*(partImpCI(:,:,1)).*CI(:,:,1).*(ones(sec,1)*(A(1,:).*Q(1,:))));
++sum((p(2,:)'*ones(1,sec)).*taxCIdom(:,:,2).*partDomCI(:,:,2).*CI(:,:,2).*(ones(sec,1)*(A(2,:).*Q(2,:))))+sum(((wp.*(1+mtax(2,:))+nit(2,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,2).*(partImpCI(:,:,2)).*CI(:,:,2).*(ones(sec,1)*(A(2,:).*Q(2,:))));
++sum((p(3,:)'*ones(1,sec)).*taxCIdom(:,:,3).*partDomCI(:,:,3).*CI(:,:,3).*(ones(sec,1)*(A(3,:).*Q(3,:))))+sum(((wp.*(1+mtax(3,:))+nit(3,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,3).*(partImpCI(:,:,3)).*CI(:,:,3).*(ones(sec,1)*(A(3,:).*Q(3,:))));
++sum((p(4,:)'*ones(1,sec)).*taxCIdom(:,:,4).*partDomCI(:,:,4).*CI(:,:,4).*(ones(sec,1)*(A(4,:).*Q(4,:))))+sum(((wp.*(1+mtax(4,:))+nit(4,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,4).*(partImpCI(:,:,4)).*CI(:,:,4).*(ones(sec,1)*(A(4,:).*Q(4,:))));
++sum((p(5,:)'*ones(1,sec)).*taxCIdom(:,:,5).*partDomCI(:,:,5).*CI(:,:,5).*(ones(sec,1)*(A(5,:).*Q(5,:))))+sum(((wp.*(1+mtax(5,:))+nit(5,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,5).*(partImpCI(:,:,5)).*CI(:,:,5).*(ones(sec,1)*(A(5,:).*Q(5,:))));
++sum((p(6,:)'*ones(1,sec)).*taxCIdom(:,:,6).*partDomCI(:,:,6).*CI(:,:,6).*(ones(sec,1)*(A(6,:).*Q(6,:))))+sum(((wp.*(1+mtax(6,:))+nit(6,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,6).*(partImpCI(:,:,6)).*CI(:,:,6).*(ones(sec,1)*(A(6,:).*Q(6,:))));
++sum((p(7,:)'*ones(1,sec)).*taxCIdom(:,:,7).*partDomCI(:,:,7).*CI(:,:,7).*(ones(sec,1)*(A(7,:).*Q(7,:))))+sum(((wp.*(1+mtax(7,:))+nit(7,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,7).*(partImpCI(:,:,7)).*CI(:,:,7).*(ones(sec,1)*(A(7,:).*Q(7,:))));
++sum((p(8,:)'*ones(1,sec)).*taxCIdom(:,:,8).*partDomCI(:,:,8).*CI(:,:,8).*(ones(sec,1)*(A(8,:).*Q(8,:))))+sum(((wp.*(1+mtax(8,:))+nit(8,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,8).*(partImpCI(:,:,8)).*CI(:,:,8).*(ones(sec,1)*(A(8,:).*Q(8,:))));
++sum((p(9,:)'*ones(1,sec)).*taxCIdom(:,:,9).*partDomCI(:,:,9).*CI(:,:,9).*(ones(sec,1)*(A(9,:).*Q(9,:))))+sum(((wp.*(1+mtax(9,:))+nit(9,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,9).*(partImpCI(:,:,9)).*CI(:,:,9).*(ones(sec,1)*(A(9,:).*Q(9,:))));
++sum((p(10,:)'*ones(1,sec)).*taxCIdom(:,:,10).*partDomCI(:,:,10).*CI(:,:,10).*(ones(sec,1)*(A(10,:).*Q(10,:))))+sum(((wp.*(1+mtax(10,:))+nit(10,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,10).*(partImpCI(:,:,10)).*CI(:,:,10).*(ones(sec,1)*(A(10,:).*Q(10,:))));
++sum((p(11,:)'*ones(1,sec)).*taxCIdom(:,:,11).*partDomCI(:,:,11).*CI(:,:,11).*(ones(sec,1)*(A(11,:).*Q(11,:))))+sum(((wp.*(1+mtax(11,:))+nit(11,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,11).*(partImpCI(:,:,11)).*CI(:,:,11).*(ones(sec,1)*(A(11,:).*Q(11,:))));
++sum((p(12,:)'*ones(1,sec)).*taxCIdom(:,:,12).*partDomCI(:,:,12).*CI(:,:,12).*(ones(sec,1)*(A(12,:).*Q(12,:))))+sum(((wp.*(1+mtax(12,:))+nit(12,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,12).*(partImpCI(:,:,12)).*CI(:,:,12).*(ones(sec,1)*(A(12,:).*Q(12,:))))];
+ 
+-taxCI_imp = [
+-sum(((wp.*(1+mtax(1,:))+nit(1,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,1).*(partImpCI(:,:,1)).*CI(:,:,1).*(ones(sec,1)*(A(1,:).*Q(1,:))), 'c')';
+-sum(((wp.*(1+mtax(2,:))+nit(2,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,2).*(partImpCI(:,:,2)).*CI(:,:,2).*(ones(sec,1)*(A(2,:).*Q(2,:))), 'c')';
+-sum(((wp.*(1+mtax(3,:))+nit(3,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,3).*(partImpCI(:,:,3)).*CI(:,:,3).*(ones(sec,1)*(A(3,:).*Q(3,:))), 'c')';
+-sum(((wp.*(1+mtax(4,:))+nit(4,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,4).*(partImpCI(:,:,4)).*CI(:,:,4).*(ones(sec,1)*(A(4,:).*Q(4,:))), 'c')';
+-sum(((wp.*(1+mtax(5,:))+nit(5,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,5).*(partImpCI(:,:,5)).*CI(:,:,5).*(ones(sec,1)*(A(5,:).*Q(5,:))), 'c')';
+-sum(((wp.*(1+mtax(6,:))+nit(6,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,6).*(partImpCI(:,:,6)).*CI(:,:,6).*(ones(sec,1)*(A(6,:).*Q(6,:))), 'c')';
+-sum(((wp.*(1+mtax(7,:))+nit(7,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,7).*(partImpCI(:,:,7)).*CI(:,:,7).*(ones(sec,1)*(A(7,:).*Q(7,:))), 'c')';
+-sum(((wp.*(1+mtax(8,:))+nit(8,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,8).*(partImpCI(:,:,8)).*CI(:,:,8).*(ones(sec,1)*(A(8,:).*Q(8,:))), 'c')';
+-sum(((wp.*(1+mtax(9,:))+nit(9,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,9).*(partImpCI(:,:,9)).*CI(:,:,9).*(ones(sec,1)*(A(9,:).*Q(9,:))), 'c')';
+-sum(((wp.*(1+mtax(10,:))+nit(10,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,10).*(partImpCI(:,:,10)).*CI(:,:,10).*(ones(sec,1)*(A(10,:).*Q(10,:))), 'c')';
+-sum(((wp.*(1+mtax(11,:))+nit(11,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,11).*(partImpCI(:,:,11)).*CI(:,:,11).*(ones(sec,1)*(A(11,:).*Q(11,:))), 'c')';
+-sum(((wp.*(1+mtax(12,:))+nit(12,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,12).*(partImpCI(:,:,12)).*CI(:,:,12).*(ones(sec,1)*(A(12,:).*Q(12,:))), 'c')'];
+-
+ TAXCO2_dom=[(A(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1).*taxCO2_CI(:,:,1).*coef_Q_CO2_CI(:,:,1).*(num(1,1)*ones(sec,sec)))');
+ (A(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2).*taxCO2_CI(:,:,2).*coef_Q_CO2_CI(:,:,2).*(num(2,1)*ones(sec,sec)))');
+ (A(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3).*taxCO2_CI(:,:,3).*coef_Q_CO2_CI(:,:,3).*(num(3,1)*ones(sec,sec)))');
+@@ -433,7 +419,7 @@
+ 
+ //TAXCO2 = sum(taxCO2.*num.*coef_Q_CO2.*(QCdom+Imp),'c');
+ 
+-TAX_sect = taxCI_dom + taxCI_imp + TAXCO2_imp + TAXCO2_dom + Exp.*p.*xtax+...
++sumtax = taxCI+TAXCO2+sum(Exp.*p.*xtax+...
+ (p.*taxDFdom.*partDomDF+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDFimp.*(partImpDF)).*DF+...
+ (p.*taxDGdom.*partDomDG+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDGimp.*(partImpDG)).*DG+...
+ (p.*taxDIdom.*partDomDI+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDIimp.*(partImpDI)).*DI+...
+@@ -440,9 +426,9 @@
+ (ones(reg,1)*wp).*mtax.*Imp+...
+ DF.*pArmDF.*Ttax./(1+Ttax)+...
+ Q.*p.*qtax./(1+qtax)+...
+-A.*Q.*w.*l.*sigma.*(energ_sec+FCC.*non_energ_sec);
++A.*Q.*w.*l.*sigma.*(energ_sec+FCC.*non_energ_sec),"c");
++//DF.*Ttax1+...
+ 
+-sumtax = sum(TAX_sect,"c");
+ 
+ E_CO2 = [   
+ (A(1,:).*Q(1,:))*((CI(:,:,1).*      (coef_Q_CO2_CI(:,:,1)))');
+@@ -514,15 +500,19 @@
+ //       * GDP_PPP_constant  (base: referenceExoGDP_PPP)
+ 
+ GDP = sum(VA,"c")+sumtax-sum(DF.*pArmDF.*Ttax./(1+Ttax),'c'); // From model own calibration GDP
+-GDP_sect = VA + TAX_sect - DF.*pArmDF.*Ttax./(1+Ttax);
++share_wages_GDP = sum(A.*w.*l.*Q.*(1+sigma).*(energ_sec+FCC.*non_energ_sec),"c") ./ GDP;
++if ~is_bau
++     share_wages_GDP_taxbase = sum(A.*w.*l.*Q.*(1+base_sigma(:,:,current_time_im)).*(energ_sec+FCC.*non_energ_sec),"c") ./ GDP;
++else
++    share_wages_GDP_taxbase = share_wages_GDP;
++end
++share_wages_GDP_notax = sum(A.*w.*l.*Q.*(energ_sec+FCC.*non_energ_sec),"c") ./ sum(VA,"c");
++share_wages_GDP_noCO2tax = sum(A.*w.*l.*Q.*(1+sigma).*(energ_sec+FCC.*non_energ_sec),"c") ./ (GDP-TAXCO2);
+ GrowthNominalMER = GDP ./ GDP_ref; // Growth multiplier nominal GDP MER
+ 
+ Labor_compensation_gross = sum(A.*w.*l.*Q.*(1+sigma).*(energ_sec+FCC.*non_energ_sec),"c");
+ Labor_compensation_net = sum(A.*w.*l.*Q.*(energ_sec+FCC.*non_energ_sec),"c");
+ 
+-// Approximation of sectoral GDP - tax by sector are missing
+-GDP_sect = VA + TAX_sect - DF.*pArmDF.*Ttax./(1+Ttax);
+-GDP_sect_wo_tax = A.*Q.*w.*l.*sigma.*(energ_sec+FCC.*non_energ_sec) + VA;
+ 
+ fisherQuantityIndex = ((sum(pArmDF_prev.*DF+pArmDG_prev.*DG+pArmDI_prev.*DI,'c')+sum(Exp.*p_prev.*(1+xtax)-Imp.*((ones(reg,1)*wp_prev).*(1)),'c'))./(sum(pArmDF_prev.*DF_prev+pArmDG_prev.*DG_prev+pArmDI_prev.*DI_prev,'c')+sum(Exp_prev.*p_prev.*(1+xtax)-Imp_prev.*((ones(reg,1)*wp_prev).*(1)),'c')).*(sum(pArmDF.*DF+pArmDG.*DG+pArmDI.*DI,'c')+sum(Exp.*p.*(1+xtax)-Imp.*((ones(reg,1)*wp).*(1)),'c'))./(sum(pArmDF.*DF_prev+pArmDG.*DG_prev+pArmDI.*DI_prev,'c')+sum(Exp_prev.*p.*(1+xtax)-Imp_prev.*((ones(reg,1)*wp).*(1)),'c'))).^(1/2); //Fischer Quantity Index
+ chainedFisherQuantIndex = chainedFisherQuantIndex .* fisherQuantityIndex; // Chained Fisher Quantity Index
+@@ -532,9 +522,8 @@
+ GDP_MER_real = GrowthRealMER.*GDP_ref;       // From calibration.gdp.sce base GDP (exogenous)
+ GDP_PPP_constant_prev=GDP_PPP_constant;
+ GDP_PPP_constant = GDP_MER_real     ./ PPP_factors; 
+-GPP_secMER_real = (GDP_MER_real*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_sect, "c")*ones(1,sec)));
+-GDP_secPPP_constant = (GDP_PPP_constant*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_sect, "c")*ones(1,sec)));
+ 
++
+ //residentiel //TODO: check again if the line below can indeed be removed
+ //deltastockbatiment = deltastockbatimentref.*(QCdom(:,indice_construction)./QCdomref(:,indice_construction));
+ 
+@@ -594,7 +583,7 @@
+   abs_error= abs(error(:,6:$)-1);
+   disp( "txCaptemp", txCaptemp);
+   disp( [max( abs_error(abs_error<1)), mean(abs_error(abs_error<1))], "max, mean");
+-  csvWrite( txCaptemp2sav, path_autocal_txCap+'/txCaptemp_'+string(nb_sectors)+'.csv');
++  csvWrite( txCaptemp2sav, path_autocalibration+'/txCaptemp_'+string(nb_sectors)+'.csv');
+   abort;
+ end
+ 
+@@ -617,76 +606,9 @@
+     pkm_air_inc = ( Conso(:,indice_air-nbsecteurenergie) + DG(:,indice_air) + DI(:,indice_air) + sum( Imp .* nit,"c") .*partTIref(1)+CI_air) ./ ( Consoref(:,indice_air-nbsecteurenergie) + DGref(:,indice_air) + DIref(:,indice_air) + ImpTIref+CI_air_ref);
+ end
+ 
+-if ind_climat == 99 & current_time_im == start_tax+duration_NDC
+-    // trick to force the sav files to be recognized
+-    // This shall only be used for calibration runs!
+-    IamDoneFolks=1;
+-    mksav("IamDoneFolks");
+-    sg_save()
+-    exec(MODEL+ "terminate.sce")
+-    abort;
++if ind_lindhal ==1
++    weight_regional_tax_prev = weight_regional_tax;
++    weight_regional_tax = GDP_PPP_constant ./ Ltot;
++    weight_regional_tax = weight_regional_tax ./ weight_regional_tax(ind_usa);
++    weight_regional_tax = weight_regional_tax .* (1-convergence_regional_tax(current_time_im)) + convergence_regional_tax(current_time_im);
+ end
+-
+-// Climate policy uncertainty and credibility scenario filter
+-if ind_climpol_uncer>0 
+-    if current_time_im == 1
+-        WCB_2020_total = zeros(reg, TimeHorizon)
+-    end
+-    //Emissions|CO2|Energy in GT
+-    ECO2ener(:,current_time_im) = sum(E_reg_use(:,:),"c")/1e9 + emi_evitee/1e9;
+-    //Emissions|CO2|Industrial Processes in GT
+-    ECO2indus(:,current_time_im) = CO2_indus_process/1e3;
+-    //Emissions|CO2|AFOLU in GT. These emi stop in 2020, so we do not include them in the CB
+-    ECO2AFOLU(:, current_time_im) = (exo_CO2_LUCCCF(:,current_time_im+1) + exo_CO2_agri_direct(:,current_time_im+1))/1e3;
+-
+-    //total emi
+-    ECO2(:,current_time_im) = ECO2ener(:,current_time_im) + ECO2indus(:,current_time_im);
+-
+-    //CB
+-    if current_time_im>=2020-base_year_simulation
+-        WCB_2020_total(:,current_time_im) = sum(ECO2(:,(2020-base_year_simulation):$),"c");
+-        disp("Total 2020 CB: " + sum(WCB_2020_total(:,current_time_im))+" GtCO2") 
+-    end
+-
+-    if current_time_im == year_nz - base_year_simulation // time to reach NZ or respect a CB
+-        if ~isdef("nz_emi")
+-            nz_emi = 1000;
+-        end
+-        emi_NZ = sum(ECO2(:,current_time_im));
+-        global CO2_indus_process_sav
+-        CB_NZ = sum(WCB_2020_total(:,current_time_im));
+-                //exporting the yearly CT profile
+-                if nbMKT == 1
+-                    csvWrite( [["Year","Price|Carbon"];[base_year_simulation:(base_year_simulation +TimeHorizon);taxMKTexo * 10^6]'],OUTPUT+run_id+"/carbon_price_"+run_id + ".csv", "," )
+-                end
+-                if nbMKT == 9
+-                    csvWrite( [["Year","Price|Carbon|MK1","Price|Carbon|MK2","Price|Carbon|MK3","Price|Carbon|MK4","Price|Carbon|MK5","Price|Carbon|MK6","Price|Carbon|MK7","Price|Carbon|MK8","Price|Carbon|MK9"];[base_year_simulation:(base_year_simulation +TimeHorizon);taxMKTexo * 10^6]'],OUTPUT+run_id+"/carbon_price_"+run_id + ".csv", "," )
+-                end
+-        if ind_nz & ind_force_export==1
+-            mkdir(OUTPUT + 'NZ_'+year_nz+'/')
+-            csvWrite( ["Truncated_Horizon","Planning_Horizon","Wait_See","Max_Inj_Rate","CB_NZ","NZ_emi"; 
+-            horizon_CT,nb_year_expect_LCC,ind_wait_n_see,max_CCS_injection/giga2unity,CB_NZ,emi_NZ], OUTPUT + 'NZ_'+year_nz+'/' + run_id + '.csv', '|');
+-        end
+-        if ind_nz & ind_force_export==0
+-            if  sum(emi_NZ) < nz_emi 
+-                mkdir(OUTPUT + 'NZ_'+year_nz+'/')
+-                csvWrite( ["Truncated_Horizon","Planning_Horizon","Wait_See","Max_Inj_Rate","CB_NZ","NZ_emi"; 
+-                horizon_CT,nb_year_expect_LCC,ind_wait_n_see,max_CCS_injection/giga2unity,CB_NZ,sum(emi_NZ)], OUTPUT + 'NZ_'+year_nz+'/' + run_id + '.csv', '|');
+-            end
+-        end
+-    end
+-end
+-
+-final_energy_freight = zeros(nb_regions,1);
+-for k=1:nb_regions
+-    final_energy_freight(k,1) = (..
+-                (sum(energy_balance(conso_transport_eb,[elec_eb,gaz_eb,et_eb,coal_eb],k))) ..
+-                - sum(energy_balance(conso_car_eb,[elec_eb,gaz_eb,et_eb,coal_eb],k)).. // passenger cars
+-	- (alpharail_passenger(k,indice_coal) + alpharail_passenger(k,indice_oil)) * EnergyServices_road_pass(k)..
+-	- (alpharoad_passenger(k,indice_coal) + alpharoad_passenger(k,indice_oil)) * EnergyServices_road_pass(k)..
+-        - sum(alpharail_passenger(k,[indice_elec,indice_Et,indice_gaz])) * EnergyServices_rail_pass(k) - sum(alpharoad_passenger(k,[indice_elec,indice_Et,indice_gaz]))      *EnergyServices_road_pass(k)..
+-        - sum(energy_balance(conso_air_eb,[elec_eb,gaz_eb,et_eb,coal_eb],k))*DF(k,indice_air)/(Q(k,indice_air))* ShareDomAviation_2014(k)..//passenger domestic aviation
+-                - sum(energy_balance(conso_air_eb,[elec_eb,gaz_eb,et_eb,coal_eb],k))* (1-ShareDomAviation_2014(k)).. //international aviation
+-        ) * Mtoe_EJ;
+-end
+-
+Index: model/plugins.sce
+===================================================================
+--- model/plugins.sce	(révision 31998)
++++ model/plugins.sce	(copie de travail)
+@@ -1,7 +1,5 @@
+ // diagnostic of scenarios
+-exec (MODEL+"diagnostic.sce");
+ 
+-
+ if ind.monitor
+     exec(CONTROL+"control.emissions.sce");
+     exec(CONTROL+"control.costCI.sce");
+Index: study_frames/default_parameters.sce
+===================================================================
+--- study_frames/default_parameters.sce	(révision 31998)
++++ study_frames/default_parameters.sce	(copie de travail)
+@@ -43,10 +43,15 @@
+ end
+ 
+ // automatic calibration of coal price elasticity
+-if ~isdef("auto_calibration_coal_prices")
+-    auto_calibration_coal_prices="None";
++if ~isdef("auto_calibration_p_coal")
++    auto_calibration_p_coal="None";
+ end
+ 
++// automatic calibration of intangible costs
++if ~isdef("auto_calibration_IC_elec")
++    auto_calibration_IC_elec=%f;
++end
++
+ // switch to run new calibration settings for coal price elasticity + xtax for gas
+ if ~isdef("ind_new_calib_coal")
+     ind_new_calib_coal=%t;
+@@ -56,9 +61,6 @@
+     ind_new_calib_gas=%t;
+ end
+ 
+-if ~isdef("ind_new_calib_biomass_LR")
+-    ind_new_calib_biomass_LR=%f;
+-end
+ 
+ // need to be set to %t for the first step of the auto_calibration_txCap automatic procedure
+ if ~isdef("first_try_autocalib")
+@@ -131,7 +133,7 @@
+ // MACRO indexes which monitor big demand-side variants
+ 
+ if ~isdef("ind_sufficiency")
+-ind_sufficiency = 0; // Variant monitoring the options regarding sufficiency: 0 = default (initially in the trunk); 1 = sufficient variant; 2 = BAU or non-sufficient variant
++    ind_sufficiency = 0; // Variant monitoring the options regarding sufficiency: 0 = default (initially in the trunk); 1 = sufficient variant; 2 = BAU or non-sufficient variant
+ end
+ 
+ if ~isdef("ind_efficiency")
+@@ -168,6 +170,10 @@
+     ind_shipFret_A = 0;
+ end
+ 
++if ~isdef("ind_sufficiency_indus")
++	ind_sufficiency_indus = 0; // Variant for LD scenarios controlling industrial consumption 
++end
++
+ //EFFICIENCY options and their use
+ //  speeds up energy efficiency improvements in dwellings // NAVIGATE - task 3.5
+ if ~isdef("ind_buildingefficiency")
+@@ -200,6 +206,12 @@
+ if ~isdef("ind_shipping_air_electri")
+     ind_shipping_air_electri = 0;
+ end
++
++// electrification of ldv
++if ~isdef("indice_ldv_electri")
++indice_ldv_electri = 0;
++end
++
+ // electrification of the building sector
+ if ~isdef("indice_building_electri")
+     indice_building_electri = 0;
+@@ -206,6 +218,7 @@
+ end
+ 
+ 
++
+ /////////
+ 
+ 
+@@ -273,8 +286,13 @@
+ // NPi/INDC diagnostic
+ 
+ if ~isdef("ind_npi_ndc")
+-    ind_npi_ndc = 0; //1 for NPi, 2 for NDC
++    ind_npi_ndc = 0; //1 for NPi, 2 for NDC, 3 for calibration
+ end
++
++if ~isdef("ind_npi_ndc_effort")
++    ind_npi_ndc_effort = 1; //0 = constant CO2 price after 2030, 1 for "continuation of efforts" = CO2 grow at natural GDP's rate
++end
++
+ // WACC dummies for the electricity sector
+ //By default, discount factor are regional and techno specific 
+ if ~isdef('ind_uniform_DR')
+@@ -281,6 +299,31 @@
+     ind_uniform_DR =%f; 
+ end
+ 
++//sensibility analysis on the logit exponent in the main logit node of the investment module - electricity nexus. 
++// some weights_ENR.tsv need to be generate first (takes 5 min to do it manually)
++if ~isdef("ind_logit_sensib_VRE")
++    ind_logit_sensib_VRE=%f;
++end
++
++// switch for the heterogenous expectations scenarios
++if ~isdef("ind_believers_switch")
++    ind_believers_switch = %f;
++end
++
++if ~isdef("ind_believers")
++    ind_believers = %f;
++end
++
++if ~isdef("ind_new_calib_biomass_LR")
++    ind_new_calib_biomass_LR=%f;
++end
++
++// automatic calibration of coal price elasticity
++if ~isdef("auto_calibration_coal_prices")
++    auto_calibration_coal_prices="None";
++end
++
++
+ if ~isdef("ind_global_wacc")
+     ind_global_wacc = 0; //global WACC paper
+     //case 0 : using IMACLIM-R own assumption about the WACC
+@@ -293,20 +336,43 @@
+ if ~isdef("ind_climfin")
+     ind_climfin = 0;
+     ind_climfin_inc = 0;
+-else
+-    ind_new_calib_wacc=%f;
+ end
+ 
+-// switch for the heterogenous expectations scenarios
+-if ~isdef("ind_believers_switch")
+-    ind_believers_switch = %f;
++ // running climate policy uncertainty & credibility study scenarios and associated switches
++ if ~isdef("ind_climpol_uncer")
++    ind_climpol_uncer=0;
+ end
+ 
+-if ~isdef("ind_believers")
+-    ind_believers = %f;
++//adding a switch used in the credibility study scenarios that appears in the study frame file
++if ~isdef("ind_wait_n_see")
++    ind_wait_n_see=0;
+ end
+ 
++// looking for net zero?
++if ~isdef("ind_nz")
++    ind_nz =0;
++end
+ 
++//cap on CO2 prices, when using standardized tax profiles?
++if ~isdef("cap_CO2_price")
++    cap_CO2_price =0;
++end
++
++// climate impact
++// climate impacts on labor productivity
++if ~isdef("ind_impacts")
++    ind_impacts = 0;
++end
++// climate sensitivity
++if ~isdef("ind_clim_sensi")
++    ind_clim_sensi = 1;
++end
++
++// labor market rigidity
++if ~isdef("ind_labour")
++    ind_labour = 0;
++end
++
+ // a temporary switch to keep previous results before actknowledging new changes in the wacc module.
+ if ~isdef("ind_new_calib_wacc")
+     ind_new_calib_wacc = %t;
+@@ -315,12 +381,8 @@
+ if ~isdef("ind_in_markup_elec")
+     ind_in_markup_elec=%t;
+ end
+-//sensibility analysis on the logit exponent in the main logit node of the investment module - electricity nexus. 
+-// some weights_ENR.tsv need to be generate first (takes 5 min to do it manually)
+-if ~isdef("ind_logit_sensib_VRE")
+-    ind_logit_sensib_VRE=%f;
+-end
+ 
++
+ //indice for carbon revenues recycling scheme
+ if ~isdef("ind_recycl")
+     ind_recycl=0;
+@@ -335,3 +397,113 @@
+ if ~isdef("tool_output_diagnostic")
+     tool_output_diagnostic=%f;
+ end
++
++// labor market rigidity
++if ~isdef("ind_labour")
++    ind_labour = 0;
++end
++
++// assumptions for development lifestyles
++if ~isdef("ind_develo")
++    ind_develo = 1;
++end
++
++// assumption for energy efficiency
++if ~isdef("ind_EEI")
++    ind_EEI = 0;
++end
++
++// armingont elasticities
++if ~isdef("ind_trade")
++    ind_trade = 0;
++end
++
++// lower trade elasticities for agriculture (if ==1)
++if ~isdef("ind_trade_agri")
++    ind_trade_agri = 0;
++end
++
++// assumption on coal price elasticitie
++if ~isdef("ind_charbo")
++    ind_charbo = 1;
++end
++
++// alternative liquid fuels but biofuels, i-e CTL
++if ~isdef("ind_altern")
++    ind_altern = 1;
++end
++
++// Technological evolution
++if ~isdef("ind_techno") // TODO check if obsolete, and which variant is optimistic/pessimistic
++    ind_techno = 1;
++end
++
++// carbon price expectations (0 = myopic, the carcon price is assumed by agent to remain constant)
++if ~isdef("ind_expectations")
++    ind_expectations = 0;
++end
++
++// Low demand assumption for the Low Energy Demand Paper
++if ~isdef("indice_LED")
++    indice_LED = 0;
++end
++
++//
++if ~isdef("ind_exogenous_forcings")
++    ind_exogenous_forcings = 0;
++end
++
++// Short-term planning and truncated LCC calculation (nexus building & elec)
++if ~isdef("ind_short_term_hor")
++    ind_short_term_hor = 0;
++end
++
++// as energy auto-consumption were not accounted for in the hybridation procedure
++// We add it exogenously for outputs (cor_ener_autocons=%t)
++if ~isdef("ind_cor_ener_autocons")
++    ind_cor_ener_autocons = %f;
++end
++
++// Variant for Post-Growth and Convergence scenarios with exogenous labor productivity growth
++if ~isdef("indice_TC_l_exo")
++	indice_TC_l_exo = 0; 
++end
++
++// Changes in taxes and prices expectations for EEI and CTL
++if ~isdef("test_expect_prices")
++	test_expect_prices = 0; 
++end
++
++//Switch to allow regions to fix domestic coal production goals
++if ~isdef("ind_coal_fin")
++    ind_coal_fin=0;
++end
++
++// constraint on cap growth rate
++if ~isdef("ind_max_growth_rate_elec")
++    ind_max_growth_rate_elec=1;
++end
++
++
++// forcing VRE shares (for profile cost calibration: only forcing onshore wind and utility scale PV for the calibration of profile costs)
++if ~isdef("force_VRE_share")
++    force_VRE_share=0;
++end
++
++// using old RLDC design (for profile cost calibration)
++if ~isdef("old_RLDC_design")
++    old_RLDC_design=0;
++end
++// calibrating profile costs
++if ~isdef("calib_profile_cost")
++    calib_profile_cost=0;
++end
++// using new rho (power plant efficiency) calibration
++if ~isdef("ind_new_rho_calib")
++    ind_new_rho_calib =1;
++end
++
++// CCS capture rate 
++if ~isdef("ind_cap_rate_CCS")
++    ind_cap_rate_CCS =1;
++end
+Index: study_frames/matrice_base.csv
+===================================================================
+--- study_frames/matrice_base.csv	(révision 32090)
++++ study_frames/matrice_base.csv	(copie de travail)
+@@ -2,7 +2,7 @@
+ //indices should be in the first line, as used in the code, without space separated by a semi-column;;;;;;;;;;;;;;;;;
+ 1;0;0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+ 9;99;0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+-1011;1;1;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
++11;1;1;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+ 1012;1;1;0;1;1;1;0;1;0;1;0;0;0;0;0;0;0
+ 1013;1;1;0;1;1;1;0;0;0;0;1;0;0;0;0;0;0
+ 1014;1;1;0;1;1;1;0;0;0;0;0;1;0;0;0;0;0
+@@ -17,7 +17,6 @@
+ 1003;1;1;0;1;1;1;0;0;0;0;1;0;1;0;0;0;0
+ 1004;1;1;0;1;1;1;0;0;0;0;0;1;1;0;0;0;0
+ 1005;1;1;0;1;1;1;0;1;0;1;1;1;1;0;0;0;0
+-11;1;1;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+ 12;1;1;0;1;1;1;3;0;0;0;0;0;0;0;0;0;0
+ 41;1;1;0;1;1;1;0;0;0;0;0;1;0;0;0;0;0
+ 42;1;1;0;1;1;1;3;0;0;0;0;1;1;0;0;0;1

@@ -1,0 +1,168 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{eurosym}
+\usepackage{longtable}
+\usepackage{hyperref}
+\setlength{\hoffset}{-2cm}  	
+\setlength{\oddsidemargin}{1cm}   % Marge gauche sur pages impaires
+\setlength{\evensidemargin}{1cm} 	% Marge gauche sur pages paires
+%\setlength{\marginparwidth}{2cm} 	% Largeur de note dans la marge
+\setlength{\textwidth}{19cm} 	    % Largeur de la zone de texte (17cm)
+\setlength{\voffset}{-1cm} 	    % Bon pour DOS
+%\setlength{\marginparsep}{0.1cm}    % Séparation de la marge
+%\setlength{\topmargin}{1cm} 	    % Pas de marge en haut
+%\setlength{\headheight}{1cm} 	    % Haut de page
+\setlength{\headsep}{0.7cm} 	        % Entre le haut de page et le texte
+%\setlength{\footskip}{27pt} 	    % Bas de page + séparation
+\setlength{\textheight}{23cm} 	    % Hauteur de la zone de texte (25cm) 
+
+\begin{document}
+
+\tableofcontents
+
+% GDP
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-baseline.pdf}
+    \end{center}
+    \caption{World GDP ($\$$)}
+\end{figure}
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-baseline-Europe.pdf}
+    \end{center}
+    \caption{Europe GDP ($\$$)}
+\end{figure}
+
+
+% GDP - mer real
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-mer-real-baseline.pdf}
+    \end{center}
+    \caption{World GDP MER-Real ($\$$)}
+\end{figure}
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-mer-real-baseline-Europe.pdf}
+    \end{center}
+    \caption{Europe GDP MER-Real ($\$$)}
+\end{figure}
+
+% GDP - mer nominal
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-mer-nominal-baseline.pdf}
+    \end{center}
+    \caption{World GDP MER-Real ($\$$)}
+\end{figure}
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-mer-nominal-baseline-Europe.pdf}
+    \end{center}
+    \caption{Europe GDP MER-nominal ($\$$)}
+\end{figure}
+
+% GDP - ppp real
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-ppp-real-baseline.pdf}
+    \end{center}
+    \caption{World GDP ppp-nominal ($\$$)}
+\end{figure}
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-ppp-real-baseline-Europe.pdf}
+    \end{center}
+    \caption{Europe GDP ppp-Real ($\$$)}
+\end{figure}
+
+% GDP - ppp nominal
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-ppp-nominal-baseline.pdf}
+    \end{center}
+    \caption{World GDP ppp-nominal ($\$$)}
+\end{figure}
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-ppp-nominal-baseline-Europe.pdf}
+    \end{center}
+    \caption{Europe GDP ppp-nominal ($\$$)}
+\end{figure}
+
+
+% GDP differences
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-mer-real.pdf}
+    \end{center}
+    \caption{World GDP losses MER-Real ($\$$)}
+\end{figure}
+
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/GDP-mer-real-Europe.pdf}
+    \end{center}
+    \caption{Europe GDP losses MER-Real ($\$$)}
+\end{figure}
+
+
+% taxes
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/taxes.pdf}
+    \end{center}
+    \caption{Taxe ($\$2001/tCO2$)}
+\end{figure}
+
+
+% world energy prices
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/world-coal-price.pdf}
+    \end{center}
+    \caption{World coal price ($\$$/mtoe)}
+\end{figure}
+
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/world-oil-price.pdf}
+    \end{center}
+    \caption{World oil price ($\$$/mtoe)}
+\end{figure}
+
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/world-gas-price.pdf}
+    \end{center}
+    \caption{World gas price ($\$$/mtoe)}
+\end{figure}
+
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/world-et-price.pdf}
+    \end{center}
+    \caption{World refined oil price ($\$$/mtoe)}
+\end{figure}
+
+
+\begin{figure}[!ht]
+    \begin{center}
+        \includegraphics[scale=0.7]{plots/world-elec-price.pdf}
+    \end{center}
+    \caption{World electricity price ($\$$/mtoe)}
+\end{figure}
+	
+
+\end{document}

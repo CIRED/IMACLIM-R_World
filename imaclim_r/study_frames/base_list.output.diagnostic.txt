@@ -1,0 +1,2 @@
+//list of desired output on the diagnostic .xlsx file; 'ALL' or nothing in the second line means you want all; 'EXCLUDE' + list of string separated by '|' means you want to exclude diagnostic variable containing this string. Otherwise just copy past the diagnostic variable you want to output, one per line. The complete possible list can be found in data/xxx. Consequently, do not use '|' in the variable names
+ALL

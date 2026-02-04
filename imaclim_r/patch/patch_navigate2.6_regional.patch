@@ -1,0 +1,1309 @@
+Index: lib/diagnostic.sci
+===================================================================
+--- lib/diagnostic.sci	(révision 31998)
++++ lib/diagnostic.sci	(copie de travail)
+@@ -36,4 +36,5 @@
+         - energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
+         + energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+         ) )/1e6;
++    end
+ endfunction
+Index: model/diagnostic.sce
+===================================================================
+--- model/diagnostic.sce	(révision 32209)
++++ model/diagnostic.sce	(copie de travail)
+@@ -90,6 +90,7 @@
+         worldBudgetTot_2020 = sum(E_reg_use)/1e9 + sum(emi_evitee)/1e9 +  sum(CO2_indus_process + exo_CO2_AFOLU(current_time_im+1)) / 1e3 
+     end
+     worldBudgetTot_2020_cum = worldBudgetTot_2020_cum + worldBudgetTot_2020;
++    disp("worldBudgetTot_2020_cum",worldBudgetTot_2020_cum)
+ 
+     if worldBudgetTot_2020_cum > peak_CO2_budget
+         peak_CO2_budget = worldBudgetTot_2020_cum;
+@@ -459,7 +460,7 @@
+ 
+ if current_time_im == (2020-base_year_simulation) & auto_calibration_covid<>"None"
+     disp([ [regnames;"WLD"], string([GDP_PPP_constant;sum(GDP_PPP_constant)]), string([GDP_PPP_WB_2020;sum(GDP_PPP_WB_2020)]), string([GDP_PPP_constant./GDP_PPP_WB_2020;sum(GDP_PPP_constant)/sum(GDP_PPP_WB_2020)]), string([GDP_PPP_constant./GDP_PPP_constant_prev;sum(GDP_PPP_constant)/sum(GDP_PPP_constant_prev)])], "GDP PPP IMACLIM, GDP PPP World Bank, ratio, GDP Imaclim ratio on previous");
+-    csvWrite( scale_impact_covid./(GDP_PPP_constant./GDP_PPP_WB_2020), path_autocal_covid+'/scale_impact_covid.csv');
++    csvWrite( scale_impact_covid./(GDP_PPP_constant./GDP_PPP_WB_2020), path_autocalibration+'/scale_impact_covid.csv');
+     break
+ end
+ 
+@@ -536,48 +537,6 @@
+     printf("\n		--- should be lower than 250 GtCO2 in NAVIGATE 1.5°C scenarios\n")
+     //disp("Total negative emission rises to "+string(emiEv_2020) + "   GtCO2")
+ 
+-
+-// Variable to be integrated to the "metadata indicators" .xls file
+-    // Cumulative net CO2 - 2020-2100
+-    var_observed=worldBudgetTot_2020;
+-    test_string="Cumulative net CO2 (2020-2100, Gt CO2)";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-    // Year of peak CO2 Emissions
+-    var_observed=year_peak_CO2_budget;
+-    test_string="Year of peak CO2 Emissions";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Cumulative net CO2 (2020-2100, Gt CO2)
+-    var_observed=sum(net_negative);
+-    test_string="Cumulative net CO2 (2020-2100, Gt CO2)";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-	
+-	// Cumulative negative emission (2020-2100, Gt CO2)
+-    var_observed=sum(emiEv_2020);
+-    test_string="Cumulative negative emission (2020-2100, Gt CO2)";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-	
+-	// Final Energy 2100
+-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
+-    test_string="Final Energy - 2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+     // save vettings scenario
+     if record_vett_carbonbudget==%t
+         co2_budget_vett =     [1150,1050,1000,800,700,700,600,400];
+@@ -591,338 +550,3 @@
+         end
+     end
+ end
+-
+-
+-
+-
+-
+-if current_time_im == 2019-base_year_simulation
+-
+-// Variable to be integrated to test the new OT dynamics
+-    // LDV share 2019
+-    var_observed= (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) +  + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_LDV_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Public transport share 2019
+-    var_observed= (sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass))*10^9 / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_public_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-	
+-	// Active mode share 2019
+-	var_observed= (sum(TNM.*pkmautomobileref./100)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_active_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// air pkm 2019
+-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014);
+-    test_string="pkm_airdom_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// air pkm 2019
+-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100);
+-    test_string="pkm_airtot_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-    // LDV pkm 2019
+-    var_observed=sum((Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT)/ 1e9);
+-    test_string="pkm_LDV_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// tkm freight 2019
+-    var_observed=sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
+-	tkm_freight = sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
+-    test_string="tkm_freight_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// tkm shipping 2019
+-    var_observed=sum(Q(:,indice_mer)-DF(:,indice_mer)./convfactorOT_tkmtoDF);
+-    test_string="tkm_shipping_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// electricity in trucks and bus in 2019
+-    var_observed=	sum(alpharoad_passenger(:,indice_elec)		.*EnergyServices_road_pass(:) + alpharoad_freight(:,indice_elec)	.*EnergyServices_road_fret(:)) ..
+-	/ sum(alpharoad_passenger(:,energyIndexes)	.*(EnergyServices_road_pass(:) * ones(1,nbsecteurenergie)) + alpharoad_freight(:,energyIndexes).*(EnergyServices_road_fret(:) * ones(1,nbsecteurenergie)));
+-    test_string="truck_elec_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Final Energy 2019 
+-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
+-    test_string="Final_Energy_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Final Energy for transport 2019
+-    var_observed=sum(energy_balance(conso_transport_eb,:,:))*Mtoe_EJ;
+-    test_string="FE_trans_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// GDP MER 2019
+-    var_observed=sum(GDP_MER_real(:))/ 1e3*usd_year1_year2;
+-    test_string="gdp_mer_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency freight 2019
+-    var_observed=sum(final_energy_freight)/tkm_freight;
+-    test_string="freight_eff_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency of trucks
+-    var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
+-    test_string="truck_eff_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency of cars
+-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto)) / (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="cars_eff_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Electrification of trucks
+-    var_observed=sum(alpharoad_freight(:,indice_elec) .* EnergyServices_road_fret) / sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret);
+-    test_string="truck_elec_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Electrification of cars
+-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT, "c") .* alphaelecauto) / sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto));
+-    test_string="cars_elec_2019";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-
+-end
+-
+-if current_time_im == 2050-base_year_simulation
+-
+-// Variable to be integrated to test the new OT dynamics
+-    // LDV share 2050
+-    var_observed= (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) +  + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_LDV_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Public transport share 2050
+-    var_observed= (sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass))*10^9 / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_public_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-	
+-	// Active mode share 2050
+-	var_observed= (sum(TNM.*pkmautomobileref./100)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_active_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// air pkm 2050
+-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014);
+-    test_string="pkm_airdom_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// air pkm 2050
+-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100);
+-    test_string="pkm_airtot_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-    // LDV pkm 2050
+-    var_observed=sum((Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT)/ 1e9);
+-    test_string="pkm_LDV_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// tkm freight 2050
+-    var_observed=sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
+-	tkm_freight = sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
+-    test_string="tkm_freight_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// tkm shipping 2050
+-    var_observed=sum(Q(:,indice_mer)-DF(:,indice_mer)./convfactorOT_tkmtoDF);
+-    test_string="tkm_shipping_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// electricity in trucks and bus in 2050
+-    var_observed=	sum(alpharoad_passenger(:,indice_elec)		.*EnergyServices_road_pass(:) + alpharoad_freight(:,indice_elec)	.*EnergyServices_road_fret(:)) ..
+-	/ sum(alpharoad_passenger(:,energyIndexes)	.*(EnergyServices_road_pass(:) * ones(1,nbsecteurenergie)) + alpharoad_freight(:,energyIndexes).*(EnergyServices_road_fret(:) * ones(1,nbsecteurenergie)));
+-    test_string="truck_elec_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Final Energy 2050 
+-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
+-    test_string="Final_Energy_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Final Energy for transport 2050
+-    var_observed=sum(energy_balance(conso_transport_eb,:,:))*Mtoe_EJ;
+-    test_string="FE_trans_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// GDP MER 2050
+-    var_observed=sum(GDP_MER_real(:))/ 1e3*usd_year1_year2;
+-    test_string="gdp_mer_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency freight 2050
+-    var_observed=sum(final_energy_freight)/tkm_freight;
+-    test_string="freight_eff_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency of trucks
+-    var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
+-    test_string="truck_eff_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency of cars
+-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto)) / (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="cars_eff_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Electrification of trucks
+-    var_observed=sum(alpharoad_freight(:,indice_elec) .* EnergyServices_road_fret) / sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret);
+-    test_string="truck_elec_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Electrification of cars
+-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT, "c") .* alphaelecauto) / sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto));
+-    test_string="cars_elec_2050";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-
+-end
+-
+-
+-if current_time_im == TimeHorizon 
+-
+-// Variable to be integrated to test the new OT dynamics
+-    // LDV share 2100
+-    var_observed= (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) +  + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_LDV_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Public transport share 2100
+-    var_observed= (sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass))*10^9 / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_public_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-	
+-	// Active mode share 2100
+-	var_observed= (sum(TNM.*pkmautomobileref./100)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="Share_active_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// air pkm 2100
+-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014);
+-    test_string="pkm_airdom_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// air pkm 2100
+-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100);
+-    test_string="pkm_airtot_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-    // LDV pkm 2100
+-    var_observed=sum((Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT)/ 1e9);
+-    test_string="pkm_LDV_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// tkm freight 2100
+-    var_observed=sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
+-	tkm_freight = sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
+-    test_string="tkm_freight_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// tkm shipping 2100
+-    var_observed=sum(Q(:,indice_mer)-DF(:,indice_mer)./convfactorOT_tkmtoDF);
+-    test_string="tkm_shipping_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// electricity in trucks and bus in 2100
+-    var_observed=	sum(alpharoad_passenger(:,indice_elec)		.*EnergyServices_road_pass(:) + alpharoad_freight(:,indice_elec)	.*EnergyServices_road_fret(:)) ..
+-	/ sum(alpharoad_passenger(:,energyIndexes)	.*(EnergyServices_road_pass(:) * ones(1,nbsecteurenergie)) + alpharoad_freight(:,energyIndexes).*(EnergyServices_road_fret(:) * ones(1,nbsecteurenergie)));
+-    test_string="truck_elec_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
+-
+-	// Final Energy 2100 
+-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
+-    test_string="Final_Energy_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Final Energy for transport 2100
+-    var_observed=sum(energy_balance(conso_transport_eb,:,:))*Mtoe_EJ;
+-    test_string="FE_trans_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// GDP MER 2100
+-    var_observed=sum(GDP_MER_real(:))/ 1e3*usd_year1_year2;
+-    test_string="gdp_mer_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency freight 2100
+-    var_observed=sum(final_energy_freight)/tkm_freight;
+-    test_string="freight_eff_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency of trucks
+-    var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
+-    test_string="truck_eff_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Efficiency of cars
+-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto)) / (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
+-    test_string="cars_eff_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Electrification of trucks
+-    var_observed=sum(alpharoad_freight(:,indice_elec) .* EnergyServices_road_fret) / sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret);
+-    test_string="truck_elec_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-	// Electrification of cars
+-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT, "c") .* alphaelecauto) / sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto));
+-    test_string="cars_elec_2100";
+-    string_for_diag = test_string;
+-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
+-
+-
+-end
+Index: model/extraction-first.sce
+===================================================================
+--- model/extraction-first.sce	(révision 31998)
++++ model/extraction-first.sce	(copie de travail)
+@@ -577,7 +577,7 @@
+ pImp = (ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit;
+ pImp_notax = (ones(reg,1)*wp)+(ones(reg,sec)*wpTIagg).*nit;
+ 
+-if ind_lindhal ==1
++if ind_lindhal >=1
+     weight_regional_tax_prev = weight_regional_tax;
+     weight_regional_tax = (GDP_PPP_constant ./ Ltot) ;
+     weight_regional_tax = weight_regional_tax ./ weight_regional_tax(ind_usa);
+Index: model/extraction.outputs.navigate.region.sce
+===================================================================
+--- model/extraction.outputs.navigate.region.sce	(révision 31998)
++++ model/extraction.outputs.navigate.region.sce	(copie de travail)
+@@ -2951,267 +2951,6 @@
+ if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";
+ end;
+ 
+-//Consumption|Dx % share of  total consumption accruing to each Decile
+-varname = 'Consumption|D1'; // Share of  total consumption accruing to decile 1
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,1)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D1'; // Share of  total income accruing to decile 1
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,1)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D1'; // Share of food consumption accruing to decile 1
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D1'; // Share of consumption for transportation accruing to decile 1
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D1'; // Share of consumption for energy use in buildings accruing to decile 1
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Inequality index|Gini'; // Gini index
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = gini_income(k);
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "index";end;//
+-
+-varname = 'Inequality index|Absolute Poverty'; // Absolute Povert Rate (1.9$ threshold)
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = poverty_rate(k);
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "index";end;//
+-
+-varname = 'Consumption|D2'; // Share of  total consumption accruing to decile 2
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,2)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D2'; // Share of  total income accruing to decile 2
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,2)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D2'; // Share of food consumption accruing to decile 2
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D2'; // Share of consumption for transportation accruing to decile 2
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D2'; // Share of consumption for energy use in buildings accruing to decile 2
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption|D3'; // Share of  total consumption accruing to decile 3
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,3)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D3'; // Share of  total income accruing to decile 3
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,3)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D3'; // Share of food consumption accruing to decile 3
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D3'; // Share of consumption for transportation accruing to decile 3
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D3'; // Share of consumption for energy use in buildings accruing to decile 3
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption|D4'; // Share of  total consumption accruing to decile 4
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,4)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D4'; // Share of  total income accruing to decile 4
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,4)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D4'; // Share of food consumption accruing to decile 4
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D4'; // Share of consumption for transportation accruing to decile 4
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D4'; // Share of consumption for energy use in buildings accruing to decile 4
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption|D5'; // Share of  total consumption accruing to decile 5
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,5)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D5'; // Share of  total income accruing to decile 5
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,5)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D5'; // Share of food consumption accruing to decile 5
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D5'; // Share of consumption for transportation accruing to decile 5
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D5'; // Share of consumption for energy use in buildings accruing to decile 5
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption|D6'; // Share of  total consumption accruing to decile 6
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,6)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D6'; // Share of  total income accruing to decile 6
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,6)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D6'; // Share of food consumption accruing to decile 6
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D6'; // Share of consumption for transportation accruing to decile 6
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D6'; // Share of consumption for energy use in buildings accruing to decile 6
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption|D7'; // Share of  total consumption accruing to decile 7
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,7)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D7'; // Share of  total income accruing to decile 7
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,7)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D7'; // Share of food consumption accruing to decile 7
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D7'; // Share of consumption for transportation accruing to decile 7
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D7'; // Share of consumption for energy use in buildings accruing to decile 7
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption|D8'; // Share of  total consumption accruing to decile 8
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,8)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D8'; // Share of  total income accruing to decile 8
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,8)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D8'; // Share of food consumption accruing to decile 8
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D8'; // Share of consumption for transportation accruing to decile 8
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D8'; // Share of consumption for energy use in buildings accruing to decile 8
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption|D9'; // Share of  total consumption accruing to decile 9
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,9)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D9'; // Share of  total income accruing to decile 9
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,9)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D9'; // Share of food consumption accruing to decile 9
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D9'; // Share of consumption for transportation accruing to decile 9
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D9'; // Share of consumption for energy use in buildings accruing to decile 9
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption|D10'; // Share of  total consumption accruing to decile 10
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = consumption_quantiles(k,10)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Income|D10'; // Share of  total income accruing to decile 10
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = income_quantiles(k,10)*100;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Food|D10'; // Share of food consumption accruing to decile 10
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Transportation|D10'; // Share of consumption for transportation accruing to decile 10
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+-varname = 'Consumption share|Energy|Buildings|D10'; // Share of consumption for energy use in buildings accruing to decile 10
+-counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+-if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
+-
+ if ind_climat > 2
+ 
+     varname = 'Policy Cost|Default';
+Index: model/nexus.climatePolicy2.sce
+===================================================================
+--- model/nexus.climatePolicy2.sce	(révision 31998)
++++ model/nexus.climatePolicy2.sce	(copie de travail)
+@@ -279,3 +279,25 @@
+     end
+ end
+ 
++
++// Lindhal price
++if ind_lindhal >=1
++    weight_regional_tax_prev = weight_regional_tax;
++    weight_regional_tax = GDP_PPP_constant ./ Ltot;
++    weight_regional_tax = weight_regional_tax ./ weight_regional_tax(ind_usa);
++    weight_regional_tax = weight_regional_tax .* (1-convergence_regional_tax(current_time_im)) + convergence_regional_tax(current_time_im);
++end
++
++// compute the difference between the target price
++if ind_lindhal ==3 & current_time_im +1 >= start_stronger_policy
++    emi_reg = sum(E_reg_use,'c') + emi_evitee;
++    world_tax_comp = sum(taxCO2_DF(:,1) .* emi_reg) ./ sum(emi_reg);
++    tax_ind_lindhal_cor(current_time_im) = tax_ind_lindhal_cor(current_time_im) .* taxMKTexo_origin(current_time_im) / world_tax_comp;
++    disp([taxMKTexo_origin(current_time_im) / world_tax_comp, taxMKTexo(current_time_im+1), taxMKTexo_origin(current_time_im+1),world_tax_comp], "taxMKTexo(current_time_im) / world_tax_comp, taxMKT,taxMKTexo(current_time_im+1), world_tax_comp");
++end
++
++//if ind_lindhal ==2 & current_time_im == 36
++if ind_lindhal ==3 & current_time_im == 36
++    csvWrite( tax_ind_lindhal_cor, OUTPUT+'/ind_lindhal_tax_correction_'+part(string(combi),1:4)+'.csv');
++end
++
+Index: model/plugins.sce
+===================================================================
+--- model/plugins.sce	(révision 31998)
++++ model/plugins.sce	(copie de travail)
+@@ -13,9 +13,9 @@
+ end
+ 
+ //Inequalities module
+-if ind_inequality == 1
+-        exec(MODEL+"nexus.inequalities.sce");
+-end
++//if ind_inequality == 1
++//        exec(MODEL+"nexus.inequalities.sce");
++//end
+ 
+ exec(MODEL+"extraction.outputs."+ETUDEOUTPUT+".sce");
+ //exec(MODEL+"extraction.outputs.ar5.sce");
+Index: patch/patch_navigate2.6_regional.patch
+===================================================================
+--- patch/patch_navigate2.6_regional.patch	(révision 32209)
++++ patch/patch_navigate2.6_regional.patch	(copie de travail)
+@@ -1,35 +1,422 @@
++Index: lib/diagnostic.sci
++===================================================================
++--- lib/diagnostic.sci	(révision 31998)
+++++ lib/diagnostic.sci	(copie de travail)
++@@ -36,4 +36,5 @@
++         - energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
++         + energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
++         ) )/1e6;
+++    end
++ endfunction
+ Index: model/diagnostic.sce
+ ===================================================================
+---- model/diagnostic.sce	(révision 31998)
++--- model/diagnostic.sce	(révision 32209)
+ +++ model/diagnostic.sce	(copie de travail)
+-@@ -75,6 +75,7 @@
+- // Peak budget
+- if ~isdef("peak_CO2_budget")
+-     peak_CO2_budget=0;
+-+    worldBudgetTot_2020_cum = 0;
+-     year_peak_CO2_budget=base_year_simulation;
++@@ -90,6 +90,7 @@
++         worldBudgetTot_2020 = sum(E_reg_use)/1e9 + sum(emi_evitee)/1e9 +  sum(CO2_indus_process + exo_CO2_AFOLU(current_time_im+1)) / 1e3 
++     end
++     worldBudgetTot_2020_cum = worldBudgetTot_2020_cum + worldBudgetTot_2020;
+++    disp("worldBudgetTot_2020_cum",worldBudgetTot_2020_cum)
++ 
++     if worldBudgetTot_2020_cum > peak_CO2_budget
++         peak_CO2_budget = worldBudgetTot_2020_cum;
++@@ -459,7 +460,7 @@
++ 
++ if current_time_im == (2020-base_year_simulation) & auto_calibration_covid<>"None"
++     disp([ [regnames;"WLD"], string([GDP_PPP_constant;sum(GDP_PPP_constant)]), string([GDP_PPP_WB_2020;sum(GDP_PPP_WB_2020)]), string([GDP_PPP_constant./GDP_PPP_WB_2020;sum(GDP_PPP_constant)/sum(GDP_PPP_WB_2020)]), string([GDP_PPP_constant./GDP_PPP_constant_prev;sum(GDP_PPP_constant)/sum(GDP_PPP_constant_prev)])], "GDP PPP IMACLIM, GDP PPP World Bank, ratio, GDP Imaclim ratio on previous");
++-    csvWrite( scale_impact_covid./(GDP_PPP_constant./GDP_PPP_WB_2020), path_autocal_covid+'/scale_impact_covid.csv');
+++    csvWrite( scale_impact_covid./(GDP_PPP_constant./GDP_PPP_WB_2020), path_autocalibration+'/scale_impact_covid.csv');
++     break
+  end
+- if current_time_im>=2020-base_year_simulation
+-@@ -82,9 +83,16 @@
+-     global emi_evitee_sav
+-     worldBudget_2020 = round(sum(E_reg_use_sav(:,7:$))/1e9) ;
+-     emiEv_2020 = round(sum(emi_evitee_sav(:,7:$))/1e9);
+--    worldBudgetTot_2020 = worldBudget_2020 + emiEv_2020;
+--    if worldBudgetTot_2020 > peak_CO2_budget
+--        peak_CO2_budget = worldBudgetTot_2020;
+-+
+-+    if ind_exo_afforestation==0
+-+        worldBudgetTot_2020 = sum(E_reg_use)/1e9 + sum(emi_evitee)/1e9 +  sum(CO2_indus_process + exo_CO2_agri_direct_nonan(:,current_time_im+1)+exo_CO2_LUCCCF_nonan(:,current_time_im+1)) / 1e3 
+-+    else
+-+        worldBudgetTot_2020 = sum(E_reg_use)/1e9 + sum(emi_evitee)/1e9 +  sum(CO2_indus_process + exo_CO2_AFOLU(current_time_im+1)) / 1e3 
+-+    end
+-+    worldBudgetTot_2020_cum = worldBudgetTot_2020_cum + worldBudgetTot_2020;
+-+
+-+    if worldBudgetTot_2020_cum > peak_CO2_budget
+-+        peak_CO2_budget = worldBudgetTot_2020_cum;
+- 	year_peak_CO2_budget=base_year_simulation+current_time_im;
++ 
++@@ -536,48 +537,6 @@
++     printf("\n		--- should be lower than 250 GtCO2 in NAVIGATE 1.5°C scenarios\n")
++     //disp("Total negative emission rises to "+string(emiEv_2020) + "   GtCO2")
++ 
++-
++-// Variable to be integrated to the "metadata indicators" .xls file
++-    // Cumulative net CO2 - 2020-2100
++-    var_observed=worldBudgetTot_2020;
++-    test_string="Cumulative net CO2 (2020-2100, Gt CO2)";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-    // Year of peak CO2 Emissions
++-    var_observed=year_peak_CO2_budget;
++-    test_string="Year of peak CO2 Emissions";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// Cumulative net CO2 (2020-2100, Gt CO2)
++-    var_observed=sum(net_negative);
++-    test_string="Cumulative net CO2 (2020-2100, Gt CO2)";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-	
++-	// Cumulative negative emission (2020-2100, Gt CO2)
++-    var_observed=sum(emiEv_2020);
++-    test_string="Cumulative negative emission (2020-2100, Gt CO2)";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-	
++-	// Final Energy 2100
++-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
++-    test_string="Final Energy - 2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-
++-
++-
++-
++-
++-
++-
++-
++-
++-
++     // save vettings scenario
++     if record_vett_carbonbudget==%t
++         co2_budget_vett =     [1150,1050,1000,800,700,700,600,400];
++@@ -591,338 +550,3 @@
++         end
+      end
+-     //NPi & NDC testing
++ end
++-
++-
++-
++-
++-
++-if current_time_im == 2019-base_year_simulation
++-
++-// Variable to be integrated to test the new OT dynamics
++-    // LDV share 2019
++-    var_observed= (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) +  + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_LDV_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// Public transport share 2019
++-    var_observed= (sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass))*10^9 / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_public_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-	
++-	// Active mode share 2019
++-	var_observed= (sum(TNM.*pkmautomobileref./100)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_active_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// air pkm 2019
++-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014);
++-    test_string="pkm_airdom_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// air pkm 2019
++-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100);
++-    test_string="pkm_airtot_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-    // LDV pkm 2019
++-    var_observed=sum((Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT)/ 1e9);
++-    test_string="pkm_LDV_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// tkm freight 2019
++-    var_observed=sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
++-	tkm_freight = sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
++-    test_string="tkm_freight_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// tkm shipping 2019
++-    var_observed=sum(Q(:,indice_mer)-DF(:,indice_mer)./convfactorOT_tkmtoDF);
++-    test_string="tkm_shipping_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// electricity in trucks and bus in 2019
++-    var_observed=	sum(alpharoad_passenger(:,indice_elec)		.*EnergyServices_road_pass(:) + alpharoad_freight(:,indice_elec)	.*EnergyServices_road_fret(:)) ..
++-	/ sum(alpharoad_passenger(:,energyIndexes)	.*(EnergyServices_road_pass(:) * ones(1,nbsecteurenergie)) + alpharoad_freight(:,energyIndexes).*(EnergyServices_road_fret(:) * ones(1,nbsecteurenergie)));
++-    test_string="truck_elec_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// Final Energy 2019 
++-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
++-    test_string="Final_Energy_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Final Energy for transport 2019
++-    var_observed=sum(energy_balance(conso_transport_eb,:,:))*Mtoe_EJ;
++-    test_string="FE_trans_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// GDP MER 2019
++-    var_observed=sum(GDP_MER_real(:))/ 1e3*usd_year1_year2;
++-    test_string="gdp_mer_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency freight 2019
++-    var_observed=sum(final_energy_freight)/tkm_freight;
++-    test_string="freight_eff_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency of trucks
++-    var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
++-    test_string="truck_eff_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency of cars
++-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto)) / (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="cars_eff_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Electrification of trucks
++-    var_observed=sum(alpharoad_freight(:,indice_elec) .* EnergyServices_road_fret) / sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret);
++-    test_string="truck_elec_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Electrification of cars
++-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT, "c") .* alphaelecauto) / sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto));
++-    test_string="cars_elec_2019";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-
++-end
++-
++-if current_time_im == 2050-base_year_simulation
++-
++-// Variable to be integrated to test the new OT dynamics
++-    // LDV share 2050
++-    var_observed= (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) +  + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_LDV_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// Public transport share 2050
++-    var_observed= (sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass))*10^9 / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_public_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-	
++-	// Active mode share 2050
++-	var_observed= (sum(TNM.*pkmautomobileref./100)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_active_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// air pkm 2050
++-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014);
++-    test_string="pkm_airdom_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// air pkm 2050
++-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100);
++-    test_string="pkm_airtot_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-    // LDV pkm 2050
++-    var_observed=sum((Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT)/ 1e9);
++-    test_string="pkm_LDV_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// tkm freight 2050
++-    var_observed=sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
++-	tkm_freight = sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
++-    test_string="tkm_freight_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// tkm shipping 2050
++-    var_observed=sum(Q(:,indice_mer)-DF(:,indice_mer)./convfactorOT_tkmtoDF);
++-    test_string="tkm_shipping_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// electricity in trucks and bus in 2050
++-    var_observed=	sum(alpharoad_passenger(:,indice_elec)		.*EnergyServices_road_pass(:) + alpharoad_freight(:,indice_elec)	.*EnergyServices_road_fret(:)) ..
++-	/ sum(alpharoad_passenger(:,energyIndexes)	.*(EnergyServices_road_pass(:) * ones(1,nbsecteurenergie)) + alpharoad_freight(:,energyIndexes).*(EnergyServices_road_fret(:) * ones(1,nbsecteurenergie)));
++-    test_string="truck_elec_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// Final Energy 2050 
++-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
++-    test_string="Final_Energy_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Final Energy for transport 2050
++-    var_observed=sum(energy_balance(conso_transport_eb,:,:))*Mtoe_EJ;
++-    test_string="FE_trans_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// GDP MER 2050
++-    var_observed=sum(GDP_MER_real(:))/ 1e3*usd_year1_year2;
++-    test_string="gdp_mer_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency freight 2050
++-    var_observed=sum(final_energy_freight)/tkm_freight;
++-    test_string="freight_eff_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency of trucks
++-    var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
++-    test_string="truck_eff_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency of cars
++-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto)) / (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="cars_eff_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Electrification of trucks
++-    var_observed=sum(alpharoad_freight(:,indice_elec) .* EnergyServices_road_fret) / sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret);
++-    test_string="truck_elec_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Electrification of cars
++-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT, "c") .* alphaelecauto) / sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto));
++-    test_string="cars_elec_2050";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-
++-end
++-
++-
++-if current_time_im == TimeHorizon 
++-
++-// Variable to be integrated to test the new OT dynamics
++-    // LDV share 2100
++-    var_observed= (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) +  + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_LDV_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// Public transport share 2100
++-    var_observed= (sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass))*10^9 / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_public_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-	
++-	// Active mode share 2100
++-	var_observed= (sum(TNM.*pkmautomobileref./100)) / ((sum(EnergyServices_road_pass) + sum(EnergyServices_rail_pass)).*10^9 + sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014) + sum(TNM.*pkmautomobileref./100) + sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="Share_active_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// air pkm 2100
++-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100 .* ShareDomAviation_2014);
++-    test_string="pkm_airdom_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// air pkm 2100
++-	var_observed= sum(alphaair.*DF(:,indice_air).*pkmautomobileref./100);
++-    test_string="pkm_airtot_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-    // LDV pkm 2100
++-    var_observed=sum((Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT)/ 1e9);
++-    test_string="pkm_LDV_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// tkm freight 2100
++-    var_observed=sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
++-	tkm_freight = sum((Q(:,indice_OT)-DF(:,indice_OT)+Q(:,indice_mer)-DF(:,indice_mer)+Q(:,indice_air)-DF(:,indice_air))./convfactorOT_tkmtoDF);
++-    test_string="tkm_freight_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// tkm shipping 2100
++-    var_observed=sum(Q(:,indice_mer)-DF(:,indice_mer)./convfactorOT_tkmtoDF);
++-    test_string="tkm_shipping_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// electricity in trucks and bus in 2100
++-    var_observed=	sum(alpharoad_passenger(:,indice_elec)		.*EnergyServices_road_pass(:) + alpharoad_freight(:,indice_elec)	.*EnergyServices_road_fret(:)) ..
++-	/ sum(alpharoad_passenger(:,energyIndexes)	.*(EnergyServices_road_pass(:) * ones(1,nbsecteurenergie)) + alpharoad_freight(:,energyIndexes).*(EnergyServices_road_fret(:) * ones(1,nbsecteurenergie)));
++-    test_string="truck_elec_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end;
++-
++-	// Final Energy 2100 
++-    var_observed=sum(energy_balance(conso_tot_eb,:,:)-energy_balance(marbunk_eb,:,:))*Mtoe_EJ;
++-    test_string="Final_Energy_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Final Energy for transport 2100
++-    var_observed=sum(energy_balance(conso_transport_eb,:,:))*Mtoe_EJ;
++-    test_string="FE_trans_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// GDP MER 2100
++-    var_observed=sum(GDP_MER_real(:))/ 1e3*usd_year1_year2;
++-    test_string="gdp_mer_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency freight 2100
++-    var_observed=sum(final_energy_freight)/tkm_freight;
++-    test_string="freight_eff_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency of trucks
++-    var_observed=sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret) / sum(EnergyServices_road_fret);
++-    test_string="truck_eff_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Efficiency of cars
++-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto)) / (sum(Tautomobile.*pkmautomobileref /100) + sum(pkm_ldv_in_OT));
++-    test_string="cars_eff_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Electrification of trucks
++-    var_observed=sum(alpharoad_freight(:,indice_elec) .* EnergyServices_road_fret) / sum(sum(alpharoad_freight, "c") .* EnergyServices_road_fret);
++-    test_string="truck_elec_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-	// Electrification of cars
++-    var_observed=sum(sum(Tautomobile.*pkmautomobileref /100 + pkm_ldv_in_OT, "c") .* alphaelecauto) / sum(sum(Tautomobile.*pkmautomobileref /100 +pkm_ldv_in_OT, "c") .* (alphaEtauto + alphaelecauto));
++-    test_string="cars_elec_2100";
++-    string_for_diag = test_string;
++-    if tool_output_diagnostic; diagnotic_list=[diagnotic_list;[string_for_diag,var_observed]]; end
++-
++-
++-end
+ Index: model/extraction-first.sce
+ ===================================================================
+ --- model/extraction-first.sce	(révision 31998)
+@@ -362,53 +749,3 @@
+  
+  exec(MODEL+"extraction.outputs."+ETUDEOUTPUT+".sce");
+  //exec(MODEL+"extraction.outputs.ar5.sce");
+-Index: study_frames/base.sce
+-===================================================================
+---- study_frames/base.sce	(révision 31998)
+-+++ study_frames/base.sce	(copie de travail)
+-@@ -967,8 +967,8 @@
+-         if ~isdef("tax20202025")
+- 	    if ind_lindhal==0
+-                 tax20202025 = 33;
+--	    elseif ind_lindhal==1
+--                tax20202025 = 80;
+-+	    elseif ind_lindhal>=1
+-+                tax20202025 = 58;
+- 	    end
+-         end
+- 	// So has to get emissions in 2025 not lower than 95% of 2019 emissions (NAVIGATE scenario constriant), we start to increase strongly the carbon tax in 2026
+-@@ -985,6 +985,17 @@
+-         temp(start_stronger_policy:(start_stronger_policy+break_year_tax_1-start_year_strong_policy)) = linspace(tax2026,taxbreak_1,(break_year_tax_1-start_year_strong_policy)+1)'*1e-6; //20WX to 20YZ
+-         temp((start_stronger_policy+break_year_tax_1-start_year_strong_policy):TimeHorizon+1) = linspace(taxbreak_1,tax2100,(final_year_simulation-break_year_tax_1 )+1)'*1e-6; //20YZ to 2100
+-         taxMKTexo = temp';
+-+
+-+        // compute the difference between the target price
+-+        if ind_lindhal >=2
+-+            if ~isfile( OUTPUT+'/ind_lindhal_tax_correction_'+part(string(combi),1:4)+'.csv')
+-+                tax_ind_lindhal_cor = ones(taxMKTexo);
+-+            else
+-+                tax_ind_lindhal_cor = csvRead( OUTPUT+'/ind_lindhal_tax_correction_'+part(string(combi),1:4)+'.csv',',');
+-+            end
+-+            taxMKTexo_origin = taxMKTexo;
+-+            taxMKTexo = taxMKTexo .* tax_ind_lindhal_cor;
+-+        end
+-     end
+- end
+- 
+-Index: study_frames/matrice_base.csv
+-===================================================================
+---- study_frames/matrice_base.csv	(révision 31998)
+-+++ study_frames/matrice_base.csv	(copie de travail)
+-@@ -32,8 +32,10 @@
+- 1103;1;1;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+- 1104;1;1;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+- 4006;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0
+--4007;8;1;0;1;1;1;0;0;0;0;0;0;1;1;0;0;0
+--4015;8;1;0;1;1;1;0;0;0;0;0;0;1;1;0;0;0
+-+4007;8;1;0;1;1;1;0;0;0;0;0;0;1;2;0;0;0
+-+40077;8;1;0;1;1;1;0;0;0;0;0;0;1;3;0;0;0
+-+4015;8;1;0;1;1;1;0;0;0;0;0;0;1;2;0;0;0
+-+401515;8;1;0;1;1;1;0;0;0;0;0;0;1;3;0;0;0
+- 4008;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0
+- 4016;8;1;0;1;1;1;0;0;0;0;0;0;2;0;0;0;0
+- 4009;8;1;0;1;1;1;0;0;0;0;0;0;2;0;1;0;0
+Index: study_frames/base.sce
+===================================================================
+--- study_frames/base.sce	(révision 31998)
++++ study_frames/base.sce	(copie de travail)
+@@ -967,8 +967,8 @@
+         if ~isdef("tax20202025")
+ 	    if ind_lindhal==0
+                 tax20202025 = 33;
+-	    elseif ind_lindhal==1
+-                tax20202025 = 80;
++	    elseif ind_lindhal>=1
++                tax20202025 = 58;
+ 	    end
+         end
+ 	// So has to get emissions in 2025 not lower than 95% of 2019 emissions (NAVIGATE scenario constriant), we start to increase strongly the carbon tax in 2026
+@@ -985,6 +985,17 @@
+         temp(start_stronger_policy:(start_stronger_policy+break_year_tax_1-start_year_strong_policy)) = linspace(tax2026,taxbreak_1,(break_year_tax_1-start_year_strong_policy)+1)'*1e-6; //20WX to 20YZ
+         temp((start_stronger_policy+break_year_tax_1-start_year_strong_policy):TimeHorizon+1) = linspace(taxbreak_1,tax2100,(final_year_simulation-break_year_tax_1 )+1)'*1e-6; //20YZ to 2100
+         taxMKTexo = temp';
++
++        // compute the difference between the target price
++        if ind_lindhal >=2
++            if ~isfile( OUTPUT+'/ind_lindhal_tax_correction_'+part(string(combi),1:4)+'.csv')
++                tax_ind_lindhal_cor = ones(taxMKTexo);
++            else
++                tax_ind_lindhal_cor = csvRead( OUTPUT+'/ind_lindhal_tax_correction_'+part(string(combi),1:4)+'.csv',',');
++            end
++            taxMKTexo_origin = taxMKTexo;
++            taxMKTexo = taxMKTexo .* tax_ind_lindhal_cor;
++        end
+     end
+ end
+ 
+Index: study_frames/matrice_base.csv
+===================================================================
+--- study_frames/matrice_base.csv	(révision 31998)
++++ study_frames/matrice_base.csv	(copie de travail)
+@@ -32,8 +32,10 @@
+ 1103;1;1;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+ 1104;1;1;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+ 4006;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0
+-4007;8;1;0;1;1;1;0;0;0;0;0;0;1;1;0;0;0
+-4015;8;1;0;1;1;1;0;0;0;0;0;0;1;1;0;0;0
++4007;8;1;0;1;1;1;0;0;0;0;0;0;1;2;0;0;0
++40077;8;1;0;1;1;1;0;0;0;0;0;0;1;3;0;0;0
++4015;8;1;0;1;1;1;0;0;0;0;0;0;1;2;0;0;0
++401515;8;1;0;1;1;1;0;0;0;0;0;0;1;3;0;0;0
+ 4008;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0
+ 4016;8;1;0;1;1;1;0;0;0;0;0;0;2;0;0;0;0
+ 4009;8;1;0;1;1;1;0;0;0;0;0;0;2;0;1;0;0

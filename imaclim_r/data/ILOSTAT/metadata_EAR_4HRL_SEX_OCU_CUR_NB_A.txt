@@ -1,0 +1,8 @@
+Mean nominal hourly earnings of employees by sex and occupation -- Annual
+Description: The earnings of employees relate to the gross remuneration in cash and in kind paid to employees, as a rule at regular intervals, for time worked or work done together with remuneration for time not worked, such as annual vacation, other type of paid leave or holidays. This is a harmonized series: (1) data reported as weekly, monthly and yearly are converted to hourly using data on average weekly hours if available; and (2) data are converted to U.S. dollars as the common currency, using exchange rates or using 2017 purchasing power parity (PPP) rates for private consumption expenditures. The latter series allows for international comparisons by taking account of the differences in relative prices between countries. For more information, refer to the concepts and definitions page.
+Subject: Earnings and labour income
+Collection: YI -- Annual indicators
+Id: EAR_4HRL_SEX_OCU_CUR_NB_A
+Time period: 1981 - 2019
+Last updated: 20/12/2020 06:28:02
+Number of records: 19260

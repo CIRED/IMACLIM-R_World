@@ -1,0 +1,13 @@
+region|region_iso|macro_region|region_iso_long
+AFR|R10AFRICA|Global South|Countries of Sub-Saharan Africa
+CHN|R10CHINA+|Global South|Countries of centrally-planned Asia; primarily China
+EUR|R10EUROPE|Global North|Eastern and Western Europe (i.e., the EU28)
+IND|R10INDIA+|Global South|Countries of South Asia; primarily India
+RAL|R10LATIN_AM|Global South|Countries of Latin America and the Caribbean
+BRA|R10LATIN_AM|Global South|Countries of Latin America and the Caribbean
+MDE|R10MIDDLE_EAST|Global South|Countries of the Middle East; Iran, Iraq, Israel, Saudi Arabia, Qatar, etc.
+USA|R10NORTH_AM|Global North|North America; primarily the United States of America and Canada
+CAN|R10NORTH_AM|Global North|North America; primarily the United States of America and Canada
+JAN|R10PAC_OECD|Global North|Pacific OECD
+CIS|R10REF_ECON|Global North|Reforming Economies of Eastern Europe and the Former Soviet Union; primarily Russia
+RAS|R10REST_ASIA|Global South|Other countries of Asia

@@ -1,0 +1,21 @@
+The 2012 release of the KLEMS Data uses NACE 2 industry classification based on ISIC 4. 
+The previous releases are provided in NACE 1 classification based on ISIC 3.1.
+In NACE 2 the economy is covered by 35 industries, in NACE 1 by 32 industries.
+ 
+As specified in the methodology notes per country provided on the klems project website, many of the
+industries are a near perfect match between both classifications, but some others not. 
+The national accounts provide data in NACE 2 for shorter, more recent time series. 
+Back casts have been done using industry matching tables available in the methodology notes per country.
+
+The methodology notes for the data for France are here: 
+
+/mounts/goree/shared/klems/raw/france/fra_sources_12i.pdf
+
+-----------------------
+
+File ISIC4to3.csv is the matching table used to adapt the France klems data in ISIC 4 to ISIC 3, 
+where one or many ISIC 4 industry-levels are matched to 1 ISIC 3 level.
+
+The produced data is unsatisfactory for the following ISIC 3 levels :
+- 20, which is matched to ISIC 4 16-18. 20 = wood and cork. 16-18 = wood products + printing
+- 21t22 = pulp, paper, printing and publishing

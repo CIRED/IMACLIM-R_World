@@ -1,0 +1,6 @@
+// BGR. Reserves, ressources and availability of energy ressources : 2009. Hannover, Germany : Bundesanstalt für Geowissenschaften und Rohstoffe (BGR) Federal Institute for Geosciences and Natural Resources ; 2009.||||
+// Energy Resources 2009||||
+http://www.bgr.bund.de/EN/Themen/Energie/Downloads/Energierohstoffe_2009_Tabellen_en.pdf?__blob=publicationFile&v=2||||
+"// Table A 4-2: Estimated Ultimate Recovery (EUR) of Conventional Natural Gas by Year-End 2007 [in Bcm]
+"||||
+//Country/Region|Production 2007|Cum. Production until 2007|Reserves 2007|Resources 20073

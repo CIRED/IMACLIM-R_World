@@ -1,0 +1,48 @@
+TODO: create variable names for file input. The input files are commented in NotesInput.txt
+
+
+1. createIndex.py
+
+Creates index from the rawdata. Only suited if the rawdata conform to a particular (typical KLEMS) format (see NotesInput.txt)
+
+- takes initial values for variables -> to amend
+- repetitive -> mk function
+- loop too long
+- insert comment : creates index based on what information ? 
+
+
+2. importKLEMSData.py
+
+Imports the rawdata and creates the same data organized in narrow format, with 1 value per line. 
+The amount of lines equals the amount of possible combinations of the categorical variables (year included).
+
+-> put input and output filenames as variables in the beginning
+-> rename AllDataRearranged in AllDataNarrow
+
+
+3. determineShares.py
+
+For some IMACLIM industrial sectors the KLEMS Data do not provide sufficiently detailed information, i.e. provide aggregated information. 
+Disaggregation, of the KLEMS Data for the KLEMS industrial sector levels concerned, is done on the basis of GTAP Capital stock data. 
+Takes as input Capital.csv (from GTAP) and Capshares.csv: 
+The first is used to specify the shares calibrating the disaggregation. The latter specifies the sectors. 
+
+
+4. aggNarrowFormat_Countries.py
+
+Linearly combines the KLEMS data to a 12-sector IMACLIM IO-format. 
+The output is per country as specified by the KLEMS Data. Outputs the data in narrow format. 
+Takes as input the shares per region as determined by determineShares.py (RegionsCapShares.csv) and 
+
+
+- the information used of CapShares is also available in RegionsCapShares.csv -> supplant
+- non-consistent naming between KLEMStoIMACLIM_products and KLEMStoIMACLIMindustries (underscore) -> amend
+
+
+5. writeOut.py
+
+Imports the data aggregated to (IMACLIM industries)^2 in narrow format to IO Tables per variable, country, year.
+
+
+
+

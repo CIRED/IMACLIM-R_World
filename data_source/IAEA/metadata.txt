@@ -1,0 +1,22 @@
+depository: Thibault Briera (briera.cired@gmail.com)
+title: Nuclear Power Reactors in the Word, International Atomic Energy Agency
+source: https://www-pub.iaea.org/MTCD/Publications/PDF/rds2-35web-85937611.pdf
+date: 2015
+rights:
+
+description:
+
+Nuclear Power Reactors in the World is an annual publication that presents the most recent data pertaining to reactor units in IAEA Member States.
+This  thirty-fifth  edition  of  Reference  Data  Series  No.  2  provides  a  detailed  comparison  of  various  statistics  up  to and  including  31  December  2014. 
+
+coverage: World, 1985-2014
+creator: International Atomic Energy Agence (IAEA)
+
+publisher:
+
+BibliographicResource:
+
+Notes:
+This script imports IAEA data in pdf. The table p.17-18 ("Operational reactors and net electrical power, from 1985 to 2014") for the year 2014 is manually copied in the csv file "Nuclear_Power_Reactor.csv".
+
+

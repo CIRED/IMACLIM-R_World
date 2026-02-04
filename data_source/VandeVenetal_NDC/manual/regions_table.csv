@@ -1,0 +1,66 @@
+Region;IMACLIM_Reg
+Africa_Eastern;AFR
+Africa_Northern;AFR
+Africa_Southern;AFR
+Africa_Western;AFR
+Argentina;LAM
+Australia_NZ;OECD
+Brazil;LAM
+Canada;OECD
+Central America and Caribbean;LAM
+Central Asia;RASIA
+China;CHN
+Colombia;LAM
+EU-12;EUR
+EU-15;EUR
+Europe_Eastern;EUR
+Europe_Non_EU;EUR
+European Free Trade Association;EUR
+India;IND
+Indonesia;RASIA
+Japan;OECD
+Mexico;LAM
+Middle East;MDE
+Pakistan;RASIA
+Russia;REF
+South Africa;AFR
+South America_Northern;LAM
+South America_Southern;LAM
+South Asia;RASIA
+South Korea;OECD
+Southeast Asia;RASIA
+Taiwan;RASIA
+USA;USA
+World;World
+AFR;AFR
+ASI;RASIA
+BRA;LAM
+CHI;CHN
+CSA;LAM
+EUR;EUR
+IND;IND
+MID;MDE
+ROW;OECD
+RUS;REF
+WORLD;World
+ASEAN;RASIA
+ATE;RASIA
+AUS;OECD
+CAN;OECD
+CHL;LAM
+CHN;CHN
+EU;EUR
+JPN;OECD
+KOR;OECD
+MEA;MDE
+MEX;LAM
+OAFR;AFR
+OCSA;LAM
+ODA;UNK
+OE;UNK
+ZAF;AFR
+EEU;EUR
+FSU;REF
+SKO;OECD
+WEU;EUR
+"";UNK

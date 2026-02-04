@@ -1,0 +1,6 @@
+Installed electricity production capacities
+Sources : IRENA for ENR; Global Power plant for Fossil fuels tech.; IAEA for nuke
+
+Data by technology family (coal, gas, nuke, solar etc.) is extracted for the different years the same way as 2014 data: either manually or using R scripts.
+In order to get a 12x26 csv (i.e. to get the IMC technological disaggregation) the script calibration.nexus.electricity.sce is run with the previously extracted dataframe.
+This way, we make sure that the assumptions for technological disaggregation are consistent with calibration year's (for instance, subcritical coal accounting for 60% of total coal capacity).

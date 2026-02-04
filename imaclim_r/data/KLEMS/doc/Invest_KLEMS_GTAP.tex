@@ -1,0 +1,1252 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt,a4paper]{article} % use larger type; default would be 10pt
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+%\usepackage{geometry} % to change the page dimensions
+%\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\def\hybrid{\topmargin -10pt    \oddsidemargin 0pt
+        \headheight 0pt \headsep 0pt
+       \textwidth 6.5in        % US paper
+        \textheight 9in         % US paper
+       \textwidth 6.25in       % A4 paper
+      \textheight 9.5in       % A4 paper
+  \marginparwidth .875in
+       % \parskip 5pt plus 1pt   \jot = 1.5ex
+        }
+     %The default is set to be hybrid
+\hybrid
+
+\usepackage{graphicx} % support the \includegraphics command and options
+\usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\input{libraries.tex}
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+\usepackage{longtable}
+\usepackage{pdflscape}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{natbib}
+\usepackage{changepage}
+\usepackage{rotating}
+\usepackage{amsmath, amsthm} 
+\usepackage{amsfonts}
+\usepackage{amssymb,graphics,psfrag}
+%\usepackage[bottom]{footmisc}
+
+\usepackage{mathrsfs}
+%\usepackage{cite}
+%\usepackage{setspace}
+\usepackage{color}
+%\usepackage{mathtools}
+
+
+\textwidth=15cm
+\usepackage[textsize=small,textwidth=2.2cm,shadow]{todonotes}
+\newcommand\ruben[2][]{\todo[color=green!50,#1]{rb: #2}}
+\newcommand\ri[1]{\ruben[inline]{#1}}
+\newcommand\rb[1]{\textcolor{green!80!black}{#1}}
+\newcommand\ru[1]{\textcolor{green!80!black}{\sout{#1}}}
+
+%\usepackage[marginpar]{todo}
+
+
+%%% HEADERS & FOOTERS
+%\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+%\pagestyle{fancy} % options: empty , plain , fancy
+%\renewcommand{\headrulewidth}{0pt} % customise the layout...
+%\lhead{}\chead{}\rhead{}
+%\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+\floatstyle{plaintop}
+\restylefloat{table}
+
+\title{Using the KLEMS capital input database to detail capital investment per sector in IMACLIM ; Methodology}
+%\author{The Author}
+\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed
+\setlength{\tabcolsep}{20pt}
+\renewcommand{\arraystretch}{1.3}
+\setlength{\parskip}{1em}
+\begin{document}
+\maketitle
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\input{goals.tex}
+
+\section{Description of the KLEMS data}
+\subsection{Capital input variables}
+
+The period covered is 1970 - 2007, for the variables summarized in \cref{tbl:kDataSummary}.
+Data at a 32 industry-level (table \ref{IndustriesKLEMS}).
+The 32 industries invest in 8 types of products (table \ref{CapAssets}).
+
+\subsubsection{Gross fixed capital formation, I} 
+GFCF\footnote{
+    A more complete definition can be found at \url{http://stats.oecd.org/glossary/detail.asp?ID=1173}.
+} is acquisition of fixed assets less disposal of fixed assets, where disposal refers to the sale of assets.
+Disposal does not include capital consumption nor losses due to natural disasters.
+\subsubsection{Price index, Ip} \label{hedonic}
+The price index used in the KLEMS database is the hedonic price index \cite{timmer_towards_2000} \cite{timmer_eu_2007-1}. It differs from a 'conventional' price index in quality adjustement method. Conventional price indexes are based on the matching method which records price changes holding constant the characteristics of the transaction. The quality adjustment problem arrises when matching is not possible because of products leaving or entering the market, which introduces a sampling problem. 
+
+A hedonic price index is based on a hedonic function, wich specifies a relationship between prices and the characteristics of the product. For ICT equipement, specifically computers, the hedonic price index decreases much faster than a conventional price index. Thus, current computers have a much higher value when expressed in an older base year's currency. A detailed account of possible critques of the hedonic price index is given in
+\cite{triplett_handbook_2004}, critiques which center around - in the case of computers - what exactly is captured by the very fast decreasing of the index. Leaving this issue at the side, when using the price index or real economic variables corrected by it, one has to keep in mind the consistent and fast quality increase which has been going on in computer technology: investing in 1 computer today is assumed to being equivalent to investing in many more computers from years ago. When doing productivity measurements, it is obviously necessary to take into account quality improvements in quality. When confronting the question of a particular industry's investment pattern, one would want to look at for example what the portion of a budget of that industry is, at that moment, that is allocated to a particular asset. Thus one wants to work with nominal prices and the ratio of those nominal prices to the total amount invested. From this point of view, the time series for real investment, which show an enormous increase in ICT assets, mean that every year more and more computer power is installed. It does not mean that every year, over the years, a bigger portion of capital (in the nominal money sense), goes to computer assets.%, or that since this new asset is amongst us, higher total investment is needed.
+%On the other hand, if newer more performant computers require more material and energy input to produce, then there is a possible correlation between the increase in real investment and the increase in capital input where the latter is taken in the sense of materials and energy input, correlation captured via the hedonic price index.
+The price index going down fast for IT or computers represents efficiency gains, which in the case of computers are not (only) translated in lowering prices in the sense of what portion of income (national, household) goes to a particular product, but is translated in quality gains, which is apparently what demand dictates.
+
+Countries using a hedonic deflator are USA, Japan, France and Denmark (need to check)\cite{timmer_eu_2007-1}. For many countries, hedonic price indices are not available. In that case, the US hedoncic price index has been used, using a harmonization method based on assuming the difference between price changes in ICT and non-ICT capital the same across countries \cite{schreyer_measuring_2001}. 
+\subsubsection{Fixed capital stock, K}
+Fixed capital stock is determined by the aggregation of the value of fixed assets, taking into account their age-price profile, see below in the section on Consumption of fixed capital. To aggregate, acquisition prices need to be corrected by a price index. 
+
+\subsubsection{Capital compensation, CAP} \ruben{what does it represent? how is it computed?}
+Capital compensation is calculated as value added minus labour compensation. Labour compensation is calculated by supposing all workers are  compensated at the same rate as employees.
+\subsubsection{Consumption of fixed capital, D}
+Consumption of fixed capital (CFC) is the difference between successive real market values of an asset. It represents the decline in the future benefits of the assets due to their use in the production process. The decline in the value of fixed assets of governments and firms, and of dwellings of households. Unforseen obsolescene (for example due to accidents and natural disasters) is not included. 
+
+The value of an asset is determined by the rentals it will earn, the discount rate and its scrap value. Scrap value is usually small compared to the vlaue of the asset determined by the former two variables. The value of an asset is the actualised sum of the rentals it will generate per year during its service life. The rentals are equal to the quantity of services the asset will generate times the unit price. The decline in future benefits then results form the fact that the asset has a finite
+service life and that it will generate a smaller and smaller quantity of services. This relationship between rentals and the value of an assets is used to determine the pattern of the values of an asset over its service life, which is called the age-price profile of an asset.  \cite{oecd_measuring_2001}.
+
+\emph{Value} in the previous paragraph is to be understood as market price, since through rational investor and producer behaviour, market mechanisms should equalize the market price of an asset and its value as determined herabove.
+
+The age-price profile can be used to calculate the difference between beginning and end of year asset-values. In practice, many countries do not use age-price profiles to determin CFC, but apply depreciation functions to the gross value of assets. Using a specific depreciation function implies adopting a specific age-price profile.
+
+\subsubsection{Depreciation rates, Deprate}
+The depreciation rates used are specific for asset type and industry, and do not vary per country and over time. The rates used are the ones from the US Bureau of Economic Analysis (BEA).
+
+\subsubsection{Industry rate of return on capital, IRR}
+
+\begin{table}
+    \centering
+    \input{kDataSummary.tex}
+    \caption{\label{tbl:kDataSummary}Structure of the capital database}
+\end{table}
+
+\subsection{Labour and other variables}
+Generally data at a 72 industry-level, except USA, Japan, Korea, Malta, Cyprus and Australia. Variables:
+
+\begin{itemize}
+    \item Gross output (current basic prices, volume indices)
+    \item Intermediate inputs (current purchasers' prices, volume) + energy, material, service. The prices used are purchasers' prices and include margins that should be reallocated to trade and transportation. \ruben{what disaggregation?}
+        \begin{itemize}
+            \item E = 10-12 (energy mining products) + 23 (oil refining products), 40, electricity and gas products, where the codes used refer to the NACE1 classification of industries, see table \ref{IndustriesKLEMS}.
+            \item S = 50-99
+            \item M = remaining = AtB + 13t22 + 24t37 + 41 + F
+        \end{itemize}
+    \item Gross value added (current basic prices, volume, per hour worked)
+    \item Gross operating surplus
+    \item Taxes minus subsidies on production
+    \item Capital compensation (Total, ICT versus non-ICT)
+    \item Capital services (Total, ICT versus non-ICT)
+\end{itemize}
+
+and for the workforce:
+\begin{itemize}
+    \item Compensation of employees
+    \item Number of persons engaged
+    \item Number of employees
+    \item Total hours worked by persons engaged (+ differentiation per age, skill, sex)
+    \item Total hours worked by employees
+    \item Labour compensation (skill differentiation)
+    \item Labour services
+\end{itemize}
+
+\input{dataCountries.tex}
+
+\subsection{Regions covered}
+
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{8pt}
+\tiny
+\begin{longtable}{| l | l | l | l |}
+%\begin{tabular}{| l | p{360pt} | p{80pt} |}
+\hline	
+IMACLIM regions	&	Country	&	Basic (labour etc.)	&	Capital input	\\
+\hline
+Enlarged Europe	&	Austria	&	X	&	X	\\
+	&	Belgium	&	X	&	confidential	\\
+	&	Denmark	&	X	&	X	\\
+	&	Finland	&	X	&	X	\\
+	&	France	&	X	&	confidential	\\
+	&	Germany	&	X	&	X	\\
+	&	United Kingdom	&	X	&	X	\\
+	&	Greece	&	X	&		\\
+	&	Ireland	&	X	&	confidential	\\
+	&	Italy	&	X	&	X	\\
+	&	Luxembourg	&	X	&		\\
+	&	Netherlands	&	X	&	X	\\
+	&	Portugal	&	X	&		\\
+	&	Spain	&	X	&	X	\\
+	&	Sweden	&	X	&	X	\\
+	&	Switzerland	&		&		\\
+	&	Rest of EFTA	&		&		\\
+	&	Rest of Europe	&		&		\\
+	&	Albania	&		&		\\
+	&	Bulgaria	&		&		\\
+	&	Croatia	&		&		\\
+	&	Cyprus	&	X	&		\\
+	&	Czech Republic	&	X	&	X	\\
+	&	Hungary	&	X	&	confidential	\\
+	&	Malta	&	X	&		\\
+	&	Poland	&	X	&		\\
+	&	Romania	&		&		\\
+	&	Slovakia	&	X	&		\\
+	&	Slovenia	&	X	&	X	\\
+	&	Estonia	&	X	&		\\
+	&	Latvia	&	X	&		\\
+	&	Lithuania	&	X	&		\\
+\hline
+Canada	&		&	X	&	X	\\
+\hline
+USA	&		&	X	&	X	\\
+\hline
+OCDE Pacifique	&	Australia	&	X	&	X	\\
+	&	New-Zealand	&		&		\\
+	&	Japan	&	X	&	X	\\
+	&	Korea	&	X	&	X	\\
+\hline
+China	&	China	&		&	X (1980 - 2010)	\\
+\hline
+India	&	India	&	X	&	X (Cap stock \& services 1980 - 2008)	\\
+\hline
+Brazil	&	Brazil	&		&		\\
+\hline
+Africa	&		&		&		\\
+\hline
+Rest of Asia	&	Asia KLEMS under construction	&		&		\\
+\hline
+Rest of Latin America	&	Latin America KLEMS under construction.	&		&		\\
+\hline
+	&	Argentina	&	X	&	X Cap stock + ?(1990 - 2010)	\\
+\hline
+CEI	&	Russian Federation	&	X	&	X Cap compensation \& services 1995 - 2009	\\
+	&	Rest of Former Soviet Union.	&		&		\\
+\hline
+%\end{tabular}
+\caption{Regions covered by the KLEMS data versus IMACLIM regions.}
+\label{RegionsKLEMS}
+\end{longtable}
+
+\normalsize
+
+\section{KLEMS Capital input data}
+The capital input data provided by the KLEMS database are structured in the form of a use table. More generally, all the variables in the database are provided according to the detailed framework of supply- and use tables (SUTs) \cite{timmer_eu_2007}. In 1995, SUTs where added to the European System of Accounts (ESA), and constitute, together with input-output tabels, ESA95 \cite{eurostat_eurostat_2008}. Unlike input-output tables, SUTs are not symmetric with respect to the column and row entries: the supply and use tables list products in the rows and industries in the columns. The supply table shows for each product by which industries it is produced and how much is imported. The use table shows per product type in what amounts the different industries consume the product as a production factor, as well as the final uses, i.e. final consumption, investment and exports.
+
+The level of detail provided by the KLEMS database in distinguishing between product types and industrial sectors, is guided both by the imperative of consistency accross countries and by the level of detail needed for the database to be an effective tool to analyse productivity in the European Union at the industry level.
+
+The classification used for industries is the \href{http://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_NOM_DTL&StrNom=NACE_1_1}{‘General Industrial Classification of Economic Activities within the European Communities’ (NACE) revision 1.1}\footnote{Link consulted July 2016.} and the classification employed for products is the ‘Classification of Products by Activity’ (CPA).
+
+\subsection{Industries}
+The KLEMS database provides at its most detailed level data for 72 industries. These consist of the 60 industries used by almost all EU countries% in the constitution of national SUTs since 1995
+, to which further detail was added when particular industries stood out with regard to investment in skills, R\&D, information and communication technologies (ICT) or ICT share in output. On this basis, the following 8 industries were added because beleived to carry information essential for productivity analysis: pharmaceuticals, insulated wire, electronic valves, telecommunication equipment, scientific instruments, manufacturing of ships, manufacturing of aircraft and
+legal/technical/advertising services. Because in practice data availability varies, for growth accounting variables including capital formation variables, a minimum list of 31 sectors was used \cite{timmer_eu_2007}.Table \ref{IndustriesKLEMS} lists the 71 industries for which the KLEMS project collected information and shows at what level of detail capital input data are available.
+
+For some countries, notably for the US, data is available at a more detailed industry level (is there?).
+
+\tiny
+
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{8pt}
+\begin{longtable}{|l|l|p{1cm}|}
+%\begin{tabular}{| l | p{360pt} | p{60pt} |}
+\hline	
+ NACE\footnote{Nomenclature statistique des activités économiques dans la Communauté européenne} code	&	Industries	&	Growth accounting variables availability	\\
+TOT	&	TOTAL ECONOMY	&	X	\\
+AtB	&	AGRICULTURE, HUNTING, FORESTRY AND FISHING	&	X	\\
+A	&	…AGRICULTURE, HUNTING AND FORESTRY	&		\\
+1	&	……Agriculture	&		\\
+2	&	……Forestry	&		\\
+B	&	…FISHING	&		\\
+C	&	MINING AND QUARRYING	&	X	\\
+10t12	&	…MINING AND QUARRYING OF ENERGY PRODUCING MATERIALS	&		\\
+10	&	……Mining of coal and lignite; extraction of peat	&		\\
+11	&	……Extraction of crude petroleum and natural gas and services	&		\\
+12	&	……Mining of uranium and thorium ores	&		\\
+13t14	&	…MINING AND QUARRYING EXCEPT ENERGY PRODUCING MATERIALS	&		\\
+13	&	……Mining of metal ores	&		\\
+14	&	……Other mining and quarrying	&		\\
+D	&	TOTAL MANUFACTURING	&	X	\\
+15t16	&	…FOOD PRODUCTS, BEVERAGES AND TOBACCO	&	X	\\
+15	&	……Food products and beverages	&		\\
+16	&	……Tobacco products	&		\\
+17t19	&	…TEXTILES, TEXTILE PRODUCTS, LEATHER AND FOOTWEAR	&	X	\\
+17t18	&	……Textiles and textile products	&		\\
+17	&	………Textiles	&		\\
+18	&	………Wearing Apparel, Dressing And Dying Of Fur	&		\\
+19	&	……Leather, leather products and footwear	&		\\
+20	&	…WOOD AND PRODUCTS OF WOOD AND CORK	&	X	\\
+21t22	&	…PULP, PAPER, PAPER PRODUCTS, PRINTING AND PUBLISHING	&	X	\\
+21	&	……Pulp, paper and paper products	&		\\
+22	&	……Printing, publishing and reproduction	&		\\
+221	&	………Publishing	&		\\
+22x	&	………Printing and reproduction	&		\\
+23t25	&	…CHEMICAL, RUBBER, PLASTICS AND FUEL PRODUCTS	&	X	\\
+23	&	……Coke, refined petroleum products and nuclear fuel	&	X	\\
+24	&	……Chemicals and chemical products	&	X	\\
+244	&	………Pharmaceuticals	&		\\
+24x	&	………Chemicals excluding pharmaceuticals	&		\\
+25	&	……Rubber and plastics products	&	X	\\
+26	&	…OTHER NON-METALLIC MINERAL PRODUCTS	&	X	\\
+27t28	&	…BASIC METALS AND FABRICATED METAL PRODUCTS	&	X	\\
+27	&	……Basic metals	&		\\
+28	&	……Fabricated metal products	&		\\
+29	&	…MACHINERY, NEC	&	X	\\
+30t33	&	…ELECTRICAL AND OPTICAL EQUIPMENT	&	X	\\
+30	&	……Office, accounting and computing machinery	&		\\
+31t32	&	……Electrical engineering	&		\\
+31	&	………Electrical machinery and apparatus, nec	&		\\
+313	&	…………Insulated wire	&		\\
+31x	&	…………Other electrical machinery and apparatus nec	&		\\
+32	&	………Radio, television and communication equipment	&		\\
+321	&	…………Electronic valves and tubes	&		\\
+322	&	…………Telecommunication equipment	&		\\
+323	&	…………Radio and television receivers	&		\\
+33	&	……Medical, precision and optical instruments	&		\\
+331t3	&	………Scientific instruments	&		\\
+334t5	&	………Other instruments	&		\\
+34t35	&	…TRANSPORT EQUIPMENT	&	X	\\
+34	&	……Motor vehicles, trailers and semi-trailers	&		\\
+35	&	……Other transport equipment	&		\\
+351	&	………Building and repairing of ships and boats	&		\\
+353	&	………Aircraft and spacecraft	&		\\
+35x	&	………Railroad equipment and transport equipment nec	&		\\
+36t37	&	…MANUFACTURING NEC; RECYCLING	&	X	\\
+36	&	……Manufacturing nec	&		\\
+37	&	……Recycling	&		\\
+E	&	ELECTRICITY, GAS AND WATER SUPPLY	&	X	\\
+40	&	…ELECTRICITY AND GAS	&		\\
+40x	&	……Electricity supply	&		\\
+402	&	……Gas supply	&		\\
+41	&	…WATER SUPPLY	&		\\
+F	&	CONSTRUCTION	&	X	\\
+G	&	WHOLESALE AND RETAIL TRADE	&	X	\\
+50	&	……Sale, maintenance and repair of motor vehicles and motorcycles; retail sale of	&	X	\\
+51	&	……Wholesale trade and commission trade, except of motor vehicles and motorcycles	&	X	\\
+52	&	……Retail trade, except of motor vehicles and motorcycles; repair of household goods	&	X	\\
+H	&	HOTELS AND RESTAURANTS	&	X	\\
+I	&	TRANSPORT AND STORAGE AND COMMUNICATION	&	X	\\
+60t63	&	…TRANSPORT AND STORAGE	&	X	\\
+60	&	……Inland transport	&		\\
+61	&	……Water transport	&		\\
+62	&	……Air transport	&		\\
+63	&	……Supporting and auxiliary transport activities; activities of travel agencies	&		\\
+64	&	…POST AND TELECOMMUNICATIONS	&	X	\\
+JtK	&	FINANCE, INSURANCE, REAL ESTATE AND BUSINESS SERVICES	&	X	\\
+J	&	…FINANCIAL INTERMEDIATION	&	X	\\
+65	&	……Financial intermediation, except insurance and pension funding	&		\\
+66	&	……Insurance and pension funding, except compulsory social security	&		\\
+67	&	……Activities related to financial intermediation	&		\\
+K	&	…REAL ESTATE, RENTING AND BUSINESS ACTIVITIES	&	X	\\
+70	&	……Real estate activities	&	X	\\
+71t74	&	……Renting of m\&eq and other business activities	&	X	\\
+71	&	………Renting of machinery and equipment	&		\\
+72	&	………Computer and related activities	&		\\
+73	&	………Research and development	&		\\
+74	&	………Other business activities	&		\\
+741t4	&	…………Legal, technical and advertising	&		\\
+745t8	&	…………Other business activities, nec	&		\\
+LtQ	&	COMMUNITY SOCIAL AND PERSONAL SERVICES	&	X	\\
+L	&	…PUBLIC ADMIN AND DEFENCE; COMPULSORY SOCIAL SECURITY	&	X	\\
+M	&	…EDUCATION	&	X	\\
+N	&	…HEALTH AND SOCIAL WORK	&	X	\\
+O	&	…OTHER COMMUNITY, SOCIAL AND PERSONAL SERVICES	&	X	\\
+90	&	……Sewage and refuse disposal, sanitation and similar activities	&		\\
+91	&	……Activities of membership organizations nec	&		\\
+92	&	……Recreational, cultural and sporting activities	&		\\
+921t2	&	………Media activities	&		\\
+923t7	&	………Other recreational activities	&		\\
+93	&	……Other service activities	&		\\
+P	&	…PRIVATE HOUSEHOLDS WITH EMPLOYED PERSONS	&	X	\\
+Q	&	…EXTRA-TERRITORIAL ORGANIZATIONS AND BODIES	&		\\
+\hline
+%\end{tabular}
+\caption{Industry classification in KLEMS.}
+\label{IndustriesKLEMS}
+\end{longtable}
+%\clearpage
+\normalsize
+
+\subsection{Product types}\label{ProductTypes}
+At the lowest level of aggregation, the product types used in the KLEMS database are: residential structures, non-residential structures, infrastructure, transport equipment, computing equipment, communications equipment, software, other machinery and equipment, products of agriculture and forestry, other products, software, other intangibles. This minimum list with 11 asset types was defined because most European countries provide a limited amount of asset detail in the capital formation matrices. The capital investment data are available for a slightly more aggregated version of 8 asset types, listed in table \ref{CapAssets}.
+
+\begin{table}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{| l | l | p{160pt} |}
+\hline			
+IMACLIM	&	Asset types	&	  \\	
+\hline	
+Industries	&	Computing equipment	&	IT	\\
+Industries	&	Communications equipment	&	CT	\\
+Autres \& services	&	Software	&	Soft	\\
+Industries	&	Transport Equipment	&	TraEq	\\
+Industries	&	Other Machinery and Equipment	&	OMach	\\
+Construction	&	Total Non-residential investment	&	OCon = NRStruc + Infra	\\
+Construction	&	Residential structures	&	RStruc	\\
+Autres \& services + Agri	&	Other assets	&	Other = Agri + Oth + OGFCFI	\\
+\hline
+& ICT assets & ICT = IT + CT + Soft \\
+& non-ICT assets & Non-ICT = TraEq + Omach + OCon + Rstruc + Other \\
+& All assets & ICT + Non-ICT \\
+\hline
+\end{tabular}
+\caption{Aggregation level of asset types for which capital input data are available. NRStruc = non-residential structures, Infra = infrastructure, Agri = agriculture, Other = other products, OGFCFI = Other intangibles.}
+\label{CapAssets}
+\end{table}
+
+A more detailed description of the contents of each of the asset-levels is obtained by referring to the 1993 System of National Accounts\footnote{
+    Cf. Chapter XIII. The balance sheet, Annex: Definitions of assets.
+} \cite{commission1993system}, and the OECD manual ``Measuring Capital''\cite{oecd_measuring_2001}\footnote{
+    Cf. Chapter 3, ``Coverage and classification of stocks and flows, Classification by asset type, 3.8''.
+}.
+They are listed in \cref{table:CapAssetsDetailed}.
+
+
+\begin{table}
+    \setlength{\tabcolsep}{6pt}
+    \footnotesize
+    \vskip-0.0cm\hskip-2.0cm\begin{tabular}{| l | l | l | p{110pt} | p{260pt} |}
+        \hline	
+        \rot{Tangibles}	&	RStruc	&		&	Dwellings	&	Buildings that are used entirely or primarily as residences, including any associated structures, such as garages, and all permanent fixtures customarily installed in residences. Houseboats, barges, mobile homes and caravans used as principal residences of households are also included, as are historic monuments identified primarily as dwellings. Costs of site clearance and preparation are also included.	\\
+        \cline{2-5}
+        &	OCon	&	= NRStruc	&	Non-residential structures	&	Buildings other than dwellings, including fixtures, facilities and equipment that are integral parts of the structures and costs of site clearance and preparation. Historic monuments identified primarily as non-residential buildings are also included. Examples include products included in CPC class 5212, nonresidential buildings, such as warehouse and industrial buildings, commercial buildings, buildings for public entertainment, hotels, restaurants, educational buildings, health buildings, etc.	\\
+        \cline{3-5}
+        &		&+	Infra	&	Other structures \newline (=infrastructure)	&	Structures other than buildings, including the cost of the streets,
+        sewers and site clearance and preparation other than for residential
+        or non-residential buildings. Also included are historic
+        monuments for which identification as dwellings or nonresidential
+        buildings is not possible and shafts, tunnels and other
+        structures associated with mining subsoil assets. (Major
+        improvements to land, such as dams and dykes for flood control,
+        are included in the value of land.)
+        Examples include products included in CPC group 522, civil
+        engineering works, such as highways, streets, roads, railways and
+        airfield runways; bridges, elevated highways, tunnels and
+        subways; waterways, harbours, dams and other waterworks; longdistance
+        pipelines, communication and power lines; local pipelines
+        and cables, ancillary works; constructions for mining and
+        manufacture; and constructions for sport and recreation.	\\
+        \cline{2-5}
+        &	TraEq	&		&	Transport equipment	&	Equipment for moving people and objects: motor vehicles, trailers and semitrailers; ships;
+        railway and tramway locomotives and rolling stock; aircraft and
+        spacecraft; and motorcycles, bicycles, etc.	\\
+        \cline{2-5}
+        &	OMach	&		&	Machinery and equipment  \newline excluding communications  \newline equipment and
+        computers \newline (office machinery?) 	&	Machinery and equipment not elsewhere classified. Examples
+        include products other than parts included in CPC divisions 43,
+        general purpose machinery; 44, special purpose machinery; 45,
+        office, accounting and (computing equipment), 46, electrical
+        machinery and apparatus, 47, radio, television and (communication
+        equipment and apparatus); and 48, medical appliances, precision
+        and optical instruments, watches and clocks.\\
+        \cline{2-5}
+        &	IT	&		&		&		\\
+        \cline{2-5}
+        &	CT	&		&		&		\\
+        \cline{2-5}
+        &	Other	&	=Agri	&	Cultivated assets	&		\\
+        \cline{3-5}
+        &		&	+Other	&		&	Other examples are
+        products other than parts included in CPC groups 337, fuel
+        elements (cartridges) for nuclear reactors; 381, furniture; 383,
+        musical instruments; 384, sports goods; and 423, steam generators
+        except central heating boilers.	\\
+        \cline{1-1} \cline{3-5}
+        \rot{Intangibles}	&		&	+OGFCFI	&	Mineral exploration, \newline Entertainment, literary and \newline artistic originals	&		\\
+        \cline{2-5}
+        &	Soft	&		&		&	Computer programs, program descriptions and supporting materials for both systems and applications software. Included are purchased software and software developed on own account, if the expenditure is large. Large expenditures on the purchase, development or extension of computer databases that are expected to be used for more than one year, whether marketed or not, are also included.	\\
+        \hline
+    \end{tabular}
+    \caption{Detailed description of the KLEMS asset-levels, SNA 1993 \cite{commission1993system}.}
+    \label{table:CapAssetsDetailed}
+\end{table}
+
+
+
+
+\subsection{From the KLEMS use table to the IMACLIM IO table}
+
+For the purpose of using the capital formation data provided by the detailed use table as input for the IMACLIM model, the use table needs to be transformed to the input-output form with 12 specified sectors. To this end, the 11 product types specified in KLEMS to which investment is directed need to be mapped to the corresponding producing industries, and secondly, the 31 industries for which the KLEMS database specifies capital investment need to be mapped to the GTAP sectors. 
+
+\subsubsection{Mapping industries}
+
+Mapping industries is a straightforward procedure since information is available on the correspondance between the GTAP sectorial divisions and the International Standard Industrial Classification (ISIC) classification. NACE is the European adaptation of the ISIC. The correspondance is given in table \ref{IndKLEMSGTAP}.
+
+\renewcommand{\arraystretch}{1.15}
+\begin{table}[!p]
+    \tiny
+\vskip-0.0cm\hskip-2.0cm\begin{tabular}{| p{110 pt} | l | p{180 pt}| p{92 pt}|}
+\hline
+	&	code	&	EU KLEMS	&	GTAP	\\
+\hline							
+AtB & AtB & Agriculture, Hunting, Forestry And Fishing & pdr wht gro v\_f osd c\_b pfb ocr ctl oap rmk wol frs fsh \\
+\hline 
+C & C & Mining And Quarrying & coa oil gas omn \\
+\hline 
+D & 15t16 & Food , Beverages And Tobacco & cmt omt vol mil pcr sgr ofd b\_t \\
+Total Manufacturing & 17t19 & Textiles, Textile , Leather And Footwear & tex lea \\
+& 20 & Wood And Of Wood And Cork & lum \\
+& 21t22 & Pulp, Paper, Paper , Printing And Publishing & ppp \\
+& 23t25 & Chemical, Rubber, Plastics And Fuel & crp p\_c \\
+& 23 & Coke, Refined Petroleum And Nuclear Fuel & p\_c \\
+& 24 & Chemicals And Chemical Products & crp \\
+& 25 & Rubber And Plastics & crp \\
+& 26 & Other Non-Metallic Mineral & nmm \\
+& 27t28 & Basic Metals And Fabricated Metal & is nfm fmp \\
+& 29 & Machinery, nec & ome \\
+& 30t33 & Electrical and Optical Equipment & ome \\
+& 34t35 & Transport Equipment & mvh otn \\
+& 36t37 & Manufacturing nec; Recycling & omf \\
+\hline 
+E & E & Electricity, Gas and Water Supply & ely gdt wtr \\
+\hline 
+F & F & Construction & cns \\
+\hline 
+G & 50 & Sale, Maintenance and Repair of Motor Vehicles and Motorcycles; Retail Sale of Fuel & trd \\
+Wholesale and Retail Trade & 51 & Wholesale Trade and Commission Trade, Except of Motor Vehicles and Motorcycles & trd \\
+& 52 & Retail Trade, Except of Motor Vehicles and Motorcycles; Repair of Household Goods & trd \\
+\hline 
+H & H & Hotels and Restaurants & trd \\
+\hline 
+I & 60t63 & transport and storage & otp wtp atp \\
+Transport and Storage and Communication & 64 & Post and Telecommunications & cmn \\
+\hline 
+JtK & J & Financial Intermediation & ofi isr \\
+\begin{flushleft}Finance, Insurance, Real Estate and Business Services \end{flushleft}& 70 & Real Estate Activities & obs \\
+K & 71t74 & Renting of M\&Eq and Other Business Activities & obs \\
+\hline 
+LtQ & L & Public Admin and Defence; Compulsory Social Security & osg \\
+Community Social & M & Education & osg \\
+and Personal Services & N & Health and Social Work & osg \\
+ & O & Other Community, Social and Personal Services & osg \\
+ & P & Private Households With Employed Persons & ros \\
+& Q & Extra-Territorial Organizations and Bodies & osg \\
+
+\hline
+\end{tabular}
+\caption{Correspondance between the industrial levels used in KLEMS and GTAP.}
+\label{IndKLEMSGTAP}
+\end{table}
+
+Although the IMACLIM model uses 12 sectors and the KLEMS database provides capital input data for a 32 sector division, in three cases IMACLIM uses a more detailed subdivision of the corresponding KLEMS aggregation level: 
+\begin{itemize}
+\item The IMACLIM sectors Coal, Crude oil and Natural Gas are lumped together with non-energy mining activities in the KLEMS database at the "Mining and quarrying" level. Non-energy mining activities correspond to the GTAP sector omn and are a part of Industry in IMACLIM. 
+\item In the KLEMS database, Electricity supply data are aggregated with Gas and water supply. 
+\item IMACLIM disaggregates Transport activities in Air, Sea and Other transport, which is not the case in the KLEMS database. 
+\end{itemize} 
+
+To disaggregate the KLEMS capital input data, capital revenue data have been used from GTAP. Denote $GTAPCap_{i}$ the capital compensation of GTAP sector i, then the weights used to disaggregate the three aforementioned KLEMS industrial sectors are: 
+\begin{equation}
+s^{cap}_{i} = \frac{GTAPCap_i}{ \sum_j GTAPCap_{j}}
+\end{equation}
+where j sums over the GTAP sectors that aggregated together constitute the KLEMS industrial sector in question. Explicitly, i,j respectively run over \{coa, oil, gas, omn\}, \{ely, gdt, wtr\} and \{otp, atp, wtp\} to disaggregate mining of energy producing materials from non-energy producing materials, electricity distribution from gas and water supply, and the different types of transport activities. 
+
+Table \ref{IndKLEMSIMACLIM} shows how the KLEMS industries aggregate to the 12 IMACLIM industries. 
+
+
+\renewcommand{\arraystretch}{1.2}
+\begin{table}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{| r p{340 pt}|}
+\hline
+Agriculture = & Agriculture, hunting, forestry and fishing  \\
+\ & + Food , beverages and tobacco \\
+\hline
+Coal = & $s^{cap}_{coa}\ \times$ Mining and quarrying \\
+\hline
+Crude oil = & $s^{cap}_{oil}\ \times$ Mining and quarrying \\
+\hline
+Gas = & $s^{cap}_{gas}\ \times$ Mining and quarrying \\ \ & + $s^{cap}_{gdt}\ \times$ Electricity, gas and water supply \\
+\hline
+Industry = & $s^{cap}_{omn}\ \times$ Mining and quarrying \\ \ & + Textiles, textile , leather and footwear \\ \ & + Wood and of wood and cork \\ \ &  + Pulp, paper, paper , printing and publishing \\ \ &  + Chemicals and chemical products \\ \ &  + Rubber and plastics \\ \ &  + Other non-metallic mineral \\ \ &  + Basic metals and fabricated metal \\ \ &  + Machinery, nec \\ \ &  + Electrical and optical equipment \\ \ & + Transport equipment  \\
+\hline
+Other industries = & $s^{cap}_{wtr}\ \times$ Electricity, gas and water supply \\ \ & + Wholesale and retail trade \\ \ & + Hotels and restaurants \\ \ & + Post and telecommunications \\ \ & + Financial intermediation \\ \ & + Real estate activities \\ \ & + Renting of m\&eq and other business activities \\ \ & + Public admin and defence; compulsory social security \\ \ & + Education \\ \ & + Health and social work \\ \ & + Other community, social and personal services \\ \ & + Private households with employed persons \\ \ & + Extra-territorial organizations and bodies \\
+\hline
+Refined products = & Coke, refined petroleum and nuclear fuel \\
+\hline
+Electricity = & $s^{cap}_{ely}\ \times$ Electricity, gas and water supply \\
+\hline
+Construction = & Construction \\
+\hline
+Air Transport = & $s^{cap}_{atp}\ \times$ Transport and storage \\
+\hline
+Sea Transport = & $s^{cap}_{stp}\ \times$ Transport and storage \\
+\hline
+Other Transport = & $s^{cap}_{otp}\ \times$ Transport and storage \\
+\hline
+\end{tabular}
+\caption{Mapping between the IMACLIM industrial sectors and the industries used in KLEMS}
+\label{IndKLEMSIMACLIM}
+\end{table}
+
+\subsubsection{Mapping product types to industries}
+
+Mapping the list of 11 asset types in the KLEMS database, aggregated to 8 asset types for which capital input data are provided (see table \ref{CapAssets}), is straightforward when making the assumption that every product type is produced by one industrial sector. 
+
+The classification of products in KLEMS is based on the Statistical Classification of Products by Activity in the European Economic Community (CPA)\footnote{\href{http://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_NOM_DTL&StrNom=CPA_2008&StrLanguageCode=EN&IntPcKey=&StrLayoutCode=HIERARCHIC}{CPA} consulted June 2106} and is closely related to NACE, the EU classification of industries. Table \ref{CapAssets} maps the 8 assets for which capital input data are provided to the IMACLIM sectors.
+
+The publishing of \emph{Software} is, under CPA, classified as part of Publishing services, which falls under Information and Communication services. Following this classification, Software falls under the NACE industry classification 64 Post and Telecommunications, which corresponds to cmn in GTAP.
+
+
+
+
+\begin{table}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{| r p{200 pt}|}
+\hline
+Industry =& Computing equipment \\ \ & + Communications equipment \\ \ & + Transport equipment \\ \ &  + Other machinery and equipment  \\
+\hline
+Other industries =& Software \\ \ & + Other assets \\
+\hline
+Construction = & Total Non-residential investment \\ \ & + Residential structures \\
+
+\hline
+\end{tabular}
+\caption{Mapping between the IMACLIM industrial sectors and the KLEMS asset types}
+\label{IndKLEMSIMACLIM}
+\end{table}
+
+\section{Capital input data: missing values}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{table}
+\setlength{\tabcolsep}{6pt}
+\hskip-2.2cm\begin{tabular}{| p{60pt} | l | p{70pt} | l| p{70pt} | p{70pt} | p{70pt} |}
+\hline
+
+	&		&	industry-levels	&    &		  		&	Variables	&	Additional sources	\\
+IMACLIM regions	&	Country	&	P	&	Q	&	LtQ	&	Price index	&		\\
+\hline
+Enlarged Europe	&	Austria	&	ok	&	missing	&	ok	&	ful/part missing	&		\\
+	&	Belgium	&		&		&		&		&		\\
+	&	Denmark	&	ok	&	missing	&	ok	&	ful/part missing	&		\\
+	&	Finland	&	missing for Ip and D, partially missing for Iq	&	missing	&	missing for D. Ip and Iq missing for all but IT	&	ful/part missing	&		\\
+	&	France	&		&		&		&		&		\\
+	&	Germany	&	ok	&	missing	&	ok	&	ful/part missing	&		\\
+	&	United Kingdom	&	missing	&	missing	&	ok	&	ful/part missing	&		\\
+													
+	&	Ireland	&		&		&		&		&		\\
+	&	Italy	&	ok	&	missing	&	ok	&	ful/part missing	&		\\
+													
+	&	Netherlands	&	missing	&	missing	&	ok	&	ful/part missing	&		\\
+													
+	&	Spain	&	missing	&	missing	&	ok	&	ok	&	for K, CAP, D, asset level Other missing	\\
+	&	Sweden	&	missing for Ip, K, VAP, D	&	missing	&		&	price index RStruc	&	product-level Other for all variables missing	\\
+																
+	&	Czech Republic	&	ok	&	missing	&	ok	&	ful/part missing	&		\\
+	&	Hungary	&		&		&		&		&		\\							
+													
+	&	Slovenia	&		&		&		&		&		\\
+\hline
+													
+Canada	&		&		&		&		&		&		\\
+\hline
+USA	&		&	missing	&	missing	&	ok	&		&		\\
+\hline
+OCDE Pacifique	&	Australia	&	missing	&	missing	&	ok	&	ful/part missing	&		\\
+	
+\hline
+\end{tabular}
+\caption{Sources of missing values}
+\label{missingvalues}
+\end{table}
+
+Generally the KLEMS data base provides capital input data from 1970 on. For some countries, data are available only from a later starting date \footnote{See appendix \ref{AppMV}, table \ref{nanCountries}.}:
+\begin{itemize}
+\item Austria - 1970 - 2007
+\item Australia - 1976 - 2007 (no data 1970 - 1975)
+\item Tcheque rep - 1995 - 2007 (no data 1970 - 1994)
+\item Denmark - 1970 - 2007
+\item Spain - 1970 - 2007
+\item Finland - 1970 - 2007
+\item Germany - 1991 - 2007 (no data 1970 - 1990)
+\item Italy - 1970 - 2007
+\item The Netherlands - 1970 - 2007
+\item Sweden - 1993 - 2007 (no data 1970 - 1992)
+\item UK - 1970 - 2007
+\item USA - 1970 - 2007
+\item France
+\item Ireland
+\item Belgium
+\item Japan
+\item Slovenia
+\end{itemize}
+
+Data for the industry-level P (Private households with employed persons) are entirely missing for the countries Australia, Spain, the Netherlands, UK, USA. For Austria, the Czeque Republic, Denmark, Germany and Italy, data are fully available for this industry-level. For Finland, data for the industry-level P are missing for the variables Ip and D, are available for CAP, I and K, and partially unavailable for Iq. For Sweden, data are entirely missing for the level P for the variables Ip, K, CAP and D, and available (and equal to 0) for the variables I and Iq, except for for the product-level Other for which they are missing. See tables \ref{nanIndustries_0_20} and \ref{nanIndustries_21} and \ref{nanCountries_noP}.
+
+Data for the industry-level Q (Extra-territorial organizations and bodies) are entirely missing for all countries Austria, Australia, Tcheque rep, Denmark, Spain, Finland, Germany, Italy, The Netherlands, Sweden, UK, USA. See tables \ref{nanCountries_noP} and \ref{nanCountries_noPQ}.
+
+KLEMS provides data directly on the aggregated level LtQ regrouping Community Social and Personal Services. Data on this level are consistently available for the countries Australia, Austria, Czech Republic, Denmark, Spain, Germany, Italy, the Netherlands, UK and USA. For Finland, LtQ-level data are available for K capital stock and I nominal capital investment but for the capital formation price index and real investment only available for investment in IT and missing for all other product-levels. LtQ-level data are entirely missing for D Cunsumption of capital. For Sweden, there are 7 counts of missing data for LtQ ; 6 of those stem from missing data for the product-level Other, the 7th comes from missing data for the price index of RStruc asset-types. So generally, LtQ data are also available for Sweden.  See tables \ref{nanCountries} and \ref{nanCountries_noLtQ}.
+
+The capital formation price index is fully or partially missing for Australia, Austria, Czech rep., Denmark, Finland, Germany, Italy, the Netherlands, Sweden, UK and USA. See tables \ref{nanCountries_noPQ} and \ref{nanCountries_noPQ_noIp}. It is fully available for Spain.
+
+In addition to previuously mentioned missing variables, for Spain, data are missing for capital stock, capital compensation and consumption of fixed capital for the asset-level "Other". 
+
+For Finland, data are not available for capital formation and capital consumption, for the industry-level PtQ, which is also reflected in missing values at the aggregated total industry-level TOT. (Check Finland.)
+
+For Sweden, any capital stock data (variables I, Iq, K, Cap, D) for the product-level "Other" are not available. (check other RStruc)
+
+%\input{reducedSystems-USA-plan.tex}
+
+\input{reducedSystems.tex}
+
+
+\section{TODO}
+
+\begin{itemize}
+    \item KLEMS data what is in the additional aggregations
+    \item use depreciation rates for determining shares of investment going to EMA, OMA, etc. 
+    \item input IMACLIM: couper les capital input data en 3 morceaux
+    \item check Annual macro-economic database, which includes gross fixed capital formation by type of goods at current prices, constant prices and price deflators: \url{http://ec.europa.eu/economy_finance/db_indicators/ameco/zipped_en.htm}
+\end{itemize}
+
+\section{Definitions}
+
+\paragraph{Basic price} is the amount a seller receives. It does not include any taxes the buyer pays (those go to the state not to the seller). It includes any subsidy the seller gets for selling (the seller gets the subsidy from the state not from the buyer). Point of view of the seller.
+\paragraph{Producer's price} is the amount a producer receives from a buyer. It excludes transportation costs and subsidies (the producer gets those from the state not from the buyer). It includes non-deductible VAT. Point of view of the producer.
+
+\paragraph{Purchaser's price} is the amount payed by the buyer. It includes transportation costs and non-deductible VAT. Point of view of the buyer.
+\paragraph{Total investment} = GFCF + financial assets + changes in stocks + education of workers ? + ?
+\paragraph{GFCF} is acquisition of fixed assets - disposal of fixed assets, where disposal does not include capital consumption nor losses due to natural disasters.
+
+\paragraph{CFC - Consumptoin of fixed capital} represents the decline in the future benefits of the assets due to their use in the production process. Teh declien in the value of fixed assets of governments and firms, and of dwelling of households. Unforseen obsolescene is not included. How is it measured ? 
+\paragraph{Gross operating surplus} is gross output minus the cost of intermediate goods and services and labour costs. It is the capital available to pay debt, invest and pay taxes. 
+
+\appendix
+
+\input{classifications.tex}
+
+
+\section{Missing values} \label{AppMV}
+To get an overview of the missing values amongst the set of capital input data, encompassing the variables \{Nominal gross fixed capital formation, Real gross fixed capital formation, Gross fixed capital formation price index, Real fixed capital stock, Capital compensation, Consumption of fixed capital \} and all product and industry levels provided, a strategy of counting missing variables was used. Firstly, the amount of missing values was determined per year and country (summing over variables, products and industries), per year and variable (summing over countries, products and industries) and per year and industry-level (summing over countries, variables and products). The results can be found respectively in tables \ref{nanCountries}, \ref{nanVars}, \ref{nanIndustries_0_20} and \ref{nanIndustries_21}.
+
+\input{nanCountries.tex}
+\input{nanCountries_noP.tex}
+\input{nanCountries_noPQ.tex}
+\input{nanCountries_noLtQ.tex}
+
+\begin{landscape}
+\input{nanIndustries_0_20.tex}
+\input{nanIndustries_21.tex} 
+\end{landscape}
+\input{nanVars.tex}
+
+%From the missing values per industry-level, tables \ref{nanIndustries_0_20} and \ref{nanIndustries_21}, it appears data are often missing for the industry levels: P - Private Households With Employed Persons and Q - Extra-Territorial Organizations and Bodies. For this reason, for further analysis of missing data, the levels P and Q were excluded from here on. Industry-levels P and Q are aggragated in LtQ - Community Social and Personal Services, at which level data are usually available. 
+
+\begin{itemize}
+\item UK : UK,Ip,TraEq,23 qqs valeurs manquantes (~1990?). Price index investment in residential structures is based only on 70 - real estate activities. Price index products "Other" is based on 
+\item USA : price index investment in residential structures is missing for 28 sectors (! KLEMS transforms NA in 0's, see for example line USA,Ip,RStruc,JtK and levels below.)
+\end{itemize}
+
+\input{nanVars_noPQ.tex}
+
+Table \ref{nanVars_noPQ} shows missing values per variable and year, summing over countries, product- and industry-levels (where industry-levels P and Q were excluded). One can see that there are many more missing values for the price index of capital formation (Ip) then for the other variables.  
+
+%To confirm that the values are missing mostly for price indices of capital formation and for the industry levels P - PRIVATE HOUSEHOLDS WITH EMPLOYED PERSONS and Q - EXTRA-TERRITORIAL ORGANIZATIONS AND BODIES, three more counting exercises were performed: one by counting missing values per country and year, summing as previously over all product and industry-levels and over all variables except over the price index; secondly, missing values were counted per country and per year, summing over all variables, products and over all industry-levels except over levels P and Q\footnote{To use only the level LtQ and delete the levels L,M,N,O,P,Q, the data were processed with getData\_noLMNPQ.sh.}. The results are summerized in tables \ref{nanCountries_noIp} and \ref{nanCountries_noLMNOPQ}.
+
+Finally, a count of missing values per year and country was done combining both previous observations: the price index of capital formation was excluded from the count and the industry-levels P and Q. Results can be found in tables \ref{nanCountries_noPQ_noIp}.
+
+\input{nanCountries_noPQ_noIp.tex}
+%\input{nanVars_noLMNOPQ.tex}
+%\input{nanCountries_noLMNOPQ.tex}
+\input{nanCountries_noIp.tex}
+%\input{nanCountries_noLMNOPQ_noIp.tex}
+\clearpage
+
+\input{metrics}
+
+
+
+
+\section{Charts}
+
+\subsection{Per product I/VA stats and charts}
+
+\clearpage
+\subsubsection{GFCF}
+\input{img/summarizeData/Summary_SLR_GFCF_TOT.tex}
+\vfill
+\begin{figure}[!h]
+\hfill\begin{minipage}{.85\textwidth}\centering
+    \includegraphics[width=13cm]{img/plotted_I_K_VA/I_ShareVA-GFCF.pdf}
+    \caption{\label{fig:I_ShareVA-GFCF}Share of GFCF in value added (\%), source: KLEMS}\todo{add appendix with country comparison graphs}
+\end{minipage}
+\end{figure} 
+\input{img/summarizeData/Summary_GFCF_TOT.tex}
+\clearpage
+For the countries under consideration, Austria, Czech Republic, Denmark,Spain, Finland, France, Germany, Italy, the Netherlands, Slovenia, Sweden, UK, USA, Japan, Australia, the portion of the annual national budgets allocated to investment in fixed assets, between 1970 and 2007, averages at $24.2\%$, reaches a minimum in the USA in 1992 with $16.5\%$ and three close maxima of about $35\%$ in Finland in 1975, in the Czech Republic in 1996, and in Spain in 2007. Over the period considered, averaging over all countries, investment in non-ICT assets decreases with $0.16\%$ of VA, whereas investment in ICT assets shows a steady increase of $0.06\%$ of VA per year \footnote{The changes per year in I/VA are not growth rates. They are the slope of the linear regression $I_{pc}/VA_{c} = trend_{pc} year + intercept + residual$. The trend is thus interpreted as }. Overall GFCF decreases on average with $0.097\%$ per year (view \cref{table:I_ShareVA-GFCF-global}). The steady increase in investment in ICT products is most recently pulled by software assets, which reaches a maximum of $2.9\%$ in Sweden in 2000 and to stay above $2.4\%$ since, closely followed by $2.5\%$ in Denmark in 2007 and $2.2\%$ in the USA in 2000. Since 1997, all countries in the sample allocate at least $0.5\%$ of VA to investment in software, and on average $1.6\%$ in 2007.
+
+Investment in IT gradually increased throughout the seventies and eigthies, to settle on an average investment level of around $1\%$ of VA from the middle of the eighties, throughout the nineties and until 2007. The overall trend is an increase in IT assets of $0.014\%$ of VA per year. Denmark is an early investor in IT equipment surpassing $1.5\%$ in the second half of the seventies (and rarely dipping below this level since), peaking from 1984-1987 with I reaching $2.7\%$ - $2.9\%$ of VA. (What industries do this investing in Denmark?) 
+
+Investment in communication technologies had already attained higher levels in 1970 then software and IT investment (see figure \ref{fig:I_ShareVA-gridCountries-TOT}). The average investment level has increased slightly over the years, with a peak around 2000, reaching $0.09\%$ of VA. (peak mobile infrastructure ? which industries ?). In this year the Czech Republic invests $1.5\%$ of VA. The overall average over all years and all countries is $0.06\%$ of VA.
+
+
+For the USA, figure \ref{fig:I_ShareVA-USA-TOT} shows GFCF/VA has not often surpassed $20\%$ after 1976 up til 2007. The dip in 1992 seems to be mostly due to a reduction in Construction, both residential and other. Notably, from 1992 on, capital formation in residential structures keeps rising in the USA, to boom in 2005, at which point it reaches $6.5\%$ of VA, after which it dramatically goes down in the years after.
+
+Investment is highest in 1970 at of VA. It is lowest in at  of VA. Over the next 38 years, for many countries, investment as a share of value added decreased at a yearly rate ranging from of $0.65\%$ - CZE, to $0.42\%$ - GER to around $0.10\%$ for 
+
+\clearpage
+\subsubsection{Construction}
+
+The asset level Construction encompasses both residential (RStruc) and non-residential construction (OCon). On average over time and space, it accounts for $56\%$ of GFCF, with $25\%$ going to residential construction and  $31\%$ going to non-residential construction.
+Investment in construction decreased over the period and country-sample considered by $0.11\%$ per year, with residential construction going down slightly faster then non-residential construction, $0.062\%$ and $0.050\%$ respectively. For a few countries, investment in construction does not go significantly decrease, or fluctuates more, on average (Sweden, Slovenia, UK, USA). In Spain, construction significantly increases on average by $0.17\%$ of VA per year, evolution which can be decomposed in 2 periods: during the first period, investment in construction is in line with the levels of the other countries, specifically in the eurozone ; from 1997 on, real estate investment increases by approx $1\%$ of VA per year, to reach about $24\%$ of VA in 2006 or $0.11\%$ of GFCF. Investment in construction starts rising from 1985 on, taking a dip in the middle of the nineties, to start the linear rise in 1997. 
+
+Non-residential construction starts increasing rapidly in the early eighties, interrupted by 2 dips in the nominal level in the nineties, to continue rising rapidly together with residential construction after 1997. (see $analysis/plots/plottedData/I-ESP$)
+
+There is a spread (max-min) in Con $I/VA$ of about $0.08 \%$ per year over countries, spread going up as the Spanish building bubble booms to $1.5 \%$ in 2005. Dynamics seem to be pretty close between some countries, such as a peak in the middle of the seventies, end of the eighties, a rise in the beginning of the years 2000. (Discuss context of peaks.)
+
+The spread in $I/VA$ over countries and years is similar between RStruc and OCon, as is the standard deviation (see table \ref{table:I_ShareVA-GFCF-global}). The kurtosis of RStruc is much higher then that of OCon, indicating more outliers: Sweden, Spain, France, Denmark (\cref{table:I_ShareVA-GFCF-global}). 
+
+The sectors investing in residential structures are the real estate sector ; investment in non-residential structures is done by Community and some other sectors \todo{Detailed analysis of which sectors invest in what.}
+
+\begin{itemize}
+\item For GFCF and every asset: what is the min and max growth rate (in absolute values) from year to year ? How abrupt does it go up/down? What is the relevant variable to measure nominal investment change (think psychology factor)?
+\item Composition of GFCF. Average composition in 1970, 1995, 2007 in europe, usa, japan, \% of GFCF per asset.   Percentage construction etc : an average ? outliers ? 
+
+\end{itemize}
+
+%\input{img/summarizeData/Summary_OMach_TOT.tex}
+
+Investment in travel equipment averages over the 38 years under consideration and all countries at $0.022 \%$ of VA. The overall trend in investment in travel equipment is not pronounced ($-0.005 \%$ of VA). Notable outliers are Australia before 1990 with an investment level of above $3 \%$ of VA and Czech Republic where investment in travel equipment sharply inncreases and surpasses $3 \%$ of VA after the year 2000.
+
+TraEq $I/VA$ significantly decreases over the whole period in Australia, Finland, the UK and USA. It significantly increases in Sweden from 1993 on, the data are missing before that date, and in the Czech Republic, for which there is data from 1995 on. Kurtosis is negative for many countries over the 38 period considered, indicating a relatively constant investment level (compare mean/stddev between prods,ctries). 
+
+Investment per VA in OMach decreases over the period considered for most countries (Australia, Austria, Czech Republic, Spain, Finland, France, Germany, Italy, the Netherlands, UK, USA). In Japan and Denmark there is no overall trend over the period considered.
+
+\clearpage
+\subsubsection{Other}
+
+\input{img/summarizeData/Summary_SLR_Other_TOT.tex}
+\vfill
+\begin{figure}[!h]
+\hfill\begin{minipage}{.85\textwidth}\centering
+    \includegraphics[width=13cm]{img/plotted_I_K_VA/I_ShareVA-Other.pdf}
+    \caption{\label{fig:I_ShareVA-GFCF}Share of GFCF in value added (\%), source: KLEMS}
+\end{minipage}
+\end{figure} 
+%\input{img/summarizeData/Summary_Other_TOT.tex}
+
+This category groups investment in Agriculture, Other intangiables and other products (describe more specifically).
+
+The investment pattern is very different, with much higher levels in Japan, Australia and the Netherlands than the other countries. The overall downward slight trend reported in table \ref{table:I_ShareVA-GFCF-global} is probably mostly due to Australia. Australia very high in the 70's, from turning bush into agricultural productive capital, terrain?
+
+\clearpage
+\subsubsection{ICT}
+
+\input{img/summarizeData/Summary_SLR_ICT_TOT.tex}
+\vfill
+\begin{figure}[!h]
+\hfill\begin{minipage}{.85\textwidth}\centering
+    \includegraphics[width=13cm]{img/plotted_I_K_VA/I_ShareVA-ICT.pdf}
+    \caption{\label{fig:I_ShareVA-ICT}Share of ICT in value added (\%), source: KLEMS}
+\end{minipage}
+\end{figure} 
+%\input{img/summarizeData/Summary_ICT_TOT.tex}
+
+\clearpage
+
+\input{img/summarizeData/Summary_SLR_CT_TOT.tex}
+\vfill
+\begin{figure}[!h]
+\hfill\begin{minipage}{.85\textwidth}\centering
+    \includegraphics[width=13cm]{img/plotted_I_K_VA/I_ShareVA-CT.pdf}
+    \caption{\label{fig:I_ShareVA-CT}Share of CT in value added (\%), source: KLEMS}
+\end{minipage}
+\end{figure} 
+%\input{img/summarizeData/Summary_CT_TOT.tex}
+\clearpage
+\input{img/summarizeData/Summary_SLR_IT_TOT.tex}
+\vfill
+\begin{figure}[!h]
+\hfill\begin{minipage}{.85\textwidth}\centering
+    \includegraphics[width=13cm]{img/plotted_I_K_VA/I_ShareVA-IT.pdf}
+    \caption{\label{fig:I_ShareVA-IT}Share of IT in value added (\%), source: KLEMS}
+\end{minipage}
+\end{figure} 
+%\input{img/summarizeData/Summary_IT_TOT.tex}
+\clearpage
+\input{img/summarizeData/Summary_SLR_Soft_TOT.tex}
+\vfill
+\begin{figure}[!h]
+\hfill\begin{minipage}{.85\textwidth}\centering
+    \includegraphics[width=13cm]{img/plotted_I_K_VA/I_ShareVA-Soft.pdf}
+    \caption{\label{fig:I_ShareVA-Soft}Share of Soft in value added (\%), source: KLEMS}
+\end{minipage}
+\end{figure} 
+%\input{img/summarizeData/Summary_Soft_TOT.tex}
+\clearpage
+
+\paragraph{CT} Investment in communications technology fluctuates between 0 and 1,5 $\%$ of VA for the observed countries, a light upward trend, is it significant ? For a number of countries, there is peak in investment a little before the year 2000 : UK, USA, CZE, SVN, FIN and t oa lesser extent SWE and JPN. What is this peak ? Wires for the internet ? Mobile phone isntallations, masts etc ?  
+\paragraph{IT} Investment in IT took of in the 1980's, except for Denmark and Italy, which stayed around the 1970 level. FInlands investment in IT peaked in the mid-nineties and has declined since. Italy, Austria, France, Germany and Spain invested less in the 90's and 2000's then CZE, SVN, Denmark, UK, Sweden and Japan, Australia ; the US and the Netherlands are in between.  
+\paragraph{Software} Investment in software has been going up steadily from $0\%$ to around $3\%$  of VA over the last 40 years. 
+
+
+
+
+\subsection{Per product industry-stacked barcharts, countrygrid, I}
+\clearpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedIndustries/I_RStruc.pdf}
+    \caption{\label{fig:I_RStruc}source: KLEMS.}
+\end{figure} 
+\clearpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedIndustries/I_OCon.pdf}
+    \caption{\label{fig:I_OCon}source: KLEMS.}
+\end{figure} 
+\clearpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedIndustries/I_TraEq.pdf}
+    \caption{\label{fig:I_TraEq}source: KLEMS.}
+\end{figure} 
+\clearpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedIndustries/I_OMach.pdf}
+    \caption{\label{fig:I_OMach}source: KLEMS.}
+\end{figure} 
+\clearpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedIndustries/I_Other.pdf}
+    \caption{\label{fig:I_Other}source: KLEMS.}
+\end{figure} 
+\clearpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedIndustries/I_CT.pdf}
+    \caption{\label{fig:I_CT}source: KLEMS.}
+\end{figure} 
+\clearpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedIndustries/I_IT.pdf}
+    \caption{\label{fig:I_IT}source: KLEMS.}
+\end{figure}
+\clearpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedIndustries/I_Soft.pdf}
+    \caption{\label{fig:I_Soft}source: KLEMS.}
+\end{figure}
+
+
+\subsection{Per country, product-stacked barcharts, I and I/VA}
+
+\clearpage
+\subsubsection{Austria} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-AUT-TOT.pdf}
+    \caption{\label{fig:I-AUT-TOT}Evolution of GFCF composition in Austria (millions of euros), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-AUT-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-AUT-TOT}Evolution of GFCF composition in Austria. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{The Netherlands} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-NLD-TOT.pdf}
+    \caption{\label{fig:I-NLD-TOT}Evolution of GFCF composition in the Netherlands (millions of euros), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-NLD-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-NLD-TOT}Evolution of GFCF composition in the Netherlands. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{Germany} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-GER-TOT.pdf}
+    \caption{\label{fig:I-GER-TOT}Evolution of GFCF composition in Germany (millions of euros), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-GER-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-GER-TOT}Evolution of GFCF composition in Germany. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+\clearpage
+\subsubsection{France} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-FRA-TOT.pdf}
+    \caption{\label{fig:I-FRA-TOT}Evolution of GFCF composition in France (millions of euros), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-FRA-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-FRA-TOT}Evolution of GFCF composition in France. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{Spain} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-ESP-TOT.pdf}
+    \caption{\label{fig:I-ESP-TOT}Evolution of GFCF composition in Spain (millions of euros), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-ESP-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-ESP-TOT}Evolution of GFCF composition in Spain. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{Italy} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-ITA-TOT.pdf}
+    \caption{\label{fig:I-ITA-TOT}Evolution of GFCF composition in Italy (millions of euros), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-ITA-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-ITA-TOT}Evolution of GFCF composition in Italy. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{Denmark}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-DNK-TOT.pdf}
+    \caption{\label{fig:I-DKN-TOT}Evolution of GFCF composition in Denmark (millions danish krone), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-DNK-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-DKN-TOT}Evolution of GFCF composition in Denmark. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+Denmark is an early investor in IT equipment surpassing $1.5\%$ in the second half of the seventies (and rarely dipping below this level since), peaking from 1984-1987 with I reaching $2.7\%$ - $2.9\%$ of VA. (What industries do this investing in Denmark?) 
+ Denmarks capital stock Other construction in the 1970s very high, been declining since. Why?
+
+\clearpage
+\subsubsection{Finland}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-FIN-TOT.pdf}
+    \caption{\label{fig:I-FIN-TOT}Evolution of GFCF composition in Finland (millions of euros), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-FIN-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-FIN-TOT}Evolution of GFCF composition in Finland. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{Sweden}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-SWE-TOT.pdf}
+    \caption{\label{fig:I-SWE-TOT}Evolution of GFCF composition in Sweden (millions swedish krone), source: KLEMS.}
+\end{figure}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-SWE-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-SWE-TOT}Evolution of GFCF composition in Sweden. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{UK}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-UK-TOT.pdf}
+    \caption{\label{fig:I-UK-TOT}Evolution of GFCF composition in the United Kingdom (millions of pounds), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-UK-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-UK-TOT}Evolution of GFCF composition in the United Kingdom. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{Czech Republic} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-CZE-TOT.pdf}
+    \caption{\label{fig:I-CZE-TOT}Evolution of GFCF composition in the Czech Republic (millions of Czech Koruna), source: KLEMS.}
+\end{figure}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-CZE-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-CZE-TOT}Evolution of GFCF composition in the Czech Republic. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+
+\clearpage
+\subsubsection{SVN} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-SVN-TOT.pdf}
+    \caption{\label{fig:I-SVN-TOT}Evolution of GFCF composition in Slovenia (millions of Slovenian Tolar), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-SVN-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-SVN-TOT}Evolution of GFCF composition in Slovenia. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{Japan}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-JPN-TOT.pdf}
+    \caption{\label{fig:I-JPN-TOT}Evolution of GFCF composition in Japan (millions of Yen), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-JPN-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-JPN-TOT}Evolution of GFCF composition in Japan. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{Australia}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-AUS-TOT.pdf}
+    \caption{\label{fig:I-AUS-TOT}Evolution of GFCF composition in the Australia (millions of Australian dollars), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-AUS-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-AUS-TOT}Evolution of GFCF composition in the Australia. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\clearpage
+\subsubsection{US}
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I-USA-TOT.pdf}
+    \caption{\label{fig:I-USA-TOT}Evolution of GFCF composition in the United States (millions of dollars), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plottedProducts-bar/I_ShareVA-USA-TOT.pdf}
+    \caption{\label{fig:I_ShareVA-USA-TOT}Evolution of GFCF composition in the United States. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+
+
+
+%---------------------------------------------------------------------------------
+
+\clearpage
+\subsection{Per industry composition of investment, USA}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Total-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Total-USA}Evolution of the composition of capital formation, total industry, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Agri-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Agri-USA}Evolution of the agriculture sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Mining-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Mining-USA}Evolution of the mining sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Manufacturing-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Manufacturing-USA}Evolution of the real estate sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Elec Gas Wtr-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Elec Gas Wtr-USA}Evolution of the electricity \& gas sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Construction-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Construction-USA}Evolution of the construction sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Sale-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Sale-USA}Evolution of the retail sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Transport Communication-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Transport Communication-USA}Evolution of the transport \& communication sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Finance-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Finance-USA}Evolution of the finance sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Real estate-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Real estate-USA}Evolution of the real estate sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Real Estate Business-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Real Estate Business-USA}Evolution of the real estate business sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics{img/plotted_perCountry/I-VA-Product-Community-USA.pdf}
+    \caption{\label{fig:I-VA-Product-Community-USA}Evolution of the community sector's composition of capital formation, USA. Investment as share of value added (\%), source: KLEMS.}
+\end{figure} 
+\input{gfcf.tex}
+
+\bibliographystyle{cbe}
+\bibliography{klems.bib}
+
+\listoftodos
+
+\end{document}

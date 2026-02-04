@@ -1,0 +1,3 @@
+xlsb file IEA_EEI_database_Full_Rev.xlsb
+converted to .csv with the command (on another machine)
+soffice --headless --convert-to csv IEA_EEI_database_Full_Rev.xlsb

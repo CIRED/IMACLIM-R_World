@@ -1,0 +1,29 @@
+0. 2 files for electricity investment:
+* nexus.electricity.idealPark for the ideal park
+* nexus.electricity.realInvestment for actual investment
+Files dedicated to biomass
+* Calibration.elec.biomass.sce
+
+1. On biomass
+1.1. Ideal park
+* Define a technology
+* Definition of LCC : depends on used biomass quantity thus on sum(MSH(biomass))
+* Find "the" combination of MSH for biomass that make the system work
+1.2. Real park
+* Find the production of biomass needed
+* Find the prices of biomass
+* Update CFuel for biomass and emissions accordingly
+1.3. After equilibrium computation
+* Check that actual quantity of electricity production is close enough that biomass price is close to the expected one
+
+2. On the electric sector
+2.1. Check whether biomass technologies are used ?
+2.2. Check consistency of new technology with previous ones
+2.3. Calibrate intangible costs
+2.4. Check evolution of intangible costs (where is it ?)
+
+
+fixme:
+* in case indice_calib_CINV_elec~=0 pb not solved
+* in case ind_recalib_IC~=0 pb not solved
+* initial CI(indice_agriculture, indice_elec,:) is not 0

@@ -1,0 +1,283 @@
+
+Index: batch/waysout_central.sh
+===================================================================
+--- batch/waysout_central.sh	(revision 32645)
++++ batch/waysout_central.sh	(working copy)
+@@ -2,6 +2,18 @@
+ # META-IMACLIM-R
+ # Permet d'exécuter plusieurs fois imaclim-r en fonction dess *combis* pertinentes dans le cadre d'une *ETUDE*
+ 
++
++#================================================================
++# Final scenarios waysout
++
++# run wth r32645 & path:
++
++# svn update -r32645
++#patch -p0 -i patch/patch_waysout_r32645.patch
++#svn update -r32817 batch/waysout_central.sh
++#================================================================
++
++
+ if [ $HOSTNAME = "poseidon.centre-cired.fr" ] || [ $HOSTNAME = "belenus.centre-cired.fr" ]
+ then
+     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
+@@ -31,8 +43,6 @@
+ ' > run_scenario.sh
+ chmod a+x run_scenario.sh
+ 
+-# Final scenarios waysout
+-# run with r32440
+ 
+ (
+ 
+@@ -66,64 +76,70 @@
+     echo $runname
+ 
+ done
++#================================================================
+ 
+ # NDC Long term strategy
+ for i in  172
+ do
+-    ind_coal_fin=2
+-    mshbio=20
+-    ind_labour=0
+-    ind_coal_decapacity=0
+-    
+-    runname="$i-$mshbio-$ind_labour"
++    for ind_CCS in 0 2
++    do
++        ind_coal_fin=2
++        mshbio=20
++        ind_labour=0
++        ind_coal_decapacity=0
++        
++        runname="$i-$mshbio-$ind_labour-$ind_CCS"
+ 
+ 
+-    echo "record_vett_carbonbudget=%t;exo_maxmshbiom=$mshbio/1000;ind_debug_SC_nlu=%t;suffix2combiName='.Central.NDC'"     > run.cmdFile$runname.sce
+-    echo "ETUDEOUTPUT='waysout';ind_coal_decapacity=$ind_coal_decapacity"   >> run.cmdFile$runname.sce
++        echo "record_vett_carbonbudget=%t;exo_maxmshbiom=$mshbio/1000;ind_debug_SC_nlu=%t;suffix2combiName='.Central.NDC.indCCS.$ind_CCS'"     > run.cmdFile$runname.sce
++        echo "ETUDEOUTPUT='waysout';ind_coal_decapacity=$ind_coal_decapacity;ind_CCS=$ind_CCS;"   >> run.cmdFile$runname.sce
+ 
+-    echo "combi=$i;isBatch = %t;covid_crises_shock=%f;nbMKT=3;ind_coal_fin=$ind_coal_fin;ind_labour=$ind_labour;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  >> run.cmdFile$runname.sce
+-    echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$runname.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$runname
+-    #sh run.batchCmd$runname &
+-    echo $runname
+-
++        echo "combi=$i;isBatch = %t;covid_crises_shock=%f;nbMKT=3;ind_coal_fin=$ind_coal_fin;ind_labour=$ind_labour;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  >> run.cmdFile$runname.sce
++        echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$runname.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$runname
++        #sh run.batchCmd$runname &
++        echo $runname
++    done
+ done
++#================================================================
+ 
+ 
+-
+-# 1.5°C 1146 GtCO2 (-164 NE)
++# 1.5°C
+ for i in  4202
+ do
+-  for tax2019 in 10
++  for ind_CCS in 0 2
+   do
+-      for taxbreak_1 in 1400
+-      do
+-      for tax2100 in 3200
+-      do
+- 
+-      
+-      ind_coal_fin=2
+-      mshbio=50
+-      
++    for tax2019 in 10
++    do
++        for taxbreak_1 in 900
++        do
++        for tax2100 in 3000
++        do
++    
++        
++        ind_coal_fin=2
++        mshbio=50
++        
+ 
+-      ind_labour=0
+-      exo_max_CCS_injection=55
+-      ind_coal_decapacity=0
++        ind_labour=0
++        exo_max_CCS_injection=55
++        ind_coal_decapacity=0
+ 
+-      runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio-$ind_labour"
+-      echo "record_vett_carbonbudget=%t;tax2019=$tax2019;taxbreak_1=$taxbreak_1;tax2100=$tax2100;exo_maxmshbiom=$mshbio/1000;ind_debug_SC_nlu=%t;suffix2combiName='.Central.1_5.$taxbreak_1'"     > run.cmdFile$runname.sce
+-      echo "ETUDEOUTPUT='waysout';ind_coal_decapacity=$ind_coal_decapacity"   >> run.cmdFile$runname.sce
++        runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio-$ind_labour-$ind_CCS"
++        echo "record_vett_carbonbudget=%t;tax2019=$tax2019;taxbreak_1=$taxbreak_1;tax2100=$tax2100;exo_maxmshbiom=$mshbio/1000;ind_debug_SC_nlu=%t;suffix2combiName='.Central.1_5_indccs.$ind_CCS.$taxbreak_1'"     > run.cmdFile$runname.sce
++        echo "ETUDEOUTPUT='waysout';ind_coal_decapacity=$ind_coal_decapacity;ind_CCS=$ind_CCS;"   >> run.cmdFile$runname.sce
+ 
+-      echo "combi=$i;exo_max_CCS_injection=$exo_max_CCS_injection/10;covid_crises_shock=%f;ind_coal_fin=$ind_coal_fin;ind_labour=$ind_labour;ind_wait_n_see=0;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  >> run.cmdFile$runname.sce
+-      echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$runname.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$runname
+-      #sh run.batchCmd$runname &
+-      echo $runname
+-      done
++        echo "combi=$i;exo_max_CCS_injection=$exo_max_CCS_injection/10;covid_crises_shock=%f;ind_coal_fin=$ind_coal_fin;ind_labour=$ind_labour;ind_wait_n_see=0;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  >> run.cmdFile$runname.sce
++        echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$runname.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$runname
++        #sh run.batchCmd$runname &
++        echo $runname
++        done
++        done
+     done
+   done
+ done
++#================================================================
+ 
+ 
+-
+ ) > all_run_names.txt
+ xargs -n1 -P32 "./run_scenario.sh" < all_run_names.txt
+ 
+Index: model/calibration.nexus.electricity.sce
+===================================================================
+--- model/calibration.nexus.electricity.sce	(revision 32645)
++++ model/calibration.nexus.electricity.sce	(working copy)
+@@ -161,6 +161,21 @@
+     end
+ end
+ 
++if ind_seq_opt==2
++    for tranche=tranches_elec
++        for j=[indice_PSS,indice_CGS,indice_GGS]
++            execstr('MSHmax_'+tranche+'_elec(:,'+j+') =zeros('+nb_regions+',1);');
++            execstr("MSH_"+tranche+"_elec_sup(:,"+j+")=0;"); //If ind_seq_opt == 0, no CCS
++        end
++
++        for j= [indice_PSS,indice_CGS]
++            execstr('MSHmax_'+tranche+'_elec(ind_ind,'+j+') =1;');
++            execstr("MSH_"+tranche+"_elec_sup(ind_ind,"+j+")=1;"); //If ind_seq_opt == 0, no CCS
++        end
++    end
++end
++
++
+ if ind_seq_beccs_opt==0
+     for tranche=tranches_elec
+         for j=[indice_BIS]
+Index: model/extraction.outputs.waysout.region.sce
+===================================================================
+--- model/extraction.outputs.waysout.region.sce	(revision 32645)
++++ model/extraction.outputs.waysout.region.sce	(working copy)
+@@ -3766,4 +3766,18 @@
+ counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+ outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = markup(k,coal);
+ if current_time_im==yr_start & k==1; list_output_unit($+1) = "-";
++end;
++
++
++varname = 'Price Capital|Coal'; //   
++counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
++outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = pK(k,coal);
++if current_time_im==yr_start & k==1; list_output_unit($+1) = "-";
++end;
++
++
++varname = 'Wages|Coal'; //   
++counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
++outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = w(k,coal);
++if current_time_im==yr_start & k==1; list_output_unit($+1) = "-";
+ end;
+\ No newline at end of file
+Index: model/nexus.electricity.idealPark.sce
+===================================================================
+--- model/nexus.electricity.idealPark.sce	(revision 32645)
++++ model/nexus.electricity.idealPark.sce	(working copy)
+@@ -118,6 +118,10 @@
+ CINV=CRF.*CINV_MW_nexus(:,:);
+ 
+ 
++if ~isdef('ind_highCoalInd')
++    ind_highCoalInd=0
++end
++
+ //--------------------------------------------------------------------//
+ //------------- Demand and fossil fuel prices expectations -----------//
+ //--------------------------------------------------------------------//
+@@ -192,7 +196,9 @@
+             for t=1:Life_time_LCC(k,j)
+                 CFuel(k,j)=CFuel(k,j)+p_Coal_anticip(k,t)/(rho_elec_nexus(k,j)*(1+disc_rate_elec(k,j,current_time_im))^t)*CRF(k,j);
+             end
+-        end    
++        end
++        
++          
+         for j=technoElecGas
+             CFuel(k,j)=0;
+             for t=1:Life_time_LCC(k,j)
+@@ -207,6 +213,20 @@
+             end
+         end
+ 
++        if (k==ind_ind)&(ind_highCoalInd==1)
++            for j=technoCoalWCCS
++                CFuel(k,j)=0;
++            end
++            for j=technoElecGas
++                CFuel(k,j)=CFuel(k,j)*4;
++            end
++            for j=technoOil
++                CFuel(k,j)=CFuel(k,j)*2;
++            end
++            for j=technoCoalWOCCS
++                CFuel(k,j)=CFuel(k,j)*2;
++            end
++        end  
+         /////////////////////////////////////Treating CCS separately: removing the carbon price component from the FF price
+         j=indice_PSS;
+         CFuel(k,j)=0;
+@@ -285,7 +305,10 @@
+ mask_HYD=ones(1,nTechno_dispatch);
+ mask_HYD(indice_HYD) = 0;
+ 
++// Exo techno WCCS
++// mask_HYD(technoCoalWCCS) = 0;
+ 
++
+ //FF share weights: giving a weight to split the installed cap by family of technologies, so the global share of coal/gas/nuke does not
+ //depends onthe # of techno in each family
+ weights_FF = zeros(reg,nTechno_dispatch);
+@@ -351,7 +374,7 @@
+ //Constraints on CCS
+ //Step 1 CCS starts immediately if 1) its ideal share in the mix is not negligeable AND 2) a minimum threshold for the carbon tax is reached
+ //Step 2 Applying the S curve technology deployment on each techno and tranche.
+-if ind_seq_opt == 1
++if ind_seq_opt ==1
+     for k=1:reg
+         for tranche=tranches_elec
+             for j=[indice_PSS,indice_CGS,indice_UCS,indice_GGS]
+@@ -368,6 +391,24 @@
+     end
+ end
+ 
++if ind_seq_opt == 2
++    k = ind_ind
++    for tranche=tranches_elec
++        for j=[indice_PSS,indice_CGS,indice_UCS]
++            //Step 1
++            if evstr ("Tstart_CCS_"+tranche+"(k,j)==0 & MSH_"+tranche+"_elec(k,j)>0.001 & max(taxCO2_CI(:,indice_elec,k))>starting_taxCO2_ccs_elec *1e6")
++                execstr ("Tstart_CCS_"+tranche+"(k,j)=current_time_im;");
++            end
++            //Step 2
++            if evstr ("Tstart_CCS_"+tranche+"(k,j)>0")
++                execstr ("MSH_"+tranche+"_elec_sup(k,j)=MSH_limit_newtechno(Tstart_CCS_"+tranche+"("+k+","+j+"),Tniche_CCS_"+tranche+"(k,j),Tgrowth_CCS_"+tranche+"(k,j),Tmature_CCS_"+tranche+"(k,j),MSHmax_"+tranche+"_elec(k,j),current_time_im);");
++            end
++        end
++    end
++
++end
++
++
+ //Step 3
+ //if the carbon tax is lower than starting_taxCO2_ccs_elec  .1e6 $/tCO2, CCS market shares are null
+ // => CCS deployment starts after the floor carbon price is reached

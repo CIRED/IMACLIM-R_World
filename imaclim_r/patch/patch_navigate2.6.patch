@@ -1,0 +1,662 @@
+Index: batch/navigate2.6.sh
+===================================================================
+--- batch/navigate2.6.sh	(révision 32727)
++++ batch/navigate2.6.sh	(copie de travail)
+@@ -36,7 +36,7 @@
+ #          & svn update -r32011 model/diagnostic.sce
+ # 	   & svn update -r32058 lib/diagnostic.sce
+ #	   & svn update -r32090 model/extraction-first.sce model/nexus.climatePolicy2.sce study_frames/base.sce study_frames/matrice_base.csv study_frames/default_parameters.sce
+-#	   & svn update -r32726 lib/npi_ndc.sci
++#	   & svn update -r32726 lib/npi_ndc.sci lib/compute_emi_ccs.sci lib/diagnostic.sce
+ 
+ # data, do
+ #unzip -o /data/public_results/ImaclimR/input_data/input_data-Imaclim2.0-r32070.zip
+Index: lib/diagnostic.sci
+===================================================================
+--- lib/diagnostic.sci	(révision 31998)
++++ lib/diagnostic.sci	(copie de travail)
+@@ -36,4 +36,5 @@
+         - energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
+         + energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+         ) )/1e6;
++    end
+ endfunction
+Index: patch/patch_navigate2.6.patch
+===================================================================
+--- patch/patch_navigate2.6.patch	(révision 32727)
++++ patch/patch_navigate2.6.patch	(copie de travail)
+@@ -1,319 +1,23 @@
+ Index: batch/navigate2.6.sh
+ ===================================================================
+---- batch/navigate2.6.sh	(révision 32726)
++--- batch/navigate2.6.sh	(révision 32727)
+ +++ batch/navigate2.6.sh	(copie de travail)
+-@@ -35,8 +35,14 @@
+- # run with r31998
++@@ -36,7 +36,7 @@
+  #          & svn update -r32011 model/diagnostic.sce
+  # 	   & svn update -r32058 lib/diagnostic.sce
+--#	   & svn update -r32090 model/extraction-first.sce model/nexus.climatePolicy2.sce study_frames/base.sce study_frames/matrice_base.csv
+-+#	   & svn update -r32090 model/extraction-first.sce model/nexus.climatePolicy2.sce study_frames/base.sce study_frames/matrice_base.csv study_frames/default_parameters.sce
+-+#	   & svn update -r32726 lib/npi_ndc.sci
++ #	   & svn update -r32090 model/extraction-first.sce model/nexus.climatePolicy2.sce study_frames/base.sce study_frames/matrice_base.csv study_frames/default_parameters.sce
++-#	   & svn update -r32726 lib/npi_ndc.sci
+++#	   & svn update -r32726 lib/npi_ndc.sci lib/compute_emi_ccs.sci lib/diagnostic.sce
+  
+-+# data, do
+-+#unzip -o /data/public_results/ImaclimR/input_data/input_data-Imaclim2.0-r32070.zip
+-+#unzip -o /data/public_results/ImaclimR/input_data/input_data-Imaclim2.0-r31996.zip
+-+
+-+
+- # 401515 and 40077 needs to be run 3 times exactly to generate 
+- # outputs/ind_lindhal_tax_correction_4007.csv and
+- # outputs/ind_lindhal_tax_correction_4015.csv and
+-Index: study_frames/default_parameters.sce
++ # data, do
++ #unzip -o /data/public_results/ImaclimR/input_data/input_data-Imaclim2.0-r32070.zip
++Index: lib/diagnostic.sci
+ ===================================================================
+---- study_frames/default_parameters.sce	(révision 31998)
+-+++ study_frames/default_parameters.sce	(copie de travail)
+-@@ -43,10 +43,15 @@
+- end
+- 
+- // automatic calibration of coal price elasticity
+--if ~isdef("auto_calibration_coal_prices")
+--    auto_calibration_coal_prices="None";
+-+if ~isdef("auto_calibration_p_coal")
+-+    auto_calibration_p_coal="None";
+- end
+- 
+-+// automatic calibration of intangible costs
+-+if ~isdef("auto_calibration_IC_elec")
+-+    auto_calibration_IC_elec=%f;
+-+end
+-+
+- // switch to run new calibration settings for coal price elasticity + xtax for gas
+- if ~isdef("ind_new_calib_coal")
+-     ind_new_calib_coal=%t;
+-@@ -56,9 +61,6 @@
+-     ind_new_calib_gas=%t;
+- end
+- 
+--if ~isdef("ind_new_calib_biomass_LR")
+--    ind_new_calib_biomass_LR=%f;
+--end
+- 
+- // need to be set to %t for the first step of the auto_calibration_txCap automatic procedure
+- if ~isdef("first_try_autocalib")
+-@@ -131,7 +133,7 @@
+- // MACRO indexes which monitor big demand-side variants
+- 
+- if ~isdef("ind_sufficiency")
+--ind_sufficiency = 0; // Variant monitoring the options regarding sufficiency: 0 = default (initially in the trunk); 1 = sufficient variant; 2 = BAU or non-sufficient variant
+-+    ind_sufficiency = 0; // Variant monitoring the options regarding sufficiency: 0 = default (initially in the trunk); 1 = sufficient variant; 2 = BAU or non-sufficient variant
+- end
+- 
+- if ~isdef("ind_efficiency")
+-@@ -168,6 +170,10 @@
+-     ind_shipFret_A = 0;
+- end
+- 
+-+if ~isdef("ind_sufficiency_indus")
+-+	ind_sufficiency_indus = 0; // Variant for LD scenarios controlling industrial consumption 
+-+end
+-+
+- //EFFICIENCY options and their use
+- //  speeds up energy efficiency improvements in dwellings // NAVIGATE - task 3.5
+- if ~isdef("ind_buildingefficiency")
+-@@ -200,6 +206,12 @@
+- if ~isdef("ind_shipping_air_electri")
+-     ind_shipping_air_electri = 0;
+- end
+-+
+-+// electrification of ldv
+-+if ~isdef("indice_ldv_electri")
+-+indice_ldv_electri = 0;
+-+end
+-+
+- // electrification of the building sector
+- if ~isdef("indice_building_electri")
+-     indice_building_electri = 0;
+-@@ -206,6 +218,7 @@
+- end
+- 
+- 
+-+
+- /////////
+- 
+- 
+-@@ -273,8 +286,13 @@
+- // NPi/INDC diagnostic
+- 
+- if ~isdef("ind_npi_ndc")
+--    ind_npi_ndc = 0; //1 for NPi, 2 for NDC
+-+    ind_npi_ndc = 0; //1 for NPi, 2 for NDC, 3 for calibration
+- end
+-+
+-+if ~isdef("ind_npi_ndc_effort")
+-+    ind_npi_ndc_effort = 1; //0 = constant CO2 price after 2030, 1 for "continuation of efforts" = CO2 grow at natural GDP's rate
+-+end
+-+
+- // WACC dummies for the electricity sector
+- //By default, discount factor are regional and techno specific 
+- if ~isdef('ind_uniform_DR')
+-@@ -281,6 +299,31 @@
+-     ind_uniform_DR =%f; 
+- end
+- 
+-+//sensibility analysis on the logit exponent in the main logit node of the investment module - electricity nexus. 
+-+// some weights_ENR.tsv need to be generate first (takes 5 min to do it manually)
+-+if ~isdef("ind_logit_sensib_VRE")
+-+    ind_logit_sensib_VRE=%f;
+-+end
+-+
+-+// switch for the heterogenous expectations scenarios
+-+if ~isdef("ind_believers_switch")
+-+    ind_believers_switch = %f;
+-+end
+-+
+-+if ~isdef("ind_believers")
+-+    ind_believers = %f;
+-+end
+-+
+-+if ~isdef("ind_new_calib_biomass_LR")
+-+    ind_new_calib_biomass_LR=%f;
+-+end
+-+
+-+// automatic calibration of coal price elasticity
+-+if ~isdef("auto_calibration_coal_prices")
+-+    auto_calibration_coal_prices="None";
+-+end
+-+
+-+
+- if ~isdef("ind_global_wacc")
+-     ind_global_wacc = 0; //global WACC paper
+-     //case 0 : using IMACLIM-R own assumption about the WACC
+-@@ -293,20 +336,43 @@
+- if ~isdef("ind_climfin")
+-     ind_climfin = 0;
+-     ind_climfin_inc = 0;
+--else
+--    ind_new_calib_wacc=%f;
+- end
+- 
+--// switch for the heterogenous expectations scenarios
+--if ~isdef("ind_believers_switch")
+--    ind_believers_switch = %f;
+-+ // running climate policy uncertainty & credibility study scenarios and associated switches
+-+ if ~isdef("ind_climpol_uncer")
+-+    ind_climpol_uncer=0;
+- end
+- 
+--if ~isdef("ind_believers")
+--    ind_believers = %f;
+-+//adding a switch used in the credibility study scenarios that appears in the study frame file
+-+if ~isdef("ind_wait_n_see")
+-+    ind_wait_n_see=0;
+- end
+- 
+-+// looking for net zero?
+-+if ~isdef("ind_nz")
+-+    ind_nz =0;
+-+end
+- 
+-+//cap on CO2 prices, when using standardized tax profiles?
+-+if ~isdef("cap_CO2_price")
+-+    cap_CO2_price =0;
+-+end
+-+
+-+// climate impact
+-+// climate impacts on labor productivity
+-+if ~isdef("ind_impacts")
+-+    ind_impacts = 0;
+-+end
+-+// climate sensitivity
+-+if ~isdef("ind_clim_sensi")
+-+    ind_clim_sensi = 1;
+-+end
+-+
+-+// labor market rigidity
+-+if ~isdef("ind_labour")
+-+    ind_labour = 0;
+-+end
+-+
+- // a temporary switch to keep previous results before actknowledging new changes in the wacc module.
+- if ~isdef("ind_new_calib_wacc")
+-     ind_new_calib_wacc = %t;
+-@@ -315,12 +381,8 @@
+- if ~isdef("ind_in_markup_elec")
+-     ind_in_markup_elec=%t;
+- end
+--//sensibility analysis on the logit exponent in the main logit node of the investment module - electricity nexus. 
+--// some weights_ENR.tsv need to be generate first (takes 5 min to do it manually)
+--if ~isdef("ind_logit_sensib_VRE")
+--    ind_logit_sensib_VRE=%f;
+--end
+- 
+-+
+- //indice for carbon revenues recycling scheme
+- if ~isdef("ind_recycl")
+-     ind_recycl=0;
+-@@ -335,3 +397,113 @@
+- if ~isdef("tool_output_diagnostic")
+-     tool_output_diagnostic=%f;
+- end
+-+
+-+// labor market rigidity
+-+if ~isdef("ind_labour")
+-+    ind_labour = 0;
+-+end
+-+
+-+// assumptions for development lifestyles
+-+if ~isdef("ind_develo")
+-+    ind_develo = 1;
+-+end
+-+
+-+// assumption for energy efficiency
+-+if ~isdef("ind_EEI")
+-+    ind_EEI = 0;
+-+end
+-+
+-+// armingont elasticities
+-+if ~isdef("ind_trade")
+-+    ind_trade = 0;
+-+end
+-+
+-+// lower trade elasticities for agriculture (if ==1)
+-+if ~isdef("ind_trade_agri")
+-+    ind_trade_agri = 0;
+-+end
+-+
+-+// assumption on coal price elasticitie
+-+if ~isdef("ind_charbo")
+-+    ind_charbo = 1;
+-+end
+-+
+-+// alternative liquid fuels but biofuels, i-e CTL
+-+if ~isdef("ind_altern")
+-+    ind_altern = 1;
+-+end
+-+
+-+// Technological evolution
+-+if ~isdef("ind_techno") // TODO check if obsolete, and which variant is optimistic/pessimistic
+-+    ind_techno = 1;
+-+end
+-+
+-+// carbon price expectations (0 = myopic, the carcon price is assumed by agent to remain constant)
+-+if ~isdef("ind_expectations")
+-+    ind_expectations = 0;
+-+end
+-+
+-+// Low demand assumption for the Low Energy Demand Paper
+-+if ~isdef("indice_LED")
+-+    indice_LED = 0;
+-+end
+-+
+-+//
+-+if ~isdef("ind_exogenous_forcings")
+-+    ind_exogenous_forcings = 0;
+-+end
+-+
+-+// Short-term planning and truncated LCC calculation (nexus building & elec)
+-+if ~isdef("ind_short_term_hor")
+-+    ind_short_term_hor = 0;
+-+end
+-+
+-+// as energy auto-consumption were not accounted for in the hybridation procedure
+-+// We add it exogenously for outputs (cor_ener_autocons=%t)
+-+if ~isdef("ind_cor_ener_autocons")
+-+    ind_cor_ener_autocons = %f;
+-+end
+-+
+-+// Variant for Post-Growth and Convergence scenarios with exogenous labor productivity growth
+-+if ~isdef("indice_TC_l_exo")
+-+	indice_TC_l_exo = 0; 
+-+end
+-+
+-+// Changes in taxes and prices expectations for EEI and CTL
+-+if ~isdef("test_expect_prices")
+-+	test_expect_prices = 0; 
+-+end
+-+
+-+//Switch to allow regions to fix domestic coal production goals
+-+if ~isdef("ind_coal_fin")
+-+    ind_coal_fin=0;
+-+end
+-+
+-+// constraint on cap growth rate
+-+if ~isdef("ind_max_growth_rate_elec")
+-+    ind_max_growth_rate_elec=1;
+-+end
+-+
+-+
+-+// forcing VRE shares (for profile cost calibration: only forcing onshore wind and utility scale PV for the calibration of profile costs)
+-+if ~isdef("force_VRE_share")
+-+    force_VRE_share=0;
+-+end
+-+
+-+// using old RLDC design (for profile cost calibration)
+-+if ~isdef("old_RLDC_design")
+-+    old_RLDC_design=0;
+-+end
+-+// calibrating profile costs
+-+if ~isdef("calib_profile_cost")
+-+    calib_profile_cost=0;
+-+end
+-+// using new rho (power plant efficiency) calibration
+-+if ~isdef("ind_new_rho_calib")
+-+    ind_new_rho_calib =1;
+-+end
+-+
+-+// CCS capture rate 
+-+if ~isdef("ind_cap_rate_CCS")
+-+    ind_cap_rate_CCS =1;
+-+end
++--- lib/diagnostic.sci	(révision 31998)
+++++ lib/diagnostic.sci	(copie de travail)
++@@ -36,4 +36,5 @@
++         - energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
++         + energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
++         ) )/1e6;
+++    end
++ endfunction
+Index: study_frames/default_parameters.sce
+===================================================================
+--- study_frames/default_parameters.sce	(révision 31998)
++++ study_frames/default_parameters.sce	(copie de travail)
+@@ -43,10 +43,15 @@
+ end
+ 
+ // automatic calibration of coal price elasticity
+-if ~isdef("auto_calibration_coal_prices")
+-    auto_calibration_coal_prices="None";
++if ~isdef("auto_calibration_p_coal")
++    auto_calibration_p_coal="None";
+ end
+ 
++// automatic calibration of intangible costs
++if ~isdef("auto_calibration_IC_elec")
++    auto_calibration_IC_elec=%f;
++end
++
+ // switch to run new calibration settings for coal price elasticity + xtax for gas
+ if ~isdef("ind_new_calib_coal")
+     ind_new_calib_coal=%t;
+@@ -56,9 +61,6 @@
+     ind_new_calib_gas=%t;
+ end
+ 
+-if ~isdef("ind_new_calib_biomass_LR")
+-    ind_new_calib_biomass_LR=%f;
+-end
+ 
+ // need to be set to %t for the first step of the auto_calibration_txCap automatic procedure
+ if ~isdef("first_try_autocalib")
+@@ -131,7 +133,7 @@
+ // MACRO indexes which monitor big demand-side variants
+ 
+ if ~isdef("ind_sufficiency")
+-ind_sufficiency = 0; // Variant monitoring the options regarding sufficiency: 0 = default (initially in the trunk); 1 = sufficient variant; 2 = BAU or non-sufficient variant
++    ind_sufficiency = 0; // Variant monitoring the options regarding sufficiency: 0 = default (initially in the trunk); 1 = sufficient variant; 2 = BAU or non-sufficient variant
+ end
+ 
+ if ~isdef("ind_efficiency")
+@@ -168,6 +170,10 @@
+     ind_shipFret_A = 0;
+ end
+ 
++if ~isdef("ind_sufficiency_indus")
++	ind_sufficiency_indus = 0; // Variant for LD scenarios controlling industrial consumption 
++end
++
+ //EFFICIENCY options and their use
+ //  speeds up energy efficiency improvements in dwellings // NAVIGATE - task 3.5
+ if ~isdef("ind_buildingefficiency")
+@@ -200,6 +206,12 @@
+ if ~isdef("ind_shipping_air_electri")
+     ind_shipping_air_electri = 0;
+ end
++
++// electrification of ldv
++if ~isdef("indice_ldv_electri")
++indice_ldv_electri = 0;
++end
++
+ // electrification of the building sector
+ if ~isdef("indice_building_electri")
+     indice_building_electri = 0;
+@@ -206,6 +218,7 @@
+ end
+ 
+ 
++
+ /////////
+ 
+ 
+@@ -273,8 +286,13 @@
+ // NPi/INDC diagnostic
+ 
+ if ~isdef("ind_npi_ndc")
+-    ind_npi_ndc = 0; //1 for NPi, 2 for NDC
++    ind_npi_ndc = 0; //1 for NPi, 2 for NDC, 3 for calibration
+ end
++
++if ~isdef("ind_npi_ndc_effort")
++    ind_npi_ndc_effort = 1; //0 = constant CO2 price after 2030, 1 for "continuation of efforts" = CO2 grow at natural GDP's rate
++end
++
+ // WACC dummies for the electricity sector
+ //By default, discount factor are regional and techno specific 
+ if ~isdef('ind_uniform_DR')
+@@ -281,6 +299,31 @@
+     ind_uniform_DR =%f; 
+ end
+ 
++//sensibility analysis on the logit exponent in the main logit node of the investment module - electricity nexus. 
++// some weights_ENR.tsv need to be generate first (takes 5 min to do it manually)
++if ~isdef("ind_logit_sensib_VRE")
++    ind_logit_sensib_VRE=%f;
++end
++
++// switch for the heterogenous expectations scenarios
++if ~isdef("ind_believers_switch")
++    ind_believers_switch = %f;
++end
++
++if ~isdef("ind_believers")
++    ind_believers = %f;
++end
++
++if ~isdef("ind_new_calib_biomass_LR")
++    ind_new_calib_biomass_LR=%f;
++end
++
++// automatic calibration of coal price elasticity
++if ~isdef("auto_calibration_coal_prices")
++    auto_calibration_coal_prices="None";
++end
++
++
+ if ~isdef("ind_global_wacc")
+     ind_global_wacc = 0; //global WACC paper
+     //case 0 : using IMACLIM-R own assumption about the WACC
+@@ -293,20 +336,43 @@
+ if ~isdef("ind_climfin")
+     ind_climfin = 0;
+     ind_climfin_inc = 0;
+-else
+-    ind_new_calib_wacc=%f;
+ end
+ 
+-// switch for the heterogenous expectations scenarios
+-if ~isdef("ind_believers_switch")
+-    ind_believers_switch = %f;
++ // running climate policy uncertainty & credibility study scenarios and associated switches
++ if ~isdef("ind_climpol_uncer")
++    ind_climpol_uncer=0;
+ end
+ 
+-if ~isdef("ind_believers")
+-    ind_believers = %f;
++//adding a switch used in the credibility study scenarios that appears in the study frame file
++if ~isdef("ind_wait_n_see")
++    ind_wait_n_see=0;
+ end
+ 
++// looking for net zero?
++if ~isdef("ind_nz")
++    ind_nz =0;
++end
+ 
++//cap on CO2 prices, when using standardized tax profiles?
++if ~isdef("cap_CO2_price")
++    cap_CO2_price =0;
++end
++
++// climate impact
++// climate impacts on labor productivity
++if ~isdef("ind_impacts")
++    ind_impacts = 0;
++end
++// climate sensitivity
++if ~isdef("ind_clim_sensi")
++    ind_clim_sensi = 1;
++end
++
++// labor market rigidity
++if ~isdef("ind_labour")
++    ind_labour = 0;
++end
++
+ // a temporary switch to keep previous results before actknowledging new changes in the wacc module.
+ if ~isdef("ind_new_calib_wacc")
+     ind_new_calib_wacc = %t;
+@@ -315,12 +381,8 @@
+ if ~isdef("ind_in_markup_elec")
+     ind_in_markup_elec=%t;
+ end
+-//sensibility analysis on the logit exponent in the main logit node of the investment module - electricity nexus. 
+-// some weights_ENR.tsv need to be generate first (takes 5 min to do it manually)
+-if ~isdef("ind_logit_sensib_VRE")
+-    ind_logit_sensib_VRE=%f;
+-end
+ 
++
+ //indice for carbon revenues recycling scheme
+ if ~isdef("ind_recycl")
+     ind_recycl=0;
+@@ -335,3 +397,113 @@
+ if ~isdef("tool_output_diagnostic")
+     tool_output_diagnostic=%f;
+ end
++
++// labor market rigidity
++if ~isdef("ind_labour")
++    ind_labour = 0;
++end
++
++// assumptions for development lifestyles
++if ~isdef("ind_develo")
++    ind_develo = 1;
++end
++
++// assumption for energy efficiency
++if ~isdef("ind_EEI")
++    ind_EEI = 0;
++end
++
++// armingont elasticities
++if ~isdef("ind_trade")
++    ind_trade = 0;
++end
++
++// lower trade elasticities for agriculture (if ==1)
++if ~isdef("ind_trade_agri")
++    ind_trade_agri = 0;
++end
++
++// assumption on coal price elasticitie
++if ~isdef("ind_charbo")
++    ind_charbo = 1;
++end
++
++// alternative liquid fuels but biofuels, i-e CTL
++if ~isdef("ind_altern")
++    ind_altern = 1;
++end
++
++// Technological evolution
++if ~isdef("ind_techno") // TODO check if obsolete, and which variant is optimistic/pessimistic
++    ind_techno = 1;
++end
++
++// carbon price expectations (0 = myopic, the carcon price is assumed by agent to remain constant)
++if ~isdef("ind_expectations")
++    ind_expectations = 0;
++end
++
++// Low demand assumption for the Low Energy Demand Paper
++if ~isdef("indice_LED")
++    indice_LED = 0;
++end
++
++//
++if ~isdef("ind_exogenous_forcings")
++    ind_exogenous_forcings = 0;
++end
++
++// Short-term planning and truncated LCC calculation (nexus building & elec)
++if ~isdef("ind_short_term_hor")
++    ind_short_term_hor = 0;
++end
++
++// as energy auto-consumption were not accounted for in the hybridation procedure
++// We add it exogenously for outputs (cor_ener_autocons=%t)
++if ~isdef("ind_cor_ener_autocons")
++    ind_cor_ener_autocons = %f;
++end
++
++// Variant for Post-Growth and Convergence scenarios with exogenous labor productivity growth
++if ~isdef("indice_TC_l_exo")
++	indice_TC_l_exo = 0; 
++end
++
++// Changes in taxes and prices expectations for EEI and CTL
++if ~isdef("test_expect_prices")
++	test_expect_prices = 0; 
++end
++
++//Switch to allow regions to fix domestic coal production goals
++if ~isdef("ind_coal_fin")
++    ind_coal_fin=0;
++end
++
++// constraint on cap growth rate
++if ~isdef("ind_max_growth_rate_elec")
++    ind_max_growth_rate_elec=1;
++end
++
++
++// forcing VRE shares (for profile cost calibration: only forcing onshore wind and utility scale PV for the calibration of profile costs)
++if ~isdef("force_VRE_share")
++    force_VRE_share=0;
++end
++
++// using old RLDC design (for profile cost calibration)
++if ~isdef("old_RLDC_design")
++    old_RLDC_design=0;
++end
++// calibrating profile costs
++if ~isdef("calib_profile_cost")
++    calib_profile_cost=0;
++end
++// using new rho (power plant efficiency) calibration
++if ~isdef("ind_new_rho_calib")
++    ind_new_rho_calib =1;
++end
++
++// CCS capture rate 
++if ~isdef("ind_cap_rate_CCS")
++    ind_cap_rate_CCS =1;
++end

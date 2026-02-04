@@ -1,0 +1,57 @@
+depository: Florian Leblanc (leblanc)
+title: data from meta-model build in the NAVIGATE project, from the Aviation International Model build by TIAM-UCL
+source: Olivier Dessens - mail
+date: 2022-08
+rights: private
+description:
+
+The meta-model is described here:
+Navigate/AviationIntegratedModel_TIAM_UCL/metadata.txt
+
+The dataset provid three projections of regional RPK (Revenue Passenger Kilometer),
+which are fed into scenarios build for a specific model intercomparison exercice and paper
+on aviation demand.
+
+The data are supposed to be used in IMACLIM-R World V2.0
+
+The paper protocol is added in the data.
+
+coverage: world
+creator: Olivier Dessens - Tiam UCL team
+publisher:
+
+notes:
+
+
+Email:
+
+-------- Message transféré --------
+Sujet : 	NAVIGATE WP3 T3.3 aviation modelling protocol: final version with aviation demand data available.
+Date : 	Thu, 18 Nov 2021 11:18:22 +0000
+De : 	Dessens, Olivier <o.dessens@ucl.ac.uk>
+Pour : 	Pye, Steve <s.pye@ucl.ac.uk>, tsiropoulos@e3modelling.com <tsiropoulos@e3modelling.com>, Pelopidas Siskos <psiskos@e3modelling.com>, roberto@ppe.ufrj.br <roberto@ppe.ufrj.br>, Eduardo Miranda Müller Drumond Casseres <emmdc@poli.ufrj.br>, rottoli@pik-potsdam.de <rottoli@pik-potsdam.de>, 'fragkos@e3modelling.com' <fragkos@e3modelling.com>, Johannes Emmerling <johannes.emmerling@eiee.org>, leblanc@centre-cired.fr <leblanc@centre-cired.fr>, szklo@ppe.ufrj.br <szklo@ppe.ufrj.br>, pietzcker@pik-potsdam.de <pietzcker@pik-potsdam.de>, Hesam.naghash@eiee.org <Hesam.naghash@eiee.org>, Jessica Strefler <strefler@pik-potsdam.de>, le-gallic@centre-cired.fr <le-gallic@centre-cired.fr>, ecasseres@ppe.ufrj.br <ecasseres@ppe.ufrj.br>, 'bertram@pik-potsdam.de' <bertram@pik-potsdam.de>, pedrorochedo@ppe.ufrj.br <pedrorochedo@ppe.ufrj.br>, Johanna Hoppe <johanna.hoppe@pik-potsdam.de>
+Copie à : 	VAN RUIJVEN Bastiaan <vruijven@iiasa.ac.at>
+
+
+Dear all,
+
+Please find attached the modelling protocol for the aviation sector in NAVIGATE WP3 T3.3.
+Within the file you can find the different demand for the aviation sector that have been developed from the aviation meta-model (only 3 different demand files: reference, 1.5C and 1.5C low demand).
+The aviation demands are harmonised for the scenarios and supplied at national level.
+The scenarios developed from these demands are defined in the protocol.
+
+You also will find an excel file with the results we would like to have from the scenarios. This has been developed from the "results template" used in the diagnostic work in NAVIGATE. The number of variables has been largely reduced from the original list and some specific variables added to the list (all of those added relate to the aviation sector: emission, fuels, .....). Because some variables have been added (new variables linked to the aviation sector) we won't use the IIASA database to upload and analyse the results, but we will use the excel spreadsheet provided to get and analyse the scenarios.
+
+The same files are also available from the NAVIGATE share cloud storage:
+https://cloud.pik-potsdam.de/index.php/s/6ub3P77GgwrvqIY?path=%2F
+under the directory: WP3... and then T3.3.... you will find the data and protocol under: NAVIGATE-T3.3_AviationModellingProtocol&Data
+
+The password for accessing the site is: NAVIGATE_H2020
+
+The deliverable is due in February next year, it would be nice to get the results from the modelling work mid-December to be able to get a good draft end of January.
+
+If there are questions, please do not hesitate to contact me.
+
+Kind regards,
+Olivier.
+

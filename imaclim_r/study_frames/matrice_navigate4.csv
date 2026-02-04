@@ -1,0 +1,10 @@
+//combi;ind_climat;ind_clim_refForBau;ind_EEI;ind_NUC;ind_ENR;ind_bioEnergy;ind_expectations;pol_infra;ind_recycl;ind_sufficiency;ind_efficiency;ind_fuelswitching;ind_electrification_indu;ind_lindhal;ind_lim_nuke;ind_limCCS_InjRate;ind_high_VRE
+//indices should be in the first line, as used in the code, without space separated by a semi-column;;;;;;;;;;;;;;;;;
+1;0;0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+2;0;0;0;1;1;1;0;0;2;0;0;0;0;0;0;0;0
+11;1;1;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0
+22;1;1;0;1;1;1;0;0;2;0;0;0;0;0;0;0;0
+651;651;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0
+659;19;1;0;1;1;1;0;0;2;0;0;0;1;0;0;0;0
+151;151;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0
+159;159;1;0;1;1;1;0;0;2;0;0;0;1;0;0;0;0

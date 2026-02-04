@@ -1,0 +1,27 @@
+depository: Thibault Briera (briera.cired@gmail.com)
+title: Variable Renewable Energy Integration Module
+source: https://fp7-advance.eu/?q=content/variable-renewable-energy-integration-module
+date: 2017
+rights:
+
+description:
+
+This module provides both data and a method to represent key integration challenges of wind and solar power in large-scale energy-economy models.
+
+Cite: Ueckerdt, Pietzcker et al. (n.d.) when using any RLDC data or the described method to implement wind or solar variability.
+The main idea of the module is that the variable renewable energies wind and solar are challenging to integrate in power systems because of their variability and the necessity to match load and generation at all times. 
+VRE influence key power system parameters such as peak residual demand, full-load hours of dispatchable power plants, storage requirements and curtailment. Residual load duration curves (RLDCs) contain the information how these key system parameters change depending on the share of wind and solar in electricity generation (Ueckerdt et al., 2015). Using the RLDCs, we describe below how to represent this information in an IAM (Integrated Assessment Model), using a polynomial formulation suited for a non-linear model (Ueckerdt, Pietzcker et al., n.d.). 
+The results of different implementations of the RLDC data in several IAMs as well as other approaches to represent variability are evaluated in (Pietzcker et al., n.d.) 
+
+coverage: This module contains the RLDCs for the eight world regions Sub-Saharan Africa, China, Europe, India, Japan, Latin America, Middle East and North Africa, and the USA
+creator: Ueckerdt, Pietzcker et al (2017)
+
+publisher:
+
+BibliographicResource: Ueckerdt, Pietzcker et al (2017) doi:10.1016/j.eneco.2016.05.012
+
+Notes:
+This .zip file have been send by email, the link on the ADVANCE project webpage is broken so the .zip file is manually added and can not be directly downloaded.
+Theses files can also be found in the supplementary materials of Ueckerdt, Pietzcker et al (2017).
+
+

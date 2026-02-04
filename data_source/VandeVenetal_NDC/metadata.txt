@@ -1,0 +1,25 @@
+depository: Thibault Briera (briera)
+title: Van de Ven et al data - NPi & NDC MiP
+source: https://doi.org/10.5281/zenodo.7767193
+date: March 2023
+
+description:
+
+This dataset contains the underlying data (IAM outputs, feasibility assessment, temperature projections) for the journal article by van de Ven et al. currently in revision in Nature Climate Change, titled "A multi-model analysis of post-Glasgow climate targets and feasibility challenges". Citation: 
+
+van de Ven, Dirk-Jan, Mittal, Shivika, Gambhir, Ajay, Doukas, Haris, Giarola, Sara, Hawkes, Adam, Koasidis, Konstantinos, Koberle, Alexandre, Lamboll, Robin, McJeon, Haewon, Perdana, Sigit, Peters, Glen, Rogelj, Joeri, Sognnaes, Ida, Vielle, Marc, & Nikas, Alexandros. (2023). van de Ven et al_2023_postGlasgow_NCC_Dataset (1.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.7767193
+
+These inputs are meant to be used to calibrate Npi/NDC emissions trajectories in IMACLIM-R. They are AR6 database compliant.
+
+coverage: World
+
+
+BibliographicResource:
+
+Notes:
+csv in 
+/data/public_data/data
+
+
+
+

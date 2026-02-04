@@ -1,0 +1,9 @@
+author: leblanc
+date:
+
+source: world energy outlook 2014, IEA
+
+// Main tight oil producing region projections in world energy outlook 2014
+// page 118-121
+// unit : kb/d
+// 1 kb/day indicates the start year of production

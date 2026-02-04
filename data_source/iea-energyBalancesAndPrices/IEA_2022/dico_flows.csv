@@ -1,0 +1,110 @@
+Long Name (new base),Long Name (old base),Long Name (new base)
+Production,Production,INDPROD
+Imports,Imports,IMPORTS
+Exports,Exports,EXPORTS
+International marine bunkers,International marine bunkers,MARBUNK
+International aviation bunkers,International aviation bunkers,AVBUNK
+Stock changes,Stock changes,STOCKCHA
+Total energy supply,Total primary energy supply,TES
+Transfers,Transfers,TRANSFER
+Statistical differences,Statistical differences,STATDIFF
+Transformation processes,Transformation processes,TOTTRANF
+Main activity producer electricity plants,Main activity producer electricity plants (transf.),MAINELEC
+Autoproducer electricity plants,Autoproducer electricity plants (transf.),AUTOELEC
+Main activity producer CHP plants,Main activity producer CHP plants (transf.),MAINCHP
+Autoproducer CHP plants,Autoproducer CHP plants (transf.),AUTOCHP
+Main activity producer heat plants,Main activity producer heat plants (transf.),MAINHEAT
+Autoproducer heat plants,Autoproducer heat plants (transf.),AUTOHEAT
+Heat pumps,Heat pumps (transf.),THEAT
+Electric boilers,Electric boilers (transf.),TBOILER
+Chemical heat for electricity production,Chemical heat for electricity production (transf.),TELE
+      Blast furnaces,Blast furnaces (transf.),TBLASTFUR
+      Gas works,Gas works (transf.),TGASWKS
+      Coke ovens,Coke ovens (transf.),TCOKEOVS
+      Patent fuel plants,Patent fuel plants (transf.),TPATFUEL
+      BKB/peat briquette plants,BKB/peat briquette plants (transf.),TBKB
+      Oil refineries,Oil refineries (transf.),TREFINER
+      Petrochemical plants,Petrochemical plants (transf.),TPETCHEM
+      Coal liquefaction plants,Coal liquefaction plants (transf.),TCOALLIQ
+      Gas-to-liquids (GTL) plants,Gas-to-liquids (GTL) plants (transf.),TGTL
+      For blended natural gas,For blended natural gas (transf.),TBLENDGAS
+      Charcoal production plants,Charcoal production plants (transf.),TCHARCOAL
+      Non-specified (transformation),Non-specified (transformation),TNONSPEC
+   Energy industry own use,Energy industry own use,TOTENGY
+      Coal mines,Coal mines (energy),EMINES
+      Oil and gas extraction,Oil and gas extraction (energy),EOILGASEX
+      Blast furnaces,Blast furnaces (energy),EBLASTFUR
+      Gas works,Gas works (energy),EGASWKS
+      Gasification plants for biogases,Gasification plants for biogases (energy),EBIOGAS
+      Coke ovens,Coke ovens (energy),ECOKEOVS
+      Patent fuel plants,Patent fuel plants (energy),EPATFUEL
+      BKB/peat briquette plants,BKB/peat briquette plants (energy),EBKB
+      Oil refineries,Oil refineries (energy),EREFINER
+      Coal liquefaction plants,Coal liquefaction plants (energy),ECOALLIQ
+      Liquefaction (LNG) / regasification plants,Liquefaction (LNG) / regasification plants  (energy),ELNG
+      Gas-to-liquids (GTL) plants,Gas-to-liquids (GTL) plants  (energy),EGTL
+"      Own use in electricity, CHP and heat plants","Own use in electricity, CHP and heat plants (energy)",EPOWERPLT
+      Pumped storage plants,Pumped storage plants (energy),EPUMPST
+      Nuclear industry,Nuclear industry  (energy),ENUC
+      Charcoal production plants,Charcoal production plants (energy),ECHARCOAL
+      Non-specified (energy),Non-specified (energy),ENONSPEC
+   Losses,Losses,DISTLOSS
+   Total final consumption,Total final consumption,TFC
+      Industry,Industry,TOTIND
+         Mining and quarrying,Mining and quarrying,MINING
+         Construction,Construction,CONSTRUC
+         Manufacturing,Manufacturing,MANUFACT
+            Iron and steel,Iron and steel,IRONSTL
+            Chemical and petrochemical,Chemical and petrochemical,CHEMICAL
+            Non-ferrous metals,Non-ferrous metals,NONFERR
+            Non-metallic minerals,Non-metallic minerals,NONMET
+            Transport equipment,Transport equipment,TRANSEQ
+            Machinery,Machinery,MACHINE
+            Food and tobacco,Food and tobacco,FOODPRO
+"            Paper, pulp and printing","Paper, pulp and print",PAPERPRO
+            Wood and wood products,Wood and wood products,WOODPRO
+            Textile and leather,Textile and leather,TEXTILES
+         Industry not elsewhere specified,Non-specified (industry),INONSPEC
+      Transport,Transport,TOTTRANS
+         World aviation bunkers,World aviation bunkers,WORLDAV
+         Domestic aviation,Domestic aviation,DOMESAIR
+         Road,Road,ROAD
+         Rail,Rail,RAIL
+         Pipeline transport,Pipeline transport,PIPELINE
+         World marine bunkers,World marine bunkers,WORLDMAR
+         Domestic navigation,Domestic navigation,DOMESNAV
+         Transport not elsewhere specified,Non-specified (transport),TRNONSPE
+,Other,
+      Residential,Residential,RESIDENT
+      Commercial and public services,Commercial and public services,COMMPUB
+      Agriculture/forestry,Agriculture/forestry,AGRICULT
+      Fishing,Fishing,FISHING
+      Final consumption not elsewhere specified,Non-specified (other),ONONSPEC
+      Non-energy use,Non-energy use,NONENUSE
+         Non-energy use industry/transformation/energy,Non-energy use industry/transformation/energy,NEINTREN
+            Memo: Non-energy use in industry,,NEIND
+               Memo: Non-energy use in construction,,NECONSTRUC
+               Memo: Non-energy use in mining and quarrying,,NEMINING
+               Memo: Non-energy use in iron and steel,,NEIRONSTL
+               Memo: Non-energy use in chemical/petrochemical,   Memo: Non-energy use chemical/petrochemical,NECHEM
+               Memo: Non-energy use in non-ferrous metals,,NENONFERR
+               Memo: Non-energy use in non-metallic minerals,,NENONMET
+               Memo: Non-energy use in transport equipment,,NETRANSEQ
+               Memo: Non-energy use in machinery,,NEMACHINE
+               Memo: Non-energy use in food/beverages/tobacco,,NEFOODPRO
+               Memo: Non-energy use in paper/pulp and printing,,NEPAPERPRO
+               Memo: Non-energy use in wood and wood products,,NEWOODPRO
+               Memo: Non-energy use in textiles and leather,,NETEXTILES
+               Memo: Non-energy use in industry not elsewhere specified,,NEINONSPEC
+         Non-energy use in transport,Non-energy use in transport,NETRANS
+         Non-energy use in other,Non-energy use in other,NEOTHER
+Electricity output (GWh),Electricity output (GWh),ELOUTPUT
+   Electricity output (GWh)-main activity producer electricity plants,Electricity output (GWh)-main activity producer electricity plants,ELMAINE
+   Electricity output (GWh)-autoproducer electricity plants,Electricity output (GWh)-autoproducer electricity plants,ELAUTOE
+   Electricity output (GWh)-main activity producer CHP plants,Electricity output (GWh)-main activity producer CHP plants,ELMAINC
+   Electricity output (GWh)-autoproducer CHP plants,Electricity output (GWh)-autoproducer CHP plants,ELAUTOC
+Heat output,Heat output,HEATOUT
+   Heat output-main activity producer CHP plants,Heat output-main activity producer CHP plants,HEMAINC
+   Heat output-autoproducer CHP plants,Heat output-autoproducer CHP plants,HEAUTOC
+   Heat output-main activity producer heat plants,Heat output-main activity producer heat plants,HEMAINH
+   Heat output-autoproducer heat plants,Heat output-autoproducer heat plants,HEAUTOH

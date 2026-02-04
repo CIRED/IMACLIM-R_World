@@ -1,0 +1,38 @@
+depository: Florian Leblanc (leblanc)
+title: Baseline macroeconomic scenarios by CEPII evaluated by the MAGE model
+source: http://www.cepii.fr/cepii/fr/bdd_modele/presentation.asp?id=11
+http://www.cepii.fr/cepii/fr/bdd_modele/download.asp?id=11
+date: 2021
+rights: 
+
+Permissions:
+Users of EconMap are kindly asked to cite the reference document and the version of EconMap used. The reference document is:
+Jean Fouré, Agnès Bénassy-Quéré & Lionel Fontagné (2012). “The Great Shift: Macroeconomic projections for the world economy at the 2050 horizon”, CEPII Working Paper 2012-03, February.
+and
+Jean Fouré, Agnès Bénassy-Quéré & Lionel Fontagné (2013). "Modelling the world economy at the 2050 horizon", Economics of Transition 21(4), 617-654.
+
+description:
+World macro-economic prospective scenarios: reference and SSPs
+
+coverage: World
+creator: Jean Fouré
+publisher: CEPII
+
+BibliographicResource:
+    Jean Fouré, Agnès Bénassy-Quéré & Lionel Fontagné (2012), The Great Shift: Macroeconomic projections for the world economy at the 2050 horizon, CEPII Working paper 2012-03.
+    Jean Fouré, Agnès Bénassy-Quéré & Lionel Fontagné (2013), Modelling the world economy at the 2050 horizon, Economics of Transition 21(4), p.p. 617-654.
+
+
+Description:
+
+EconMap est la base de données développée par le CEPII depuis 2010 pour envisager l'économie mondiale à long terme. EconMap est le nouveau nom de l'ancienne base Baseline.
+A partir d'une fonction de production à trois facteurs (travail, capital et énergie) et à deux progrès technologiques, nous proposons un scénario de croissance pour 167 pays à l'horizon 2050, issu du modèle 
+MaGE (Macroeconometrics of the Global Economy). Notre modèle est basé sur les projections de l'Organisation des Nations Unies et de l'Organisation Internationale du Travail, ainsi que sur des estimations économétriques (i) de l'accumulation du capital, (ii) de taux d'épargne, (iii) de la relation entre capital et investissement, (iv) de l'éducation, (v) de la participation des femmes au marché du travail, et (vi) du progrès technique (productivité globale des facteurs et productivité spécifique à l'utilisation de l'énergie). 
+La base de données recouvre le PIB à prix constant ou courant, ainsi que les facteurs de production et le progrès technique, pour chacun des 167 pays de 1980 à 2050.
+ Méthodologie : une brève description
+Nos projections proposent quatre nouveautés.
+Tout d'abord, nous prenons en compte la contrainte énergétique en intégrant sa consommation dans la fonction de production, et en séparant les rentes issues de la production de pétrole.
+Deuxièmement, nous estimons une relation non unitaire entre l'épargne et l'investissement, de façon à s'écarter des hypothèses traditionnelles de mobilité parfaite ou d'immobilité du capital.
+Enfin, nous définissons séparément le Produit Intérieur Brut réel (PIB) et les effets de prix relatifs, par le biais d'une relation à la Balassa-Samuelson. 
+
+Notes:

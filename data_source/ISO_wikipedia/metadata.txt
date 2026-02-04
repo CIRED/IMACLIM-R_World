@@ -1,0 +1,22 @@
+depository: Florian Leblanc (leblanc)
+
+title: ISO codes - wikipedia table
+source: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes#BONA
+
+date: 2023-06-09
+
+rights: 
+description:
+ISO code table
+extracted using 
+https://wikitable2csv.ggor.de/
+source code - https://github.com/gambolputty/wikitable2csv
+
+publication:
+coverage:  World, country and region level
+
+creator: 
+publisher:
+notes:
+Obsolete:
+

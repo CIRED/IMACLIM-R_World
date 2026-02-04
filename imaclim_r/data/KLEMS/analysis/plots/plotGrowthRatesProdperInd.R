@@ -1,0 +1,362 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Liesbeth Defosse
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
+#Graphs that show both evolution in RStruc and OCon, coming from all industries.
+
+growthRate <- function(x)
+{
+  (x-lag(x))/lag(x)
+}
+#--------------------------------------------------------------------------------------------------------------
+add.growthRates.1Country <- function(df, varHere, countryHere, industryHere, productHere)
+{
+  if(is.null(productHere)) 
+  {
+    df %>% filter(var==varHere, country==countryHere, industry==industryHere )  -> tempH
+  }
+  else
+  {
+    df %>% filter(var==varHere, country==countryHere, industry==industryHere, product==productHere)  -> tempH
+  }
+  tempH %>% spread(var,value)  -> tempH
+  
+  tempH <- mutate_each(tempH, funs(g=growthRate(.)), -country, -product, -industry, -year)
+  colnames(tempH)[which(names(tempH) == "g")] <- paste("g", varHere, sep="_")
+  return(tempH)
+}
+#--------------------------------------------------------------------------------------------------------------
+add.growthRates <- function(df, varH, countryH, industryH, productList)
+{
+  gr.init <- add.growthRates.1Country(df, varH, countryH ,industryH, productList[1])
+  gr.newData  <- gr.init
+  
+  for( productHere in productList[-1] )
+  {
+    gr.addl <- add.growthRates.1Country(df, varH, countryH, industryH, productHere)
+    gr.newData <- bind_rows(gr.newData,gr.addl)
+  }
+  return(gr.newData)
+}
+#------------------------------------------------------------definition of function to create table with growthrates
+perInd_prodGrowthrates <- function(productVector){
+
+industryHere <- industryVector12[1]
+temp1 <- dsAgg %>% dplyr::filter(var=="I")
+temp2 <- temp1 %>% dplyr::filter(industry==industryHere)
+temp0 <- dsAgg %>% dplyr::filter(var=="VA", industry=="TOT" , country %in% as.vector(countries)) %>% select(-c(product,industry)) %>% spread(var,value)
+
+temp3 <- temp2 %>%  spread(product,value) %>%
+                    mutate(Con = RStruc + OCon, Mach = TraEq + OMach) #%>% 
+#gather(product, value, -year, -country, -var, -industry,factor_key = TRUE)
+temp  <- left_join(temp0,temp3, by=c("country","year")) %>% mutate_each(funs(./VA), -VA,-country, -var, -year,-industry) %>%
+                                                            gather(product, value, -country, -year, -VA, -var, -industry,factor_key = TRUE) %>%
+                                                            select(-VA)
+#temp$var <- factor(c("I_VA"),levels=c("I_VA"))                                                           
+temp$var <- "I_VA"
+
+temp.init   <- add.growthRates(temp, "I_VA", as.vector(countries[1]), industryHere, productVector)
+temp.final  <- temp.init
+
+for(countryHere in as.vector(countries[-1]))
+{
+  temp.init   <- add.growthRates(temp, "I_VA", countryHere, industryHere, productVector)
+  temp.final  <- temp.final  <- bind_rows(temp.final,temp.init)
+}
+
+
+for (industryHere in c(industryVector12,"TOT")[-1])
+{
+  temp2 <- temp1 %>%  dplyr::filter(industry==industryHere)
+  temp3 <- temp2 %>%  spread(product,value) %>%
+                      mutate(Con = RStruc + OCon, Mach = TraEq + OMach) #%>% 
+                      #gather(product, value, -year, -country, -var, -industry,factor_key = TRUE)
+  temp  <- left_join(temp0,temp3, by=c("country","year")) %>% mutate_each(funs(./VA), -VA,-country, -var, -year,-industry) %>%
+                                                              gather(product, value, -country, -year, -VA, -var, -industry,factor_key = TRUE) %>%
+                                                              select(-VA)
+  temp$var <- "I_VA"                                                           
+  
+  temp.init <- add.growthRates(temp, "I_VA", as.vector(countries[1]), industryHere, productVector)
+  temp.final  <- bind_rows(temp.final,temp.init)
+  
+  for(countryHere in as.vector(countries[-1]))
+  {
+    temp.init   <- add.growthRates(temp, "I_VA", countryHere, industryHere, productVector)
+    temp.final  <- temp.final  <- bind_rows(temp.final,temp.init)
+  }
+}
+return(temp.final)
+}
+
+LiesGR2 <- perInd_prodGrowthrates(c("GFCF","NonICT","ICT","Con","Mach",productVector8))
+#temp.final <- temp.final %>% spread(product, g_I)
+
+
+folder <- paste0(PLOT,"/plottedGrowthRates/perIndustry/Con_Mach/")
+cat("Results will be located in",folder,"\n")
+dir.create(folder, recursive=TRUE)
+setwd(folder)
+
+Lies <- LiesGR %>% filter(product %in% c("Con", "Mach"))
+
+LiesConMach <- Lies %>% select(-I_VA) %>% spread(product,g_I_VA)
+LiesConMach$posCon <- abs(LiesConMach$Con)
+LiesConMach$absMach <- abs(LiesConMach$Mach)
+
+LiesConMach$posCon <- LiesConMach$Con
+LiesConMach$negCon <- LiesConMach$Con
+LiesConMach$posCon[LiesConMach$Con < 0] <- NA
+LiesConMach$negCon[LiesConMach$Con > 0] <- NA
+
+LiesConMach$posMach <- LiesConMach$Mach
+LiesConMach$negMach <- LiesConMach$Mach
+LiesConMach$posMach[LiesConMach$Mach < 0] <- NA
+LiesConMach$negMach[LiesConMach$Mach > 0] <- NA
+
+LiesOConTraEq <- LiesGR %>% filter(product %in% c("OCon", "TraEq")) %>% select(-I_VA) %>% spread(product,g_I_VA)
+
+LiesOConTraEq$posOCon <- LiesOConTraEq$OCon
+LiesOConTraEq$negOCon <- LiesOConTraEq$OCon
+LiesOConTraEq$posOCon[LiesOConTraEq$OCon < 0] <- NA
+LiesOConTraEq$negOCon[LiesOConTraEq$OCon > 0] <- NA
+
+LiesOConTraEq$posTraEq <- LiesOConTraEq$TraEq
+LiesOConTraEq$negTraEq <- LiesOConTraEq$TraEq
+LiesOConTraEq$posTraEq[LiesOConTraEq$TraEq < 0] <- NA
+LiesOConTraEq$negTraEq[LiesOConTraEq$TraEq > 0] <- NA
+
+for(industryHere in c(industryVector12,"TOT"))
+{
+  p <-  ggplot(subset(LiesConMach, industry==industryHere), aes( x=negCon, y=negMach)) + 
+        geom_point(size=1.1) + 
+        geom_smooth(method='lm') +
+        geom_point(data=subset(LiesConMach, industry==industryHere), aes( x=posCon, y=posMach)) +  
+        geom_smooth(data=subset(LiesConMach, industry==industryHere), aes( x=posCon, y=posMach), method='lm') +
+        scale_y_continuous(labels=percent, limits=c(-0.5,0.5)) +
+        scale_x_continuous(labels=percent, limits=c(-0.5,0.5)) +
+        facet_wrap(~ country, ncol=3,scales = "free") +
+        ggtitle(paste("I growth rates",industryHere,sep=", "))
+  print(p)
+  ggsave(filename=paste(paste("I-VA_growthratesConMach",industryHere,sep="-"),"pdf",sep="."), width = 36, height = 36, units = c("cm"), dpi = 300)
+}
+
+for(industryHere in c(industryVector12,"TOT"))
+{
+  p <-  ggplot(subset(LiesOConTraEq, industry==industryHere), aes( x=negOCon, y=negTraEq)) + 
+        geom_point(size=1.1) + 
+        geom_smooth(method='lm') +
+        geom_point(data=subset(LiesOConTraEq, industry==industryHere), aes( x=posOCon, y=posTraEq)) +  
+        geom_smooth(data=subset(LiesOConTraEq, industry==industryHere), aes( x=posOCon, y=posTraEq), method='lm') +
+        scale_y_continuous(labels=percent, limits=c(-0.5,0.5)) +
+        scale_x_continuous(labels=percent, limits=c(-0.5,0.5)) +
+        facet_wrap(~ country, ncol=3,scales = "free") +
+        ggtitle(paste("I growth rates",industryHere,sep=", "))
+  print(p)
+  ggsave(filename=paste(paste("I-VA_growthratesConMach",industryHere,sep="-"),"pdf",sep="."), width = 36, height = 36, units = c("cm"), dpi = 300)
+}
+
+
+  for(industryHere in c(industryVector12,"TOT"))
+  {
+    p <-  ggplot(subset(Lies, industry==industryHere), aes( x=year, y=g_I_VA, colour=product)) + 
+          geom_line(size=1.1) + 
+          scale_y_continuous(labels=percent) +
+          facet_wrap(~ country, ncol=3,scales = "free") +
+          ggtitle(paste("I growth rates",industryHere,sep=", ")) +
+          scale_color_manual(values=c(colour_products8,"#000000","#CCCCCC"))
+    print(p)
+    ggsave(filename=paste(paste("I-VA_growthratesProd",industryHere,sep="-"),"pdf",sep="."), width = 36, height = 36, units = c("cm"), dpi = 300)
+  }
+}
+
+wrappedgrapsGrowthrates(c(Con,Mach))
+
+#------------------------------------------------------------------------------------------------
+#Same as above but on shares
+temp.shares <- dgAgg
+for(varHere in "I")
+{
+  temp1 <- dgAgg %>% filter(var==varHere)
+  for (industryHere in "TOT")
+  {
+    temp1 <- temp1 %>% filter(industry==industryHere)
+    temp.shares <- temp1 %>% spread(product, value) %>% 
+                     # mutate(Con = OCon + RStruc) %>% 
+                      mutate_each(funs(./GFCF),-GFCF, -country, -var, -industry, -year) %>% 
+                      gather(product, value, -country, -var, -industry, -year) %>% 
+                      filter(product %in% c("RStruc", "OCon", "Con"))
+  }
+}
+
+temp.shares.init <- add.growthRates(temp.shares, "I", countries[1], "TOT", c("RStruc", "OCon")) %>% select (-c(I))
+temp.shares.final <- temp.shares.init
+for(countryHere in countries[-1])
+{
+  temp        <- add.growthRates(temp.shares, "I", countryHere, "TOT", c("RStruc", "OCon")) %>% select (-c(I))
+  temp.shares.final  <- bind_rows(temp.shares.final,temp)
+}
+
+temp.shares.final <- temp.shares.final %>% spread(product, g_I)
+
+p <-  ggplot(temp.shares.final, aes( x=RStruc, y=OCon, colour=year)) + 
+      geom_point(size=1.1) + 
+      #stat_summary(fun.data=mean_cl_normal) + 
+      geom_smooth(method='lm') +
+      scale_y_continuous(labels=percent) +
+      scale_x_continuous(labels=percent) +
+      facet_wrap(~ country, ncol=2,scales = "free") +
+      scale_colour_continuous() +
+      ggtitle(paste("I share growth rates",industryHere,sep=", "))
+    
+print(p)
+ggsave(filename=paste(paste("I_share_growthrates_Constr",industryHere,sep="-"),"pdf",sep="."), width = 18, height = 36, units = c("cm"), dpi = 300)
+
+for(countryHere in countries)
+{
+  filename <- paste(paste("lm","I_share_growthrates_Constr",countryHere,sep="-"),"txt",sep=".")
+  sink(filename)
+  print(summary(lm(OCon ~ RStruc, data = subset(temp.shares.final, country==countryHere))))
+  sink()
+}
+
+
+#-------------------------------------------------------------------------------------------------------------
+#First do linear regresssions on the variables and work with the residuals, to get out overall trend.
+
+#temp.lm <- dgAgg %>% filter(var %in% "I", industry=="TOT", product %in% c("RStruc", "OCon"), country %in% c("USA","AUS"))
+temp.lm <- temp
+temp.lm.residuals <- temp.lm %>% subset(!country %in% c("USA","AUS") & !product==c("RStruc","OCon"))
+temp.lm.residuals$residuals <- rep(0,dim(temp.lm.residuals)[1])
+
+for(countryHere in c("USA","AUS"))
+{
+  for(productHere in c("RStruc", "OCon"))
+  {
+    tempLies <- temp.lm %>% subset(country==countryHere & product==productHere)
+    tempLies$year2 <- tempLies$year^2
+    #res.lm.Lies <- lm(value ~ year, data=tempLies)
+    res.lm.Lies2 <- lm(value ~ year + year2, data=tempLies)
+    summary(res.lm.Lies2)
+    tempLies$residuals <- residuals(res.lm.Lies2)
+    temp.lm.residuals <- dplyr::bind_rows(temp.lm.residuals, tempLies)
+  }
+}
+
+p <-  ggplot(temp.lm.residuals, aes( x=year, y=residuals, colour=product)) + 
+      geom_line(size=1.1) + 
+      #stat_summary(fun.data=mean_cl_normal) + 
+      #geom_smooth(method='lm') +
+      #scale_y_continuous(labels=percent) +
+      #scale_x_continuous(labels=percent) +
+      facet_wrap(~ country, ncol=2,scales = "free") +
+      #ggtitle(paste("I growth rates",industryHere,sep=", ")) +
+      scale_color_manual(values=c("#191970", "#2f4ea3"))
+print(p)
+
+#now plot growth rates of the detrended data
+
+
+
+
+
+#tempLies <- temp.lm %>% spread(product,value) %>% subset(country=="USA")
+
+# plot GFCF shares of construction related investment
+for(varHere in "I")
+{
+  temp1 <- dgAgg %>% filter(var==varHere)
+  for (industryHere in "TOT")
+  {
+    temp1 <- temp1 %>% filter(industry==industryHere)
+    #for(countryHere in "USA")
+    #{
+    #temp <- temp1 %>% filter(country==countryHere) %>% 
+    temp <- temp1 %>% spread(product, value) %>% 
+            mutate(Con = OCon + RStruc) %>% 
+            mutate_each(funs(g=growthRate(.)),-GFCF, -country, -var, -industry, -year) %>% 
+            gather(product, value, -country, -var, -industry, -year) %>% 
+            filter(product %in% c("RStruc", "OCon", "Con"))
+    
+    p <-  ggplot(temp, aes( x=year, y=value, color=product)) + 
+          geom_line(size=1.1) + 
+          scale_y_continuous(labels=percent) +
+          facet_wrap(~ country, ncol=2,scales = "free") +
+          ggtitle(paste("I share",industryHere, sep=", ")) +
+          labs(y = "I / I_GFCF") +
+          scale_color_manual(values=c("#333333", "#191970", "#2f4ea3" ))
+    print(p)
+    ggsave(filename=paste(paste("I_growthrates_Constr",industryHere,sep="-"),"pdf",sep="."), width = 18, height = 36, units = c("cm"), dpi = 300)
+    #}
+  }
+}
+
+
+# plot GFCF shares of construction related investment
+for(varHere in "I")
+{
+  temp1 <- dgAgg %>% filter(var==varHere)
+  for (industryHere in "TOT")
+  {
+    temp1 <- temp1 %>% filter(industry==industryHere)
+    #for(countryHere in "USA")
+    #{
+    #temp <- temp1 %>% filter(country==countryHere) %>% 
+    temp <- temp1 %>% spread(product, value) %>% 
+            mutate(Con = OCon + RStruc) %>% 
+            mutate_each(funs(./GFCF),-GFCF, -country, -var, -industry, -year) %>% 
+            gather(product, value, -country, -var, -industry, -year) %>% 
+            filter(product %in% c("RStruc", "OCon", "Con"))
+    
+    p <-  ggplot(temp, aes( x=year, y=value, color=product)) + 
+          geom_line(size=1.1) + 
+          scale_y_continuous(labels=percent) +
+          facet_wrap(~ country, ncol=2,scales = "free") +
+          ggtitle(paste("I share",industryHere, sep=", ")) +
+          labs(y = "I / I_GFCF") +
+          scale_color_manual(values=c("#333333", "#191970", "#2f4ea3" ))
+    print(p)
+    ggsave(filename=paste(paste("I_Share_Constr",industryHere,sep="-"),"pdf",sep="."), width = 18, height = 36, units = c("cm"), dpi = 300)
+    #}
+  }
+}
+
+
+
+
+# linegraphs with investment in either on it
+
+temp.con <- dsAgg %>%  filter(product %in% c("RStruc","OCon"), var %in% c("I","VA"))
+
+countryHere <- "USA"
+temp.con1Country <- temp.con %>%  filter(country==countryHere)
+
+p <- ggplot(temp.con, aes(x=year, y=product,aes=industry))
+
+for (countryHere in "USA")
+{
+  # all industries on 1 plot, how does total investment (or in some prod-level) evolve 
+  for (productHere in "GFCF")
+  {
+    temp1 <- temp0 %>% filter(country==countryHere, product==productHere, var=="I", !industry=="Total") %>% spread(var,value) %>% 
+      spread(industry,I)      
+    temp2 <- temp0 %>% filter(country==countryHere, var=="VA", industry=="Total") %>% spread(var,value) %>% select(-c(product, industry))
+    temp  <- left_join(temp1,temp2, by=c("country","year")) %>% 
+      mutate_each(funs(./VA),-country, -product, -year, -VA) %>%
+      gather(industry, I_VA, -country, -product, -year, -VA)
+    # filter(industry %in% c("AtB","C","D","E","F","GtH","I","J","70","71t74","LtQ"))#, "TOT"))
+    #temp$industry <- factor(temp$industry, c("AtB","C","D","E","F","GtH","I","J","70","71t74","LtQ"), labels=c("Agri","Mining","Manufacturing","Elec Gas Wtr","Construction","Sale","Transport Communication","Finance","Real estate","Real Estate Business","Community"))
+    
+    p <- ggplot(temp, aes( x=year, y=I_VA, color=industry)) +
+      xlim(1970,2007) +
+      geom_line(size=1.1) + 
+      scale_y_continuous(labels=percent, limits=c(0,0.068)) +
+      ggtitle(paste("I/VA per industry", countryHere, sep=", ")) +
+      scale_color_manual(values=colorscheme_industries)
+    print(p)
+    ggsave(filename=paste(paste("I-VA-Industry",countryHere,sep="-") ,"pdf",sep=".")) 
+  }
+}

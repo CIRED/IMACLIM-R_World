@@ -1,0 +1,13 @@
+depository: Thibault Briera (briera)
+title: KPMG’s corporate tax rates table 
+source: https://home.kpmg/xx/en/home/services/tax/tax-tools-and-resources/tax-rates-online/corporate-tax-rates-table.html
+date: 2021
+description:
+KPMG’s corporate tax rates table provides a view of corporate tax rates around the world.
+
+coverage: World
+
+notes:
+Corporate tax rate for WACC formula. 
+
+Table are SCRAPPED using the Tabula software since no link to download the data was available.

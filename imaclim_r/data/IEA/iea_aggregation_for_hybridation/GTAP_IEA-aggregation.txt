@@ -1,0 +1,514 @@
+#+TITLE: Gtap Iea Hybridation
+
+# Note: "je" thereafter means "Nicolas Graves" (can be chekcked with svn blame)
+
+* Energy Balances Treatment
+** 1 Disaggregating IEA aggregated other countries
+*** General idea
+Since the IEA data tables are not present for all countries, the first step is
+to disaggregate "other" data balances, especially :
+ - wbig_2014_OTHER_AFRICA.csv
+ - wbig_2014_OTHER_NON_OECD_AMERICAS.csv
+ - wbig_2014_OTHER_NON_OECD_ASIA.csv
+ We use GDPs from World Bank data as a key to distribute these data balances
+ between all GTAP ISO3 countries.
+*** TODO Special cases
+The list of relevant comments on most special cases on this issue can be found
+in the drive file.
+
+
+** 2 - Applying products changes.
+ After creating primary equivalent products for final energy products, we aggregate flows
+ in a ~GTAP_EDS form, so that we can save a ~EDS matrix, before final aggregation for Imaclim.
+ This is done through different steps (all steps might not be permutable because of drops):
+*** 2.1 Treatment of Peat products
+
+*** 2.2 Treatment of Patent fuel & BKB
+- pour les flux Patent fuels, BKB et Peat briquette plants (transf.) (que j'ai
+  séparé en deux produits, un équivalent Peat, l'autre équivalent Lignite): on a
+  facilement les produits équivalents. On n'agrège pas le flux, toutes les infos
+  sont effectivement dans l'équivalent.
+
+ - Pre-treating special case Niger, which in 2014 consumes Lignite but does not
+   produce BKB briquettes. It creates a np.inf in the process. Niger doesn't show
+   a usage of BKB briquettes at all, we cancel its consumption in Lignite.
+
+ - Same special case for Ukraine for Patent fuel as BKB briquettes in Niger.
+
+
+*** 2.4 Treatment of Gas works gas and Gas coke
+We discard Gas coke, which is created in Gas works as a by-product of Gas works gas.
+
+- pour les Gas works : ce sont en gros des vielles usines de coal-to-gas pour du
+  gaz de ville. On change le gas works gas pour avoir un équivalent charbon. On
+  n'aggrège pas le Gas coke qui est un co-produit. C'est dans ce genre de cas où
+  j'étais un peu gêné, parce qu'une fois qu'on a fait ça, on a plus vraiment
+  l'utilité du flux Gas works (transf.). En reprenant le raisonnement, j'y vois
+  plus clair.
+
+
+*** 2.5 Treatment of Coke ovens
+- pour le flux Coke ovens (transf.) : C'est un processus de purification du
+  charbon vers le Coke oven coke, qui est propre aux industries pour
+  probablement au moins l'industrie sidérurgique. Il y a des co-produits qu'on
+  ne valorise pas (Coke oven gas, coal tar). Un peu pareil que pour les gas
+  works (transf.), on a un produit équivalent charbon, qui aura donc une
+  valorisation cohérente. Le traitement est correct en n'agrégeant pas le flux.
+  Juste une remarque qu'on a pas soulevé avant, en lien avec ce que je disais
+  sur les Gas works : en raisonnant comme ça, on considère que toutes les
+  industries font elles-mêmes leur propre coke oven coke, et qu'il y a pas une
+  industrie du charbon qui vend du coke oven coke aux autres industries. J'ai
+  pas encore une connaissance assez fine pour savoir si c'est cohérent, en tout
+  cas ça l'est pour l'industrie sidérurgique.
+- Pre-treating special case Algeria, which in 2014 consumes Coking coal but does
+  not produce Coke oven coke. It creates a np.inf in the process. Algeria shows
+  a usage of Coke oven coke, all imported. We create the transformation process
+  for Algeria with the world yield and substract imports accordingly.
+
+*** 2.6 Treatment of Blast furnaces
+- pour les Blast furnaces : C'est un processus industriel de l'industrie
+  sidérurgique. Il y a deux co-produits, qui ne sont pas l'objectif de ce
+  processus de transfo, qu'on avait décidé de ne pas aggréger : Blast furnace
+  gas et Other recovered gases. On compte juste les flux négatifs, qu'on va
+  directement mettre dans l'EDS iron&steel, comme pour flux de consommation
+  industriel et pas de transfo.
+  DONE
+
+*** Discussion sur la répartition industrielle en volumes
+Une remarque générale : quand on jette un co-produit et qu'on trouve un
+équivalent charbon ou autre pour un processus de transformation, on change la
+répartition industrielle en volumes, mais c'est pour avoir une meilleure
+représentation en valeurs (je l'écris presque pour moi-même).
+
+** 3 - Applying flows changes.
+***  3.0 General changes
+****  Distributing all non-specified flows between flows of the same category.
+***  3.1 Transformation processes block
+
+****  Distributing autoproducer flows according to electricity and heat consumption.
+- pour les autoproducer electricity / heat / CHP plants : on a implémenté la
+  distribution de ce flux selon le tissu industriel de l'utilisation du produit,
+  ces flux ne sont plus à traiter après. Les quelques cas où il y a de
+  l'autoproduction mais pas de tissu industriel sont envoyés au pro-rata dans
+  les flux 'Non-specified (energy)' et 'Non-specified (industry)' qui sont
+  traités par la suite. Je me rends compte que je n'avais pas discriminé dans
+  mon raisonnement la partie positive, qu'on a a priori envie d'enlever aux
+  usages des industries: " l'industrie x fait de l'auto-production d'électricité
+  avec y charbon, puis consomme son électricité, mais on représente juste le
+  fait que l'industrie x utilise y charbon". À la lecture du code, c'est bien ce
+  qui est fait.
+
+****  Transformation processes sign changes.
+- on avait eu une discussion sur le fait que la partie positive des flux des
+  transformation processes est mise à 0 dans les Imaclim pays. Ta réponse était
+  de dire que ce qui est important est qu'au cas par cas, on soit satisfait du
+  traitement qu'on fait et des chiffres que l'on valorise, par produit.
+
+- à la fin de la conversation, j'avais sous-entendu qu'on pouvait avoir un
+  traitement systématique facile pour les transformation processes, puisqu'il
+  s'agit de la même chose pour tous les produits ; je maintiens cette position,
+  et l'étaye, parce qu'ayant rapidement raisonné au cas par cas, je me rends
+  compte que la situation est souvant la même. Une remarque générale avant le
+  détail : si on recompose les ressources à partir des usages, en fait les flux
+  positifs des transformation processes rentrent dans la production, qui n'est
+  plus de la production primaire, mais tout ce qui est utilisé aux
+  imports/exports près, y compris les processus de transformation (en tout cas
+  c'est l'hypothèse de mon raisonnement ici).
+
+****  Transformation processes with inputs/outputs between industries
+    - pour les transformation processes avec des transferts entre les industries
+      (Main activity electricity / heat / CHP plants (transf.)), il faut compter
+      les flux négatifs, parce que ce sont des flux valorisés, pas
+      intra-industries. Pour la partie positive, il me semble qu'on a envie de
+      ne pas la compter, et de plutôt la faire rentrer dans la recomposition de
+      l'équilibre usages / ressources. Dans ce cas, ce qu'on représente, c'est
+      que l'industrie 'ely' consomme tant de ressources et qu'il y a une
+      production de tant d'électricité.
+
+****  Oil refineries / petrochemical plants
+- pour les flux Oil refineries et petrochemical plants :
+
+    Là on a beaucoup de flux positifs pour tous les produits pétroliers. Je
+  pense qu'on en a pas besoin, qu'ils reviennent d'eux-mêmes dans la production
+  quand on recompose l'équilibre ressources-emplois. Il faut juste qu'on puisse
+  enregistrer la consommation de pétrole primaire comme consommation
+  intermédiaire "valorisée" (mais sans émissions) de pétrole par l'industrie
+  pétro-chimique.
+
+    Il y a beaucoup plus de produits concernés, que je traite plus bas, puisque
+  c'est mécaniquement plus complexe que pour les précédents :
+
+  - Pour Crude oil et Natural gas liquids : on compte tout
+
+  - Pour Refinery feedstocks  :
+    Ce sont des produits raffiné une deuxième fois, mais importés ou exportés, donc payés.
+    On suit l'AIE dans ses bilans réduits et on l'aggrège avec le OIL
+
+      # bilan : agg.
+
+  - Pour les additive / blending components : aucun usage final, mais on avait
+    dit que c'était des inputs intéressants et souhaités car participent à la
+    prise de valeur et au contenu énergétique, bien que non carbonés. Je
+    change d'avis : on en a pas besoin. Il n'a pas d'usages finaux. Pour le
+    contenu énergétique, on devrait normalement le retrouver quand on
+    recompose les équilibres. Pour la prise de valeur, on considère déjà des
+    prix finaux du côté de GTAP de mémoire, donc je pense qu'on est pas
+    obligés d'en rendre compte ici, c'est implicite dans la prise de valeur du
+    pétrole à l'essence par exemple.
+
+      # bilan : discarded
+
+  - Pour les other hydrocarbons : c'est plus complexe, je vais le traiter dans
+    mon prochain mail.
+
+  - Pour le refinery gas : c'est un co-produit. Il a des usages finaux, mais
+    qui ne correspondent très certainement qu'à l'industrie pétro-chimique. Il
+    a des usages pour la production d'électricité mais il me semble qu'on le
+    considère juste comme de l'efficacité energétique.
+
+      # bilan : discarded
+
+  - de Motor gasoline jusqu'à fuel oil + Petroleum coke + Other oil products :
+    les usages pour la production d'électricité sont tous passés en
+    consommation finale (cf mail sur les main activity producers). Le reste se
+    recompose par l'équilibre ressources-emplois. On n'agrège pas les flux.
+    Les usages non-énergétiques ne rentrent pas dans la consommation finale
+    bien sûr, on les enregistre juste.
+
+       # bilan : OK
+
+  - Ethane + de Naphta à Paraffin waxes : co-produits
+
+	Refinery gas: auto-consumption for energy pruposes of oil refineries
+	Ethane : mostly non energy uses (petrochemical feedstocks)
+      # bilan : discarded.
+
+  - pour le produit LPG : Il y a deux types d'usages différents : comme le gaz
+    (~5/6) ou comme le pétrole (~1/6, mais beaucoup plus à certains endroits,
+    en Europe notamment). Plusieurs possibilités :
+
+    - le plus simple, c'est de considérer que c'est purement du gaz du
+      début à la fin, auquel cas on l'agrège dans le gas. Je crois
+      qu'il faudrait de toute façon utiliser un coefficient de
+      conversion entre les deux (gaz et LPG) ou avec le pétrole
+      (j'avais vu il y a  un bout de temps que les variations du prix
+      du pétrole jouent sur l'extraction de LPG, et ils sont
+      effectivement substituts à moyen terme pour les transports). -
+      pour le produit LPG : Il y a deux types d'usages différents :
+      comme le gaz (~5/6) ou comme le pétrole (~1/6, mais beaucoup plus
+      à certains endroits, en Europe notamment). Plusieurs
+      possibilités :
+
+    - le plus simple, c'est de considérer que c'est purement du gaz du
+      début à la fin, auquel cas on l'agrège dans le gas. Je crois
+      qu'il faudrait de toute façon utiliser un coefficient de
+      conversion entre les deux (gaz et LPG) ou avec le pétrole
+      (j'avais vu il y a  un bout de temps que les variations du prix
+      du pétrole jouent sur l'extraction de LPG, et ils sont
+      effectivement substituts à moyen terme pour les transports).
+
+    - sinon, il est assez aisé de séparer en proportion des usages.
+
+        Il faut aussi voir si on veut séparer les valorisations aussi ou si on se
+        satisfait des contenus énergétiques (le LPG a contenu énergétique
+        volumique plus important (coef ~46/38)), ce qui diminue les coûts de
+        transports et  permet de nouveaux usages, et on repasse techniquement
+        facilement du LPG à l'équivalent gas naturel, donc augmente la
+        demande et  probablement le prix.
+
+    # bilan : 2 décisions à prendre :
+    # 1) comment on le compte ? Est-ce qu'on
+    # sépare ou pas ? (à mon avis on aurait intérêt à le faire, mais c'est
+    # aussi une amélioration facile à mettre en place après. Sinon on a
+    # aussi potentiellement une question de différence de valorisation avec
+    # le pétrole que j'ai un peu évité au-dessus avec l'option de la
+    # séparation). 2) comment on le valorise ? J'ai vu qu'on a des prix de
+    # marché à gauche à droite, mais pas assez pour trouver un équivalent
+    # direct.
+
+    Pour le moment dans le code, il est placé dans la catégorie "Petroleum and
+    coal products". #TODO
+
+**** Coal liquefaction / Gas-to-liquids plants
+- pour le flux Coal liquefaction plants / Gas-to-liquids plants : on agrège que
+  la partie négative des flux, et on met les flux positifs à 0. Les produits
+  primaires sont convertis en Other hydrocarbons, et après on ne sait pas
+  précisément ce qu'ils deviennent (où ils sont utilisés dans la consommation
+  finale), et ils vont revenir en valorisation pour la consommation finale
+  lorsque l'on recompose l'équilibre ressources-emploi (j'ai tellement
+  l'impression de me répéter haha).
+
+**** For blended Natural gas
+- pour le flux For blended natural gas : On ne compte que la partie du flux avec
+  le produit Gas works gas (coa --> gas) ou avec le produit LPG (p_c --> gas).
+  Idem, la partie positive est uniquement utilisée, c'est recomposé avec
+  l'équilibre.
+
+**** Charcoal : no aggregation
+
+***  3.2 Energy industry own use block
+****  Coke ovens
+- Coke ovens (energy) : pour le moment je l'avais bêtement mis dans 'i_s' en me
+  disant que c'était l'industrie la plus importante. Mais c'est pas cohérent
+  avec ce que je disais du côté des Coke ovens (transf.) : soit on décide que
+  c'est un service vendu par l'industrie du charbon, soit on considère que c'est
+  de l'autoproduction pour tout le monde, ou on trouve un compromis (me semble
+  pas complexe) entre les deux (ex : autoproduction pour la sidérurgie, achat de
+  l'industrie du charbon pour le reste).
+
+https://www3.epa.gov/ttnchie1/old/ap42/ch12/s02/final/c12s02_1995.pdf
+"Most coke plants are co-located with iron and steel production facilities.   Coke demand isdependent on the iron and steel industry.   This represents a continuing decline from the about40 plants that were operating in 1987."
+	-> c'est produit par "iron & steel" et vendu aux autres industries
+
+**** Oil & gas extraction treatment.
+Pour rappel, on veut séparer le flux en oil extraction et gas extraction pour
+pouvoir avoir cette séparation sectorielle quand on aggrège vers oil // gas. Du
+côté de GTAP, et de ce qu'on a dans le code, c'est séparé en proportion de la
+quantité énergétique d'oil et de gas extraite.
+
+C'est une séparation fonctionnelle, mais pas aussi précise que souhaité, on a
+arbitré selon notre temps disponible.
+
+Florian a fait remarquer, et on en avait d'ailleurs parlé pendant la réunion
+Imaclim, que l'on pourrait plutôt passer par un **indicateur de l'effort à
+extraire**, pour mieux traduire la différence qu'on peut en faire dans la
+valorisation.
+
+
+**** Distributing losses between flows from the "Energy industry own use" block.
+***  3.3 Final consumption block
+****  Adjusting International marine and aviation bunkers to IOT format
+****  Transports treatment.
+Pour le moment, le traitement des transports est basique : il est réalisé comme
+un premier traitement.
+
+** 4 - Aggregating flows towards an EDS format (see GTAP doc).
+***  4.1 - Aggregating energy flows.
+***  4.2 - Cancelling auto-consumption.
+***  4.3 - Aggregating consumption flows.
+
+** 5 - Aggregating products towards an EDS format and correcting imports/exports.
+
+** 6 - Saving the matrix in EDS format.
+
+** 5bis - Aggregating flows towards an Imaclim format.
+
+** 6bis - Saving all annex products (not for Imaclim but for comparison.)
+
+** 7bis - Aggregating products towards an Imaclim format and correcting imports/exports.
+
+** 8bis - Aggregating aving Imaclim matrix.
+
+
+* Hybridization
+** Parenthesis : Available prices
+https://www.gtap.agecon.purdue.edu/resources/download/10254.pdf
+Attention, les noms des prix sont différents entre la doc GTAP et les headers
+des données en pratique.
+On n'a plus des basic et des producer prices, mais des market's prices et des
+agent's prices.
+La correspondance 2 à 2 des flux en volumes énergétiques et en valeurs
+économiques ne font pas de doute. (voir fichier [[./code/GTAP_prices.py]] )
+On a donc les market prices et agent's prices pour plein de choses :
+*** Imports
+*** Exports
+*** Consommation
+mais sans distinction entre consommation intermédiaire et consommation finale
+On a les prix implicites pour 3 catégories de consommateurs finaux :
+**** Ménages
+**** Gouvernement
+Problème : Dans GTAP, il n'y a aucun volume énergétique alloué au gouvernement,
+ces dépenses énergétiques ont été comptées ailleurs (domaine des services
+probablement). C'est évoqué qqpart dans la doc mais je sais plus où, ce serait
+long à retrouver.
+
+**** Entreprises
+
+Il me semble plus judicieux dans chacun des cas de passer par les agent's
+prices.
+
+** Point de départ
+*** Dans notre dernière discussion à l'oral :
+# Niveau désaggrégé régional, mais aggrégé sectoriel.
+Niveau désaggrégé régional, désagrégé sectoriel.
+
+On ne peut pas raisonner au niveau agrégé  régional, car on applique pas les
+mêmes traitements.
+
+*** Hypothèse des prix
+Pour simplifier le raisonnement et avancer sur l'hybridation, on a décidé de
+mettre de côté tout une partie du traitement qui est liée à la cohérence des
+prix qu'on calcule, notamment avec les prix qui sont représentés dans Imaclim.
+On prend ici l'hypothèse des prix différentiés par agent dans GTAP, mais il
+faudra traiter plus tard cette question de la cohérence.
+
+Pour les prix : peu importe le prix qu'on prend. Qu'est-ce qu'on va piocher dans
+les Imaclim pays, qu'est-ce qu'on
+
+Ce qui manquera : rééquilibrer les usages et les ressources à partir d'un bien
+composite.
+
+
+*** Traitement de la valeur des taxes.
+Je me dis que les valeurs qu'ont GTAP pour les taxes sont un minimum cohérentes
+avec la réalité, et je pense donc qu'on devrait garder une part **identique à ce
+qu'on a maintenant dans GTAP** pour la part des taxes par rapport au total.
+
+Autrement dit, on applique les mêmes traitements aux taxes qu'aux consommations
+intermédiaires.
+
+Attention, ce n'est pas le traitement qui est fait du côté des Imaclim pays, où
+les taxes ne sont pas changées (plus de confiance en la qualité des données ??),
+mais où tout les changements sont reportés sur la production totale ou sur les
+marges.
+
+Les valeurs qu'on a pour le moment dans le traitement des valeurs de l'IEA ne
+comprenent pas de taxes.
+
+**** TODO décision à prendre sur la valeur des taxes
+
+
+*** Une remarque générale sur les traitements des prix // GTAP
+
+** Traitement des consommations intermédiaires.
+Dans la discussion, prendre l'exemple de la consommation intermédiaire de
+pétrole en Inde par exemple.
+
+*** Séparation des consommations intermédiaires entre importés et conso domestique
+Pour faire cette séparation, on maintient les parts déjà présentes dans GTAP
+avec notre ajustement des volumes énergétiques.
+
+*** Valeurs = Prix des consommations de GTAP pour les ménages et entreprises * volumes énergétiques associés.
+**** Dans le code :
+#+begin_src python
+GTAP_APDP = GTAP_VDPA/GTAP_EDP # Agent's Prices, Domestic, Households Purchases
+GTAP_APDF = GTAP_VDFA/GTAP_EDF.where(GTAP_EDF!=0.0) # Agent's Prices, Domestic, Firms Purchases
+#+end_src
+
+*** Traitement de la valeur des taxes.
+
+*** Conséquences / traitements adoptés
+**** Hybridation des auto-importations
+Normalement, on ne compte plus les auto-importations dans le tableau. Cela
+modifie aussi normalement le total des ressources : si GTAP les compte à
+l'origine, il faudrait prévoir de l'enlever du total des ressources.
+Autrement dit, il faut qu'on soustrait ce qui devrait être aggrégé ensemble du
+total d'Imaclim.
+
+**** Total des usages
+Le total des usages change, et on cherche à le garder.
+***** Ajout d'une industrie composite pour les écarts
+Si on raisonne au niveau désagrégé sectoriel, on peut ajouter un "composite" qui
+rassemble les écarts statistiques, qu'on pourrait nommer "Stat_diff_hybd" ou qch
+comme ça.
+Il faudra qu'on ajoute cette variable dans l'aggrégation, comme tu disais, en
+mettant bien en évidence que c'est une variable particulière.
+
+On ajoute de la demande finale, on fait la somme, on sait combien il faut de disponible
+de cette industrie. Une fois qu'on l'a : ratio domestique / partie importée.
+
+
+**** TODO Total des ressources ?
+
+
+** Imports treatment
+
+*** Valeurs = Prix des imports de GTAP pour les ménages et entreprises * volumes énergétiques associés.
+où on prend le prix des imports comme la moyenne pondérée du prix des imports
+par région pondéré par le total des imports .
+**** Dans le code :
+#+begin_src python
+GTAP_APIP = GTAP_VIPA/GTAP_EIP # Agent's Prices, Imports, Households Purchases
+GTAP_APIF = GTAP_VIFA/GTAP_EIF.where(GTAP_EIF!=0.0) # Agent's Prices, Imports, Firms Purchases
+#+end_src
+Attention, 2 méthodes pour calculer le prix des imports.
+Soit on peut prendre le prix dans les volumes d'échanges, soit on peut prendre
+le prix différentié par agent.
+
+*** Traitement de la valeur des taxes
+
+*** Conséquences / traitements adoptés.
+**** Total des ressources
+**** Équilibre imports / exports à l'échelle mondiale
+On a un sous-équilibre à respecter :
+Somme des importations hors taxe = somme des exportations avec taxe + coûts de
+transport.
+On s'est dit qu'il fallait respecter l'équilibre imports / exports pour pouvoir
+maintenir
+
+
+
+** Exports treatment
+Pour les exports, on a pas de prix total parfaitement cohérent, puisque VIWS
+correspond à des prix à l'import /donc transports + taxes à l'export + exports/.
+
+On a quand même un prix à l'export cohérent et complet.
+
+
+Sauf pour le code
+**** Dans le code :
+#+begin_src python
+GTAP_VIWS/GTAP_EXI.where(GTAP_EXI!=0.0)
+#+end_src
+
+Potentiellement un peu de travail dans le code après, notamment pour la
+cohérence avec les taxes.
+
+
+** Rééquilibrage imports / exports
+
+On pourrait tout à fait reprendre notre traitement des imports / exports pour
+les volumes énergétiques, en conservant les ratios de production / import et
+production /export.
+
+** Rééquilibrage ressources / emplois
+On pourrait aussi tout à fait reprendre le traitement qu'on a fait pour les
+ressources / emplois, ie. redéfinir la production à partir des usages.
+À la différence qu'on peut le faire avant comme après l'ajustement des imports
+et des exports.
+**** Quelle différence à le faire avant ou après ?
+La seule chose qu'on modifie est la répartition de l'écart entre ressources et
+emplois entre les imports / exports / production / valeur ajoutée.
+
+
+Pour rétablir l'équilibre ressources / emplois, il y a plusieurs solutions.
+
+
+** Quelles différences avec la méthodologie des Imaclim pays ?
+*** Pas de changements de la ligne des valeurs ajoutées.
+C'est-à-dire qu'on reporte tous les changements provoqués dans la réallocation
+des valeurs des usages dans la valeur de la production pour respecter
+l'équilibre ressources / emplois. Dans la méthodologie des Imaclim pays, on a
+plutôt une répartition qui se base sur des hypothèses de structures des coûts à
+l'échelle des produits (donc désaggrégé sectoriellement).
+
+** À quoi il faut que je fasse attention dans le futur ?
+*** Les questions liées aux taxes dans Imaclim
+    p(1+t)*Q  // faire attention à identifier les bonnes choses.
+    dans le passage au code Imaclim
+    Mais est-ce que ça a vraiment un sens de faire particulièrement attention ?
+    Oui, il faut faire attention à la définition des variables en valeur dans
+    GTAP : est-ce qu'elles prennent en compte les taxes ou pas  ?
+
+    Ils expliquent dans GTAP comment calculer les taxes (lien de la ligne 294) ;
+    donc on selon ce qui est fait en ce moment pour les taxes, on peut
+    normalement les avoir explicitement.
+
+
+
+** Discussion
+*** Plus pertinent de partir du désaggrégé ? Au niveau du code, ça ne changerait pas granchose, et plus modulaire / facilement modifiable.
+Changerait pas grandchose car on a les prix au niveau désaggrégé régional et
+sectoriel, et qu'on doit de toute façon faire ce travail d'aggrégation dans les
+prix si on ne le fait pas pour les quantités.
+
+#TODO Vérifier qu'il y a rien d'obsolète ou de faux.
+#TODO Commiter avec le script.
+
+
+** Other notes
+
+After checking numerical value for USA, comparing to online table (checked on IEA website the 30/03/2021):
+- more electricity in composite than in industry, because we set "non specified" in composite: moving it to industry:
+- more gas in our "agri" sector than in table: ok because we have "food processing and tobacco" here, not in industry
+- COal consumption in Et: this correspond to coal energy own-use from “Gas/oil diesel ecl. biofuels”

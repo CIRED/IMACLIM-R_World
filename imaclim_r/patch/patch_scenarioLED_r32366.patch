@@ -1,0 +1,1345 @@
+Index: lib/update_parameter_rule.sci
+===================================================================
+--- lib/update_parameter_rule.sci	(révision 32366)
++++ lib/update_parameter_rule.sci	(copie de travail)
+@@ -1,15 +1,19 @@
+ 
+ function y = update_parameter_rule( x, goal, init, time, t, method)
+    if method == "linear"
+-        y =  x + (goal-init) ./ time;
++        y =  x + ((goal-init) ./ time) * (t<=time);
++   elseif method == "ci"
++	time_dicoth = year_stop_dynForc_1-(start_year_strong_policy-1);
++	time_stop = year_stop_dynForc_CI-(start_year_strong_policy-1);
++        y =  x + ((goal-init) ./ time_dicoth) * (t<=time_stop);
+    elseif method == "exponentialdecrease"
+-        y1 =  x + (goal-init) ./ time;
+-        y2 = x .* ( divide(goal, init,0)) .^ ( 1 ./time);
+-        alpha = log( 2 - divide(goal, init,0)) ;// ./ time;
+-        y2 = init .* (2-exp(alpha.* t./time));
++        //y1 =  x + (goal-init) ./ time;
++        //y2 = x .* ( divide(goal, init,0)) .^ ( 1 ./time);
++        //alpha = log( 2 - divide(goal, init,0)) ;// ./ time;
++        //y2 = init .* (2-exp(alpha.* t./time));
+         alpha = (exp( 1 - divide(goal, init,0)) -1) ;
+-        y2 = init .* (1-log(1+alpha.* t./time));
+-        y = ( divide(goal, init,0) <1) .* y2 + ( divide(goal, init,0) >=1) .* y1;
++        y2 = init .* (1-log(1+alpha.* min(t,time)./time));
++        //y = ( divide(goal, init,0) <1) .* y2 + ( divide(goal, init,0) >=1) .* y1;
+         y = y2;
+    end
+ endfunction
+Index: model/calibration.nexus.buildings.sce
+===================================================================
+--- model/calibration.nexus.buildings.sce	(révision 32366)
++++ model/calibration.nexus.buildings.sce	(copie de travail)
+@@ -54,6 +54,8 @@
+     asymptote_surface_pc=[75;65;45;45;45;45;45;45;45;45;45;45];
+ 	mult_surface_pc_ini=[1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.5;1.0;1.5;1.5;1.5];
+ end
++mult_surface_pc_ini_ref = mult_surface_pc_ini;
++asymptote_surface_pc_ref = asymptote_surface_pc;
+ 
+ //These two lines are useless, but kept as a comment if someone is looking for these variables with the old name.
+ //asymptote_surface_pc=asp_cff; 
+Index: model/calibration.parameters.dyncalib.sce
+===================================================================
+--- model/calibration.parameters.dyncalib.sce	(révision 32366)
++++ model/calibration.parameters.dyncalib.sce	(copie de travail)
+@@ -2,10 +2,13 @@
+ dynForc_m2_ener = ones(nb_regions,1);
+ dynForc_resid_TBE1 = ones(nb_regions,1);
+ dynForc_resid_TBE2 = ones(nb_regions,1);
+-dynForc_resid_TBE3 = 1;
++dynForc_resid_TBE3 = ones(nb_regions,1);
+ dynForc_pcoal = 1;
+ dynForc_pcoal2 = 1;
+ dynForc_EI_indus = ones(nb_regions,1);
++dynForc_EI_indus_obj = ones(nb_regions,1);
++dynForc_EI_comp = ones(nb_regions,1);
++dynForc_EI_indus2comp = ones(nb_regions,1);
+ dynForc_pEt_comp = 1;
+ dynForc_effOT2 = ones(nb_regions,1);
+ dynForc_effAir = ones(nb_regions,1);
+@@ -20,7 +23,22 @@
+ dynForc_cap_tr_car = ones(nb_regions,1);
+ dynForc_effOT1 = ones(nb_regions,1);
+ dynForc_effOT1_prev = dynForc_effOT1;
++dynForc_DGindu = ones(nb_regions,1);
++dynForc_resid_m2 = ones(nb_regions,1);
++dynForc_savings = ones(nb_regions,1);
+ 
++lenght_dynForc_cap_tr = 6;
++lenght_dynForc_eff_tr = 35;
++lenght_dynForc_1 = 20;10;35;
++disp(lenght_dynForc_1,"lenght_dynForc_1");
++year_stop_dynForc_1=start_year_strong_policy-1+lenght_dynForc_1;
++year_stop_dynForc_CI = 2050;2040;2035;2060;
++lenght_dynForc_p_ener=10;
++lenght_dynForc_pref_tr = 16;
++lenght_dynForc_m2 = 35;
++
++dynForc_effMer = 0.99;
++
+ if ind_exogenous_forcings & indice_LED >=1
+ 
+ 	// indice_LED = 1: all forcings for low energy demand 
+@@ -37,9 +55,11 @@
+ 	dynForc_pcoal2_2050 = 1; // exogenous forcing on coal price expectation by sectors, driving coal use
+ 	dynForc_pEt_comp_2050 = 1; // exogenous forcing on liquid fuel price expectation by the composite sector, driving LF use use
+ 
+-	dynForc_m2_ener_2050_n = 0.5*0.3*0.79; // exogenous forcing on the energy intensity of private buildings, driver FE in buildings - global north
+-	dynForc_m2_ener_2050_s = 1; // exogenous forcing on the energy intensity of private buildings, driver FE in buildings - global south
++	dynForc_m2_ener_2050_n = 0.1185;0.1;0.1185;0.5*0.3*0.79; // exogenous forcing on the energy intensity of private buildings, driver FE in buildings - global north
++	dynForc_m2_ener_2050_s = 1.0019;0.85;1; // exogenous forcing on the energy intensity of private buildings, driver FE in buildings - global south
+ 
++	//dynForc_resid_m2(ind_global_north) = 0.5;
++
+ 	dynForc_resid_TBE1_2050 = 1; // exogenous forcing on the share of Very Low Energy buildings
+ 
+ 	// Scenario LED
+@@ -46,14 +66,19 @@
+ 	//on met un taux de rénovation maximal dans le scénario LED fixé à 7% passé 2020, ambitieux mais nécessaire pour suivre la trajectoire LED
+ 	dynForc_resid_TBE2_2050n = 1; // exogenous forcing on the renovation rate - global north
+ 	dynForc_resid_TBE2_2050s = 1; // exogenous forcing on the renovation rate - global south
+-	dynForc_resid_TBE3 = 0.25/0.45; // exogenous forcing on the energy intensity of very low energy private buildings
++	//dynForc_resid_TBE3 = 0.25/0.45; // exogenous forcing on the energy intensity of very low energy private buildings
++        dynForc_resid_TBE2_2050s = 0.4;0.7; // exogenous forcing on the renovation rate - global south
++        dynForc_resid_TBE3_n = 1.3;1.4;1.3;0.25/0.45; // exogenous forcing on the energy intensity of very low energy private buildings
++        dynForc_resid_TBE3_s = 0.4;0.2;0.4;0.25/0.45; // exogenous forcing on the energy intensity of very low energy private buildings
+ 
++
++
+ 	dynForc_tair_2050_n = 0.985; // exogenous forcing on air infrastures, driving the demand for air passenger travels - global north
+-	dynForc_tair_2050_s = 1.015; // exogenous forcing on air infrastures, driving the demand for air passenger travels - global south
++	dynForc_tair_2050_s = 0.956;1.015; // exogenous forcing on air infrastures, driving the demand for air passenger travels - global south
+ 	dynForc_tOt_2050_n = 4; // exogenous forcing on otehr transport infrastures, driving the demand for OT passenger travels - global north
+-	dynForc_tOt_2050_s = 0.997; // exogenous forcing on otehr transport infrastures, driving the demand for OT passenger travels - global south
++	dynForc_tOt_2050_s = 0.994;0.997; // exogenous forcing on otehr transport infrastures, driving the demand for OT passenger travels - global south
+ 	dynForc_tcar_2050_n = 0.993; // exogenous forcing on road infrastures, driving the demand for car passenger travels - global north
+-	dynForc_tcar_2050_s = 1.02; // exogenous forcing on road infrastures, driving the demand for car passenger travels - global south
++	dynForc_tcar_2050_s = 0.97; // exogenous forcing on road infrastures, driving the demand for car passenger travels - global south
+ 
+         coef_pref_2050_n = 0.6;
+ 	dynForc_tairA_2050_n = coef_pref_2050_n*(9/150)^(1/20); // exogenous forcing on preferences for air travels parameters of the congestion function) in the utility function - global north
+@@ -70,22 +95,49 @@
+ 	dynForc_effAir_2050_n = 1; // exogenous forcing on plane efficiency - global north
+ 	dynForc_effAir_2050_s = 0.994; // exogenous forcing on plane efficiency - global south
+ 
+-	dynForc_EI_indus_50_n = 1; // exogenous forcing on industry energy efficiency - global north
+-	dynForc_EI_indus_50_s = 1.0185; // exogenous forcing on industry energy efficiency - global south
++	//dynForc_EI_indus_50_n = 0.99;1; // exogenous forcing on industry energy efficiency - global north
++	//dynForc_EI_indus_50_s = 1.0;002;1.0185; // exogenous forcing on industry energy efficiency - global south
++        dynForc_EI_indus_50_n = 1.002;1.001;0.997;0.99;1; // exogenous forcing on industry energy efficiency - global north
++        dynForc_EI_indus_50_s = 1.012;1.009;1.001;1.0;002;1.0185; // exogenous forcing on industry energy efficiency - global south
++	dynForc_EI_indus_obj(ind_global_north) = dynForc_EI_indus_50_n;
++ 	dynForc_EI_indus_obj(ind_global_south) = dynForc_EI_indus_50_s;
+ 
+         coef_ci_s=0.994;
+-        coef_didgdf_s=0.415;
++        coef_didgdf_s=0.3;0.415;
+         coef_didgdf_n=0.71;
+         coef_ci_n=1.22;
+-	dynForc_hdf_2050_n = 0.8*coef_didgdf_n*0.97*0.47; // exogenous forcing on industrial good consumption by households - global north
+-	dynForc_hdf_2050_s =  coef_didgdf_s*0.97; // exogenous forcing on industrial good consumption by households - global south
+-	dynForc_DIindu_2050_n =  coef_didgdf_n*0.93*0.37; // exogenous forcing on material efficiency (industrial input in capital formation) - global north
+-	dynForc_DIindu_2050_s = 0.75*1*coef_didgdf_s; // exogenous forcing on material efficiency (industrial input in capital formationproduction) - global south
+-	dynForc_DGindu_2050_n = 0.7*0.5*coef_didgdf_n*dynForc_DIindu_2050_n; // exogenous forcing on industrial good consumption by the administration - global north
+-	dynForc_DGindu_2050_s = 0.5*0.5*dynForc_DIindu_2050_s; // exogenous forcing on industrial good consumption by the administration - global south
+-	dynForc_CIindu_2050_n = coef_ci_n*0.09; // exogenous forcing on material efficiency (industrial input in production) - global north
+-	dynForc_CIindu_2050_s = coef_ci_s*0.67; // exogenous forcing on material efficiency (industrial input in production) - global south
++	dynForc_hdf_2050_n = 0.76;coef_didgdf_n;0.8*coef_didgdf_n;0.5*coef_didgdf_n;0.4*coef_didgdf_n;0.9*coef_didgdf_n*0.97*0.47; // exogenous forcing on industrial good consumption by households - global north
++	dynForc_hdf_2050_s =  0.2;0.25;0.291;coef_didgdf_s*0.97; // exogenous forcing on industrial good consumption by households - global south
++	dynForc_DIindu_2050_n =  0.25;coef_didgdf_n*0.93*0.37; // exogenous forcing on material efficiency (industrial input in capital formation) - global north
++	dynForc_DIindu_2050_s =  0.25;0.7*1*coef_didgdf_s; 0.75*1*coef_didgdf_s; // exogenous forcing on material efficiency (industrial input in capital formationproduction) - global south
++	dynForc_DGindu_2050_n = 1;0.7*0.5*coef_didgdf_n*dynForc_DIindu_2050_n; // exogenous forcing on industrial good consumption by the administration - global north
++	dynForc_DGindu_2050_s = 0.75;0.03;0.0525;0.5*0.5*dynForc_DIindu_2050_s; // exogenous forcing on industrial good consumption by the administration - global south
++disp(dynForc_DGindu_2050_s,"dynForc_DGindu_2050_s")
++toto=-0.05;
++disp(toto,"toto")
++	dynForc_CIindu_2050_n = toto;0.13;0.3;0.7;0.6;0.3;0.35;0.7;0.50;1098;coef_ci_n*0.09; // exogenous forcing on material efficiency (industrial input in production) - global north
++	dynForc_CIindu_2050_s = toto;0.13;0.3;0.68;0.7;0.8;1;0.85;0.7;0.8;0.7;0.66598;coef_ci_s*0.67; // exogenous forcing on material efficiency (industrial input in production) - global south
+ 
++dynForc_hdf_2050_n = 0.71;
++dynForc_hdf_2050_s = 0.17;0.3;0.17;0.291;
++dynForc_DIindu_2050_n = 0.51;0.45;0.24431;
++dynForc_DIindu_2050_s = 0.45;0.21;
++dynForc_DGindu_2050_n = 1;
++dynForc_DGindu_2050_s = 0.75;
++//dynForc_DGindu_2050_s = 0.6;
++dynForc_CIindu_2050_n = 0.7;
++dynForc_CIindu_2050_s = 0.68;
++
++dynForc_CIindu_2050_n = 0.4;0.4;
++dynForc_CIindu_2050_s = 0.4;0.4;
++
++//dynForc_DGindu_2050_s = 1;
++//dynForc_CIindu_2050_n = 1;
++//#dynForc_CIindu_2050_s = 1;
++
++
++	disp( [dynForc_CIindu_2050_n,dynForc_CIindu_2050_s], "[dynForc_CIindu_2050_n,dynForc_CIindu_2050_s]");
++
+ 	if indice_LED == 4 
+ 		dynForc_CIindu_markup = 1;
+ 	else
+@@ -92,14 +144,24 @@
+ 		dynForc_CIindu_markup = 0;
+ 	end
+ 
++	if indice_LED == 9
++		dynForc_CIindu_CIcomp = 1;
++	else
++		dynForc_CIindu_CIcomp = 0;
++	end
++
+ 	if indice_LED >=1 
+ 		dynForc_ETAarm_2050 = 1;
++		dynForc_ETAarm_2050 = 3.0;
+ 	end
++
++disp('dynForc_ETAarm_2050',dynForc_ETAarm_2050);
++
+ 	if indice_LED == 3
+ 		dynForc_ETAarm_2050 = 1;
+ 	end
+ 
+-	if ~isdef("dynForc_EI_indus2comp") // default additional energy efficiency in the composite sector compare to the industrial one
+-	    dynForc_EI_indus2comp = 0.95;
++	if ~isdef("dynForc_EI_indus2comp_obj") // default additional energy efficiency in the composite sector compare to the industrial one
++	    dynForc_EI_indus2comp_obj = 0.95;
+ 	end
+ end
+Index: model/diagnostic.sce
+===================================================================
+--- model/diagnostic.sce	(révision 32366)
++++ model/diagnostic.sce	(copie de travail)
+@@ -70,7 +70,7 @@
+ 
+ // Grübler et al. (2018) LED scenario target
+ // Value target to be as close as possible to Grubler et al., 2018 for a low energy demand (LED) scenario
+-if current_time_im==1 & indice_LED >=1
++if current_time_im==1 & %t //indice_LED >=1
+ 	// b pkm
+ 	pkm_ot_n_2020_obj = 4149;
+ 	pkm_air_n_2020_obj = 1581;
+@@ -978,6 +978,6 @@
+ 
+ end
+ 
+-if indice_LED>=1
++if %t //indice_LED>=1
+ 	exec(MODEL + "extraction.specific.led.sce");
+ end
+Index: model/dynamic.sce
+===================================================================
+--- model/dynamic.sce	(révision 32366)
++++ model/dynamic.sce	(copie de travail)
+@@ -45,8 +45,9 @@
+ 
+ //# Savings rate and investment rate, central scenario is SSP2
+ ptc=ptc.*(1-saving_obj_exo_1(:,current_time_im+1))./(1-saving_obj_exo_1(:,current_time_im));
+-div=div.*(1-auto_invest_obj_exo_1(:,current_time_im+1))./(1-auto_invest_obj_exo_1(:,current_time_im));
++div=div.*(1-auto_invest_obj_exo_1(:,current_time_im+1))./(1-auto_invest_obj_exo_1(:,current_time_im)) .* dynForc_savings;
+ 
++
+ // Climate - TCRE & impacts
+ exec(MODEL+"nexus.climate.impact.sce");
+ 
+Index: model/extraction-first.sce
+===================================================================
+--- model/extraction-first.sce	(révision 32366)
++++ model/extraction-first.sce	(copie de travail)
+@@ -415,6 +415,7 @@
+ GDP_MER_nominal  = GrowthNominalMER .* GDP_ref; // From calibration.gdp.sce base GDP (exogenous)
+ GDP_MER_real     = GrowthRealMER    .* GDP_ref; // From calibration.gdp.sce base GDP (exogenous)
+ GDP_PPP_constant = GDP_MER_real     ./ PPP_factors; 
++GDP_PPP_constant_ref = GDP_PPP_constant;
+ GPP_secMER_real = (GDP_MER_real*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_sect, "c")*ones(1,sec)));
+ GDP_secPPP_constant = (GDP_PPP_constant*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_sect, "c")*ones(1,sec)));
+ 
+Index: model/extraction.specific.led.sce
+===================================================================
+--- model/extraction.specific.led.sce	(révision 32366)
++++ model/extraction.specific.led.sce	(copie de travail)
+@@ -26,6 +26,7 @@
+ ener_tot_air = Q(:,indice_air) .* matrix(sum(CI(energyIndexes,indice_air,:) ,1), nb_regions,1)*mtoe2ej;
+ ener_tot_ot = Q(:,indice_OT) .* matrix(sum(CI(energyIndexes,indice_OT,:) ,1), nb_regions,1)*mtoe2ej;
+ ener_fret_air = ener_tot_air - ener_pkm_air;
++ener_fret_air_int = ExpTI(:,indice_air) .* matrix(sum(CI(energyIndexes,indice_air,:) ,1), nb_regions,1)*mtoe2ej;
+ ener_fret_ot = ener_tot_ot - ener_pkm_ot;
+ 
+ ener_indus = Q(:,indus) .* matrix(sum(CI(energyIndexes,indus,:) ,1), nb_regions,1) *mtoe2ej;
+@@ -39,7 +40,7 @@
+ m2batiment_n = sum( stockbatiment(ind_global_north)) / 1e9;
+ m2batiment_s = sum( stockbatiment(ind_global_south)) / 1e9;
+ m2batiment = stockbatiment / 1e9;
+-ener_resid = m2batiment.*(alphaCoalm2+alphaEtm2+alphaGazm2+alphaelecm2);
++ener_resid = stockbatiment.*(alphaCoalm2+alphaEtm2+alphaGazm2+alphaelecm2) + DF(:,indice_oil);
+ ener_resid_n = sum( ener_resid(ind_global_north))*mtoe2ej;
+ ener_resid_s = sum( ener_resid(ind_global_south))*mtoe2ej;
+ 
+@@ -66,7 +67,9 @@
+ fe_ship_n=0;
+ fe_ship_s=0;
+ 
+-fe_detail = zeros( 13,1);
++fe_detail = zeros( 15,1);
++fe_detail_s = zeros( 15,1);
++fe_detail_n = zeros( 15,1);
+ for kk=1:reg
+   fe_et_resid = fe_et_resid + energy_balance(conso_resid_eb,et_eb,kk) * mtoe2ej;
+   fe_trans = fe_trans + sum(energy_balance(conso_transport_eb,:,kk)) * mtoe2ej;
+@@ -84,8 +87,61 @@
+    fe_detail( 10) = fe_detail( 10) + (sum(energy_balance(conso_tot_eb,:,kk))-sum(energy_balance(marbunk_eb,:,kk)))* mtoe2ej;
+ 	fe_detail( 12) = sum(ener_pkm_air);
+ 	fe_detail( 13) = sum(ener_fret_air)
++	fe_detail( 16) = sum(ener_pkm_ot);
++	fe_detail( 15) = sum(ener_fret_ot)
++	fe_detail( 14) = sum(ener_fret_air_int)
+ end
+ 
++for kk=ind_global_north
++  fe_et_resid = fe_et_resid + energy_balance(conso_resid_eb,et_eb,kk) * mtoe2ej;
++  fe_trans = fe_trans + sum(energy_balance(conso_transport_eb,:,kk)) * mtoe2ej;
++   fe_indu = fe_indu + (sum(energy_balance(conso_indu_eb,:,kk))+sum(energy_balance(conso_agri_eb,:,kk))+sum(energy_balance(conso_btp_eb,:,kk)))* mtoe2ej;
++   fe_comp = fe_comp + (sum(energy_balance(conso_comp_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( conso_comp_eb-9) = fe_detail_n( conso_comp_eb-9) + (sum(energy_balance(conso_comp_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( conso_agri_eb-9) = fe_detail_n( conso_agri_eb-9) + (sum(energy_balance(conso_agri_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( conso_indu_eb-9) = fe_detail_n( conso_indu_eb-9) + (sum(energy_balance(conso_indu_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( conso_air_eb-9) = fe_detail_n( conso_air_eb-9) + (sum(energy_balance(conso_air_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( conso_ot_eb-9) = fe_detail_n( conso_ot_eb-9) + (sum(energy_balance(conso_ot_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( conso_car_eb-9) = fe_detail_n( conso_car_eb-9) + (sum(energy_balance(conso_car_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( conso_resid_eb-9) = fe_detail_n( conso_resid_eb-9) + (sum(energy_balance(conso_resid_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( conso_btp_eb-9) = fe_detail_n( conso_btp_eb-9) + (sum(energy_balance(conso_btp_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( 9) = fe_detail_n( 9) - (sum(energy_balance(marbunk_eb,:,kk)))* mtoe2ej;
++   fe_detail_n( 10) = fe_detail_n( 10) + (sum(energy_balance(conso_tot_eb,:,kk))-sum(energy_balance(marbunk_eb,:,kk)))* mtoe2ej;
++        fe_detail_n( 12) = sum(ener_pkm_air);
++        fe_detail_n( 13) = sum(ener_fret_air)
++        fe_detail_n( 16) = sum(ener_pkm_ot);
++        fe_detail_n( 15) = sum(ener_fret_ot)
++        fe_detail_n( 14) = sum(ener_fret_air_int)
++end
++
++for kk=ind_global_south
++  fe_et_resid = fe_et_resid + energy_balance(conso_resid_eb,et_eb,kk) * mtoe2ej;
++  fe_trans = fe_trans + sum(energy_balance(conso_transport_eb,:,kk)) * mtoe2ej;
++   fe_indu = fe_indu + (sum(energy_balance(conso_indu_eb,:,kk))+sum(energy_balance(conso_agri_eb,:,kk))+sum(energy_balance(conso_btp_eb,:,kk)))* mtoe2ej;
++   fe_comp = fe_comp + (sum(energy_balance(conso_comp_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( conso_comp_eb-9) = fe_detail_s( conso_comp_eb-9) + (sum(energy_balance(conso_comp_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( conso_agri_eb-9) = fe_detail_s( conso_agri_eb-9) + (sum(energy_balance(conso_agri_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( conso_indu_eb-9) = fe_detail_s( conso_indu_eb-9) + (sum(energy_balance(conso_indu_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( conso_air_eb-9) = fe_detail_s( conso_air_eb-9) + (sum(energy_balance(conso_air_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( conso_ot_eb-9) = fe_detail_s( conso_ot_eb-9) + (sum(energy_balance(conso_ot_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( conso_car_eb-9) = fe_detail_s( conso_car_eb-9) + (sum(energy_balance(conso_car_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( conso_resid_eb-9) = fe_detail_s( conso_resid_eb-9) + (sum(energy_balance(conso_resid_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( conso_btp_eb-9) = fe_detail_s( conso_btp_eb-9) + (sum(energy_balance(conso_btp_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( 9) = fe_detail_s( 9) - (sum(energy_balance(marbunk_eb,:,kk)))* mtoe2ej;
++   fe_detail_s( 10) = fe_detail_s( 10) + (sum(energy_balance(conso_tot_eb,:,kk))-sum(energy_balance(marbunk_eb,:,kk)))* mtoe2ej;
++        fe_detail_s( 12) = sum(ener_pkm_air);
++        fe_detail_s( 13) = sum(ener_fret_air)
++        fe_detail_s( 16) = sum(ener_pkm_ot);
++        fe_detail_s( 15) = sum(ener_fret_ot)
++        fe_detail_s( 14) = sum(ener_fret_air_int)
++end
++
++
++// conso_ot_eb : Q*CI
++// conso_air_eb : Q*CI
++// marbunk_eb : Q*CI
++
++
+ fe_tot_n=0;
+ fe_tot_s=0;
+ for kk=ind_global_north
+@@ -98,7 +154,7 @@
+    fe_indu_s = fe_indu_s + (sum(energy_balance(conso_indu_eb,:,kk))+sum(energy_balance(conso_agri_eb,:,kk))+sum(energy_balance(conso_btp_eb,:,kk)))* mtoe2ej;
+    fe_comp_s = fe_comp_s + (sum(energy_balance(conso_comp_eb,:,kk)))* mtoe2ej;
+    fe_ship_s = fe_ship_s - (sum(energy_balance(marbunk_eb,:,kk)))* mtoe2ej;
+-	fe_tot_s= fe_tot_n + (sum(energy_balance(conso_comp_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_agri_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_indu_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_air_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_ot_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_car_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_resid_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_btp_eb,:,kk)))* mtoe2ej - (sum(energy_balance(marbunk_eb,:,kk)))* mtoe2ej;
++	fe_tot_s= fe_tot_s + (sum(energy_balance(conso_comp_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_agri_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_indu_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_air_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_ot_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_car_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_resid_eb,:,kk)))* mtoe2ej + (sum(energy_balance(conso_btp_eb,:,kk)))* mtoe2ej - (sum(energy_balance(marbunk_eb,:,kk)))* mtoe2ej;
+ end
+ 
+ 
+@@ -120,10 +176,19 @@
+ "Total as sum"
+ "Air Transport - Mobility"
+ "Air Transport - Freight"
++"Air Transport - Freight Int."
++"Terrestrial Transport - Freight"
++"Terrestrial Transport - Mobility"
+ ];
+ 
++        fe_detail_s( 12) = sum(ener_pkm_air);
++        fe_detail_s( 13) = sum(ener_fret_air)
++        fe_detail_s( 16) = sum(ener_pkm_ot);
++        fe_detail_s( 15) = sum(ener_fret_ot)
++        fe_detail_s( 14) = sum(ener_fret_air_int)
+ 
+ 
++
+ for k=1:reg
+     emi_residcom = emi_residcom + (..
+ + coef_Q_CO2_DF(k,coal)'       .* energy_balance(conso_resid_eb,coal_eb,k) ..
+@@ -163,10 +228,12 @@
+ df_indus = sum(DF(:,indus));
+ dg_indus = sum(DG(:,indus));
+ ci_indus = 0;
++ci_indus_reg = zeros(12,1);
+ expti_indus = sum(ExpTI(:,indus));
+ for ii=1:12
+   for kk=1:12
+     ci_indus = ci_indus + CI(indus,ii, kk) * Q(kk,ii);
++    ci_indus_reg(kk) = ci_indus_reg(kk) + CI(indus,ii,kk)*Q(kk,ii);
+ end
+ end
+ 
+@@ -179,8 +246,8 @@
+ dg_indusimp_s = sum(partImpDG(ind_global_south,indus).*DG(ind_global_south,indus));
+ ci_indusimp_s = 0;
+ for kk=ind_global_south
+-	//for ii=1:12
+-  for ii=nonEnergyIndexes
++	for ii=1:12
++  //for ii=nonEnergyIndexes
+     ci_indusimp_s = ci_indusimp_s + partImpCI(indus,ii,kk)*CI(indus,ii, kk) * Q(kk,ii);
+   end
+ end
+@@ -189,22 +256,27 @@
+ dg_indusimp_n = sum(partImpDG(ind_global_north,indus).*DG(ind_global_north,indus));
+ ci_indusimp_n = 0;
+ for kk=ind_global_north
+-  //for ii=1:12
+-  for ii=nonEnergyIndexes
++  for ii=1:12
++  //for ii=nonEnergyIndexes
+     ci_indusimp_n = ci_indusimp_n + partImpCI(indus,ii,kk)*CI(indus,ii, kk) * Q(kk,ii);
+   end
+ end
+ 
++imp_indu_n = di_indusimp_n+df_indusimp_n+ci_indusimp_n+dg_indusimp_n;
++imp_indu_s = di_indusimp_s+df_indusimp_s+ci_indusimp_s+dg_indusimp_s;
++
+ di_indusdom_s = sum(partDomDI(ind_global_south,indus).*DI(ind_global_south,indus)) + sum(marketshare(ind_global_south,indus)) * di_indusimp_s;
+ df_indusdom_s = sum(partDomDF(ind_global_south,indus).*DF(ind_global_south,indus)) + sum(marketshare(ind_global_south,indus)) * df_indusimp_s;
+ dg_indusdom_s = sum(partDomDG(ind_global_south,indus).*DG(ind_global_south,indus)) + sum(marketshare(ind_global_south,indus)) * dg_indusimp_s;
+ exp_indu_s = sum(marketshare(ind_global_south,indus)) * ( di_indusimp_n + df_indusimp_n + dg_indusimp_n + ci_indusimp_n);
+ ci_indusdom_s = 0;
+-ci_indusdom_s = ci_indusdom_s + sum(marketshare(ind_global_south,indus)) * ci_indusimp_s;
++ci_airdom_s = 0;
++//ci_indusdom_s = ci_indusdom_s + sum(marketshare(ind_global_south,indus)) * ci_indusimp_s;
+ for kk=ind_global_south
+-  //for ii=1:12
+-  for ii=nonEnergyIndexes
++  for ii=1:12
++  //for ii=nonEnergyIndexes
+     ci_indusdom_s = ci_indusdom_s + partDomCI(indus,ii,kk)*CI(indus,ii, kk) * Q(kk,ii);
++    ci_airdom_s = ci_airdom_s + partDomCI(air,ii,kk)*CI(air,ii, kk) * Q(kk,ii);
+   end
+ end
+ 
+@@ -214,18 +286,59 @@
+ exp_indu_n = sum(marketshare(ind_global_north,indus)) * ( di_indusimp_s + df_indusimp_s + dg_indusimp_s + ci_indusimp_s);
+ ci_indusdom_n = 0;
+ ci_indusdom_n = ci_indusdom_n+ sum(marketshare(ind_global_north,indus)) * ci_indusimp_n;
++ci_airdom_n = 0;
+ for kk=ind_global_north
+-  //for ii=1:12
+-  for ii=nonEnergyIndexes
++  for ii=1:12
++  //for ii=nonEnergyIndexes
+     ci_indusdom_n = ci_indusdom_n + partDomCI(indus,ii,kk)*CI(indus,ii, kk) * Q(kk,ii);
++    ci_airdom_n = ci_airdom_n + partDomCI(air,ii,kk)*CI(air,ii, kk) * Q(kk,ii);
+   end
+ end
+ 
++ci_indus_n = ci_indusdom_n + ci_indusimp_n;
++ci_indus_s = ci_indusdom_s + ci_indusimp_s;
+ 
++nrb_n = sum(NRB(ind_global_north));
++nrb_s = sum(NRB(ind_global_south));
++ci_indus_indus_dom_n = 0
++ci_indus_indus_n = 0
++ci_indus_comp_dom_n = 0
++ci_indus_comp_n = 0
++
++for kk=ind_global_north
++    ci_indus_indus_dom_n = ci_indus_indus_dom_n + partDomCI(indus,indus,kk)*CI(indus,indus, kk) * Q(kk,indus);
++    ci_indus_indus_n = ci_indus_indus_n + CI(indus,indus, kk) * Q(kk,indus);
++    ci_indus_comp_dom_n = ci_indus_comp_dom_n + partDomCI(indus,compo,kk)*CI(indus,compo, kk) * Q(kk,compo);
++    ci_indus_comp_n = ci_indus_comp_dom_n + CI(indus,compo, kk) * Q(kk,compo);
++end
++
++ci_indus_indus_dom_s = 0
++ci_indus_indus_s = 0
++ci_indus_comp_dom_s = 0
++ci_indus_comp_s = 0
++
++for kk=ind_global_south
++    ci_indus_indus_dom_s = ci_indus_indus_dom_s + partDomCI(indus,indus,kk)*CI(indus,indus, kk) * Q(kk,indus);
++    ci_indus_indus_s = ci_indus_indus_s + CI(indus,indus, kk) * Q(kk,indus);
++    ci_indus_comp_dom_s = ci_indus_comp_dom_s + partDomCI(indus,compo,kk)*CI(indus,compo, kk) * Q(kk,compo);
++    ci_indus_comp_s = ci_indus_comp_dom_s + CI(indus,compo, kk) * Q(kk,compo);
++end
++
++ci_indus_oth_dom_s = ci_indusdom_s - ci_indus_indus_dom_s - ci_indus_comp_dom_s;
++ci_indus_oth_s = ci_indus_s - ci_indus_indus_s - ci_indus_comp_s;
++ci_indus_oth_dom_n = ci_indusdom_n - ci_indus_indus_dom_n - ci_indus_comp_dom_n;
++ci_indus_oth_n = ci_indus_n - ci_indus_indus_n - ci_indus_comp_n;
++
+ q_indus_n = sum(Q(ind_global_north, indus));
+ q_indus_s = sum(Q(ind_global_south, indus));
++q_comp_n = sum(Q(ind_global_north, compo));
++q_comp_s = sum(Q(ind_global_south, compo));
+ df_indus_n = sum(DF(ind_global_north, indus));
+ df_indus_s = sum(DF(ind_global_south, indus));
++dg_indus_n = sum(DG(ind_global_north, indus));
++dg_indus_s = sum(DG(ind_global_south, indus));
++di_indus_n = sum(DI(ind_global_north, indus));
++di_indus_s = sum(DI(ind_global_south, indus));
+ 
+ // LED sc.  2020
+ // 35182 MtCO2/yr
+@@ -297,16 +410,24 @@
+     q_indus_2020_s = q_indus_s;
+     df_indus_2020_n = df_indus_n;
+     df_indus_2020_s = df_indus_s;
++    dg_indus_2020_n = dg_indus_n;
++    dg_indus_2020_s = dg_indus_s;
++    di_indus_2020_n = di_indus_n;
++    di_indus_2020_s = di_indus_s;
+     di_indusdom_n_20 = di_indusdom_n;
+     df_indusdom_n_20 = df_indusdom_n;
+     dg_indusdom_n_20 = dg_indusdom_n;
+     exp_indu_n_20 = exp_indu_n;
++    imp_indu_n_20 = imp_indu_n;
+     ci_indusdom_n_20 = ci_indusdom_n;
+     di_indusdom_s_20 = di_indusdom_s;
+     df_indusdom_s_20 = df_indusdom_s;
+     dg_indusdom_s_20 = dg_indusdom_s;
+     exp_indu_s_20 = exp_indu_s;
++    imp_indu_s_20 = imp_indu_s;
+     ci_indusdom_s_20 = ci_indusdom_s;
++    ci_indus_n_20 = ci_indus_n;
++    ci_indus_s_20 = ci_indus_s;
+ 
+     di_indusimp_n_20 = di_indusimp_n;
+     df_indusimp_n_20 = df_indusimp_n;
+@@ -317,6 +438,24 @@
+     dg_indusimp_s_20 = dg_indusimp_s;
+     ci_indusimp_s_20 = ci_indusimp_s;
+ 
++ci_indus_indus_dom_n_20 = ci_indus_indus_dom_n;
++ci_indus_indus_n_20 = ci_indus_indus_n;
++ci_indus_comp_dom_n_20 = ci_indus_comp_dom_n;
++ci_indus_comp_n_20 = ci_indus_comp_n;
++nrb_n_20 = nrb_n;
++nrb_s_20 = nrb_s;
++ci_indus_indus_dom_s_20 = ci_indus_indus_dom_s;
++ci_indus_indus_s_20 = ci_indus_indus_s;
++ci_indus_comp_dom_s_20 = ci_indus_comp_dom_s;
++ci_indus_comp_s_20 = ci_indus_comp_s;
++q_comp_n_20 = q_comp_n;
++q_comp_s_20 = q_comp_s;
++ci_indus_oth_dom_s_20 = ci_indus_oth_dom_s;
++ci_indus_oth_s_20 = ci_indus_oth_s;
++ci_indus_oth_dom_n_20 = ci_indus_oth_dom_n;
++ci_indus_oth_n_20 = ci_indus_oth_n;
++
++
+     disp( [fe_detail, fe_detail_percent], "fe_detail")
+ 
+ 	m2batiment_n_20=m2batiment_n;
+@@ -398,7 +537,10 @@
+ 
+ end
+ 
+-if current_time_im==2050-base_year_simulation
++gdp_evol_n = sum(GDP_PPP_constant(ind_global_north)) ./ sum(GDP_PPP_constant_ref(ind_global_north));
++gdp_evol_s = sum(GDP_PPP_constant(ind_global_south)) ./ sum(GDP_PPP_constant_ref(ind_global_south));
++
++if current_time_im==2060-base_year_simulation | current_time_im==2050-base_year_simulation
+     disp( "[ pkm_ot_n, pkm_air_n, pkm_car_n ]");
+     disp( [ [ pkm_ot_n, pkm_air_n, pkm_car_n ]; [pkm_ot_n_2050_obj, pkm_air_n_2050_obj, pkm_car_n_2050_obj]; [ pkm_ot_n/pkm_ot_n_2050_obj, pkm_air_n/pkm_air_n_2050_obj, pkm_car_n /pkm_car_n_2050_obj]]); 
+     disp( "[ pkm_ot_s, pkm_air_s, pkm_car_s ]");
+@@ -451,6 +593,93 @@
+             [ (ci_indusdom_n-ci_indusdom_n_20)/ci_indusdom_n_20, (ci_indusdom_s-ci_indusdom_s_20)/ci_indusdom_s_20, (ci_indusdom_n-ci_indusdom_n_20+ci_indusdom_s-ci_indusdom_s_20)/(ci_indusdom_n_20+ci_indusdom_s_20)];
+             [ (exp_indu_n-exp_indu_n_20)/exp_indu_n_20, (exp_indu_s-exp_indu_s_20)/exp_indu_s_20, (exp_indu_n-exp_indu_n_20+exp_indu_s-exp_indu_s_20)/(exp_indu_n_20+exp_indu_s_20)]  ]);
+  
++
++disp(" DI DF DG CI, Exp, Imp, Q -> dom 2020")
++
++    disp( [ [ di_indusdom_n_20, di_indusdom_s_20];
++            [ df_indusdom_n_20, df_indusdom_s_20];
++            [ dg_indusdom_n_20, dg_indusdom_s_20];
++            [ ci_indusdom_n_20, ci_indusdom_s_20];
++            [ exp_indu_n_20, exp_indu_s_20];
++            [ imp_indu_n_20, imp_indu_s_20];
++		[q_indus_n_20, q_indus_s_20] ]);
++
++disp(" DI DF DG CI, Exp, Imp, Q -> dom 2050")
++
++    disp( [ [ di_indusdom_n, di_indusdom_s];
++            [ df_indusdom_n, df_indusdom_s];
++            [ dg_indusdom_n, dg_indusdom_s];
++            [ ci_indusdom_n, ci_indusdom_s];
++            [ exp_indu_n, exp_indu_s];
++            [ imp_indu_n, imp_indu_s];
++                [q_indus_n, q_indus_s]       ]);
++
++disp(" DI DF DG CI, Exp, Imp, Q -> tot 2020")
++
++
++    disp( [ [ di_indus_2020_n, di_indus_2020_s];
++            [ df_indus_2020_n, df_indus_2020_s];
++            [ dg_indus_2020_n, dg_indus_2020_s];
++            [ ci_indus_n_20, ci_indus_s_20];
++            [ exp_indu_n_20, exp_indu_s_20];
++            [ imp_indu_n_20, imp_indu_s_20]; 
++                [q_indus_n_20, q_indus_s_20] ]);
++
++
++disp(" DI DF DG CI, Exp, Imp, Q -> tot 2050")
++
++    disp( [ [ di_indus_n, di_indus_s];
++            [ df_indus_n, df_indus_s];
++            [ dg_indus_n, dg_indus_s];
++            [ ci_indus_n, ci_indus_s];
++            [ exp_indu_n, exp_indu_s];
++            [ imp_indu_n, imp_indu_s];
++                [q_indus_n, q_indus_s]       ]);
++
++disp("MAIN  decompos");
++
++    disp( [ [ di_indusdom_n_20, di_indusdom_s_20, di_indusdom_n, di_indusdom_s];
++	    [nrb_n_20, nrb_s_20, nrb_n, nrb_s];
++	    [ci_indus_oth_dom_n_20, ci_indus_oth_dom_s_20, ci_indus_oth_dom_n, ci_indus_oth_dom_s];
++	    [ci_indus_indus_dom_n_20, ci_indus_indus_dom_s_20, ci_indus_indus_dom_n, ci_indus_indus_dom_s];
++	    [ci_indus_comp_dom_n_20, ci_indus_comp_dom_s_20, ci_indus_comp_dom_n, ci_indus_comp_dom_s];
++	                [ci_indus_oth_n_20, ci_indus_oth_s_20, ci_indus_oth_n, ci_indus_oth_s];
++            [ci_indus_indus_n_20, ci_indus_indus_s_20, ci_indus_indus_n, ci_indus_indus_s];
++            [ci_indus_comp_n_20, ci_indus_comp_s_20, ci_indus_comp_n, ci_indus_comp_s];
++                [q_indus_n_20, q_indus_s_20, q_indus_n, q_indus_s] ;
++                [q_comp_n_20, q_comp_s_20, q_comp_n, q_comp_s] ;
++		[ di_indusdom_n_20, di_indusdom_s_20, di_indusdom_n, di_indusdom_s]
++            [ df_indusdom_n_20, df_indusdom_s_20, df_indusdom_n, df_indusdom_s];
++            [ dg_indusdom_n_20, dg_indusdom_s_20, dg_indusdom_n, dg_indusdom_s];
++            [ ci_indusdom_n_20, ci_indusdom_s_20, ci_indusdom_n, ci_indusdom_s];
++            [ exp_indu_n_20, exp_indu_s_20, exp_indu_n, exp_indu_s];
++            [ imp_indu_n_20, imp_indu_s_20, imp_indu_n, imp_indu_s];
++                [q_indus_n_20, q_indus_s_20, q_indus_n, q_indus_s] ]);
++
++
++disp("MAIN  decompos - gdp");
++
++    disp( [ [ di_indusdom_n_20, di_indusdom_s_20, di_indusdom_n, di_indusdom_s];
++            [nrb_n_20, nrb_s_20, nrb_n, nrb_s];
++            [ci_indus_oth_dom_n_20, ci_indus_oth_dom_s_20, ci_indus_oth_dom_n, ci_indus_oth_dom_s];
++            [ci_indus_indus_dom_n_20, ci_indus_indus_dom_s_20, ci_indus_indus_dom_n, ci_indus_indus_dom_s];
++            [ci_indus_comp_dom_n_20, ci_indus_comp_dom_s_20, ci_indus_comp_dom_n, ci_indus_comp_dom_s];
++                        [ci_indus_oth_n_20, ci_indus_oth_s_20, ci_indus_oth_n, ci_indus_oth_s];
++            [ci_indus_indus_n_20, ci_indus_indus_s_20, ci_indus_indus_n, ci_indus_indus_s];
++            [ci_indus_comp_n_20, ci_indus_comp_s_20, ci_indus_comp_n, ci_indus_comp_s];
++                [q_indus_n_20, q_indus_s_20, q_indus_n, q_indus_s] ;
++                [q_comp_n_20, q_comp_s_20, q_comp_n, q_comp_s] ;
++                [ di_indusdom_n_20, di_indusdom_s_20, di_indusdom_n, di_indusdom_s]
++            [ df_indusdom_n_20, df_indusdom_s_20, df_indusdom_n, df_indusdom_s];
++            [ dg_indusdom_n_20, dg_indusdom_s_20, dg_indusdom_n, dg_indusdom_s];
++            [ ci_indusdom_n_20, ci_indusdom_s_20, ci_indusdom_n, ci_indusdom_s];
++            [ exp_indu_n_20, exp_indu_s_20, exp_indu_n, exp_indu_s];
++            [ imp_indu_n_20, imp_indu_s_20, imp_indu_n, imp_indu_s];
++                [q_indus_n_20, q_indus_s_20, q_indus_n, q_indus_s];
++		[gdp_evol_n, gdp_evol_s, gdp_evol_n, gdp_evol_s]]);
++
++
++
+ 	disp( "Demand on CI (mistake 2050 ref): 0.3055 (too high means we reduce too much demand relatively to CI)")
+ 	disp( [  (di_indusdom_n-di_indusdom_n_50ref+df_indusdom_n-df_indusdom_n_50ref+dg_indusdom_n-dg_indusdom_n_50ref) / (di_indusdom_n_50ref+df_indusdom_n_50ref+dg_indusdom_n_50ref) * (ci_indusdom_n_50ref) / (ci_indusdom_n-ci_indusdom_n_50ref),  (di_indusdom_s-di_indusdom_s_50ref+df_indusdom_s-df_indusdom_s_50ref+dg_indusdom_s-dg_indusdom_s_50ref) / (di_indusdom_s_50ref+df_indusdom_s_50ref+dg_indusdom_s_50ref) * ci_indusdom_s_50ref /  (ci_indusdom_s-ci_indusdom_s_50ref) ])
+ 
+@@ -475,9 +704,17 @@
+ 
+     disp( "[m2batiment_n, m2batiment_s, ener_resid_n, ener_resid_s]")
+     disp( [ [m2batiment_n, m2batiment_s, ener_resid_n, ener_resid_s], [m2_resid_n_2050_obj, m2_resid_s_2050_obj, ener_resid_n_2050_obj, ener_resid_s_2050_obj],  [m2batiment_n / m2_resid_n_2050_obj, m2batiment_s/m2_resid_s_2050_obj, ener_resid_n/ener_resid_n_2050_obj, ener_resid_s/ener_resid_s_2050_obj]]);
+-    disp(sum(GDP_PPP_constant), 'GDP')
+ 
++	gdp_ssp2_2050 = 253137.334642 * 1e3 * CPI_2017_to_2014;
++	gdp_ssp2_2060 = 311753.1826 * 1e3 * CPI_2017_to_2014;
+ 
++	if current_time_im==2050-base_year_simulation
++		disp( [sum(GDP_PPP_constant),gdp_ssp2_2050], 'GDP')
++	end
++	if current_time_im==2060-base_year_simulation
++		disp( [sum(GDP_PPP_constant),gdp_ssp2_2060], 'GDP')
++	end
++
+ 	disp("***************************************************")
+ 	disp("   Print for the table of the paper")
+ 
+@@ -675,7 +912,7 @@
+ 
+ modelcombi = "Imaclim-R 1.1|" + string(combi)+ "|"
+ 
+-if i==1
++if current_time_im==1
+         unix_s("echo " + str_head + " > " + SAVEDIR + filename)
+ end
+ 
+@@ -683,22 +920,31 @@
+ 	str_val = '';
+ 	for k=1:12
+ 		for j=1:12	
+-			str_val = "''" + modelcombi + "VA|" + regnames(k) + '|' + secnames(j) + '|' + string(2001+i) + '|' + GDP_sect(k,j) + "''";
++			str_val = "''" + modelcombi + "VA|" + regnames(k) + '|' + secnames(j) + '|' + string(2014+current_time_im) + '|' + GDP_sect(k,j) + "''";
+ 			unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
+ 		end
+ 	end
+ 
++// GDP deflator
++        str_val = '';
++        for k=1:12
++                        str_val = "''" + modelcombi + "GDP_deflator|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + GDP_MER_real(k)/GDP_MER_nominal(k) + "''";
++                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++       end
++
++
+ // GDP_PPP_real
+         str_val = '';
+         for k=1:12
+-			str_val = "''" + modelcombi + "GDP_PPP_constant|" + regnames(k) + '|nan|' + string(2001+i) + '|' + GDP_PPP_constant(k) + "''";
++			str_val = "''" + modelcombi + "GDP_PPP_constant|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + GDP_PPP_constant(k) + "''";
+                         unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
+        end
+ 
++
+ // GDP_MER_nominal
+         str_val = '';
+         for k=1:12
+-                        str_val = "''" + modelcombi + "GDP_MER_nominal|" + regnames(k) + '|nan|' + string(2001+i) + '|' + GDP_MER_nominal(k) + "''";
++                        str_val = "''" + modelcombi + "GDP_MER_nominal|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + GDP_MER_nominal(k) + "''";
+                         unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
+        end
+ 
+@@ -705,30 +951,139 @@
+ // Population
+         str_val = '';
+         for k=1:12
+-			str_val = "''" + modelcombi + "Population|" + regnames(k) + '|nan|' + string(2001+i) + '|' + Ltot(k) + "''";
++			str_val = "''" + modelcombi + "Population|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + Ltot(k) + "''";
+                         unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
+         end
+ 
+-employ = Q .* l;
+-// emploie
++// Q indus decomposition
+         str_val = '';
+         for k=1:12
+-                for j=1:12
+-                        str_val = "''" + modelcombi + "employ|" + regnames(k) + '|' + secnames(j) + '|' + string(2001+i) + '|' + employ(k,j) + "''";
++                        str_val = "''" + modelcombi + "Q industry - total|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + Q(k,indus) + "''";
+                         unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
+-                end
+         end
+ 
+-// Final energy
++        str_val = '';
++        for k=1:12
++                        str_val = "''" + modelcombi + "Q industry - DFDG|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + string(DF(k,indus)*partDomDF(k,indus) + DG(k,indus)*partDomDG(k,indus)) + "''";
++                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
+ 
+         str_val = '';
+-        for j=1:13
+-                        str_val = "''" + modelcombi + "Final Energy,"+ fe_detail_label(j)+'|WLD|nan|' + string(2001+i) + '|' + fe_detail(j) + "''";
++        for k=1:12
++                        str_val = "''" + modelcombi + "Q industry - Exp|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + Exp(k,indus) + "''";
+                         unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
+         end
+ 
++        str_val = '';
++        for k=1:12
++                        str_val = "''" + modelcombi + "Q industry - Inv_val indus|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + Inv_val_sec(k,indus) + "''";
++                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
++
++        str_val = '';
++        for k=1:12
++                        str_val = "''" + modelcombi + "Q industry - Inv_val comp|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + Inv_val_sec(k,compo) + "''";
++                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
++
++
++        str_val = '';
++        for k=1:12
++                        str_val = "''" + modelcombi + "Q industry - Inv_val other|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + sum(Inv_val_sec(k,[1 2 3 4 5 6 8 9 10 11])) + "''";
++                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
++
++
++        str_val = '';
++        for k=1:12
++                        str_val = "''" + modelcombi + "Q industry - Inv_val DIinfra|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + sum( DI(k,:).*pArmDI(k,:)*partDomDI(k,indus)) +  "''";
++                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
++
++        str_val = '';
++        for k=1:12
++                        str_val = "''" + modelcombi + "Q industry - DI indus|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + string(DI(k,indus)*partDomDI(k,indus)-DIinfra(k,indus)*partDomDI(k,indus)) + "''";
++                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
++
++        str_val = '';
++        for k=1:12
++                        str_val = "''" + modelcombi + "Q industry - CI|" + regnames(k) + '|nan|' + string(2014+current_time_im) + '|' + ci_indus_reg(k) + "''";
++                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
++
++//employ = Q .* l;
++// emploie
++//        str_val = '';
++//        for k=1:12
++//                for j=1:12
++//                        str_val = "''" + modelcombi + "employ|" + regnames(k) + '|' + secnames(j) + '|' + string(2014+current_time_im) + '|' + employ(k,j) + "''";
++//                        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++//                end
++//        end
++
++// Final energy
++
++        str_val = '';
++        for j=1:16
++                str_val = "''" + modelcombi + "Final Energy,"+ fe_detail_label(j)+'|WLD|nan|' + string(2014+current_time_im) + '|' + fe_detail(j) + "''";
++                unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++                str_val = "''" + modelcombi + "Final Energy,"+ fe_detail_label(j)+'|North|nan|' + string(2014+current_time_im) + '|' + fe_detail_n(j) + "''";
++                unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++                str_val = "''" + modelcombi + "Final Energy,"+ fe_detail_label(j)+'|South|nan|' + string(2014+current_time_im) + '|' + fe_detail_s(j) + "''";
++                unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
++
++activity_matrix = zeros(16,3)
++
++activity_matrix(:,1:2)= [[pkm_ot_n, pkm_ot_s];
++		[pkm_air_n, pkm_air_s];
++		[pkm_car_n, pkm_car_s];
++		[m2batiment_n, m2batiment_s];
++		[q_comp_n, q_comp_s];
++		[sum(Q(ind_global_north, agri)), sum(Q(ind_global_south, agri))];
++		[sum(Q(ind_global_north, btp)), sum(Q(ind_global_south, btp))];
++		[q_indus_n, q_indus_s];
++		[di_indusdom_n, di_indusdom_s];
++		[df_indusdom_n, df_indusdom_s];
++		[dg_indusdom_n, dg_indusdom_s];
++		[ci_indusdom_n, ci_indusdom_s];
++		[exp_indu_n, exp_indu_s];
++		[sum(Q(ind_global_north, mer)), sum(Q(ind_global_south, mer))];
++		[ci_airdom_n+sum(ExpTI(ind_global_north, air)), ci_airdom_s+sum(ExpTI(ind_global_north, air))];
++		[sum(ExpTI(ind_global_north, air)), sum(ExpTI(ind_global_north, air))]]
++activity_matrix(:,3) = sum( activity_matrix(:,1:2),'c');
++
++activity_labels =[
++"Activity - PKM - ot",
++"Activity - PKM - air",
++"Activity - PKM - car",
++"Activity - M2",
++"Activity - services",
++"Activity - agri",
++"Activity - construction",
++"Activity - industries",
++"Activity - industries - DI",
++"Activity - industries - DF",
++"Activity - industries - DG",
++"Activity - industries - CI",
++"Activity - industries - Exp",
++"Activity - Shipping",
++"Activity - Air- Freight",
++"Activity - Air- Freight Int."]
++
++        str_val = '';
++        for j=1:16
++                str_val = "''" + modelcombi + "Activity,"+ activity_labels(j)+'|North|nan|' + string(2014+current_time_im) + '|' + activity_matrix(j,1) + "''";
++                unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++                str_val = "''" + modelcombi + "Activity,"+ activity_labels(j)+'|South|nan|' + string(2014+current_time_im) + '|' + activity_matrix(j,2) + "''";
++                unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++                str_val = "''" + modelcombi + "Activity,"+ activity_labels(j)+'|WLD|nan|' + string(2014+current_time_im) + '|' + activity_matrix(j,3) + "''";
++                unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++        end
++
+ // PCO2
+-	str_val = '';
+-	str_val = "''" + modelcombi + "Price Carbon|WLD|nan|" + string(2001+i) + '|' + taxCO2_DF(1)*1e6 + "''";
+-        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
++//	str_val = '';
++//	str_val = "''" + modelcombi + "Price Carbon|WLD|nan|" + string(2014+current_time_im) + '|' + taxCO2_DF(1)*1e6 + "''";
++//        unix_s("echo " + str_val + " >> " + SAVEDIR + filename)
+ 
+Index: model/nexus.buildings.sce
+===================================================================
+--- model/nexus.buildings.sce	(révision 32366)
++++ model/nexus.buildings.sce	(copie de travail)
+@@ -37,6 +37,13 @@
+ 	mult_surface_pc_ini=[1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.5;1.0;1.5;1.5;1.5];
+ end
+ 
++if indice_LED>=1  & current_time_im >= start_year_strong_policy-base_year_simulation 
++    asymptote_surface_pc=[30;30;30;30;30;30;30;30;30;30;30;30];
++    mult_surface_pc_ini=[1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.5;1.0;1.5;1.5;1.5];
++    asymptote_surface_pc(ind_global_north) = 0.8*asymptote_surface_pc(ind_global_north);
++    mult_surface_pc_ini(ind_global_north) = 0.8*mult_surface_pc_ini(ind_global_north);	
++end
++
+ if ind_buildingefficiency == 1 & current_time_im == start_year_strong_policy-base_year_simulation
+ CINV_res_nexus_ref(:,ind_build_VLE) = 	0.00065 * ones(nb_regions,1); // Variant to meet the task 3.5 NAVIGATE objective, where we need to reach 40% of energy saving by 2030 through renovation (!) and very low NZEB level for insulation in new construction (0.3 W/m2K). This lower investment costs could be reached thanks to massive subsidies for very high efficient buildings.
+ max_extra_renov_rate = 0.02*3; // We accelerate the renovation rate until 2035 ...
+@@ -47,7 +54,7 @@
+ end
+ 
+ // Initialisation and update of the building stock variable
+-if current_time_im==1
++if current_time_im==1 
+     stockbatiment_vise_prev=stockbatimentref;
+ else
+     stockbatiment_vise_prev=stockbatiment_vise;
+@@ -238,10 +245,11 @@
+ alphaGazm2_VLE  = (1-alphaelecm2_VLE_sh) .* build_VLE_ener_cons;
+ 
+ if current_time_im >= start_year_strong_policy-base_year_simulation
+-    alphaelecm2_VLE( ind_global_south) = dynForc_resid_TBE3*alphaelecm2_VLE( ind_global_south);
+-    alphaGazm2_VLE( ind_global_south) = dynForc_resid_TBE3*alphaGazm2_VLE( ind_global_south);
++    alphaelecm2_VLE = dynForc_resid_TBE3 .*alphaelecm2_VLE;
++    alphaGazm2_VLE = dynForc_resid_TBE3 .*alphaGazm2_VLE;
+ end
+ 
++
+ alpha_m2_building = zeros(nb_regions, nb_type_buildings, nb_building_ener);
+ alpha_m2_building(:,ind_build_BAU,:) = [alphaCoalm2_BAU,alphaEtm2_BAU,alphaGazm2_BAU,alphaelecm2_BAU];
+ alpha_m2_building(:,ind_build_SLE,:) = [alphaCoalm2_SLE,alphaEtm2_SLE,alphaGazm2_SLE,alphaelecm2_SLE];
+Index: model/nexus.climatePolicy1.sce
+===================================================================
+--- model/nexus.climatePolicy1.sce	(révision 32366)
++++ model/nexus.climatePolicy1.sce	(copie de travail)
+@@ -9,7 +9,13 @@
+ 
+ // DG is first computed from its initial value and the demographic evolution ...
+ DG=DGref.*((Ltot./Ltot0)*ones(1,sec)); //TODO: with this assumption, DG & DF diverge strongly at the end of the century. Is it consistent with past trend to index it only on demograhic change? 
++if indice_LED >= 1 & current_time_im>=i_year_strong_policy
++    DG(:,indus) = DG(:,indus) .* dynForc_DGindu;
++end
+ 
++disp(dynForc_DGindu, "dynForc_DGindu")
++//disp( update_parameter_rule(1, dynForc_DGindu_2050_s, 1, year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-i_year_strong_policy+1, "linear"), "update_parameter_rule(1, dynForc_DGindu_2050_s, 1, year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-i_year_strong_policy+1,);")
++
+ // ... then residential energy efficiency investments for the year are charged to the government (DG), for now only in the composite sector (other variants to be tested soon)
+ renovation_expenditures = (K_cost_res_SLE+K_cost_res_VLE)./(pArmDG(:,indice_composite)); // Note that it includes all the expenditures in terms of residential energy efficiency improvement (renovation and new construction).
+ DG(:,indice_composite)=DG(:,indice_composite)+renovation_expenditures;
+Index: model/nexus.finance.sce
+===================================================================
+--- model/nexus.finance.sce	(révision 32366)
++++ model/nexus.finance.sce	(copie de travail)
+@@ -70,7 +70,7 @@
+                 partInvFin(k,coal) = 0;
+                 partInvFin(k,[et nonEnergSectors]) = 0*partInvFin(k,[et nonEnergSectors]);
+             else
+-                partInvFin(k,elec) = InvDem(k,elec)./ sum(InvDem(k, [elec coal oil gaz]));
++              partInvFin(k,elec) = InvDem(k,elec)./ sum(InvDem(k, [elec coal oil gaz]));
+               partInvFin(k,coal) = InvDem(k,coal)./ sum(InvDem(k, [elec coal oil gaz]));
+               partInvFin(k,oil)  = InvDem(k,oil )./sum(InvDem(k, [elec coal oil gaz]));
+               partInvFin(k,gaz)  = InvDem(k,gaz )./sum(InvDem(k, [elec coal oil gaz]));
+Index: model/nexus.productiveSectors.eei.sce
+===================================================================
+--- model/nexus.productiveSectors.eei.sce	(révision 32366)
++++ model/nexus.productiveSectors.eei.sce	(copie de travail)
+@@ -48,15 +48,17 @@
+         for j=1:nb_sectors,
+             if k<6
+ 			
+-			if j==indice_composite & ind_buildingefficiency == 1 & current_time_im >= start_year_strong_policy-base_year_simulation
++			if j==indice_composite & (ind_buildingefficiency | indice_LED ==4 | indice_LED ==8 | indice_LED ==9 | indice_LED ==6 | indice_LED ==1) == 1 & current_time_im >= start_year_strong_policy-base_year_simulation
+ 				EEI_newVintage(k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1))^EI_comp_boost - 1),-0.03*EI_comp_boost);// We introduce a higher maximum rate for services in this variant
++				EEI_newVintage(k,j,current_time_im) = (EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1;
+ 			else
+ 				EEI_newVintage(k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1),-0.03);
+ 			end
+             end
+             if k>=6
+-			if j==indice_composite & ind_buildingefficiency == 1 & current_time_im >= start_year_strong_policy-base_year_simulation
++			if j==indice_composite & (ind_buildingefficiency | indice_LED ==4 | indice_LED ==8 | indice_LED ==9 | indice_LED ==6 | indice_LED ==1) & current_time_im >= start_year_strong_policy-base_year_simulation
+ 				EEI_newVintage(k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1))^EI_comp_boost - 1),-0.045*max_eei*EI_comp_boost);// We introduce a higher maximum rate for services in this variant
++				EEI_newVintage(k,j,current_time_im) = (EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1;
+ 			else
+ 				EEI_newVintage(k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1),-0.045*max_eei);			
+ 			end
+@@ -69,9 +71,10 @@
+     for k=1:nb_regions,
+         for j=1:nb_sectors,
+             if k<6
+-				if j==indice_composite & ind_buildingefficiency == 1 & current_time_im >= start_year_strong_policy-base_year_simulation
++				if j==indice_composite & (ind_buildingefficiency | indice_LED ==4 | indice_LED ==8 | indice_LED ==9 | indice_LED ==6 | indice_LED ==1) & current_time_im >= start_year_strong_policy-base_year_simulation
+ 					AEEI_allVintages(k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1))^EI_comp_boost - 1)/2,-0.01*EI_comp_boost);// We introduce a higher maximum rate for services in this variant
+ 					AEEI_newVintage (k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1))^EI_comp_boost - 1)/2,-0.01*EI_comp_boost);// We introduce a higher maximum rate for services in this variant
++					AEEI_newVintage (k,j,current_time_im) = (EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1;
+ 				else
+ 					AEEI_allVintages(k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1)/2,-0.01);
+ 					AEEI_newVintage (k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1)/2,-0.01);				
+@@ -78,9 +81,10 @@
+ 				end
+             end
+             if k>=6
+-				if j==indice_composite & ind_buildingefficiency == 1 & current_time_im >= start_year_strong_policy-base_year_simulation
++				if j==indice_composite & (ind_buildingefficiency | indice_LED ==4 | indice_LED ==8 | indice_LED ==9 | indice_LED ==6 | indice_LED ==1) & current_time_im >= start_year_strong_policy-base_year_simulation
+ 					AEEI_allVintages(k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1))^EI_comp_boost - 1)/2,-0.015*max_aeei*EI_comp_boost);// We introduce a higher maximum rate for services in this variant
+ 					AEEI_newVintage (k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1))^EI_comp_boost - 1)/2,-0.015*max_aeei*EI_comp_boost);// We introduce a higher maximum rate for services in this variant
++					AEEI_newVintage (k,j,current_time_im) = (EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1;
+ 				else
+ 					AEEI_allVintages(k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1)/2,-0.015*max_aeei);
+ 					AEEI_newVintage (k,j,current_time_im) = max(((EI(k,j,current_time_im) ./ EI(k,j,current_time_im-1)) - 1)/2,-0.015*max_aeei);
+Index: model/nexus.productiveSectors.eeiCost.sce
+===================================================================
+--- model/nexus.productiveSectors.eeiCost.sce	(révision 32366)
++++ model/nexus.productiveSectors.eeiCost.sce	(copie de travail)
+@@ -209,6 +209,7 @@
+ //////////////////////////////////////////////////////////////////////////////
+ // Scenario on Material efficiency
+ // The reduction costs obtained from material efficiency is in some case (indice_LED=4) captured in the added value (through the markup, increased margin)
++// and in other case (indice_LED=9) captures through more services inputes (CI)
+ 
+ delta_CIindus_for_markup = zeros(nb_regions,nb_sectors);
+ if ind_exogenous_forcings
+@@ -215,17 +216,26 @@
+ 	if current_time_im>=i_year_strong_policy
+     		for k=1:nb_regions
+         		for jj=nonEnergyIndexes
+-        			param = max( update_parameter_rule( dynForc_CIindu(k), dynForc_CIindu_2050(k), dynForc_CIindu_istart(k), year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-(i_year_strong_policy-1), "linear"), dynForc_CIindu_2050(k));
++        			param = max( update_parameter_rule( dynForc_CIindu(k), dynForc_CIindu_2050(k), dynForc_CIindu_istart(k), year_stop_dynForc_CI-(start_year_strong_policy-1), current_time_im-(i_year_strong_policy-1), "ci"), dynForc_CIindu_2050(k));
+         			CI_before_change = CI( indus, jj,k);
+-        			CI( indus, jj,k) = CI( indus, jj,k) .* update_parameter_rule( dynForc_CIindu(k), dynForc_CIindu_2050(k), dynForc_CIindu_istart(k), year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-(i_year_strong_policy-1), "linear");
++        			CI( indus, jj,k) = CI( indus, jj,k) .* update_parameter_rule( dynForc_CIindu(k), dynForc_CIindu_2050(k), dynForc_CIindu_istart(k), year_stop_dynForc_CI-(start_year_strong_policy-1), current_time_im-(i_year_strong_policy-1), "ci");
+                 		delta_CIindus_for_markup(k, jj) = ( CI_before_change - CI0ref( indus, jj,k)) * pArmCIref( indus, jj,k);
++                		CI( compo, jj,k) = CI0ref( compo, jj,k) + ( CI_before_change - CI0ref( indus, jj,k)) * pArmCIref( indus, jj,k) ./ pArmCIref( compo, jj,k) . * dynForc_CIindu_CIcomp; // indice_LED=9
+         		end
+    		end
+-		markup = markup + delta_CIindus_for_markup ./pref * dynForc_CIindu_markup;
+-        	markupref = markupref + delta_CIindus_for_markup ./pref * dynForc_CIindu_markup
++		markup = markup + delta_CIindus_for_markup ./pref * dynForc_CIindu_markup; // indice_LED=4
+ 	end
+ end
+ 
++disp( dynForc_CIindu, "dynForc_CIindu")
++disp( dynForc_CIindu_2050, "dynForc_CIindu_2050")
++disp( dynForc_CIindu_istart, "dynForc_CIindu_istart")
++disp( update_parameter_rule( dynForc_CIindu(k), dynForc_CIindu_2050(k), dynForc_CIindu_istart(k), year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-(i_year_strong_policy-1), "ci"), "update_parameter_rule( dynForc_CIindu(k), dynForc_CIindu_2050(k), dynForc_CIindu_istart(k), year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-(i_year_strong_policy-1), ci)")
++
++
++
++disp( CI( indus, nonEnergyIndexes,:) ./ CI0ref( indus, nonEnergyIndexes,:)*100, "CI( indus, nonEnergyIndexes,k) ./ CI0ref( indus, nonEnergyIndexes,k)*100") 
++
+ if same_EEI_agroCons_as_ind
+    for j=energyIndexes
+         for k=1:nb_regions
+Index: model/nexus.productiveSectors.leontief.sce
+===================================================================
+--- model/nexus.productiveSectors.leontief.sce	(révision 32366)
++++ model/nexus.productiveSectors.leontief.sce	(copie de travail)
+@@ -528,19 +528,19 @@
+ for k=1:reg,
+     CI_Subs(:,indice_composite,k)=sumCItempcompSubs(:,k)/sumCaptempcomposite(1,k);
+     CI_Spec(:,indice_composite,k)=sumCItempcompSpec(:,k)/sumCaptempcomposite(1,k);
+-    CI(:,indice_composite,k)=sumCItempcomposite(:,k)/sumCaptempcomposite(1,k);
++    CI(energyIndexes,indice_composite,k)=sumCItempcomposite(energyIndexes,k)/sumCaptempcomposite(1,k);
+     CI_Subs(:,indice_agriculture,k)=sumCItempagriSubs(:,k)/sumCaptempagriculture(1,k);
+     CI_Spec(:,indice_agriculture,k)=sumCItempagriSpec(:,k)/sumCaptempagriculture(1,k);
+     if ind_NLU_CI ==1 // coupling with the nexus land-use, only the disaggregated agriFoodProcess sector is considered
+         alphaIC_agriFoodProcess(:,k) = sumCItempagriculture(:,k)/sumCaptempagriculture(1,k);
+     else
+-        CI(:,indice_agriculture,k)=sumCItempagriculture(:,k)/sumCaptempagriculture(1,k);
++        CI(energyIndexes,indice_agriculture,k)=sumCItempagriculture(energyIndexes,k)/sumCaptempagriculture(1,k);
+     end
+     if NEXUS_indus==0
+ 		for i=1:nb_sectors_industry
+ 			CI_Subs(:,indice_industries(i),k)=sumCItempinduSubs(:,i,k)		/sumCaptempindustries(k,i);
+ 			CI_Spec(:,indice_industries(i),k)=sumCItempinduSpec(:,i,k)		/sumCaptempindustries(k,i);
+-			CI(:,indice_industries(i),k)		=sumCItempindustrie(:,i,k)	/sumCaptempindustries(k,i);
++			CI(energyIndexes,indice_industries(i),k)		=sumCItempindustrie(energyIndexes,i,k)	/sumCaptempindustries(k,i);
+ 		end
+ 	if ind_NLU_ferti == 1
+ 		if k <> ind_chn
+@@ -577,6 +577,7 @@
+ 
+ ///// limitation de la croissance de CI(industrie,composite) et CI(agriculture,composite) pour qu'elle soit proportionnelle à la DF
+ 
++if %f //current_time_im <= 10
+ for k=1:reg
+ 	for i=1:nb_sectors_industry
+ 		CI(indice_industries(i),indice_composite,k)=min(CI(indice_industries(i),indice_composite,k),...
+@@ -591,3 +592,4 @@
+     sum((-CI(indice_industries,indice_composite,k)+CI_prev(indice_industries,indice_composite,k)).*pArmCI(indice_industries,indice_composite,k),'r')/pArmCI(indice_composite,indice_composite,k)+...
+     (-CI(indice_agriculture,indice_composite,k)+CI_prev(indice_agriculture,indice_composite,k))*pArmCI(indice_agriculture,indice_composite,k)/pArmCI(indice_composite,indice_composite,k);
+ end
++end
+Index: model/nexus.transport.sce
+===================================================================
+--- model/nexus.transport.sce	(révision 32366)
++++ model/nexus.transport.sce	(copie de travail)
+@@ -690,10 +690,13 @@
+ 
+ DIinfra_prev=DIinfra;
+ if auto_calibration_txCap=="None" | year_calib_txCaptemp<>8;
+-    test_increase_DIinfra = (sum(pArmDI.*DIinfra,"c") ./ NRB < max_share_DIinfra_NRB);
++    test_increase_DIinfra = (sum(pArmDI.*DIinfra,"c") ./ NRB < max_share_DIinfra_NRB) & (GDP_PPP_constant ./ Ltot <= 0.08);
+     // avoid DI infra to account for more than half of NRB
+     DIinfra(:,indice_construction) = DIinfra_prev(:,indice_construction).*GDP_MER_real./GDP_MER_real_prev;
+-    test_increase_DIinfra = (sum(pArmDI.*DIinfra,"c") ./ NRB < max_share_DIinfra_NRB);
++    //test_increase_DIinfra = (sum(pArmDI.*DIinfra,"c") ./ NRB < max_share_DIinfra_NRB);
+     DIinfra(:,indice_construction) = test_increase_DIinfra .* DIinfra(:,indice_construction) + (1-test_increase_DIinfra) .* max(0,(NRB .* max_share_DIinfra_NRB - sum(pArmDI.*DIinfra,'c') + pArmDI(:,indice_construction).*DIinfra(:,indice_construction)) ) ./ pArmDI(:,indice_construction);
+     //DIinfra(:,indice_construction) = DIinfra_prev(:,indice_construction).*GDP_MER_real./GDP_MER_real_prev .* test_increase_DIinfra + DIinfra_prev(:,indice_construction).* (1-test_increase_DIinfra);
+ end
++//disp(test_increase_DIinfra,"test_increase_DIinfra")
++//disp(GDP_PPP_constant ./ Ltot <= 0.08, "GDP_PPP_constant ./ Ltot")
++//disp( (sum(pArmDI.*DIinfra,"c") ./ NRB < max_share_DIinfra_NRB), "(sum(pArmDI.*DIinfra,) ./ NRB < max_share_DIinfra_NRB)")
+Index: model/res_dyn_loop.sce
+===================================================================
+--- model/res_dyn_loop.sce	(révision 32366)
++++ model/res_dyn_loop.sce	(copie de travail)
+@@ -27,6 +27,7 @@
+ 
+ exec(MODEL+"extraction."+ETUDEOUTPUT+".init.sce");
+ 
++TimeHorizon = 6 + 40+1;
+ for current_time_im = 1:TimeHorizon
+     if current_time_im > TimeHorizon
+         break;
+Index: model/units.sce
+===================================================================
+--- model/units.sce	(révision 32366)
++++ model/units.sce	(copie de travail)
+@@ -54,6 +54,7 @@
+ CPI_2020_to_2014 = CPI(15)/CPI(21);
+ CPI_2019_to_2014 = CPI(15)/CPI(20);
+ CPI_2018_to_2014 = CPI(15)/CPI(19);
++CPI_2017_to_2014 = CPI(15)/CPI(18);
+ CPI_2015_to_2014 = CPI(15)/CPI(16);
+ CPI_2010_to_2014 = CPI(15)/CPI(11);
+ CPI_2000_to_2014 = CPI(15)/CPI(1);
+Index: model/update.parameters.dyncalib.sce
+===================================================================
+--- model/update.parameters.dyncalib.sce	(révision 32366)
++++ model/update.parameters.dyncalib.sce	(copie de travail)
+@@ -1,8 +1,14 @@
+- 
+ 
++
+ if indice_LED >= 1
+ 	parameter_change_method = "exponentialdecrease"; // "exponentialdecrease" | "linear"
+ 
++	if  current_time_im>=start_year_strong_policy-base_year_simulation+5 & current_time_im<start_year_strong_policy-base_year_simulation+5+8
++                dynForc_savings(ind_global_south) = 1.024;.98;
++        else
++                dynForc_savings(ind_global_south)=1;
++        end
++
+ 	// GDP trajectory adjustment 
+ 	if current_time_im > i_year_strong_policy-1
+ 	  dynForc_TCl = max(dynForc_TCl_2050, 1 - (1-dynForc_TCl_2050) / 10 * (current_time_im-(i_year_strong_policy-1)));
+@@ -17,36 +23,42 @@
+ 		dynForc_resid_TBE2(ind_global_south) = dynForc_resid_TBE2_2050s;
+ 	    end
+ 	end
++	asymptote_surface_pc(ind_global_north) = asymptote_surface_pc_ref(ind_global_north) .* dynForc_resid_m2(ind_global_north);
++	asymptote_surface_pc(ind_global_south) = asymptote_surface_pc_ref(ind_global_south) .* dynForc_resid_m2(ind_global_south);
++	mult_surface_pc_ini = mult_surface_pc_ini_ref;
+ 
+ 	// transport and FE in industry
+-	nb_year = 4;
+-	if  current_time_im>=start_year_strong_policy-base_year_simulation & current_time_im<start_year_strong_policy-base_year_simulation+nb_year
+-	    dynForc_cap_tr_air(ind_global_north) = dynForc_cap_tr_air(ind_global_north) + (dynForc_tair_2050_n-1)/nb_year;
+-	    dynForc_cap_tr_air(ind_global_south) = dynForc_cap_tr_air(ind_global_south) + (dynForc_tair_2050_s-1)/nb_year;
+-	    dynForc_cap_tr_ot(ind_global_north) = dynForc_cap_tr_ot(ind_global_north) + (dynForc_tOt_2050_n-1)/nb_year;
+-	    dynForc_cap_tr_ot(ind_global_south) = dynForc_cap_tr_ot(ind_global_south) + (dynForc_tOt_2050_s-1)/nb_year;
+-	    dynForc_cap_tr_car(ind_global_north) = dynForc_cap_tr_car(ind_global_north) + (dynForc_tcar_2050_n-1)/nb_year;
+-	    dynForc_cap_tr_car(ind_global_south) = dynForc_cap_tr_car(ind_global_south) + (dynForc_tcar_2050_s-1)/nb_year;
++	if  current_time_im>=start_year_strong_policy-base_year_simulation & current_time_im<start_year_strong_policy-base_year_simulation+lenght_dynForc_cap_tr
++	    dynForc_cap_tr_air(ind_global_north) = dynForc_cap_tr_air(ind_global_north) + (dynForc_tair_2050_n-1)/lenght_dynForc_cap_tr;
++	    //dynForc_cap_tr_air(ind_global_south) = dynForc_cap_tr_air(ind_global_south) + (dynForc_tair_2050_s-1)/lenght_dynForc_cap_tr;
++	    dynForc_cap_tr_ot(ind_global_north) = dynForc_cap_tr_ot(ind_global_north) + (dynForc_tOt_2050_n-1)/lenght_dynForc_cap_tr;
++	    dynForc_cap_tr_ot(ind_global_south) = dynForc_cap_tr_ot(ind_global_south) + (dynForc_tOt_2050_s-1)/lenght_dynForc_cap_tr;
++	    dynForc_cap_tr_car(ind_global_north) = dynForc_cap_tr_car(ind_global_north) + (dynForc_tcar_2050_n-1)/lenght_dynForc_cap_tr;
++	    dynForc_cap_tr_car(ind_global_south) = dynForc_cap_tr_car(ind_global_south) + (dynForc_tcar_2050_s-1)/lenght_dynForc_cap_tr;
+ 	end
+-
+-	if  current_time_im>=start_year_strong_policy-base_year_simulation & current_time_im<=start_year_strong_policy-base_year_simulation+nb_year-1
+-		nb_year=10;
+-		dynForc_pcoal = dynForc_pcoal + (dynForc_pcoal_2050-1)/nb_year;
+-		dynForc_pcoal2 = dynForc_pcoal2 + (dynForc_pcoal2_2050-1)/nb_year;
+-		dynForc_pEt_comp = dynForc_pEt_comp + (dynForc_pEt_comp_2050 - 1)/nb_year;
++	if  current_time_im>=start_year_strong_policy-base_year_simulation & current_time_im<start_year_strong_policy-base_year_simulation+0.9
++	    dynForc_cap_tr_air(ind_global_south) = dynForc_cap_tr_air(ind_global_south) + (dynForc_tair_2050_s-1)/lenght_dynForc_cap_tr;
+ 	end
+ 
+-	nb_year = 16;
+-	if current_time_im>=start_year_strong_policy-base_year_simulation & current_time_im<=start_year_strong_policy-base_year_simulation+nb_year-1
+-		atrans(ind_global_south,1) = atrans(ind_global_south,1) ./ (1 .^( 8/nb_year));
+-		ktrans(ind_global_south,1) = ktrans(ind_global_south,1) ./ (1 .^( 8/nb_year));
+-		xsiT(ind_global_south) = xsiT(ind_global_south) / (1 .^( 8/nb_year));
++	if  current_time_im>=start_year_strong_policy-base_year_simulation & current_time_im<=start_year_strong_policy-base_year_simulation+lenght_dynForc_p_ener-1
++		dynForc_pcoal = dynForc_pcoal + (dynForc_pcoal_2050-1)/lenght_dynForc_p_ener;
++		dynForc_pcoal2 = dynForc_pcoal2 + (dynForc_pcoal2_2050-1)/lenght_dynForc_p_ener;
++		dynForc_pEt_comp = dynForc_pEt_comp + (dynForc_pEt_comp_2050 - 1)/lenght_dynForc_p_ener;
+ 	end
+ 
+-	if current_time_im>2029-base_year_simulation & current_time_im<=2049-base_year_simulation
+-	    dynForc_m2_ener( ind_global_north) = update_parameter_rule( dynForc_m2_ener( ind_global_north), dynForc_m2_ener_2050_n, 1, 20,current_time_im-2029+base_year_simulation, "linear");
+-	    dynForc_m2_ener( ind_global_south) = update_parameter_rule( dynForc_m2_ener( ind_global_south), dynForc_m2_ener_2050_s, 1, 20, current_time_im-2029+base_year_simulation, "linear");
++	if current_time_im>=start_year_strong_policy-base_year_simulation & current_time_im<=start_year_strong_policy-base_year_simulation+lenght_dynForc_pref_tr-1
++		//atrans(ind_global_south,1) = atrans(ind_global_south,1) ./ (param1 .^( 8/lenght_dynForc_pref_tr));
++		//ktrans(ind_global_south,1) = ktrans(ind_global_south,1) ./ (param1 .^( 8/lenght_dynForc_pref_tr));
++		//xsiT(ind_global_south) = xsiT(ind_global_south) / (param1 .^( 8/lenght_dynForc_pref_tr));
++	        param_trans=0.992;
++		atrans(ind_global_south,1) = atrans(ind_global_south,1) ./ (param_trans .^( 8/lenght_dynForc_pref_tr));
++		ktrans(ind_global_south,1) = ktrans(ind_global_south,1) ./ (param_trans .^( 8/lenght_dynForc_pref_tr));
++		xsiT(ind_global_south) = xsiT(ind_global_south) / (param_trans .^( 8/lenght_dynForc_pref_tr));
+ 	end
++	if current_time_im>=start_year_strong_policy-base_year_simulation & current_time_im<=start_year_strong_policy-base_year_simulation+lenght_dynForc_m2
++	    dynForc_m2_ener( ind_global_north) = update_parameter_rule( dynForc_m2_ener( ind_global_north), dynForc_m2_ener_2050_n, 1, lenght_dynForc_m2,current_time_im-start_year_strong_policy+base_year_simulation, "linear");
++	    dynForc_m2_ener( ind_global_south) = update_parameter_rule( dynForc_m2_ener( ind_global_south), dynForc_m2_ener_2050_s, 1, lenght_dynForc_m2, current_time_im-start_year_strong_policy+base_year_simulation, "linear");
++	end
+ 
+ 	if current_time_im==i_year_strong_policy //19
+ 		tauxderempauto_istart = tauxderemplissageauto;
+@@ -58,9 +70,13 @@
+ 		dynForc_effOT2 (ind_global_south) = dynForc_effOT_2050_s;
+ 		DIprod_istart = DIprod;
+ 	end
+-	year_stop_dynForc_1=start_year_strong_policy-1+10;
++	if current_time_im==i_year_strong_policy+lenght_dynForc_eff_tr
++		dynForc_effAir = dynForc_effAir_prev;
++		dynForc_effOT2(:) = 1;
++	end	
++
+ 	// linear convergence towards target - 2020 2050
+-	if current_time_im>=i_year_strong_policy & current_time_im < i_year_strong_policy +10
++	if current_time_im>=i_year_strong_policy & current_time_im < i_year_strong_policy +lenght_dynForc_1;
+ 		if parameter_change_method == "exponentialdecrease"
+ 		    dynForc_EI_indus( ind_global_north) = dynForc_EI_indus_50_n; // already expo
+ 		    dynForc_EI_indus( ind_global_south) = dynForc_EI_indus_50_s; // already expo
+@@ -91,6 +107,7 @@
+ 			   Beta(indus,ii,k)= Beta(indus,ii,k) .* delta_DIprod_indus(k);
+ 		       end
+ 		    end
++disp( Beta( indus, nonEnergyIndexes,:) ./ Beta_ref( indus, nonEnergyIndexes,:)*100, "Beta( indus, nonEnergyIndexes,k) ./ Betaref( indus, nonEnergyIndexes,k)*100") 
+ 		    coeff_inc_betacomp = matrix(Beta(compo,1,:),nb_regions,1) ./ Beta_p ;
+ 		    DIprod( :, compo) = DIprod( :, compo) .* coeff_inc_betacomp;
+ 		end
+@@ -113,9 +130,17 @@
+ 		etaCI=ETA*ones(sec-nbsecteurenergie,sec,reg);
+ 	end
+ 
+-	if indice_LED == 2 | indice_LED == 5 | indice_LED == 4 | indice_LED == 1| indice_LED == 8 | indice_LED == 6// EEI on composite twice as fast as for industry
+-		dynForc_EI_comp = dynForc_EI_indus2comp*  dynForc_EI_indus -1; 
++	// EEI on composite different than on industries
++	if (indice_LED == 2 | indice_LED == 5 | indice_LED == 4 | indice_LED == 1| indice_LED == 8 | indice_LED == 6 | indice_LED==9) & current_time_im>=start_year_strong_policy-base_year_simulation   
++		//dynForc_EI_comp = dynForc_EI_indus2comp*  dynForc_EI_indus -1; 
++		dynForc_EI_indus2comp = update_parameter_rule( dynForc_EI_indus2comp, dynForc_EI_indus2comp_obj, 1, 15, current_time_im-i_year_strong_policy+1, "linear");
++		dynForc_EI_comp = (dynForc_EI_indus2comp+1) .*  dynForc_EI_indus_obj -1; 
++		//dynForc_EI_comp = update_parameter_rule( dynForc_EI_comp, dynForc_DGindu_2050_n, 1, year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-i_year_strong_policy+1, "linear"),
+ 	else
+ 		dynForc_EI_comp = dynForc_EI_indus;
+ 	end
++
++	dynForc_DGindu(ind_global_north) = update_parameter_rule( dynForc_DGindu(ind_global_north), dynForc_DGindu_2050_n, 1, year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-i_year_strong_policy+1, "linear");
++	dynForc_DGindu(ind_global_south) = update_parameter_rule( dynForc_DGindu(ind_global_south), dynForc_DGindu_2050_s, 1, year_stop_dynForc_1-(start_year_strong_policy-1), current_time_im-i_year_strong_policy+1, "linear");
++
+ end
+Index: study_frames/base.sce
+===================================================================
+--- study_frames/base.sce	(révision 32366)
++++ study_frames/base.sce	(copie de travail)
+@@ -494,7 +494,11 @@
+ // High or Low variable renewable share
+ // driven by the markup costs
+ // short-terme parameter and long-terem/ policy parameter
+-cor_param_SIC_lowflex_st = 0.99315; //was 0.9929
++cor_param_SIC_lowflex_st = 0.99305;
++//cor_param_SIC_lowflex_st = 0.99312; //was 0.9929
++if ~isdef("cor_param_SIC_lowflex_st")
++   cor_param_SIC_lowflex_st = 0.99286;
++end
+ cor_param_SIC_lowflex_po = 0.75; // parameters for ind_high_VRE==1 after start_year_strong_policy
+ 
+ if isdef("exo_maxmshbiom")
+Index: study_frames/emissions_trajectories_base.csv
+===================================================================
+--- study_frames/emissions_trajectories_base.csv	(révision 32366)
++++ study_frames/emissions_trajectories_base.csv	(copie de travail)
+@@ -4,4 +4,4 @@
+ 1|4.191e+04|4.191e+04|4.214e+04|4.292e+04|4.36e+04|4.466e+04|4.128e+04|4.045e+04|4.082e+04|4.143e+04|4.206e+04|4.268e+04|3.766e+04|3.305e+04|2.875e+04|2.632e+04|2.424e+04|2.237e+04|2.076e+04|1.933e+04|1.801e+04|1.674e+04|1.558e+04|1.443e+04|1.332e+04|1.231e+04|1.123e+04|1.008e+04|9089|8010|6997|6099|5190|4777|4310|3894|3544|3259|2929|2143|1528|864.6|361.8|-68.77|-544.9|-929|-790.6|-1007|-1064|-1096|-905.9|-931.5|-987.9|-1023|-861.5|-989.2|-883.3|-888|-891.8|-882.1|-849.1|-803.7|-741.5|-656|-550.9|-432.6|-310.6|-182.9|-48.17|88.83|224.2|371.8|513.9|711.6|889.5|1150|1397|1762|2143|2693|3261|3861|4515|5040|5572|6005|6225
+ 2|4.19E+04|4.19E+04|4.21E+04|4.29E+04|4.36E+04|4.47E+04|4.13E+04|4.05E+04|4.08E+04|4.14E+04|4.21E+04|4.27E+04|3.62E+04|3.04E+04|2.53E+04|2.21E+04|1.94E+04|1.70E+04|1.49E+04|1.31E+04|1.15E+04|1.00E+04|8.72E+03|7.50E+03|6.39E+03|5.42E+03|4.49E+03|3.63E+03|2.91E+03|2.24E+03|1.68E+03|1.22E+03|8.30E+02|5.73E+02|3.45E+02|1.56E+02|-1.23E-12|-7.91E+01|-2.01E+02|-3.19E+02|-4.38E+02|-4.53E+02|-5.59E+02|-6.92E+02|-8.18E+02|-7.75E+02|-7.91E+02|-1.01E+03|-1.06E+03|-1.10E+03|-9.06E+02|-9.32E+02|-9.88E+02|-1.02E+03|-8.62E+02|-9.89E+02|-8.83E+02|-8.88E+02|-8.92E+02|-8.82E+02|-8.49E+02|-8.04E+02|-7.42E+02|-6.56E+02|-5.51E+02|-4.33E+02|-3.11E+02|-1.83E+02|-4.82E+01|8.88E+01|2.24E+02|3.72E+02|5.14E+02|7.12E+02|8.90E+02|1.15E+03|1.40E+03|1.76E+03|2.14E+03|2.69E+03|3.26E+03|3.86E+03|4.52E+03|5.04E+03|5.57E+03|6.01E+03|6.23E+03
+ 3|4.19E+04|4.19E+04|4.21E+04|4.29E+04|4.36E+04|4.47E+04|4.13E+04|4.05E+04|4.08E+04|4.14E+04|4.21E+04|4.27E+04|38612.0448|34541.216|30461.2|28122.3936|25985.28|23937.6896|22062.0672|20294.9536|18580.5568|16873.92|15250.9504|13626.5376|12045.5424|10572.8128|9073.84|7576.9344|6270.68288|4987.9872|3848.90976|2878.728|2016.2112|1430.80704|884.067199999998|409.960319999998|-3.31984439938537E-12|-7.91E+01|-2.01E+02|-3.19E+02|-4.38E+02|-4.53E+02|-5.59E+02|-6.92E+02|-8.18E+02|-7.75E+02|-7.91E+02|-1.01E+03|-1.06E+03|-1.10E+03|-9.06E+02|-9.32E+02|-9.88E+02|-1.02E+03|-8.62E+02|-9.89E+02|-8.83E+02|-8.88E+02|-8.92E+02|-8.82E+02|-8.49E+02|-8.04E+02|-7.42E+02|-6.56E+02|-5.51E+02|-4.33E+02|-3.11E+02|-1.83E+02|-4.82E+01|8.88E+01|2.24E+02|3.72E+02|5.14E+02|7.12E+02|8.90E+02|1.15E+03|1.40E+03|1.76E+03|2.14E+03|2.69E+03|3.26E+03|3.86E+03|4.52E+03|5.04E+03|5.57E+03|6.01E+03|6.23E+03
+-4|4.19E+04|4.19E+04|4.21E+04|4.29E+04|4.36E+04|4.47E+04|4.13E+04|4.05E+04|4.08E+04|4.14E+04|4.21E+04|4.27E+04|4.03E+04|3.80E+04|3.57E+04|3.35E+04|3.14E+04|2.94E+04|2.74E+04|2.55E+04|2.36E+04|2.19E+04|2.02E+04|1.85E+04|1.70E+04|1.55E+04|1.40E+04|1.27E+04|1.14E+04|1.02E+04|9.03E+03|7.94E+03|6.93E+03|5.99E+03|5.11E+03|4.31E+03|3.57E+03|2.90E+03|2.31E+03|1.78E+03|1.31E+03|9.23E+02|6.01E+02|3.47E+02|1.62E+02|4.67E+01|0.00E+00|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0
++4|41910|41910|42140|42920|43600|44660|41280|40450|40820|41430|42060|42680|40233.3385142857|37858.8672|35556.5860571429|33326.4950857143|31168.5942857143|29082.8836571429|27069.3632|25128.0329142857|23258.8928|21461.9428571429|19737.1830857143|18084.6134857143|16504.2340571429|14996.0448|13560.0457142857|12196.2368|10904.6180571429|9685.18948571429|8537.95108571429|7462.90285714286|6460.0448|5529.37691428571|4670.8992|3884.61165714286|3170.51428571429|2853.46285714286|2536.41142857143|2219.36|1902.30857142857|1585.25714285714|1268.20571428571|951.154285714287|634.102857142858|317.051428571429|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0
+Index: study_frames/matrice_base.csv
+===================================================================
+--- study_frames/matrice_base.csv	(révision 32366)
++++ study_frames/matrice_base.csv	(copie de travail)
+@@ -103,7 +103,10 @@
+ 6303;8;1;0;1;1;1;0;0;0;0;0;1;2;1;0;0;1;0
+ 6304;8;1;0;1;1;1;0;1;0;1;1;1;2;1;0;0;1;0
+ 1204;9;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;0
+-1214;9;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;1
+-1244;9;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;4
+-1264;9;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;6
+-1284;9;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;8
++1214;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;1
++1244;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;4
++1264;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;6
++1284;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;8
++1294;8;1;0;1;1;1;0;0;0;0;0;0;1;0;0;0;0;9
++171;17;1;0;1;1;1;0;0;3;0;0;0;1;0;0;0;0;0
++4201;4;1;0;1;1;1;0;0;3;0;0;0;1;0;0;0;0;0
+Index: study_frames/study_parameters_interpretation.sce
+===================================================================
+--- study_frames/study_parameters_interpretation.sce	(révision 32366)
++++ study_frames/study_parameters_interpretation.sce	(copie de travail)
+@@ -351,7 +351,12 @@
+         end
+         temp(start_tax:(i_year_strong_policy-1)) = tax20202025*1e-6; //2020 to 20WX
+         temp(i_year_strong_policy:(i_year_strong_policy+break_year_tax_1-start_year_strong_policy)) = linspace(tax2026,taxbreak_1,(break_year_tax_1-start_year_strong_policy)+1)'*1e-6; //20WX to 20YZ
+-        temp((i_year_strong_policy+break_year_tax_1-start_year_strong_policy):TimeHorizon+1) = linspace(taxbreak_1,tax2100,(final_year_simulation-break_year_tax_1 )+1)'*1e-6; //20YZ to 2100
++	if isdef("taxbreak_2") &  isdef("break_year_tax_2") 
++        	temp((i_year_strong_policy+break_year_tax_1-start_year_strong_policy):(i_year_strong_policy+break_year_tax_2-start_year_strong_policy)) = linspace(taxbreak_1,taxbreak_2,(break_year_tax_2-break_year_tax_1)+1)'*1e-6; //20WX to 20YZ
++        	temp((i_year_strong_policy+break_year_tax_2-start_year_strong_policy):TimeHorizon+1) = linspace(taxbreak_2,tax2100,(final_year_simulation-break_year_tax_2 )+1)'*1e-6; //20YZ to 2100
++	else
++        	temp((i_year_strong_policy+break_year_tax_1-start_year_strong_policy):TimeHorizon+1) = linspace(taxbreak_1,tax2100,(final_year_simulation-break_year_tax_1 )+1)'*1e-6; //20YZ to 2100
++	end
+         taxMKTexo = temp';
+ 
+         // compute the difference between the target price
+@@ -389,7 +394,7 @@
+         MKT_start_year = i_year_strong_policy*ones(nbMKT,1);
+ 
+         CO2_traj_temp = csvRead(STUDY+'emissions_trajectories_base.csv','|',[],[],[],'/\/\//');
+-        ind_sc_temp = find(CO2_traj_temp(:,1)==3)
++        ind_sc_temp = find(CO2_traj_temp(:,1)==4)
+         CO2_obj_MKT = zeros(nbMKT,TimeHorizon+1);
+         for i=1:nbMKT
+                 CO2_obj_MKT(i,i_year_strong_policy:$) = CO2_traj_temp(ind_sc_temp,(i_year_strong_policy+1):$) * 1e6;
+@@ -495,6 +500,22 @@
+         duration_wait_n_see = 10;
+     end
+ 
++    case 17 //Three exogenous carbon tax from csv
++        whichMKT_reg_use = ones(reg,nb_use);
++
++        whichMKT_reg_use(ind_chn,:)=2;
++        whichMKT_reg_use(ind_ind,:)=3;
++        
++        temp = csvread(STUDY+"exo_tax_waysout_NDC_LTT.csv");
++
++        is_quota_MKT  = [%f;%f;%f];
++        is_taxexo_MKT = [%t;%t;%t];
++        
++        CO2_obj_MKT = ones(nbMKT,TimeHorizon+1)*%nan;
++        taxMKTexo(1,:) = temp(:,1)'*1e-6;
++        taxMKTexo(2,:) = temp(:,2)'*1e-6;
++        taxMKTexo(3,:) = temp(:,3)'*1e-6;
++
+     case 651 //650 GtCO2 recycl = 0 (lump) taxexo - WP4_650_redist
+                 is_quota_MKT = %f;
+                 is_taxexo_MKT = 1;
