@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Thomas Le-Gallic, Nicolas Graves, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Nicolas Graves, Thomas Le Gallic, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -22,9 +22,9 @@ function [Q_CTL_anticip,p_CTL_mtep,price_CTL,Cost_struc_CTL]=nexusCTL(ctl_inert_
         i_test_pci_cff=TimeHorizon+1;
     end
 
-    //Test de rentabilite du CTL
-    //calcul du cout de production du CTL, en fonction du prix du charbon
-    //d'apres http://www.iea-etsap.org/web/E-TechDS/PDF/S02-CTL&GTL-GS-gct.pdf ETSAP Energy system analysis programme - Technology brief S02 May 2010 - Liquid fuels production from coal and gas, on sait que les couts variables (hors charbon) du CTL sont en gros egaux aux couts en charbon et les couts en capital en gros 10 fois plus eleves pour une duree de vie d'environ 30 (en levelized annual capital cost, cela donne en gros en cout en capital egal a 0.8 fois le cout en charbon
+    //CTL profitability test
+    //calculation of CTL production costs, based on coal prices
+    //according to http://www.iea-etsap.org/web/E-TechDS/PDF/S02-CTL&GTL-GS-gct.pdf ETSAP Energy system analysis programme - Technology brief S02 May 2010 - Liquid fuels production from coal and gas, we know that the variable costs (excluding coal) of CTL are roughly equal to the costs of coal and the capital costs are roughly 10 times higher for a lifespan of around 30 years (in levelised annual capital cost, this gives a capital cost roughly equal to 0.8 times the cost of coal).
     cost_CTL_OM=zeros(reg,1);
     for k=1:reg,
         cost_CTL_OM(k)=cost_CTL_OMref*(sum(Cost_struc_oil_refin_ref(k,elec:sec).*(pArmCI(elec:sec,indice_Et,k)')))./(sum(Cost_struc_oil_refin_ref(k,elec:sec).*(pArmCIref(elec:sec,indice_Et,k)')));
@@ -51,7 +51,7 @@ function [Q_CTL_anticip,p_CTL_mtep,price_CTL,Cost_struc_CTL]=nexusCTL(ctl_inert_
         end;
     end
 
-    //On peut rajouter un retard à la mise en exploitation (ctl_inert_lag) correspondant au temps de construction d'une unite de production
+    //We can add a delay for ignitiate production (ctl_inert_lag) corresponding to the time to build one production unit
     if (test_pci_cff_prem)&(current_time_im>=i_test_pci_cff+ctl_inert_lag) 
         test_pci_cff=%t;
     end
@@ -60,11 +60,11 @@ function [Q_CTL_anticip,p_CTL_mtep,price_CTL,Cost_struc_CTL]=nexusCTL(ctl_inert_
 
         share_CTL_anticip=max(0,share_CTL+(p(:,et)./price_CTL-1).*a_CTL);
 
-        //inertie sur les changement de parts
+        //inertia on share change
         for k=1:reg,
             if Q_CTL_anticip_prev(k)<>0 then
                 if sum(Q(:,oil))<0.5*sum(Qref(:,oil)) then
-                    //on empeche la decroissance de la part de CTL quand on est a la fin du petrole ainsi que les fortes croissances
+                    //we prevent the degrowth of share of CTL when oil production is at depletion, we also prevent strong growth rates
                     share_CTL_anticip(k)=min(max(share_CTL(k),share_CTL_anticip(k)),inert_sh_CTL_i*share_CTL_anticip(k));
                 end;
             end;
@@ -77,12 +77,7 @@ function [Q_CTL_anticip,p_CTL_mtep,price_CTL,Cost_struc_CTL]=nexusCTL(ctl_inert_
 
     end
 
-
-
-
-
-
-    //calcul du prix de vente du carburant ex CTL
+    //selling price of CTL
     if sum(Q_CTL_anticip)>0 then
         price_CTL_w=sum(price_CTL.*Q_CTL_anticip)./sum(Q_CTL_anticip);
     else
@@ -92,7 +87,7 @@ function [Q_CTL_anticip,p_CTL_mtep,price_CTL,Cost_struc_CTL]=nexusCTL(ctl_inert_
 
 
 
-    // on a un rendement (yield_CTL) de xxx%, on considere que le taux de marge est celui de etref, et rajoute de la CI industrie pour atteindre le prix
+    // the CTL yield (yield_CTL) de xxx% is given, we consider the margin rate given by etref, we then adjust the intermediate consumption of insutrial good CI to reach the objectiv price
     Cost_struc_CTL=zeros(reg,sec+2);
     for k=1:reg
         if Q_CTL_anticip(k)>0

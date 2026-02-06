@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Thibault Briera, Ruben Bibas
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 //--------------------------------------------------------------------//
 //----------------- CARBON TAX EXPECTATIONS---------------------------//
 //--------------------------------------------------------------------//
@@ -13,8 +21,16 @@ for k=1:reg
 end
 
 if ind_climpol_uncer
-    if ind_fooled & current_time_im == 2020+duration_NDC+duration_fooled-base_year_simulation
-        expectations.priceSignal = taxMKTexo_NZ;
+    if ind_wait_n_see==1 & current_time_im >= 2020+duration_wait_n_see-base_year_simulation
+        if ind_dec_proba_ndc == 1
+            start_dec = 2020+duration_wait_n_see-base_year_simulation;
+            end_dec = start_dec+ nb_year_dec_proba ;
+            lin_dec_norm = max(min((end_dec - current_time_im)/nb_year_dec_proba,1),0); // normalised linear decrease
+            proba_ndc = lin_dec_norm *proba_ndc_init;
+            expectations.priceSignal = proba_ndc * taxMKTexo_wait_n_see + (1 - proba_ndc) * taxMKTexo_NZ;
+        else
+            expectations.priceSignal = taxMKTexo_NZ;
+        end
         // extrapolating again the price signal
         if typ_anticip == "priceSignal" | typ_anticip == "priceSignalonly" | typ_anticip == "priceSignal_2020"
             for s = TimeHorizon+1:TimeHorizon+1+expectations.duration
@@ -25,23 +41,23 @@ if ind_climpol_uncer
 end
 
 
-if ind_nz
-    if round((sum(emiLast(:)) + sum(emi_eviteeLast(:)))/1e6) < nz_target // don't harcode this?
-        stop_carb_incr = 1;
-    else 
-        stop_carb_incr = 0;
-    end
-end 
+// if ind_nz
+//     if round((sum(emiLast(:)) + sum(emi_eviteeLast(:)))/1e6) < nz_target // don't harcode this?
+//         stop_carb_incr = 1;
+//     else 
+//         stop_carb_incr = 0;
+//     end
+// end 
 
-if ind_nz
-    if stop_carb_incr
-        for s = 1:expectations.duration // when reached net zero, the price signal is kept constant
-            exp_priceSignal_prev = expectations.priceSignal;
-            expectations.priceSignal(:,current_time_im:(current_time_im+s)) = expectations.priceSignal(:,current_time_im);
-        end
-        taxMKTexo(1:nbMKT,:) = expectations.priceSignal(:,1:TimeHorizon+1); //updating the tax in the static so the plateau also applies to the consumption and production decisions
-    end
-end
+// if ind_nz
+//     if stop_carb_incr
+//         for s = 1:expectations.duration // when reached net zero, the price signal is kept constant
+//             exp_priceSignal_prev = expectations.priceSignal;
+//             expectations.priceSignal(:,current_time_im:(current_time_im+s)) = expectations.priceSignal(:,current_time_im);
+//         end
+//         taxMKTexo(1:nbMKT,:) = expectations.priceSignal(:,1:TimeHorizon+1); //updating the tax in the static so the plateau also applies to the consumption and production decisions
+//     end
+// end
 
 //CO2 tax expectations depending on the regime of expectations
 select typ_anticip
@@ -71,9 +87,9 @@ end
 // _ant variables
 // ind_lindhal llows for regional weighting and convergence with weight_regional_tax
 if ind_lindhal >=1 // T.B. : shall this ind_lindhal be removed?
-  [ taxCO2_DF_ant , taxCO2_DG_ant , taxCO2_DI_ant , taxCO2_CI_ant , taxMKT_ant ] = dispatchTax( taxCO2_DF , taxCO2_DG , taxCO2_DI , taxCO2_CI , expected.tax(:,1), weight_regional_tax_prev) ; // for backward compatibility with old myopic system
+    [ taxCO2_DF_ant , taxCO2_DG_ant , taxCO2_DI_ant , taxCO2_CI_ant , taxMKT_ant ] = dispatchTax( taxCO2_DF , taxCO2_DG , taxCO2_DI , taxCO2_CI , expected.tax(:,1), weight_regional_tax_prev) ; // for backward compatibility with old myopic system
 else
-  [ taxCO2_DF_ant , taxCO2_DG_ant , taxCO2_DI_ant , taxCO2_CI_ant , taxMKT_ant ] = dispatchTax( taxCO2_DF , taxCO2_DG , taxCO2_DI , taxCO2_CI , expected.tax(:,1)) ; // for backward compatibility with old myopic system
+    [ taxCO2_DF_ant , taxCO2_DG_ant , taxCO2_DI_ant , taxCO2_CI_ant , taxMKT_ant ] = dispatchTax( taxCO2_DF , taxCO2_DG , taxCO2_DI , taxCO2_CI , expected.tax(:,1)) ; // for backward compatibility with old myopic system
 end
 
 // expected CO2 taxes for armington prices expectations
@@ -89,8 +105,8 @@ for expectedYear = 1:expectations.duration
     expected.taxCO2_CI(:,:,:,expectedYear) = taxCO2_CI_temp; 
 end
 
-if ind_nz
-    if stop_carb_incr
-        expectations.priceSignal(:,current_time_im+1:TimeHorizon+1) = exp_priceSignal_prev(:,current_time_im:TimeHorizon); //for next period, if the price were to increase, it would not jump to the expected value but start increasing smoothly
-    end
-end
+// if ind_nz
+//     if stop_carb_incr
+//         expectations.priceSignal(:,current_time_im+1:TimeHorizon+1) = exp_priceSignal_prev(:,current_time_im:TimeHorizon); //for next period, if the price were to increase, it would not jump to the expected value but start increasing smoothly
+//     end
+// end

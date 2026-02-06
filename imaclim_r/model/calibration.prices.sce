@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Ruben Bibas, Nicolas Graves, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Nicolas Graves, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -23,13 +23,6 @@ eta_calib = 0.9;
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    ---*---   CALIBRATION   ---*---    
 /////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-////////////////////////////////////////
-//Conversion en unites physiques Mtep pour la production d'energie 0=non disponible
-////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 //           reference prices                                              //
@@ -77,10 +70,6 @@ QGTAPref = QCdomref+Expref+ExpTIref;
 
 // prices of energy corresponding to physical values
 
-// on calibre les prix de base avec le coeficient de conversion entre PIB IMACLIM et PIB PPP Banque mondiale 
-// (fichier GDP PPP worldbank 2000-2004.xls) 
-// GDP/pref(:,indice_composite)=GDP_PPP_world_Bank
-
 pref=ones(nb_regions,nb_sectors);
 pref(:,1:nbsecteurenergie) = QGTAPref(:,1:nbsecteurenergie)./Ener_Prod_Im(:,1:nbsecteurenergie);
 
@@ -108,10 +97,10 @@ qtax = zeros(nb_regions,nb_sectors);		// output tax
 // computation from GTAP aggregated data
 for k = 1:nb_regions,
     for j = 1:nb_sectors, if Imp_Im(k,j)==0 then mtax(k,j) = 0; else  mtax(k,j) = (T_Imp_Im(k,j)/Imp_Im(k,j)); end end
-    ImpHT(k,:) = Imp_Im(k,:);
-    for j = 1:nb_sectors, if (Exp_Im(k,j)-T_Exp_Im(k,j))==0 then xtax(k,j) = 0; else  xtax(k,j) = T_Exp_Im(k,j)/(Exp_Im(k,j)-T_Exp_Im(k,j)); end end
-    Expref(k,:) = Exp_Im(k,:)./(pref(k,:).*(1+xtax(k,:)));
-    ExpTIref(k,:) = Exp_trans_Im(k,:)./pref(k,:); 
+ImpHT(k,:) = Imp_Im(k,:);
+for j = 1:nb_sectors, if (Exp_Im(k,j)-T_Exp_Im(k,j))==0 then xtax(k,j) = 0; else  xtax(k,j) = T_Exp_Im(k,j)/(Exp_Im(k,j)-T_Exp_Im(k,j)); end end
+Expref(k,:) = Exp_Im(k,:)./(pref(k,:).*(1+xtax(k,:)));
+ExpTIref(k,:) = Exp_trans_Im(k,:)./pref(k,:); 
 end
 mtaxref=mtax;
 xtaxref=xtax;
@@ -120,15 +109,10 @@ xtaxref=xtax;
 // calibration of regional weights in the CES function providing the amount of 'international' goods in the internationl pool 
 // calibration of world prices and amounts of international goods
 
-eta = 0.5*ones(1,nb_sectors-nbsecteurenergie);
-
-// Calibration performed with Excel solver
-//affichage des données utilisées pour la calcul de weightsqrt
-//disp(pref,'pref');
-//disp(Expref,'Expref');
-//disp(xtax,'xtax');
-
 weightsqrt = csvRead( GTAP_V1+"weightsqrt.csv",'|',[],[],[],'/\/\//');
+weightsqrt = weightsqrt(1:12,:);
+
+
 // Initially, two versions of this file had been created, but for some reason, this way of doing seems to be more robust. Nevertheless, this writing could be adapted.
 if nb_sectors_industry > 1
     for j=1:(nb_sectors_industry-1)
@@ -136,62 +120,25 @@ if nb_sectors_industry > 1
     end
 end
 
-for i=1:4,[weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);end
-
-eta = eta_calib*ones(1,nb_sectors-nbsecteurenergie);
-for i=1:5,[weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);end
-
-if ~isdef ("etaArmington")
-    error("etaArmington is not defined, see STUDY.sce");
+for e=[0.5,0.6,0.7,0.8,0.85,0.9]
+    eta = e*ones(1,nb_sectors-nbsecteurenergie);
+    [weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);
 end
 
 indicesEta = [indice_composite-nbsecteurenergie indice_industries-nbsecteurenergie indice_agriculture-nbsecteurenergie];
 
-if etaArmington > 1.3
-    eta(indicesEta) = 1.3;
-else
-    eta(indicesEta) = etaArmington;
+list_eta = linspace(0.9,etaArmington,20);
+for e=linspace(0.9,etaArmington,20)
+    eta(indicesEta) = e;
+    eta(indice_agriculture-nbsecteurenergie) = min( eta(indice_agriculture-nbsecteurenergie), 1.1*ind_trade_agri + (1-ind_trade_agri) * eta(indice_agriculture-nbsecteurenergie));
+    [weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);
 end
-for temp=1:5,[weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);end
-
-if etaArmington > 1.5
-    eta(indicesEta) = 1.5;
-else
-    eta(indicesEta) = etaArmington;
-end
-for temp=1:5,[weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);end
-
-if etaArmington > 2
-    eta(indicesEta) = 2;
-else
-    eta(indicesEta) = etaArmington;
-end
-for temp=1:7,[weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);end
-
-if etaArmington > 2.5
-    eta(indicesEta) = 2.5;
-else
-    eta(indicesEta) = etaArmington;
-end
-for temp=1:7,[weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);end
-
-if etaArmington > 3
-    eta(indicesEta) = 3;
-else
-    eta(indicesEta) = etaArmington;
-end
-
-for temp=1:7,[weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);end
-eta(indicesEta) = etaArmington;
-if ind_trade_agri ==1 
-    eta(indice_agriculture-nbsecteurenergie)=1.1;
-end
-for temp=1:7,[weightsqrt,v,info] = fsolve(weightsqrt,exportations_Cal);end
 
 if info==4 then 
     disp('calibration armington weight failed');
     pause;
 end
+
 weight = weightsqrt(1:nb_regions,:).^2;
 
 // calibration of weights leads to unique values of world prices and volumes of imports
@@ -230,21 +177,7 @@ testPM(:,nbsecteurenergie+1:nb_sectors) = (sum(weight.*(Expref(:,nbsecteurenergi
 testPM(:,1:nbsecteurenergie) = sum(Expref(:,1:nbsecteurenergie),'r')./sum(Impref(:,1:nbsecteurenergie),'r')-1;
 
 // international transport 
-//weightTI0 = ExpTIref(:,indice_transport_1:indice_transport_2)./(ones(nb_regions,1)*sum(ExpTIref(:,indice_transport_1:indice_transport_2),"r"));
-//weightTI0 = 0.25*ones(nb_regions,nb_trans);
-weightTI0 = csvRead( GTAP_V1+"weightTI0.csv",'|',[],[],[],'/\/\//');
-
-
-// format_spec='%5.8e;';
-// // writes into this file
-// fprintfMat('ExpTIref.tsv',ExpTIref,format_spec);
-// fprintfMat('pref.tsv',pref,format_spec);
-// fprintfMat('xtax.tsv',xtax,format_spec);
-
-
-//[weightTIsqrt,v,info] = fsolve(weightTI0,exportationsTI_Cal);
-//[weightTIsqrt,v,info] = fsolve(weightTIsqrt,exportationsTI_Cal);
-
+weightTI0 = 0.15* ones(reg,nb_trans);
 
 //Calibration of IT CES production function. We assume that the international transport of techno j in determined by a CES production function, in which each region can produce the service at a given price. Weights are square to keep only positive squared values. In order to get a nice fsolve the 12th region is remove, since we want a sum of weights to be equal to 1 (constant return to scale).
 [weightTIsqrt,v,info] = fsolve(weightTI0,exportationsTI_Cal2);

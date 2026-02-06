@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Ruben Bibas, Thomas Le-Gallic, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Thomas Le Gallic, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -20,16 +20,15 @@ endfunction
 
 // CES for exports
 
-function [y] = exportations_Cal(x0);
-    x1=x0(1:reg,:);
-    pref = pref(:,nbsecteurenergie+1:sec)
-    Expref = Expref(:,nbsecteurenergie+1:sec)
-    xtax = xtax(:,nbsecteurenergie+1:sec)
-    N= sec-nbsecteurenergie
+function [y] = exportations_Cal(x1);
+    pref = pref(:,nbsecteurenergie+1:sec);
+    Expref = Expref(:,nbsecteurenergie+1:sec);
+    xtax = xtax(:,nbsecteurenergie+1:sec);
+    N= sec-nbsecteurenergie;
 
     y1=1-((x1.^2)./(pref.*(1+xtax))).^(ones(reg,1)*eta)   .*(ones(reg,1) * (sum((x1.^2).*(Expref.^(1-ones(reg,N)./(ones(reg,1)*eta))),"r")./sum(((x1.^2).^(ones(reg,1)*eta)).*((pref.*(1+xtax)).^(1-ones(reg,1)*eta)),"r"))).^(ones(reg,1)*(eta./(eta-1)))./Expref;
     y2=ones(1,N)-sum((x1.^2).^(ones(reg,1)*eta),"r");
-    y=[y1;y2];
+    y=[y1(1:11,:);y2];
 endfunction
 
 
@@ -45,7 +44,7 @@ function [y] = exportationsTI_Cal2(weightTI);//new fsolve function with the righ
     weightTI=weightTI(1:reg,:);
     y1=1-(((weightTI(1:reg-1,:).^2)./pref(1:reg-1,indice_transport_1:indice_transport_2)).^(ones(reg-1,nb_trans)*etaTI)).*(ones(reg-1,1)*(sum((weightTI.^2).*(ExpTIref(:,indice_transport_1:indice_transport_2).^((1-1/etaTI)*ones(reg,nb_trans))),"r")./sum(((weightTI.^2).^(ones(reg,nb_trans)*etaTI)).*(pref(:,indice_transport_1:indice_transport_2).^(1-ones(reg,nb_trans)*etaTI)),"r")).^(etaTI./(etaTI-1)))./ExpTIref(1:reg-1,indice_transport_1:indice_transport_2);
     y2=ones(1,nb_trans)-sum((weightTI.^2).^(ones(reg,nb_trans)*etaTI),"r");
-    y=[y1;y2];
+    y=[y1(1:11,:);y2];
 endfunction
 
 // Transport prices
@@ -55,11 +54,11 @@ function [y] = transportprice_Cal(pOTloc);
     pairloc=factmultpair.*pOTloc;
     pautomobileloc=factmultpautomobile.*pOTloc;
     Ttaxloc=zeros(reg,sec);
-    /////////prix calibrés
+    /////////calibration prices
     Ttaxloc(:,indice_Et)=(pautomobileloc)./(pArmDFref(:,indice_Et))-ones(reg,1);
     Ttaxloc(:,indice_air)=(pairloc)./(pArmDFref(:,indice_air))-ones(reg,1);
     Ttaxloc(:,indice_OT)=(pOTloc)./(pArmDFref(:,indice_OT))-ones(reg,1);
-    /// prise en compte de Ttax dans pArmDF ////
+    /// accounting for Ttax in pArmDF ////
     pArmDFrefloc=pArmDFref.*(1+Ttaxloc);
     TTAXloc=(Ttaxloc./(1+Ttaxloc)).*pArmDFrefloc.*DFref;
     divloc=ones(reg,1);
@@ -110,11 +109,11 @@ function [y] = paystransportprice_Cal(pOTloc1);
     pairloc=factmultpair.*pOTloc;
     pautomobileloc=factmultpautomobile.*pOTloc;
     Ttaxloc=zeros(reg,sec);
-    /////////prix calibrés
+    /////////calibrating prices
     Ttaxloc(:,indice_Et)=(pautomobileloc)./(pArmDFref(:,indice_Et))-ones(reg,1);
     Ttaxloc(:,indice_air)=(pairloc)./(pArmDFref(:,indice_air))-ones(reg,1);
     Ttaxloc(:,indice_OT)=(pOTloc)./(pArmDFref(:,indice_OT))-ones(reg,1);
-    /// prise en compte de Ttax dans pArmDF ////
+    /// accounting for Ttax in pArmDF ////
     pArmDFrefloc=pArmDFref.*(1+Ttaxloc);
     TTAXloc=(Ttaxloc./(1+Ttaxloc)).*pArmDFrefloc.*DFref;
     divloc=ones(reg,1);
@@ -174,11 +173,11 @@ function [y] = paystransportprice_Cal1(pOTloc1);
     pairloc=(factmultpair+factmultpautomobile).*pOTloc;
 
     Ttaxloc=zeros(reg,sec);
-    /////////prix calibrés
+    /////////calibrated prices
     Ttaxloc(:,indice_Et)=(pautomobileloc)./(pArmDFref(:,indice_Et))-ones(reg,1);
     Ttaxloc(:,indice_air)=(pairloc)./(pArmDFref(:,indice_air))-ones(reg,1);
     Ttaxloc(:,indice_OT)=(pOTloc)./(pArmDFref(:,indice_OT))-ones(reg,1);
-    /// prise en compte de Ttax dans pArmDF ////
+    /// accounting for Ttax in pArmDF ////
     pArmDFrefloc=pArmDFref.*(1+Ttaxloc);
     TTAXloc=(Ttaxloc./(1+Ttaxloc)).*pArmDFrefloc.*DFref;
     divloc=ones(reg,1);
@@ -303,42 +302,45 @@ function [y] = bilan_energetique(CI,Q,DF,Imp,Exp,pays);
     y1(conso_btp_eb,et_eb)   = CI(indice_Et,indice_construction,pays)*Q(pays,indice_construction);
     y1(conso_tot_eb,et_eb)     = sum(y1(conso_comp_eb:indice_matEner,et_eb));
 
-    y1(prod_eb,gaz_eb)         = Q(pays,indice_gaz);
-    y1(imp_eb,gaz_eb)          = Imp(pays,indice_gaz);
-    y1(exp_eb,gaz_eb)          = -Exp(pays,indice_gaz);
-    y1(marbunk_eb,gaz_eb)      = -CI(indice_gaz,indice_mer,pays)*Q(pays,indice_mer);
-    y1(tpes_eb,gaz_eb)         = sum(y1(prod_eb:marbunk_eb,gaz_eb));
-    y1(refi_eb,gaz_eb)         = -CI(indice_gaz,indice_Et,pays)*Q(pays,indice_Et);
-    y1(pwplant_eb,gaz_eb)      = -CI(indice_gaz,indice_elec,pays)*Q(pays,indice_elec);
-    y1(losses_eb,gaz_eb)       = -CI(indice_gaz,indice_gaz,pays)*Q(pays,indice_gaz);
-    y1(conso_comp_eb,gaz_eb)   = CI(indice_gaz,indice_composite,pays)*Q(pays,indice_composite);
-    y1(conso_agri_eb,gaz_eb)   = CI(indice_gaz,indice_agriculture,pays)*Q(pays,indice_agriculture);
-    y1(conso_indu_eb,gaz_eb)   = sum(CI(indice_gaz,indice_industries,pays).*Q(pays,indice_industries),'c');
-    y1(conso_air_eb,gaz_eb)    = CI(indice_gaz,indice_air,pays)*Q(pays,indice_air);
-    y1(conso_ot_eb,gaz_eb)     = CI(indice_gaz,indice_OT,pays)*Q(pays,indice_OT);
-    y1(conso_car_eb,gaz_eb)    = 0;
-    y1(conso_resid_eb,gaz_eb)  = alphaGazm2(pays).*stockbatiment(pays);
-    y1(conso_btp_eb,gaz_eb)  = CI(indice_gaz,indice_construction,pays)*Q(pays,indice_construction);
-    y1(conso_tot_eb,gaz_eb)    = sum(y1(conso_comp_eb:indice_matEner,gaz_eb));
+    y1(prod_eb,gas_eb)         = Q(pays,indice_gas);
+    y1(imp_eb,gas_eb)          = Imp(pays,indice_gas);
+    y1(exp_eb,gas_eb)          = -Exp(pays,indice_gas);
+    y1(marbunk_eb,gas_eb)      = -CI(indice_gas,indice_mer,pays)*Q(pays,indice_mer);
+    y1(tpes_eb,gas_eb)         = sum(y1(prod_eb:marbunk_eb,gas_eb));
+    y1(refi_eb,gas_eb)         = -CI(indice_gas,indice_Et,pays)*Q(pays,indice_Et);
+    y1(pwplant_eb,gas_eb)      = -CI(indice_gas,indice_elec,pays)*Q(pays,indice_elec);
+    y1(losses_eb,gas_eb)       = -CI(indice_gas,indice_gas,pays)*Q(pays,indice_gas);
+    y1(conso_comp_eb,gas_eb)   = CI(indice_gas,indice_composite,pays)*Q(pays,indice_composite);
+    y1(conso_agri_eb,gas_eb)   = CI(indice_gas,indice_agriculture,pays)*Q(pays,indice_agriculture);
+    y1(conso_indu_eb,gas_eb)   = sum(CI(indice_gas,indice_industries,pays).*Q(pays,indice_industries),'c');
+    y1(conso_air_eb,gas_eb)    = CI(indice_gas,indice_air,pays)*Q(pays,indice_air);
+    y1(conso_ot_eb,gas_eb)     = CI(indice_gas,indice_OT,pays)*Q(pays,indice_OT);
+    y1(conso_car_eb,gas_eb)    = 0;
+    y1(conso_resid_eb,gas_eb)  = alphaGazm2(pays).*stockbatiment(pays);
+    y1(conso_btp_eb,gas_eb)  = CI(indice_gas,indice_construction,pays)*Q(pays,indice_construction);
+    y1(conso_tot_eb,gas_eb)    = sum(y1(conso_comp_eb:indice_matEner,gas_eb));
 
-    y1(prod_eb,hyd_eb)         = msh_elec_techno(pays,indice_HYD) *Q(pays,indice_elec);
-    y1(tpes_eb,hyd_eb)         = sum(y1(prod_eb:marbunk_eb,hyd_eb));
-    y1(pwplant_eb,hyd_eb)      = -msh_elec_techno(pays,indice_HYD) * Q(pays,indice_elec);
+    if current_time_im>0 // msh_elec_techno not defined at calibration
+        y1(prod_eb,hyd_eb)         = msh_elec_techno(pays,indice_HYD) *Q(pays,indice_elec);
+        y1(tpes_eb,hyd_eb)         = sum(y1(prod_eb:marbunk_eb,hyd_eb));
+        y1(pwplant_eb,hyd_eb)      = -msh_elec_techno(pays,indice_HYD) * Q(pays,indice_elec);
 
-    y1(prod_eb,nuc_eb)         = (msh_elec_techno(pays,indice_NUC)+msh_elec_techno(pays,indice_NND))*Q(pays,indice_elec)/nuclPrim2Sec;
-    y1(tpes_eb,nuc_eb)         = sum(y1(prod_eb:marbunk_eb,nuc_eb));
-    y1(pwplant_eb,nuc_eb)      = -(msh_elec_techno(pays,indice_NUC)+msh_elec_techno(pays,indice_NND))*Q(pays,indice_elec)/nuclPrim2Sec;
+        y1(prod_eb,nuc_eb)         = (msh_elec_techno(pays,indice_NUC)+msh_elec_techno(pays,indice_NND))*Q(pays,indice_elec)/nuclPrim2Sec;
+        y1(tpes_eb,nuc_eb)         = sum(y1(prod_eb:marbunk_eb,nuc_eb));
+        y1(pwplant_eb,nuc_eb)      = -(msh_elec_techno(pays,indice_NUC)+msh_elec_techno(pays,indice_NND))*Q(pays,indice_elec)/nuclPrim2Sec;
 
-    y1(prod_eb,enr_eb)         = sum(msh_elec_techno(pays,[technoWind technoSolar technoBiomass])./[1 1 1 1 1 rho_elec_nexus(pays,technoBiomass)]) * Q(pays,indice_elec);
-    + max(0,..
-    (..
-    Q(pays,indice_Et)..
-    - CI(indice_coal,indice_Et,pays)*Q(pays,indice_Et)/2..
-    - CI(indice_oil,indice_Et,pays)/CIref(indice_oil,indice_Et,pays)*Q(pays,indice_Et)..
-    ));
-    y1(tpes_eb,enr_eb)         = sum(y1(prod_eb:marbunk_eb,enr_eb));
-    y1(refi_eb,enr_eb)         = -max((Q(pays,indice_Et)-CI(indice_coal,indice_Et,pays)*Q(pays,indice_Et)/2-CI(indice_oil,indice_Et,pays)/CIref(indice_oil,indice_Et,pays)*Q(pays,indice_Et)),0);
-    y1(pwplant_eb,enr_eb)      = -sum(msh_elec_techno(pays,[technoWind technoSolar technoBiomass])./[1 1 1 1 1 rho_elec_nexus(pays,technoBiomass)]) * Q(pays,indice_elec);
+        y1(prod_eb,enr_eb)         = sum(msh_elec_techno(pays,[technoWind technoSolar technoBiomass])./[1 1 1 1 1 rho_elec_nexus(pays,technoBiomass)]) * Q(pays,indice_elec)..
+            + max(0,..
+            (..
+            Q(pays,indice_Et)..
+            - CI(indice_coal,indice_Et,pays)*Q(pays,indice_Et)/2 ..
+            - CI(indice_oil,indice_Et,pays)/CIref(indice_oil,indice_Et,pays)*Q(pays,indice_Et)..
+        ));
+        y1(tpes_eb,enr_eb)         = sum(y1(prod_eb:marbunk_eb,enr_eb));
+        y1(refi_eb,enr_eb)         = -max((Q(pays,indice_Et)-CI(indice_coal,indice_Et,pays)*Q(pays,indice_Et)/2-CI(indice_oil,indice_Et,pays)/CIref(indice_oil,indice_Et,pays)*Q(pays,indice_Et)),0);
+        y1(pwplant_eb,enr_eb)      = -sum(msh_elec_techno(pays,[technoWind technoSolar technoBiomass])./[1 1 1 1 1 rho_elec_nexus(pays,technoBiomass)]) * Q(pays,indice_elec);
+
+    end
 
     y1(prod_eb,elec_eb)        = 0;
     y1(imp_eb,elec_eb)         = Imp(pays,indice_elec);
@@ -375,13 +377,13 @@ function [y] = repartition_inv(Inv_val,partInvFin,pays);
 endfunction
 
 function [y] = IC_calibration(MS,LCC,index_ref,val_nu)
-    ///MS : market share de calibrage sum(MS)=1, MS(k)<>0, vecteur de taille n en ligne
-    ///LCC : couts d'utilisation corespondant, vecteur de taille n en ligne
-    ///index_ref : n° de la technologie qui va etre utilise pour le calcul, entier
-    /// -val_nu : puissance de la logit, reel 
-    //////traitement des MS pour enlever les valeurs nulles
+    ///MS: market share of calibration sum(MS)=1, MS(k)<>0, vector of size n (in lines)
+    ///LCC: corresponding utilisation costs, vector of size n (in lines)
+    ///index_ref : number of technology that will be used in the computing, integer
+    /// -val_nu : power of the logit; real
+    //////Marsket Share treatement fo remove null values
     MS_temp=max(MS,0.000001);
-    /////la somme des parts doit faire 1
+    /////the sum should be one
     sum_MS_temp=sum(MS_temp);
     MS=MS_temp/sum(MS_temp);
     size_MS=size(MS);
@@ -421,14 +423,14 @@ function [y] = IC_calibration(MS,LCC,index_ref,val_nu)
 endfunction
 
 function [y] = IC_calibration_2(MS,LCC,index_ref,val_nu)
-    ///MS : market share de calibrage sum(MS)=1, MS(k)<>0, vecteur de taille n en ligne
-    ///LCC : couts d'utilisation corespondant, vecteur de taille n en ligne
-    ///index_ref : n° de la technologie qui va etre utilise pour le calcul, entier
-    /// -val_nu : puissance de la logit, reel 
-    //////traitement des MS pour enlever les valeurs nulles
+    ///MS: market share of calibration sum(MS)=1, MS(k)<>0, vector of size n (in lines)
+    ///LCC: corresponding utilisation costs, vector of size n (in lines)
+    ///index_ref : number of technology that will be used in the computing, integer
+    /// -val_nu : power of the logit; real
+    //////Marsket Share treatement fo remove null values
 
     MS_temp=max(MS,0.000001);
-    /////la somme des parts doit faire 1
+    /////sum should be one
     sum_MS_temp=sum(MS_temp);
     MS=MS_temp/sum(MS_temp);
     size_MS=size(MS);
@@ -450,9 +452,9 @@ function [y] = calib_wage_curve(xloc);
     aw=xloc(1:reg);
     bw=-aw;
     cw=xloc(reg+1:2*reg);
-    //valeur de calibrage
+    //calibration value
     y(1:reg) = aw+bw.*tanh(cw.*z)-1;
-    //élasticité locale à la valeur de calibrage
+    //local elasticity at the calibration value
     y(reg+1:2*reg) = bw.*cw.*z./((aw+bw.*tanh(cw.*z)).*cosh(cw.*z).^2)-(ew*ones(reg,1));
 endfunction
 
@@ -460,11 +462,11 @@ endfunction
 //    aw=xloc(1:reg);
 //    bw=xloc(reg+1:2*reg);;
 //    cw=xloc(2*reg+1:3*reg);
-//    //valeur de calibrage
+//calibration value
 //    y(1:reg) = aw+bw.*tanh(cw.*z)-1;
-//    //élasticité locale à la valeur de calibrage
+//local elasticity at the calibration value
 //    y(reg+1:2*reg) = bw.*cw.*z./((aw+bw.*tanh(cw.*z)).*cosh(cw.*z).^2)-(-0.55*ones(reg,1));
-//    //valeur du salaire pour un chomage égal à 1, on ne fixe pas de valeur limite minimale
+//    //value of wage for unemployment equal to 1, we do not fixe a minimal value
 //    y(2*reg+1:3*reg) = aw+bw.*tanh(cw)-0;
 //endfunction
 

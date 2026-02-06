@@ -17,8 +17,8 @@ date=`date '+%Y-%m-%d'`
 
 result="input_data-$who-$date"
 
-#zip -r $result `find data/ -type f \( -iname \*.csv -o -iname \*.sav \)'` externals/land-use/input_data-dumas-2018-09-27-r27182.zip
-zip -r $result `find data/ -type f \( -iname \*.csv -o -iname \*.sav -o -iname \*.tsv \)` outputs/{001,009,019}_* outputs/*.xlsx 
+#zip -r $result `find data/ -type f \( -iname \*.csv -o -iname \*.dat \)'` externals/land-use/input_data-dumas-2018-09-27-r27182.zip
+zip -r $result `find data/ -type f \( -iname \*.csv -o -iname \*.dat -o -iname \*.tsv \)` outputs/*.xlsx 
 
 if [ "z$destination" != 'z' ]; then
   mv $result.zip $destination || exit 1

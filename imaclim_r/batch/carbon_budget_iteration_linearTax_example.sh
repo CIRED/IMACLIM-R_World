@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Thibault Briera, Ruben Bibas, Florian Leblanc
+#     Ruben Bibas, Florian Leblanc, Thibault Briera
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi

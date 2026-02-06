@@ -1,3 +1,11 @@
+# =============================================
+# Contact: <imaclim.r.world@gmail.com>
+# Licence: AGPL-3.0
+# Authors:
+#     Florian Leblanc
+#     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+# =============================================
+
 import pandas as pd
 import pyam
 import os

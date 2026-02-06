@@ -3,7 +3,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Thibault Briera, Florian Leblanc, Ruben Bibas
+#     Florian Leblanc, Thibault Briera, Ruben Bibas
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -45,50 +45,52 @@ cd model
 nbMKT=1
 
 # #NoPolicy baseline
-for i in #1
+for i in 1
 do
     echo "combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
     echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
     sh run.batchCmd$i &
 done
 
-#wait #comment this if the baseline has already been run
+wait #comment this if the baseline has already been run
 
 ##### For NPi/NDC, smooth_exo_tax_glob_1 & smooth_exo_tax_glob_2 can be modified to early tax smoothing if the model struggles to find a solution, especially after 2025
 ##### This happens when the emi constraint can't be met, because by default the carbon tax cannot increase by more than 80$/tCO2/yr
 
+
+# Set the maximum number of parallel jobs
+MAX_PARALLEL_JOBS=1
+
+# Function to wait for jobs to finish if the maximum number of parallel jobs is reached
+wait_for_jobs() {
+    while (( $(jobs -r | wc -l) >= MAX_PARALLEL_JOBS )); do
+        sleep 10
+    done
+}
+
+
 # #NPi
 for i in 9
 do
-    echo "smooth_exo_tax_glob_1=10;smooth_exo_tax_glob_2=20;nbMKT_NDC=$nbMKT;scen_calib='NPi';combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
-    echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
-    sh run.batchCmd$i &
+    for run in 1 2 3 4 5 6 7 8 9 10
+    do
+        echo "autocalib_NPi=%t;nbMKT_NDC=$nbMKT;ind_npi_ndc=3;scen_calib='NPi';combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
+        echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
+        sh run.batchCmd$i &
+        # Wait for jobs to finish if the maximum number of parallel jobs is reached
+        wait_for_jobs
+    done
 done
-
-# NDC 
-
-for i in 19
+wait 
+# #NDC
+for i in 9
 do
-    echo "smooth_exo_tax_glob_1=20;smooth_exo_tax_glob_2=60;nbMKT_NDC=$nbMKT;scen_calib='NDC';combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
-    echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
-    sh run.batchCmd$i &
-done
-
-wait
-
-# #NPi
-for i in 11
-do
-    echo "nbMKT_NDC=$nbMKT;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
-    echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
-    sh run.batchCmd$i &
-done
-
-# NDC 
-
-for i in 21
-do
-    echo "nbMKT_NDC=$nbMKT;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
-    echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
-    sh run.batchCmd$i &
+    for run in 1 2 3 4 5 6 7 8 9 10
+    do
+        echo "autocalib_NDC=%t;nbMKT_NDC=$nbMKT;ind_npi_ndc=3;scen_calib='NDC';combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
+        echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
+        sh run.batchCmd$i &
+        # Wait for jobs to finish if the maximum number of parallel jobs is reached
+        wait_for_jobs
+    done
 done

@@ -1,4 +1,12 @@
-// This file take all .sav outputs from a given study and create an unique .csv output
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
+// This file take all .dat outputs from a given study and create an unique .csv output
 // it deals now with sensivity analysis, when a suffix is added to the combi number in the output folder name
 
 metaRecMessOn = %t;
@@ -27,10 +35,10 @@ nCombi = 0;
 outputsDir = [];
 combiMat   = [];
 for index = 1:length(combi)
-   //if wasdone(index)
-	SAVEDIR = nam(index);
-        outputsDir = [ outputsDir ; SAVEDIR ];
-        combiMat = [ combiMat , combi(index) ];  
+    //if wasdone(index)
+    SAVEDIR = nam(index);
+    outputsDir = [ outputsDir ; SAVEDIR ];
+    combiMat = [ combiMat , combi(index) ];  
 end
 
 [temp,matString] = csvread(STUDY+"matrice_"+ETUDE+".csv");
@@ -63,11 +71,11 @@ nCombi = size(combistr,'c');
 //create the headers
 
 // we suppose the time_lenght correspond to the last done year of first folder results (so that all runs have gone until the end)
-ldsav('last_done_year.sav',"",outputsDir(1));
+ldsav('last_done_year.dat',"",outputsDir(1));
 YEAR = year_begin;
 nb_year = last_done_year;
 for tt = 1:(last_done_year-1)
-	YEAR($+1)=year_begin + tt;
+    YEAR($+1)=year_begin + tt;
 end
 write_csv(combistr,OUTPUT_FOLDER+'dimCOMBI.csv','|');
 write_csv(YEAR',OUTPUT_FOLDER+'dimYEAR.csv','|');
@@ -132,37 +140,37 @@ varTypeDimenssionSize($+1)= string(nCombi)+'*'+ string(size(regnames,'r'))+ '*' 
 // outputs
 fileout = mopen(OUTPUT_FOLDER+ETUDE+'_outputs.csv', "w");
 varnames_normal = [..
-'GDP_sav','GDP_MER_nominal_sav','GDP_MER_real_sav','GDP_PPP_nominal_sav','GDP_PPP_real_sav','VA_sav',..
-'DF_sav','DG_sav','DI_sav','DIinfra_sav','Q_sav','Cap_sav','Imp_sav','Exp_sav','ExpTI_sav','CI_sav',..
-'p_sav','pArmDF_sav','Ttax_sav','pArmDI_sav','pArmDG_sav','pArmCI_sav','w_sav','l_sav','Ltot_sav',..
-'markup_sav','markup_lim_oil_sav',..
-'taxMKT_sav','energy_balance_stock_sav','wpEner_sav',..
-'nit_sav','mtax_sav','xtax_sav','wpTIagg_sav','wp_sav',..
-'LCC_min_alltechno_sav','LCC_min_share_INV_sav','LCC_min_share_Fuel_sav',..
-'prod_elec_techno_sav','partExpK_sav','partImpK_sav','energyInvestment_sav','pK_sav','DeltaK_sav','GRB_sav',..
-'E_reg_use_sav','emi_evitee_sav',..
-'partDomCI_sav','partDomDF_sav','partDomDG_sav','partDomDI_sav','marketshare_sav',..
-'partImpCI_sav','partImpDF_sav','partImpDG_sav','partImpDI_sav',..
-'marketshare_sav','eta_sav','bmarketshareener_sav','etamarketshareener_sav','weight_sav',..
-'coef_Q_CO2_DG_sav','coef_Q_CO2_DI_sav','coef_Q_CO2_DF_sav','coef_Q_CO2_CI_sav',..
-'taxCO2_DG_sav','taxCO2_DI_sav','taxCO2_DF_sav','taxCO2_CI_sav',..
-'taxDGdom_sav','taxDGimp_sav','taxDIdom_sav','taxDIimp_sav','taxDFdom_sav','taxDFimp_sav','taxCIdom_sav','taxCIimp_sav',..
-'qtax_sav','sigma_sav',..
-'aRD_sav','bRD_sav','cRD_sav',..
-'Q_biofuel_anticip_sav','Q_CTL_anticip_sav','share_CCS_CTL_sav',..
-'Ress_coal_sav','Ress_gaz_sav',..
-'share_shaleOil_sav','share_heavyOil_sav','share_lto_sav','share_shaleGas_sav',..
-'alphaEtauto_sav','alphaelecauto_sav','pkmautomobileref','Tautomobile_sav',..
-'alphaEtm2_sav','stockbatiment_sav','alphaelecm2_sav','alphaCoalm2_sav','alphaGazm2_sav',..
-'IR_sav','Rdisp_sav','ptc_sav','div_sav',..
-'itgbl_cost_DFdom_sav','itgbl_cost_DFimp_sav','itgbl_cost_CIdom_sav','itgbl_cost_CIimp_sav','alpha_partCI_sav','alpha_partDF_sav',..
-'bDF_sav','bCI_sav','etaCI_sav','etaDF_sav','taxDFdom_sav','taxDFimp_sav','taxCIdom_sav','taxCIimp_sav',..
+    'GDP_sav','GDP_MER_nominal_sav','GDP_MER_real_sav','GDP_PPP_nominal_sav','GDP_PPP_real_sav','VA_sav',..
+    'DF_sav','DG_sav','DI_sav','DIinfra_sav','Q_sav','Cap_sav','Imp_sav','Exp_sav','ExpTI_sav','CI_sav',..
+    'p_sav','pArmDF_sav','Ttax_sav','pArmDI_sav','pArmDG_sav','pArmCI_sav','w_sav','l_sav','Ltot_sav',..
+    'markup_sav','markup_lim_oil_sav',..
+    'taxMKT_sav','energy_balance_stock_sav','wpEner_sav',..
+    'nit_sav','mtax_sav','xtax_sav','wpTIagg_sav','wp_sav',..
+    'LCC_min_alltechno_sav','LCC_min_share_INV_sav','LCC_min_share_Fuel_sav',..
+    'prod_elec_techno_sav','partExpK_sav','partImpK_sav','energyInvestment_sav','pK_sav','DeltaK_sav','GRB_sav',..
+    'E_reg_use_sav','emi_evitee_sav',..
+    'partDomCI_sav','partDomDF_sav','partDomDG_sav','partDomDI_sav','marketshare_sav',..
+    'partImpCI_sav','partImpDF_sav','partImpDG_sav','partImpDI_sav',..
+    'marketshare_sav','eta_sav','bmarketshareener_sav','etamarketshareener_sav','weight_sav',..
+    'coef_Q_CO2_DG_sav','coef_Q_CO2_DI_sav','coef_Q_CO2_DF_sav','coef_Q_CO2_CI_sav',..
+    'taxCO2_DG_sav','taxCO2_DI_sav','taxCO2_DF_sav','taxCO2_CI_sav',..
+    'taxDGdom_sav','taxDGimp_sav','taxDIdom_sav','taxDIimp_sav','taxDFdom_sav','taxDFimp_sav','taxCIdom_sav','taxCIimp_sav',..
+    'qtax_sav','sigma_sav',..
+    'aRD_sav','bRD_sav','cRD_sav',..
+    'Q_biofuel_anticip_sav','Q_CTL_anticip_sav','share_CCS_CTL_sav',..
+    'Ress_coal_sav','Ress_gaz_sav',..
+    'share_shaleOil_sav','share_heavyOil_sav','share_lto_sav','share_shaleGas_sav',..
+    'alphaEtauto_sav','alphaelecauto_sav','pkmautomobileref','Tautomobile_sav',..
+    'alphaEtm2_sav','stockbatiment_sav','alphaelecm2_sav','alphaCoalm2_sav','alphaGazm2_sav',..
+    'IR_sav','Rdisp_sav','ptc_sav','div_sav',..
+    'itgbl_cost_DFdom_sav','itgbl_cost_DFimp_sav','itgbl_cost_CIdom_sav','itgbl_cost_CIimp_sav','alpha_partCI_sav','alpha_partDF_sav',..
+    'bDF_sav','bCI_sav','etaCI_sav','etaDF_sav','taxDFdom_sav','taxDFimp_sav','taxCIdom_sav','taxCIimp_sav',..
 'Exchange_rate_sav','RealEERate_output_sav','RealEERate_employ_sav','RealEERate_sec_sav','RCA_ind_sav','RWS_ind_sav','RTB_ind_sav','ind_export_price_sav'];//varnames with dimenssions following varTypeDimenssionName and varTypeDimenssionSize, so world variable, or variable with region and sectoral dimensions
 varnames_normal = ['Tautomobile_sav','pkmautomobileref','GDP_PPP_real_sav','rho_elec_moyen_sav','prod_elec_techno_sav','Q_biofuel_anticip_sav','Q_CTL_anticip_sav','Cap_sav','Q_sav','E_reg_use_sav','emi_evitee_sav','markup_sav','markup_lim_oil_sav','p_sav']
 varnames_normal = [varnames_normal,'CI_sav','partDomCI_sav','taxCO2_CI_sav','coef_Q_CO2_CI_sav','DF_sav','partDomDF_sav','taxCO2_DF_sav','coef_Q_CO2_DF_sav','DG_sav','partDomDG_sav','taxCO2_DG_sav','coef_Q_CO2_DG_sav','DI_sav','partDomDI_sav','taxCO2_DI_sav','coef_Q_CO2_DI_sav','partImpCI_sav','partImpDF_sav','partImpDG_sav','partImpDI_sav'];
 //add nexus land-use variables :
 //varnames_normal = [varnames_normal,'Wyieldgap_sav','yield_on_pot_scaled_sav','consNPK_volume_sav'];
-[x,ierr] = fileinfo(outputsDir(1) + 'save/elast_DFener_us_sav.sav')
+[x,ierr] = fileinfo(outputsDir(1) + 'save/elast_DFener_us_sav.dat')
 if ierr <> -1 
     varnames_normal = [varnames_normal,'elast_DFener_us_sav','elast_Expener_us_sav']
 end
@@ -172,9 +180,9 @@ end
 // write metadatas
 mfprintf(fileout, "metadatas here\n");
 
-//write _sav.sav files datas
+//write _sav.dat files datas
 for varname = varnames_normal
-//disp(varname)
+    //disp(varname)
     //check dimenssions
     ldsav(varname,"",outputsDir(1));
     execstr("varsize = size("+varname+");")
@@ -207,7 +215,7 @@ for varname = varnames_normal
             ldsav(varname,"",outputsDir(icombi));
             for iEnerCons = 1:size(matEner_names_cons,'r')
                 for iEner = 1:size(matEner_names,'c')
-		    for ireg = 1:nb_regions
+                    for ireg = 1:nb_regions
                         mfprintf(fileout, "%s|%s|%s|%s|%s", name_out, combiname, matEner_names_cons(iEnerCons), matEner_names(iEner), regnames(ireg));
                         for iyear = 1:nb_year
                             year = year_begin + iyear -1;
@@ -312,7 +320,7 @@ for varname = varnames_normal
             ldsav(varname,"",outputsDir(icombi));
 
             for ireg = 1:nb_regions
-	        for iUsage = 1:size(usenames,'r')
+                for iUsage = 1:size(usenames,'r')
                     mfprintf(fileout, "%s|%s|%s|%s", name_out, combiname,regnames(ireg), usenames(iUsage) );
                     for iyear = 1:nb_year
                         year = year_begin + iyear -1;
@@ -386,7 +394,7 @@ for varname = varnames_normal
                 mfprintf(fileout, "\n");
             end
         end
-	continue
+        continue
     end
     if varname == 'eta_sav'
         // write infos
@@ -419,7 +427,7 @@ for varname = varnames_normal
                 mfprintf(fileout, "\n");
             end
         end
-	continue
+        continue
     end
     if sum(varname == ['weight_sav','bDF_sav','bCI_sav']) == 1 
         // write infos
@@ -443,7 +451,7 @@ for varname = varnames_normal
             ldsav(varname,"",outputsDir(icombi));
 
             for ireg = 1:nb_regions
-	        for isec = 1:size(non_ener_secnames,'c')
+                for isec = 1:size(non_ener_secnames,'c')
                     mfprintf(fileout, "%s|%s|%s|%s", name_out, combiname,regnames(ireg), non_ener_secnames(isec) );
                     for iyear = 1:nb_year
                         year = year_begin + iyear -1;
@@ -488,7 +496,7 @@ for varname = varnames_normal
                 mfprintf(fileout, "\n");
             end
         end
-	continue
+        continue
     end
 
     if sum(varname == ['bmarketshareener_sav','itgbl_cost_DFdom_sav','itgbl_cost_DFimp_sav','itgbl_cost_CIdom_sav','itgbl_cost_CIimp_sav','alpha_partCI_sav','alpha_partDF_sav','etaDF_sav']) == 1
@@ -513,7 +521,7 @@ for varname = varnames_normal
             ldsav(varname,"",outputsDir(icombi));
 
             for ireg = 1:nb_regions
-	        for isec = 1:size(ener_secnames,'c')
+                for isec = 1:size(ener_secnames,'c')
                     mfprintf(fileout, "%s|%s|%s|%s", name_out, combiname,regnames(ireg), ener_secnames(isec) );
                     for iyear = 1:nb_year
                         year = year_begin + iyear -1;
@@ -638,7 +646,7 @@ for varname = varnames_normal
         end
 
     elseif varsize(1)/nb_regions == nb_sectors
-    // works for p(reg,sec) for example
+        // works for p(reg,sec) for example
         for icombi = 1:nCombi
             combiname = combistr(icombi);
             ldsav(varname,"",outputsDir(icombi));
@@ -657,7 +665,7 @@ for varname = varnames_normal
         end
 
     elseif varsize(1)/(nb_sectors^2) == nb_regions
-    // works for CI(sec,sec,reg) for example
+        // works for CI(sec,sec,reg) for example
         for icombi = 1:nCombi
             combiname = combistr(icombi);
             ldsav(varname,"",outputsDir(icombi));

@@ -2,8 +2,8 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Patrice Dumas
+#     Florian Leblanc
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
-cat WBIG1.TXT WBIG2.TXT > WBIG.TXT
+cat WORLDBIG1.TXT WORLDBIG2.TXT > WBIG.TXT

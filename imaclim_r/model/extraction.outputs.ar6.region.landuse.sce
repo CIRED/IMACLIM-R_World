@@ -97,7 +97,7 @@ varname = 'Final Energy'; //  EJ/yr
 counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
 lineVAR = find_index_list( list_output_str, 'Final Energy|Other Sector|Solids');
 outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = (sum(energy_balance(conso_tot_eb,:,k)))*Mtoe_EJ + outputs_temp(nbLines*(k-1)+lineVAR,current_time+1) ;
-//todo: quid de qbioej§
+//TODO: quid of qbioej§
 if current_time==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 

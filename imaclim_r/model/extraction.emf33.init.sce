@@ -41,24 +41,24 @@ end
 
 
 for k=1:reg
-// outputs Imaclim drivers for NLU
-// usefull to run NLU without running Imaclim
-// will be only present in full output file.
-counter_NLU = 0;
-varname_driver = 'Imaclim2NLU|Price|Carbon';
-outputs_temp(nbLines*13+counter_NLU*12+k,current_time+1) = reg_taxeC(k);
+    // outputs Imaclim drivers for NLU
+    // usefull to run NLU without running Imaclim
+    // will be only present in full output file.
+    counter_NLU = 0;
+    varname_driver = 'Imaclim2NLU|Price|Carbon';
+    outputs_temp(nbLines*13+counter_NLU*12+k,current_time+1) = reg_taxeC(k);
 
-counter_NLU = counter_NLU +1;
-varname_driver = 'Imaclim2NLU|Added_Value|Price|Agriculture';
-outputs_temp(nbLines*13+counter_NLU*12+k,current_time+1) = va_agri(k) * usd2001_2005;
+    counter_NLU = counter_NLU +1;
+    varname_driver = 'Imaclim2NLU|Added_Value|Price|Agriculture';
+    outputs_temp(nbLines*13+counter_NLU*12+k,current_time+1) = va_agri(k) * usd2001_2005;
 
-counter_NLU = counter_NLU +1;
-varname_driver = 'Imaclim2NLU|Population';
-outputs_temp(nbLines*13+counter_NLU*12+k,current_time+1) = pop(k) ;
+    counter_NLU = counter_NLU +1;
+    varname_driver = 'Imaclim2NLU|Population';
+    outputs_temp(nbLines*13+counter_NLU*12+k,current_time+1) = pop(k) ;
 
-counter_NLU = counter_NLU +1;
-varname_driver = 'Imaclim2NLU|Primary Energy|Biomass';
-outputs_temp(nbLines*13+counter_NLU*12+k,current_time+1) = reg_in_bioelec(k) ;
+    counter_NLU = counter_NLU +1;
+    varname_driver = 'Imaclim2NLU|Primary Energy|Biomass';
+    outputs_temp(nbLines*13+counter_NLU*12+k,current_time+1) = reg_in_bioelec(k) ;
 end;
 
 // outputs Imaclim drivers for NLU

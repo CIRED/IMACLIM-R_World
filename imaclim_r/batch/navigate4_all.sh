@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Thibault Briera, Aurélie Méjean
+#     Florian Leblanc, Thibault Briera
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -10,7 +10,7 @@
 # META-IMACLIM-R
 # Permet d'exécuter les combis et profils de taxes de la tâche 3.5 : 5 combis (no demand-side policy, sufficiency, efficiency, electrification, all) et 4 profils de taxe (NPi, 2°C, 1.7°C et 1.5°C). La combi electrification n'a pas de profil de taxe en 1.5°C (runs plantent pour les profils qui semble appropriés, et plus nécessaire car on soumet 1.7°C).
 
-scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 
 
 cd ../
@@ -46,7 +46,7 @@ do
       for tax2100 in 3000 
       do
  
-      for mshbio in 40
+      for mshbio in 21
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -71,7 +71,7 @@ do
       for tax2100 in 3000 
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -96,7 +96,7 @@ do
       for tax2100 in 3000 
       do
  
-      for mshbio in 30
+      for mshbio in 15
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -121,7 +121,7 @@ do
       for tax2100 in 3000 
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"

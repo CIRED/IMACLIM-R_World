@@ -1,10 +1,10 @@
-// =============================================
-// Contact: <imaclim.r.world@gmail.com>
-// Licence: AGPL-3.0
-// Authors:
-//     Thibault Briera
-//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
-// =============================================
+# =============================================
+# Contact: <imaclim.r.world@gmail.com>
+# Licence: AGPL-3.0
+# Authors:
+#     Thibault Briera, Florian Leblanc
+#     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+# =============================================
 
 #####################################################################################
 #################Aggregating IRENA's installed VRE capacities####################
@@ -22,14 +22,12 @@ library(tidyverse)
 args = commandArgs(trailingOnly = TRUE)
 
 annee <- args[1]
-
 #insert here path to imported csv (/data/IRENA/installed_cap)
 path_IRENA <- args[2]
 #insert here path to GTAP aggregation rule
 path_GTAP <- args[3]
 #insert here path to exported csv (/data/IRENA/installed_cap)
 path_export <- args[4]
-
 ###########################################################################
 ###########################################################################
 ###########################################################################
@@ -39,7 +37,7 @@ path_export <- args[4]
 Reg_IMC <- c("USA","Canada","Europe","OECD Pacific","CEI","China","India","Brazil",
              "Middle East","Africa","Rest of Asia","Rest of Latin America")
 
-techno <- c("WND","WNO","CSP","CPV","RPV","BIO")
+techno <- c("WND","WNO","CSP","CPV","RPV","BIG","SBI")
 
 #installed capacity
 data_agreg <- read.csv(path_IRENA, sep = ";", header = FALSE)
@@ -93,20 +91,31 @@ data_agreg$Technology <- as.factor(data_agreg$Technology)
 levels(data_agreg$Technology)
 
 #select the VRE technologies to be aggregated
-biomass_tech <- c("Biogas","Solid biofuels","Liquid biofuels","Renewable municipal waste")
-tech <- c("Concentrated solar power","Off-grid Solar photovoltaic","On-grid Solar photovoltaic","Offshore wind energy","Onshore wind energy",biomass_tech)
+#biogas
+BIG_tech <- c("Biogas","Liquid biofuels")
+#solid biomass
+SBI_tech <- c("Solid biofuels","Renewable municipal waste")
+tech <- c("Concentrated solar power","Off-grid Solar photovoltaic","On-grid Solar photovoltaic","Offshore wind energy","Onshore wind energy",BIG_tech,SBI_tech)
 
 data_agreg <- data_agreg %>% filter(Technology %in% tech)
 
 levels(data_agreg$Technology)
 
 #aggregating biomass technologies
-data_bio <- data_agreg %>% filter(Technology %in% biomass_tech) %>% group_by(Region,Country,ISO,Year) %>% summarise_at(vars(Installed_Cap),list(name = sum))
+data_BIG <- data_agreg %>% filter(Technology %in% BIG_tech) %>% group_by(Region,Country,ISO,Year) %>% summarise_at(vars(Installed_Cap),list(name = sum))
 #turning into the right order
-data_bio <- data_bio %>% ungroup() %>%  mutate(Technology = "Biomass",Installed_Cap = name) %>% select(names(data_agreg))
-#merging dataset
+data_BIG <- data_BIG %>% ungroup() %>%  mutate(Technology = "Biogas",Installed_Cap = name) %>% select(names(data_agreg))
 
-data_agreg <- data_agreg %>% filter(!(Technology %in% biomass_tech))
+#aggregating biomass technologies
+data_SBI <- data_agreg %>% filter(Technology %in% SBI_tech) %>% group_by(Region,Country,ISO,Year) %>% summarise_at(vars(Installed_Cap),list(name = sum))
+#turning into the right order
+data_SBI <- data_SBI  %>% ungroup() %>%  mutate(Technology = "Solid Biomass",Installed_Cap = name) %>% select(names(data_agreg))
+
+
+#merging dataset
+data_bio  <-  merge(data_BIG,data_SBI,all.y=T,all.x=T)
+
+data_agreg <- data_agreg %>% filter(!(Technology %in% c(SBI_tech,BIG_tech)))
 
 data_agreg <- merge(data_agreg,data_bio,all.y=T,all.x=T)
 
@@ -120,7 +129,7 @@ data_agreg$Technology <- droplevels(data_agreg$Technology)
 #levels(data_agreg$Technology) <- c("CSP", "Rooftop PV","Offshore Wind","Utility-scale PV","Onshore Wind")
 
 share_CPV <- 0.6
-levels(data_agreg$Technology) <- c("CSP", "Utility-scale PV","Offshore Wind","Utility-scale PV","Onshore Wind", "Biomass","Biomass","Biomass","Biomass")
+levels(data_agreg$Technology) <- c("Biogas","CSP", "Utility-scale PV","Offshore Wind","Utility-scale PV","Onshore Wind","Solid Biomass")
 data_agreg <- rbind(data_agreg %>% filter(Technology == "Utility-scale PV") %>% mutate(Installed_Cap = round(Installed_Cap*share_CPV,0)),
                     data_agreg %>% filter(Technology == "Utility-scale PV") %>% mutate(Technology = "Rooftop PV") %>%  mutate(Installed_Cap = round(Installed_Cap*(1-share_CPV),0)),
                     data_agreg %>% filter(!Technology == "Utility-scale PV"))
@@ -210,8 +219,8 @@ for (j in which(!Reg_IMC %in% existing_reg)){ #create missing regions rows and f
 }
 
 #Reordering factors
-Cap$Technology <- factor(Cap$Technology , levels = c("Onshore Wind","Offshore Wind","CSP","Utility-scale PV","Rooftop PV","Biomass"))%>% 
-  fct_recode(WND = "Onshore Wind",WNO ="Offshore Wind", CSP = "CSP",CPV = "Utility-scale PV", RPV = "Rooftop PV",BIO = "Biomass")
+Cap$Technology <- fct_recode(Cap$Technology,WND = "Onshore Wind",WNO ="Offshore Wind", CSP = "CSP",CPV = "Utility-scale PV", RPV = "Rooftop PV",BIG = "Biogas", SBI = "Solid Biomass")
+
 Cap$Region <- factor(Cap$Region, levels = Reg_IMC)
 Cap <- arrange(Cap,Technology,Region)
 Cap$Installed_Cap <- as.numeric(Cap$Installed_Cap)
@@ -219,6 +228,20 @@ Cap$Installed_Cap <- as.numeric(Cap$Installed_Cap)
 ###########################################################################
 ###########################################################################
 ###############################Exporting###################################
+###########################################################################
+###########################################################################
+
+for (i in techno){
+  data <- Cap  %>%  filter(Technology == i) %>% select(Installed_Cap)
+  names(data) <- paste0('//Installed cap for tech ',i,'. Data from IRENA')
+  write.csv2(data,paste0(path_export,"Cap_",year,"_",i,".csv"),row.names = FALSE)
+} #Generates Cap_2014_techno csv
+
+for (i in techno){
+  data <- Cap 
+  write.csv2(data,paste0(path_export,"Cap_",year,"_","ag.csv"),row.names = FALSE)
+} #Generates Cap_2014_ag csv
+
 ###########################################################################
 ###########################################################################
 

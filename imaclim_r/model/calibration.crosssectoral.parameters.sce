@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Thibault Briera, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -12,16 +12,16 @@
 //   ---*---   Discount rates
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-// les taux d'actualisation dans POLES (DISRN) sont egaux pour toutes les regions Ã  0,1
 disc_rate_elec = 0.1 * ones(nb_regions,techno_elec,TimeHorizon);
 
-
-// discount rate pour le coût de la renovations du résidentiels (now paid by states DG)
+disc_rate_EEI = 0.1 * ones(reg,1);
+disc_rate_et = 0.1 * ones(reg,1);
+// discount rate for the cost of renovation in private buildings (paid by states through DG)
 if NEXUS_resid_endogene==0
     disc_res=0.1;
 end
 
-// coût de la renovation de sbatiments dans les secteurs productifs
+// renovation cost of buildings in productive sectors
 disc_ser = 0.1;
 disc_ind = 0.1;
 disc_agr = 0.1;
@@ -43,6 +43,12 @@ CRF_composite=0.1*ones(4,1);
 //////////
 // inertia in nexus.electricity
 inertia_elec_CI = 2/3;
+
+if ind_new_rho_calib==1
+    inertia_elec_CI = 5/6;
+    inertia_elec_CI_init = inertia_elec_CI;
+    inertia_elec_CI_target = 2/3;
+end
 inertia_elec_markup = 3/4;
 
 //////////
@@ -92,9 +98,9 @@ inertia_wp_oilForGas = 2/3;
 // inertia on share for energy imports/exports
 // should we set to 1 for all scenarios ? this is a parameters that should be in the study frame of somewhere else.
 if new_Et_msh_computation ==0
-   inertia_share=1;
+    inertia_share=1;
 else
-   inertia_share=4/5;
+    inertia_share=4/5;
 end
 
 
@@ -107,3 +113,7 @@ base_charge_noFCC = 0.8*ones(nb_regions,1);
 
 // minimum markup for fossil sectors
 min_markup_fossil = 0.01;
+
+if ~isdef("nb_year_expect_LCC") & ind_short_term_hor==1 // Planning horizon (elec and buildings). nb_year_expect_LCC is shorter than the technical lifetime of the technologies to reflect shorter economic planning horizons and finance constraints (e.g. loan tenure)
+    nb_year_expect_LCC = 10; 
+end

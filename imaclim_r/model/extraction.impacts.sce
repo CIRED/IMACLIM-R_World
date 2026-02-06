@@ -2,48 +2,48 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas
+//     Florian Leblanc, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
 if ~isdef("SAVEDIR")
-exec (".."+filesep()+"preamble.sce");
-SAVEDIR = uigetdir(OUTPUT,"SAVEDIR please") 
+    exec (".."+filesep()+"preamble.sce");
+    SAVEDIR = uigetdir(OUTPUT,"SAVEDIR please") 
 end
 
-//exec(MODEL + "make_calib.sav.sce");
+//exec(MODEL + "make_calib.dat.sce");
 
 combi = run_name2combi(SAVEDIR);
 [ind_climat,ind_productivity_st,ind_catchup,ind_productivity]=combi2indices(combi);
-wasdone = isfile(SAVEDIR+"\save\IamDoneFolks.sav")
+wasdone = isfile(SAVEDIR+"\save\IamDoneFolks.dat")
 
 //////////////////////////////////////////// carbon tax
 nbMKT = get_nbMKT(combi);
 
-carbonTax = zeros(nbMKT,T+1);
+carbonTax = zeros(nbMKT,TimeHorizon+1);
 if ind_climat
     // out=sg_get_var(matname,[which_lines,[which_columns,[nb_lines,[should_revert,[which_years]]]]])
     carbonTax = sg_get_var("taxMKT");
 end
 mksav 'carbonTax'
 
-///////////////////////////////////////////////////missions de CO2 en tonnes
+///////////////////////////////////////////////////Total CO2 emission in t
 
-//emissions mondiales
+//world emissions
 ECO2W = sum(sg_get_var("E_reg_use",:),"r");
 mksav 'ECO2W'
 
-//emissions par region
+//emissions per region
 for k=1:reg
     ECO2reg(k,:) = sum(sg_get_var("E_reg_use",k),"r");
 end
 
-//emissions avant sequestration
+//emissions before sequestration
 ECO2woCCSw=sum(sg_get_var("E_CO2_wo_CCS",:),"r");
 mksav 'ECO2woCCSw'
 
 
-//emissions par usage
+//emissions per usage
 for u=1:nb_use
     ECO2W_use(u,:) = sum(sg_get_var("E_reg_use",:,u),"r");
 end
@@ -51,21 +51,21 @@ end
 emi_usage = [usenames, ECO2W_use];
 mkcsv emi_usage
 
-///////////////////////////////////////////////////////////// mobilit
-//voitures
+///////////////////////////////////////////////////////////// mobility
+//cars
 cars_out = [ strcomb(regnames(1:4), carnames) sg_get_var("MSH_cars",1:4)];
 mkcsv cars_out
 
-//pkmAir=sg_get_var("Tair").*sg_get_var("alphaair").*(pkmautomobileref*ones(1,T+1))/100;
-//pkmAuto=(sg_get_var("Tautomobile").*(pkmautomobileref*ones(1,T+1)/100));
-//pkmOT=sg_get_var("TOT").*sg_get_var("alphaOT").*(pkmautomobileref*ones(1,T+1))/100;
-//pkmNM=sg_get_var("TNM").*(pkmautomobileref*ones(1,T+1))/100;
+//pkmAir=sg_get_var("Tair").*sg_get_var("alphaair").*(pkmautomobileref*ones(1,TimeHorizon+1))/100;
+//pkmAuto=(sg_get_var("Tautomobile").*(pkmautomobileref*ones(1,TimeHorizon+1)/100));
+//pkmOT=sg_get_var("TOT").*sg_get_var("alphaOT").*(pkmautomobileref*ones(1,TimeHorizon+1))/100;
+//pkmNM=sg_get_var("TNM").*(pkmautomobileref*ones(1,TimeHorizon+1))/100;
 
 
 ///////////////////////////////////////////////// energies fossiles
 wp_coal=sg_get_var("wp",:,indice_coal,1);
 wp_oil=sg_get_var("wp",:,indice_oil,1)/ 7.33;
-wp_gas=sg_get_var("wp",:,indice_gaz,1);
+wp_gas=sg_get_var("wp",:,indice_gas,1);
 
 mksav("wp_coal");
 mksav("wp_oil");
@@ -74,7 +74,7 @@ mksav("wp_gas");
 pIndEner=sg_get_var("pIndEner");
 
 Qcoal = sg_get_var("Q",:,indice_coal);
-Qgas = sg_get_var("Q",:,indice_gaz);
+Qgas = sg_get_var("Q",:,indice_gas);
 Qoil = sg_get_var("Q",:,indice_oil)*7.33/365;
 charge_oil = sg_get_var("charge",:,indice_oil);
 
@@ -139,15 +139,15 @@ GDP_MER_real    = sgv("GDP_MER_real");
 GDP_PPP_nominal = sgv("GDP_PPP_nominal");
 GDP_PPP_real    = sgv("GDP_PPP_real");
 
-////////////////////////////////////////////////intensit energetique
+//////////////////////////////////////////////// energy intensity
 //if wasdone
 //    IEw=TFCw./realGDPw;
 //    IEocde=TFCocde./realGDPocde;
 //    IErow=TFCrow./realGDProw;
 //else
-//    IEw=zeros(1,T+1);
-//    IEocde=zeros(1,T+1);
-//    IErow=zeros(1,T+1);
+//    IEw=zeros(1,TimeHorizon+1);
+//    IEocde=zeros(1,TimeHorizon+1);
+//    IErow=zeros(1,TimeHorizon+1);
 //end
 //
 //mksav IEw
@@ -155,16 +155,16 @@ GDP_PPP_real    = sgv("GDP_PPP_real");
 //mksav IErow
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Utilite des menages
+//Household Utility
 
 //xsi=sg_get_var("xsi");
 //xsiT=sg_get_var("xsiT");
 //bnautomobile=sg_get_var("bnautomobile");
 //Tautomobile=sg_get_var("Tautomobile");
 //TNM=sg_get_var("TNM");
-//UtilityHH=zeros(reg,T+1);
+//UtilityHH=zeros(reg,TimeHorizon+1);
 //if wasdone
-//    for k=1:T+1
+//    for k=1:TimeHorizon+1
 //        xsi_temp=matrix(xsi(:,k),reg,(nb_secteur_conso-2));
 //        bnautomobile_temp=bnautomobile(:,k);
 //        Tautomobile_temp=Tautomobile(:,k);
@@ -194,21 +194,9 @@ Cap_elec_MW=sg_get_var("Cap_elec_MW");
 
 titres_elec = strcomb ( regnames, elecnames);
 
-//rapport_elec = [ ['' '' string(2000+(1:T+1))]; [titres_elec, string(Cap_elec_MW)]];
+//rapport_elec = [ ['' '' string(2000+(1:TimeHorizon+1))]; [titres_elec, string(Cap_elec_MW)]];
 //
 //mkcsv rapport_elec
-
-IC_elec=[
-sg_get_var("IC_2190")
-sg_get_var("IC_3650")
-sg_get_var("IC_5110")
-sg_get_var("IC_6570")
-sg_get_var("IC_730" )
-sg_get_var("IC_8030")
-sg_get_var("IC_8760")
-];
-
-mksav IC_elec
 
 wp_elec=sg_get_var("wp",:,indice_elec,1);
 
@@ -265,18 +253,18 @@ titres_output=[
 //    execstr ("output=[output;[data+emptystr(size("+data+",1),1),"+data+"]];");
 //end
  
-//execstr("output_"+ETUDE+" = [ ["""" string(2000+(1:T+1))]; output];")
+//execstr("output_"+ETUDE+" = [ ["""" string(2000+(1:TimeHorizon+1))]; output];")
 //
 //mkcsv("output_"+ETUDE);
 
 //ldcsv("sorties_EMF24");
 //smoothEMF = customSmooth(sorties_EMF24);
-//smoothEMF24 = smoothEMF(:,[5 10:10:T+1]-1);
+//smoothEMF24 = smoothEMF(:,[5 10:10:TimeHorizon+1]-1);
 //mkcsv("smoothEMF24");
 //mkcsv("smoothEMF24",OUTPUT);
 
-ldcsv("outputs_"+ETUDE);
-yearlySmoothOutputs= customSmooth(eval("outputs_"+ETUDE));
-execstr("smoothOutputs_"+ETUDE+" = yearlySmoothOutputs(:,[5 10:10:T+1]-1)");
+execstr("outputs_"+ETUDE+"=csvRead("""+SAVEDIR+"outputs_"+ETUDE+fit_combi(combi)+".csv"",""|"",[],[],[],""/\/\//"");");
+yearlySmoothOutputs= customSmooth(evstr("outputs_"+ETUDE));
+execstr("smoothOutputs_"+ETUDE+" = yearlySmoothOutputs(:,[5 10:10:TimeHorizon+1]-1)");
 mkcsv("smoothOutputs_"+ETUDE);
 mkcsv("smoothOutputs_"+ETUDE,OUTPUT);

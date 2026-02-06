@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 
 verbose = 1; // 1 for debugging/coding/coupling with NLU
 current_time_prev = current_time_im ;
@@ -21,9 +29,9 @@ end
 
 //Imaclim-R gives the proper variables to the Nexus Land-Use
 p_et_temp = matrix( pArmCI(indice_Et,indice_agriculture,:), nb_regions,1);
-p_gaz_temp = matrix( pArmCI(indice_gaz,indice_industrie,:), nb_regions,1);
+p_gaz_temp = matrix( pArmCI(indice_gas,indice_industrie,:), nb_regions,1);
 q_et_temp = matrix( energy_balance(refi_eb,et_eb,:), nb_regions,1);
-q_gaz_temp = matrix( (energy_balance(tpes_eb,gaz_eb,:) + energy_balance(pwplant_eb,gaz_eb,:) + energy_balance(losses_eb,gaz_eb,:)), nb_regions,1);
+q_gaz_temp = matrix( (energy_balance(tpes_eb,gas_eb,:) + energy_balance(pwplant_eb,gas_eb,:) + energy_balance(losses_eb,gas_eb,:)), nb_regions,1);
 wnatgas_price = sum(q_gaz_temp .* p_gaz_temp) / sum(q_gaz_temp);
 wlightoil_price = sum(q_et_temp .* p_et_temp) / sum(q_et_temp);
 wnatgas_price =  wp_gaz_anticip_nlu;
@@ -31,7 +39,7 @@ wnatgas_price =  wp_gaz_anticip_nlu;
 for regy=1:nb_regions
     reg_taxeC(regy) = taxMKT( whichMKT_reg_use(regy)) * 1e6 ; // ($/tCO2eq)
 end
-      printf("(\n      -------  Exec real past NLU for year " + (2000+current_time_im) + " with Imaclim equilibrium values \n");
+printf("(\n      -------  Exec real past NLU for year " + (2000+current_time_im) + " with Imaclim equilibrium values \n");
 
 // real biofuel production
 Q_biofuel_real = share_biofuel .* Q(:,indice_Et);
@@ -95,25 +103,25 @@ while (decrease_biofuel & ~reduced_all2G )
     catch
         break_loop = %T;
     end
-  if break_loop == %T
-      real_failed=%t;
-      //printf('\n      -------  NLU crashed : reducing biofuels 2G requirements \n');
-      printf('\n      ------->>>>  Break loop on : real execution failed \n')
-      //do_try_random=%f;
-      break_loop = %F;
-      fixed_nlu_startpoint = %t;
-      toomuch_bioener=%t;
-      if step_increase2G < sum(glob_in_bioelec_Et_reg)
-          glob_in_bioelec_Et_reg = glob_in_bioelec_Et_reg - step_increase2G * divide( glob_in_bioelec_Et_reg, sum(glob_in_bioelec_Et_reg), 0) ;
-      else
-          glob_in_bioelec_Et_reg = zeros(1,nb_regions);
-          reduced_all2G = %t;
-      end
-      // No reduction yet
-      decrease_biofuel=%f;
-  else
-      decrease_biofuel=%f;
-  end
+    if break_loop == %T
+        real_failed=%t;
+        //printf('\n      -------  NLU crashed : reducing biofuels 2G requirements \n');
+        printf('\n      ------->>>>  Break loop on : real execution failed \n')
+        //do_try_random=%f;
+        break_loop = %F;
+        fixed_nlu_startpoint = %t;
+        toomuch_bioener=%t;
+        if step_increase2G < sum(glob_in_bioelec_Et_reg)
+            glob_in_bioelec_Et_reg = glob_in_bioelec_Et_reg - step_increase2G * divide( glob_in_bioelec_Et_reg, sum(glob_in_bioelec_Et_reg), 0) ;
+        else
+            glob_in_bioelec_Et_reg = zeros(1,nb_regions);
+            reduced_all2G = %t;
+        end
+        // No reduction yet
+        decrease_biofuel=%f;
+    else
+        decrease_biofuel=%f;
+    end
 end
 do_try_random=%t;
 
@@ -128,12 +136,12 @@ end
 
 
 if ~real_failed
-   Tot_bioelec_cost_del_pre = Tot_bioelec_cost_del;
-   exec(codes_dir+"end_time_step.sce");
-   exec(MODEL+"nexus.landuse.desag.sce");
-   execstr ( list_nlu_prev+"p=" + list_nlu_prev + ";");
+    Tot_bioelec_cost_del_pre = Tot_bioelec_cost_del;
+    exec(codes_dir+"end_time_step.sce");
+    exec(MODEL+"nexus.landuse.desag.sce");
+    execstr ( list_nlu_prev+"p=" + list_nlu_prev + ";");
 else
-   execstr ( list_nlu_prev+"=" + list_nlu_prev + "p;");
+    execstr ( list_nlu_prev+"=" + list_nlu_prev + "p;");
 end
 
 // create nexus land-use outputs

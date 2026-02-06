@@ -289,7 +289,7 @@ def parseGTAPData(datasource, variables_infos, source_name='', line_nr=0, dimens
                     # we increase when the first value arrives, then it will be 0
                     current_table_dimension_indices[0] = -1
                     current_table_dimension_values = [[]] * (len(variable_dimension_sizes) - 2)
-                    result[in_variable_from_header] = np.zeros(variable_dimension_sizes, dtype=np.float)
+                    result[in_variable_from_header] = np.zeros(variable_dimension_sizes, dtype=float)
                     result_table = result[in_variable_from_header]
             elif re.search('^ *coefficient +', next_line):
                 coefficient_line_variable_prototype = re.sub('^ *coefficient +', '', next_line)
@@ -380,7 +380,7 @@ def parseGTAPData(datasource, variables_infos, source_name='', line_nr=0, dimens
                                 in_matrix = None
                             else:
                                 in_data = ['matrix']
-                                result[in_variable_from_header] = np.zeros(variable_dimension_sizes, dtype=np.float)
+                                result[in_variable_from_header] = np.zeros(variable_dimension_sizes, dtype=float)
                                 result_table = result[in_variable_from_header]
                             header_array = [header_item.strip() for header_item in next_line.split("|")]
                             # first is the prototype
@@ -400,7 +400,7 @@ def parseGTAPData(datasource, variables_infos, source_name='', line_nr=0, dimens
                             in_data = ['array']
                             column_dimension_values = []
                             column_idx = 0
-                        result[in_variable_from_header] = np.zeros(variable_dimension_sizes, dtype=np.float)
+                        result[in_variable_from_header] = np.zeros(variable_dimension_sizes, dtype=float)
                         result_table = result[in_variable_from_header]
                 if not in_data:
                     sys.stderr.write(common_cired.encode_output_string("ERROR: "+source_name+": "+str(line_nr)+": unexpected line: "+next_line+"\n"))
@@ -1122,7 +1122,7 @@ def read_dimensions_tables_file(file_path, selected_variables=None):
                     variable_dimensions_dimension_numbers.append(len(dimensions_indices[dimension]))
                     data_counter *= len(dimensions_indices[dimension])
             if selected_variables is None or variable_name in selected_variables:
-                results[variable_name] = np.zeros(variable_dimensions_dimension_numbers, dtype=np.float)
+                results[variable_name] = np.zeros(variable_dimensions_dimension_numbers, dtype=float)
             results_dimensions[variable_name] = variable_dimensions_names
             header_in_serie = ['data', data_counter, variable_name, variable_dimensions_indices, variable_dimensions_names]
         else:

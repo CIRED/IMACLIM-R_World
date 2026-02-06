@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Ruben Bibas
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 counterLine=1;
 //1	Population															million
 outputs_temp(nbLines*(k-1)+counterLine,i)=Ltot(k)/1e6;
@@ -16,21 +24,21 @@ outputs_temp(nbLines*(k-1)+counterLine,i)=(sum(energy_balance(tpes_eb,fossil_pri
 counterLine=counterLine+1;
 //6	Primary Energy|Fossil|w/ CCS												EJ/yr 
 outputs_temp(nbLines*(k-1)+counterLine,i) = Mtoe_EJ * (..
-- energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k)    .. // autoconsommation de charbon dans la production de charbon pour le CTL
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k)    .. // raffineries (ctl)
-- energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. // coal to elec
-- energy_balance(pwplant_eb,gaz_eb,k) * sh_CCS_gaz_Q_gaz(k) .. // gaz to elec
+    - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k)    .. // autoconsommation de charbon dans la production de charbon pour le CTL
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k)    .. // raffineries (ctl)
+    - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. // coal to elec
+    - energy_balance(pwplant_eb,gas_eb,k) * sh_CCS_gaz_Q_gaz(k) .. // gaz to elec
 );
 counterLine=counterLine+1;
 //7	Primary Energy|Fossil|w/o CCS												EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= Mtoe_EJ * (..
-sum(energy_balance(tpes_eb,fossil_primary_eb,k)) ..
-- (..
-- energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k)    .. // autoconsommation de charbon dans la production de charbon pour le CTL
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k)    .. // raffineries (ctl)
-- energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. // coal to elec
-- energy_balance(pwplant_eb,gaz_eb,k) * sh_CCS_gaz_Q_gaz(k) ..  // gaz to elec
-)..
+    sum(energy_balance(tpes_eb,fossil_primary_eb,k)) ..
+    - (..
+    - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k)    .. // autoconsommation de charbon dans la production de charbon pour le CTL
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k)    .. // raffineries (ctl)
+    - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. // coal to elec
+    - energy_balance(pwplant_eb,gas_eb,k) * sh_CCS_gaz_Q_gaz(k) ..  // gaz to elec
+    )..
 );
 counterLine=counterLine+1;
 //8	Primary Energy|Coal|													EJ/yr
@@ -38,19 +46,19 @@ outputs_temp(nbLines*(k-1)+counterLine,i)=energy_balance(tpes_eb,coal_eb,k)*Mtoe
 counterLine=counterLine+1;
 //9	Primary Energy|Coal|w/ CCS												EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i) = (..
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // raffineries (ctl)
-- energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. // autoconsommation de charbon dans la production de charbon pour le CTL
-- energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. // coal to elec
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // raffineries (ctl)
+    - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. // autoconsommation de charbon dans la production de charbon pour le CTL
+    - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. // coal to elec
 )*Mtoe_EJ;
 counterLine=counterLine+1;
 //10	Primary Energy|Coal|w/o CCS												EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i) = (..
-energy_balance(tpes_eb,coal_eb,k) ..
-- (..
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // raffineries (ctl)
-- energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. // autoconsommation de charbon dans la production de charbon pour le CTL
-- energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. // coal to elec
-)..
+    energy_balance(tpes_eb,coal_eb,k) ..
+    - (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // raffineries (ctl)
+    - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. // autoconsommation de charbon dans la production de charbon pour le CTL
+    - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. // coal to elec
+    )..
 )*Mtoe_EJ;
 counterLine=counterLine+1;
 //11	Primary Energy|Oil														EJ/yr
@@ -63,15 +71,15 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i) = energy_balance(tpes_eb,oil_eb,k)*Mtoe_EJ;
 counterLine=counterLine+1;
 //14	Primary Energy|Gas| 													EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i)= energy_balance(tpes_eb,gaz_eb,k)*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)= energy_balance(tpes_eb,gas_eb,k)*Mtoe_EJ;
 counterLine=counterLine+1;
 //15	Primary Energy|Gas|w/ CCS												EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i)= - energy_balance(pwplant_eb,gaz_eb) * sh_CCS_gaz_Q_gaz(k) * Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)= - energy_balance(pwplant_eb,gas_eb) * sh_CCS_gaz_Q_gaz(k) * Mtoe_EJ;
 counterLine=counterLine+1;
 //16	Primary Energy|Gas|w/o CCS												EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)=(..
-energy_balance(tpes_eb,gaz_eb,k) ..
-- ( - energy_balance(pwplant_eb,gaz_eb)) * sh_CCS_gaz_Q_gaz(k) ..
+    energy_balance(tpes_eb,gas_eb,k) ..
+    - ( - energy_balance(pwplant_eb,gas_eb)) * sh_CCS_gaz_Q_gaz(k) ..
 )*Mtoe_EJ;
 counterLine=counterLine+1;
 //17	Primary Energy|Biomass													EJ/yr
@@ -112,7 +120,7 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //29	Primary Energy|Secondary Energy Trade (Imports-Exports)|Total					EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= ..
--(energy_balance(imp_eb,et_eb,k)   + energy_balance(exp_eb,et_eb,k))*Mtoe_EJ ..
+    -(energy_balance(imp_eb,et_eb,k)   + energy_balance(exp_eb,et_eb,k))*Mtoe_EJ ..
 -(energy_balance(imp_eb,elec_eb,k) + energy_balance(exp_eb,elec_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //30	Primary Energy|Other													EJ/yr
@@ -155,13 +163,13 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i) = energy_balance(pwplant_eb,elec_eb,k) * sum(msh_elec_techno(k,technoBiomass))*Mtoe_EJ;
 counterLine=counterLine+1;
 //43	Secondary Energy|Electricity|Biomass|w/ CCS	EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i) = energy_balance(pwplant_eb,elec_eb,k) * sum(msh_elec_techno(k,indice_BIGCCS))*Mtoe_EJ; 
+outputs_temp(nbLines*(k-1)+counterLine,i) = energy_balance(pwplant_eb,elec_eb,k) * sum(msh_elec_techno(k,indice_BIS))*Mtoe_EJ; 
 counterLine=counterLine+1;
 //44	Secondary Energy|Electricity|Biomass|w/o CCS	EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i) = energy_balance(pwplant_eb,elec_eb,k) * sum(msh_elec_techno(k,indice_BIGCC))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i) = energy_balance(pwplant_eb,elec_eb,k) * sum(msh_elec_techno(k,technoBiomassWOCCS))*Mtoe_EJ;
 counterLine=counterLine+1;
 //45	Secondary Energy|Electricity|Nuclear	EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i)= energy_balance(pwplant_eb,elec_eb,k) * sum(msh_elec_techno(k,technoElecNuke))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)= energy_balance(pwplant_eb,elec_eb,k) * sum(msh_elec_techno(k,technoNuke))*Mtoe_EJ;
 counterLine=counterLine+1;
 //46	Secondary Energy|Electricity|Non-Biomass Renewables	(including hydro) EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= energy_balance(pwplant_eb,elec_eb,k) * sum(msh_elec_techno(k,technoNonBiomassRen))*Mtoe_EJ;
@@ -236,10 +244,10 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //70 Secondary Energy|Gases	EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i)=(energy_balance(tpes_eb,gaz_eb,k) + energy_balance(losses_eb,gaz_eb,k))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)=(energy_balance(tpes_eb,gas_eb,k) + energy_balance(losses_eb,gas_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //71 Secondary Energy|Gases|Natural gas	EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i)=(energy_balance(tpes_eb,gaz_eb,k) + energy_balance(pwplant_eb,gaz_eb,k) + energy_balance(losses_eb,gaz_eb,k))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)=(energy_balance(tpes_eb,gas_eb,k) + energy_balance(pwplant_eb,gas_eb,k) + energy_balance(losses_eb,gas_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //72 Secondary Energy|Gases|Biomass	EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
@@ -404,7 +412,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //126	Final Energy|Gases	EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i)=energy_balance(conso_tot_eb,gaz_eb,k)*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)=energy_balance(conso_tot_eb,gas_eb,k)*Mtoe_EJ;
 counterLine=counterLine+1;
 //127	Final Energy|Electricity	EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)=energy_balance(conso_tot_eb,elec_eb,k)*Mtoe_EJ;
@@ -498,22 +506,22 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //157 Emissions|CO2|Energy|Demand|Residential and Commercial	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= (..
-+ coef_Q_CO2_DF(k,coal)       .* energy_balance(conso_resid_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil)        .* energy_balance(conso_resid_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz)        .* energy_balance(conso_resid_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)         .* energy_balance(conso_resid_eb,et_eb,k)   ..
-+ coef_Q_CO2_CI(coal,compo,k) .* energy_balance(conso_comp_eb, coal_eb,k) ..
-+ coef_Q_CO2_CI(oil,compo,k)  .* energy_balance(conso_comp_eb, oil_eb,k) ..
-+ coef_Q_CO2_CI(gaz,compo,k)  .* energy_balance(conso_comp_eb, gaz_eb,k)  ..
-+ coef_Q_CO2_CI(et,compo,k)   .* energy_balance(conso_comp_eb, et_eb,k)   ..
+    + coef_Q_CO2_DF(k,coal)       .* energy_balance(conso_resid_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil)        .* energy_balance(conso_resid_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz)        .* energy_balance(conso_resid_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)         .* energy_balance(conso_resid_eb,et_eb,k)   ..
+    + coef_Q_CO2_CI(coal,compo,k) .* energy_balance(conso_comp_eb, coal_eb,k) ..
+    + coef_Q_CO2_CI(oil,compo,k)  .* energy_balance(conso_comp_eb, oil_eb,k) ..
+    + coef_Q_CO2_CI(gaz,compo,k)  .* energy_balance(conso_comp_eb, gas_eb,k)  ..
+    + coef_Q_CO2_CI(et,compo,k)   .* energy_balance(conso_comp_eb, et_eb,k)   ..
 )/1e6;
 counterLine=counterLine+1;
 //158 Emissions|CO2|Energy|Demand|Residential	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= (..
-+ coef_Q_CO2_DF(k,coal)       .* energy_balance(conso_resid_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil)        .* energy_balance(conso_resid_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz)        .* energy_balance(conso_resid_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)         .* energy_balance(conso_resid_eb,et_eb,k)   ..
+    + coef_Q_CO2_DF(k,coal)       .* energy_balance(conso_resid_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil)        .* energy_balance(conso_resid_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz)        .* energy_balance(conso_resid_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)         .* energy_balance(conso_resid_eb,et_eb,k)   ..
 )/1e6;
 counterLine=counterLine+1;
 //159 Emissions|CO2|Energy|Demand|Residential|Heating	Mt CO2/yr
@@ -533,10 +541,10 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //164 Emissions|CO2|Energy|Demand|Commercial	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= (..
-+ coef_Q_CO2_CI(coal,compo,k) .* energy_balance(conso_comp_eb, coal_eb,k) ..
-+ coef_Q_CO2_CI(oil,compo,k)  .* energy_balance(conso_comp_eb, oil_eb,k) ..
-+ coef_Q_CO2_CI(gaz,compo,k)  .* energy_balance(conso_comp_eb, gaz_eb,k)  ..
-+ coef_Q_CO2_CI(et,compo,k)   .* energy_balance(conso_comp_eb, et_eb,k)   ..
+    + coef_Q_CO2_CI(coal,compo,k) .* energy_balance(conso_comp_eb, coal_eb,k) ..
+    + coef_Q_CO2_CI(oil,compo,k)  .* energy_balance(conso_comp_eb, oil_eb,k) ..
+    + coef_Q_CO2_CI(gaz,compo,k)  .* energy_balance(conso_comp_eb, gas_eb,k)  ..
+    + coef_Q_CO2_CI(et,compo,k)   .* energy_balance(conso_comp_eb, et_eb,k)   ..
 )/1e6;
 counterLine=counterLine+1;
 //165 Emissions|CO2|Energy|Demand|AFOFI	Mt CO2/yr
@@ -544,13 +552,13 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //166 Emissions|CO2|Energy|Demand|Transportation	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= (..
-+ coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
-+ E_reg_use(k,iu_air) ..
-+ E_reg_use(k,iu_mer) ..
-+ E_reg_use(k,iu_OT)  ..
+    + coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
+    + E_reg_use(k,iu_air) ..
+    + E_reg_use(k,iu_mer) ..
+    + E_reg_use(k,iu_OT)  ..
 )/1e6;
 counterLine=counterLine+1;
 //167 Emissions|CO2|Energy|Demand|Transportation|Aviation	Mt CO2/yr
@@ -564,30 +572,30 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //170 Emissions|CO2|Energy|Demand|Transportation|Road, Rail and Domestic Shipping	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= (..
-+ coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
-+ E_reg_use(k,iu_mer) ..
-+ E_reg_use(k,iu_OT)  ..
+    + coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
+    + E_reg_use(k,iu_mer) ..
+    + E_reg_use(k,iu_OT)  ..
 )/1e6;
 counterLine=counterLine+1;
 //171 Emissions|CO2|Energy|Demand|Transportation|Road	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= (..
-+ coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
-+ E_reg_use(k,iu_OT)  ..
+    + coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
+    + E_reg_use(k,iu_OT)  ..
 )/1e6;
 counterLine=counterLine+1;
 //172 Emissions|CO2|Energy|Demand|Transportation|Passenger|Road	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= (..
-+ coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
-+ E_reg_use(k,iu_OT)*DF(k,indice_OT )/(Q(k,indice_OT )-Exp(k,indice_OT )+Imp(k,indice_OT ))  ..
+    + coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
+    + E_reg_use(k,iu_OT)*DF(k,indice_OT )/(Q(k,indice_OT )-Exp(k,indice_OT )+Imp(k,indice_OT ))  ..
 )/1e6;
 counterLine=counterLine+1;
 //173 Emissions|CO2|Energy|Demand|Transportation|Freight|Road	Mt CO2/yr
@@ -595,10 +603,10 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = (E_reg_use(k,iu_OT)*(1-DF(k,indice_O
 counterLine=counterLine+1;
 //174 Emissions|CO2|Energy|Demand|Transportation|Passenger|Road|LDV	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= (..
-+ coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
+    + coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
 )/1e6;
 counterLine=counterLine+1;
 //175 Emissions|CO2|Energy|Demand|Transportation|Rail	Mt CO2/yr
@@ -633,19 +641,19 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //185 Carbon Sequestration|CCS	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= ( ..
-+ coef_Q_CO2_ref(k,coal) * (..
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
-- energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
-) ..
-- coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
-- coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
-+ coef_Q_CO2_ref(k,gaz) * (..
-- energy_balance(refi_eb,   gaz_eb,k) * share_CCS_CTL(k) ..
-- energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb)  * sum(msh_elec_techno(k,[indice_GGS])) ..
-) ..
-- emi_evitee(k,:) ..
+    + coef_Q_CO2_ref(k,coal) * (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
+    - energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
+    ) ..
+    - coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
+    - coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
+    + coef_Q_CO2_ref(k,gaz) * (..
+    - energy_balance(refi_eb,   gas_eb,k) * share_CCS_CTL(k) ..
+    - energy_balance(losses_eb, gas_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+    ) ..
+    - emi_evitee(k,:) ..
 )/1e6; 
 counterLine=counterLine+1;
 //186 Carbon Sequestration|CCS|Biomass	Mt CO2/yr
@@ -653,17 +661,17 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = emi_evitee(k) / 1e6;
 counterLine=counterLine+1;
 //187 Carbon Sequestration|CCS|Fossil	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= ( ..
-+ coef_Q_CO2_ref(k,coal) * (..
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
-- energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
-) ..
-- coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
-- coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
-+ coef_Q_CO2_ref(k,gaz) * (..
-- energy_balance(refi_eb,   gaz_eb,k) * share_CCS_CTL(k) ..
-- energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+    + coef_Q_CO2_ref(k,coal) * (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
+    - energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
+    ) ..
+    - coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
+    - coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
+    + coef_Q_CO2_ref(k,gaz) * (..
+    - energy_balance(refi_eb,   gas_eb,k) * share_CCS_CTL(k) ..
+    - energy_balance(losses_eb, gas_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb)  * sum(msh_elec_techno(k,[indice_GGS])) ..
 ) )/1e6; 
 counterLine=counterLine+1;
 //188 Carbon Sequestration|CCS|Industrial Processes	Mt CO2/yr
@@ -698,26 +706,26 @@ outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 counterLine=counterLine+1;
 //198 Carbon Sequestration|CCS|Fossil|Energy|Supply	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= ( ..
-+ coef_Q_CO2_ref(k,coal) * (..
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
-- energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
-) ..
-- coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
-- coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
-+ coef_Q_CO2_ref(k,gaz) * (..
-- energy_balance(refi_eb,   gaz_eb,k) * share_CCS_CTL(k) ..
-- energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+    + coef_Q_CO2_ref(k,coal) * (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
+    - energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
+    ) ..
+    - coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
+    - coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
+    + coef_Q_CO2_ref(k,gaz) * (..
+    - energy_balance(refi_eb,   gas_eb,k) * share_CCS_CTL(k) ..
+    - energy_balance(losses_eb, gas_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb)  * sum(msh_elec_techno(k,[indice_GGS])) ..
 ) )/1e6; 
 counterLine=counterLine+1;
 //199 Carbon Sequestration|CCS|Fossil|Energy|Supply|Electricity	Mt CO2/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= ( ..
-+ coef_Q_CO2_ref(k,coal) * (..
-+ energy_balance(pwplant_eb,elec_eb)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
-) ..
-+ coef_Q_CO2_ref(k,gaz) * (..
-+ energy_balance(pwplant_eb,elec_eb)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+    + coef_Q_CO2_ref(k,coal) * (..
+    + energy_balance(pwplant_eb,elec_eb)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
+    ) ..
+    + coef_Q_CO2_ref(k,gaz) * (..
+    + energy_balance(pwplant_eb,elec_eb)  * sum(msh_elec_techno(k,[indice_GGS])) ..
 ) )/1e6; 
 counterLine=counterLine+1;
 //200 Carbon Sequestration|CCS|Fossil|Energy|Supply|Gases	Mt CO2/yr
@@ -1150,7 +1158,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i)=p(k,indice_oil)*usd2001_2005/tep2gj;
 counterLine=counterLine+1;
 //335 Price|Primary Energy|Natural Gas	US$2005/GJ
-outputs_temp(nbLines*(k-1)+counterLine,i)=p(k,indice_gaz)*usd2001_2005/tep2gj;
+outputs_temp(nbLines*(k-1)+counterLine,i)=p(k,indice_gas)*usd2001_2005/tep2gj;
 counterLine=counterLine+1;
 //336 Price|Primary Energy|Coal	US$2005/GJ
 outputs_temp(nbLines*(k-1)+counterLine,i)=p(k,indice_coal)*usd2001_2005/tep2gj;
@@ -1159,8 +1167,8 @@ counterLine=counterLine+1;
 if sum(prod_elec_techno(k,technoBiomass)) + prod_BFU(k)==0
     outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
 else
-    qBiom = (msh_elec_techno(k,indice_BIGCC) / rho_elec_nexus(k,indice_BIGCC) ..
-    + msh_elec_techno(k,indice_BIGCCS) / rho_elec_nexus(k,indice_BIGCCS))..
+    qBiom = (sum(msh_elec_techno(k,technoBiomassWOCCS) ./ rho_elec_nexus(k,technoBiomassWOCCS)) ..
+        + msh_elec_techno(k,indice_BIS) / rho_elec_nexus(k,indice_BIS))..
     * energy_balance(pwplant_eb,8,k);
     outputs_temp(nbLines*(k-1)+counterLine,i)=(prod_BFU(k) *  p(k,et) + costBIGCC_noTax(k) * qBiom) * usd2001_2005 / tep2gj ..
     /(qBiom + prod_BFU(k));
@@ -1221,7 +1229,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_indu_eb,oil_eb,k)+energy_balance(conso_indu_eb,et_eb,k)+energy_balance(conso_agri_eb,oil_eb,k) + energy_balance(conso_agri_eb,et_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //354 Final Energy|Industry|Gases
-outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_indu_eb,gaz_eb,k)+energy_balance(conso_agri_eb,gaz_eb,k))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_indu_eb,gas_eb,k)+energy_balance(conso_agri_eb,gas_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //355 Final Energy|Industry|Electricity
 outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_indu_eb,elec_eb,k)+energy_balance(conso_agri_eb,elec_eb,k))*Mtoe_EJ;
@@ -1248,7 +1256,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_resid_eb,oil_eb,k)+energy_balance(conso_resid_eb,et_eb,k)+energy_balance(conso_comp_eb,oil_eb,k) + energy_balance(conso_comp_eb,et_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //363 Final Energy|Residential and Commercial|Gases
-outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_resid_eb,gaz_eb,k)+energy_balance(conso_comp_eb,gaz_eb,k))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_resid_eb,gas_eb,k)+energy_balance(conso_comp_eb,gas_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //364 Final Energy|Residential and Commercial|Electricity
 outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_resid_eb,elec_eb,k)+energy_balance(conso_comp_eb,elec_eb,k))*Mtoe_EJ;
@@ -1275,7 +1283,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i) = sum(energy_balance(conso_transport_eb,et_eb,k))*share_CTL(k)*Mtoe_EJ;
 counterLine=counterLine+1;
 //372 Final Energy|Transportation|Gases   EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i) = (energy_balance(conso_air_eb,gaz_eb,k)+energy_balance(conso_ot_eb,gaz_eb,k)+energy_balance(conso_car_eb,gaz_eb,k))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i) = (energy_balance(conso_air_eb,gas_eb,k)+energy_balance(conso_ot_eb,gas_eb,k)+energy_balance(conso_car_eb,gas_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //373 Final Energy|Transportation|Hydrogen
 outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;
@@ -1317,7 +1325,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_btp_eb,oil_eb,k)+energy_balance(conso_btp_eb,et_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //386 Final Energy|Other Sector|Gases 
-outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_btp_eb,gaz_eb,k))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_btp_eb,gas_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //387 Final Energy|Other Sector|Electricity
 outputs_temp(nbLines*(k-1)+counterLine,i)= (energy_balance(conso_btp_eb,elec_eb,k))*Mtoe_EJ;
@@ -1342,7 +1350,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i)= -(energy_balance(imp_eb,coal_eb,k) + energy_balance(exp_eb,coal_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //395 Trade|Primary Energy|Gas|Volume	(Exports-Imports) EJ/yr
-outputs_temp(nbLines*(k-1)+counterLine,i)= -(energy_balance(imp_eb,gaz_eb,k) + energy_balance(exp_eb,gaz_eb,k))*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,i)= -(energy_balance(imp_eb,gas_eb,k) + energy_balance(exp_eb,gas_eb,k))*Mtoe_EJ;
 counterLine=counterLine+1;
 //396 Trade|Primary Energy|Oil|Volume	(Exports-Imports) EJ/yr
 outputs_temp(nbLines*(k-1)+counterLine,i)= -(energy_balance(imp_eb,oil_eb,k) + energy_balance(exp_eb,oil_eb,k))*Mtoe_EJ;
@@ -1442,7 +1450,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i) = sum(delta_Cap_elec_MW_1(k,technoBiomass).*CINV_MW_nexus(k,technoBiomass))/10^3*usd2001_2005/1000;
 counterLine=counterLine+1;
 //428 Investment|Energy Supply|Electricity|Non-fossil|Nuclear
-outputs_temp(nbLines*(k-1)+counterLine,i) = sum(delta_Cap_elec_MW_1(k,technoElecNuke).*CINV_MW_nexus(k,technoElecNuke))/10^3*usd2001_2005/1000;
+outputs_temp(nbLines*(k-1)+counterLine,i) = sum(delta_Cap_elec_MW_1(k,technoNuke).*CINV_MW_nexus(k,technoNuke))/10^3*usd2001_2005/1000;
 counterLine=counterLine+1;
 //429 Investment|Energy Supply|Electricity|Non-fossil|Non-Biomass Renewables
 outputs_temp(nbLines*(k-1)+counterLine,i) = sum(delta_Cap_elec_MW_1(k,technoNonBiomassRen).*CINV_MW_nexus(k,technoNonBiomassRen))/10^3*usd2001_2005/1000;
@@ -1753,13 +1761,13 @@ counterLine=counterLine+1;
 outputs_diag(nbLines*(k-1)+counterLine,i) = sum(Cap_elec_MW(k,technoBiomass))/1000;
 counterLine=counterLine+1;
 //531 Capacity|Electricity|Biomass|w/ CCS	GW
-outputs_temp(nbLines*(k-1)+counterLine,i) = Cap_elec_MW(k,indice_BIGCCS)/ 1000;
+outputs_temp(nbLines*(k-1)+counterLine,i) = Cap_elec_MW(k,indice_BIS)/ 1000;
 counterLine=counterLine+1;
 //532 Capacity|Electricity|Biomass|w/o CCS	GW
-outputs_temp(nbLines*(k-1)+counterLine,i) = Cap_elec_MW(k,indice_BIGCC)/ 1000;
+outputs_temp(nbLines*(k-1)+counterLine,i) = sum(Cap_elec_MW(k,technoBiomassWOCCS))/ 1000;
 counterLine=counterLine+1;
 //533 Capacity|Electricity|Coal	GW
-outputs_temp(nbLines*(k-1)+counterLine,i) = sum(Cap_elec_MW(k,technoCoal))/1000;
+outputs_temp(nbLines*(k-1)+counterLine,i) = sum(Cap_elec_MW(k,technoElecCoal))/1000;
 counterLine=counterLine+1;
 //534 Capacity|Electricity|Coal|w/ CCS	GW
 outputs_temp(nbLines*(k-1)+counterLine,i) = sum(Cap_elec_MW(k,technoCoalWCCS))/1000;
@@ -1783,7 +1791,7 @@ counterLine=counterLine+1;
 outputs_temp(nbLines*(k-1)+counterLine,i) = sum(Cap_elec_MW(k,technoElecHydro))/1000;
 counterLine=counterLine+1;
 //541 Capacity|Electricity|Nuclear	GW
-outputs_temp(nbLines*(k-1)+counterLine,i) = sum(Cap_elec_MW(k,technoElecNuke))/1000;
+outputs_temp(nbLines*(k-1)+counterLine,i) = sum(Cap_elec_MW(k,technoNuke))/1000;
 counterLine=counterLine+1;
 //542 Capacity|Electricity|Ocean	GW
 outputs_temp(nbLines*(k-1)+counterLine,i) = %nan;

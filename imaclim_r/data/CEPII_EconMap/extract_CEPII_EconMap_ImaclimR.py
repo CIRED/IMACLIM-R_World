@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Nicolas Graves, Florian Leblanc
+#     Florian Leblanc, Nicolas Graves
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -34,7 +34,7 @@ GTAPpath = '/data/shared/GTAP/'
 
 ###################
 # Loading argument
-parser = argparse.ArgumentParser('aggregate GTAP data')
+parser = argparse.ArgumentParser('CEPII EconMap')
 
 parser.add_argument('--data-path', nargs='?',const=data_path_default, type=str, default=data_path_default)
 

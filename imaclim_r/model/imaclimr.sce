@@ -2,41 +2,54 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Ruben Bibas, Julie Rozenberg, Adrien Vogt-Schilb, Nicolas Graves
+//     Florian Leblanc, Adrien Vogt-Schilb, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////
-//  IMACLIM-R
-//  International Multisector Computable General Equilibrium Model
-//
 ////////////////////----------------------------------------------------/////////////////////
 ////////////////////           main executable file                     /////////////////////
 ////////////////////----------------------------------------------------/////////////////////
+
+message(" ");
+message(" ");
+message(" ");
+message(" _____ __  __          _____ _      _____ __  __        _____   __          __        _     _  ");
+message(" |_   _|  \/  |   /\   / ____| |    |_   _|  \/  |      |  __ \  \ \        / /       | |   | | ");
+message("   | | | \  / |  /  \ | |    | |      | | | \  / |______| |__) |  \ \  /\  / /__  _ __| | __| | ");
+message("   | | | |\/| | / /\ \| |    | |      | | | |\/| |______|  _  /    \ \/  \/ / _ \| ''__| |/ _` | ");
+message("  _| |_| |  | |/ ____ \ |____| |____ _| |_| |  | |      | | \ \     \  /\  / (_) | |  | | (_| | ");
+message(" |_____|_|  |_/_/    \_\_____|______|_____|_|  |_|      |_|  \_\     \/  \/ \___/|_|  |_|\__,_| ");
+message(" "); 
+message(" ");
+message(" IMACLIM-R World 2.0");
+message(" IMpact Assessment of CLIMate policies");
+message(" ");
+message(" Authors: Ruben Bibas, Thibault Briera, Renaud Crassous, Gabriele Dabbaghian, Augustin Danneaux,");
+message("          Liesbeth Defosse, Patrice Dumas, Vivien Fisch-Romito, Yann Gaucher, Nicolas Graves,");
+message("          Céline Guivarch, Meriem Hamdi-Cherif, Thomas Le Gallic, Florian Leblanc, Julien Lefèvre,");
+message("          Aurélie Méjean, Eoin Ó Broin, Julie Rozenberg, Olivier Sassi, Adrien Vogt-Schilb,");
+message("          Henri Waisman, Séverine Wiltgen");
+message(" ");
+message(" ");
+message(" ");
+
 tic
-//PREAMBULE
+//PREAMBLE
 exec("preamble.sce");
 if ~isdef("scenario_commentary")
     scenario_commentary = mgetl(PARENT + 'text_for_scenarios.txt',1);
 end
-disp(scenario_commentary);
+message(scenario_commentary);
 
 //DEFAULT VALUES
-if ~isdef("metaRecMessOn")
-    metaRecMessOn = %t;     //Activer les messages d'avancement de la résolution récursive
-end
 if ~isdef ("metaBeepOn")
-    metaBeepOn = %t;        //Activer les beeps CPU
-end
-if ~isdef ( "metaExtractioOn")
-    metaExtractioOn=%f;     //Activer la grande extraction (gros truc d'olivier). extraction-ETUDE est exécuté quoiqu'il arrive (dans terminate)
+    metaBeepOn = %t;        //CPU beps activation
 end
 if ~isdef ("loadingResults")
-    loadingResults=%f;     //Vrai si imaclim est lancé par load results (only the begining of imaclim is runed)
+    loadingResults=%f;     //True is IMACLIM-R is launched from load_results (only the begining of the model is run)
 end
 if ~isdef ("combi")
-    combi = 1;           //Combinaison par defaut (variantes de l'ETUDE (etude est définie dans preamble))
+    combi = 1;           //Default scenario combination
 end
 
 
@@ -49,31 +62,38 @@ sg_make_list();
 // RUN NAME
 ////////////////////////////////////////////////////////////
 run_name=combi2run_name(combi)
-if loadingResults  // si On a lancé imaclim en lui donnant un SAVEDIR pour executer que le debut (asser rare)
-    run_id = svdr2rid(SAVEDIR);
+if loadingResults  // Rare case we launch IMACLIM-R by giving a "SAVEDIR", an already existing run
+    un_id = svdr2rid(SAVEDIR);
     combi = run_name2combi(run_id);
     say("combi","run_id","SAVEDIR");
-else //cas "normal"
-    //Creation d'une run_date sous la forme 2009-02-04 10h04
+else // Most common usage
+    //Create a run_date with the format 2009-02-04 10h04
     run_date = mydate();
     if ~isdef('suffix2combiName')
         suffix2combiName='';
     end
     run_id = run_name+suffix2combiName + "_" +run_date ;
-    say("run_id");
+    printf('\n');
+    message("The run Idendifier is: "+run_id);
     SAVEDIR = OUTPUT+run_id+sep;
     mkdir ( SAVEDIR);
-    dir_hide(SAVEDIR);//cache le dossier de sortie. Repparaitra à la fin.
+    dir_hide(SAVEDIR);//Hide the run output folder. Windows only
     LOGDIR = SAVEDIR + "log" + sep;
     mkdir(LOGDIR);
 end
 mkdir(SAVEDIR,"save");
 
 diary(LOGDIR+"summary.log");
-say("run_id");
+
+step_model = 0;
 
 //////////////////////////////////////////////////////////////////////////////
-//    PARAMETERS OF THE STUDY
+//    PARAMETERS OF THE STUDY - STEP 1 - Prime parameters (specific)
+step_model = step_model + 1;
+
+printf('\n');
+message("STEP " + string(step_model)+": DEFINE PARAMETERS OF THE STUDY (1)");
+
 exec(STUDY+ETUDE+".sce");
 
 // metadata for the diagnostic of scenarios
@@ -89,18 +109,6 @@ if getos()=="Linux" & tool_output_diagnostic
     diagnotic_list = [];
 end
 
-//Ceci garantit la pertinence des xsi_sav_REF
-if ~is_bau 
-    //this....
-    ldsav ("xsi_sav","",baseline_combi)
-    xsi_sav_REF=xsi_sav;
-    mksav("xsi_sav_REF",liste_savedir(baseline_combi));
-    clear xsi_sav
-    //..has to be deleted, say, in june, but do not "retro-merge" it
-    indice_ATC_calib_REF=0;
-    say("is_bau","indice_ATC_calib_REF");
-end
-
 /////////////////////////////////////////////////////////////////////////
 //	DATA
 /////////////////////////////////////////////////////////////////////////
@@ -108,20 +116,40 @@ end
 // source of data, once study parameters are set
 exec(MODEL + 'sources.sce');
 
-disp("STEP 1: LOADING GENERAL DATA");
+step_model = step_model + 1;
+printf('\n');
+message("STEP " + string(step_model)+": DEFINE DATA SOURCES & PATH");
 
-// Growth drivers data : population and labor productivity
-exec(MODEL+'calibration.growthdrivers.sce');
-cd(MODEL);
+//////////////////////////////////////////////////////////////////////////////
+//    PARAMETERS OF THE STUDY - STEP 2 - Interpretation (common)
+
+step_model = step_model + 1;
+printf('\n');
+message("STEP " + string(step_model)+": DEFINE PARAMETERS OF THE STUDY (2)");
+
+// study parameters conversion and interpretation should be common to all studies
+// this includes some of the above lines
+// In the following script, we start with the definition of climate policies (carbon tax or emissions trajectories
+exec(STUDY+"study_parameters_interpretation.sce");
+
+/////////////////////////////////////////////////////////////////////////////
+//      Various consitency checks
+/////////////////////////////////////////////////////////////////////////////
+exec(STUDY+"testStudy.sce");
+
 
 /////////////////////////////////////////////////////////////////////////
 //	CALIBRATION
 /////////////////////////////////////////////////////////////////////////
 
-disp("STEP 2: CALIBRATION");
+cd(MODEL);
 
-//Liste of Calibration.xxx files to executelistCalib=["static",..
-listCalib=["static","crosssectoral.parameters"];
+step_model = step_model + 1;
+printf('\n');
+message("STEP " + string(step_model)+": CALIBRATION");
+
+//list of Calibration.xxx files to executelistCalib=["static",..
+listCalib=["static","crosssectoral.parameters","parameters.dyncalib"];
 
 if ind_NLU > 0 | do_calibrateNoutput_NLU
     listCalib = [listCalib,"nexus.landuse"];
@@ -131,18 +159,18 @@ if ind_oscar>0
 end
 
 listCalib = [listCalib,...
-"emissions","nexus.productiveSectors","industry",..
-"nexus.buildings","nexus.electricity",..
-"nexus.coal","nexus.oil","nexus.Et","nexus.cars",..
-"investment","nexus.expectations","nexus.gas","nexus.wacc"];
+    "emissions","nexus.productiveSectors","industry",..
+    "nexus.buildings","nexus.electricity",..
+    "nexus.coal","nexus.oil","nexus.Et","nexus.cars",..
+"investment","nexus.expectations","nexus.gas","nexus.wacc","nexus.climate.impacts"];
 
 if ind_inequality == 1
- listCalib = [listCalib,"nexus.inequalities"];
+    listCalib = [listCalib,"nexus.inequalities"];
 end
 
 if ind_climfin >0
     listCalib = [listCalib,"nexus.climfin"];
-   end
+end
 
 current_time_im = 0;
 for nexus=listCalib
@@ -162,29 +190,31 @@ end
 //	CHECKING BENCHMARK DATA
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-sensibility = 1d-5; 
-disp("STEP 3: CHECKING BENCHMARK DATA");
-exec(MODEL+"benchmark.sce");
+step_model = step_model + 1;
+printf('\n');
+message("STEP " + string(step_model)+": CHECKING BENCHMARK DATA");
 
+sensibility = 1d-5; 
+exec(MODEL+"benchmark.sce");
 
 ////////////////////////////////////////////////////////////////////////////
 //	FIRST EQUILIBRIUM
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-disp("STEP 4: LOOKING FOR FIRST EQUILIBRIUM...");
+step_model = step_model + 1;
+printf('\n');
+message("STEP " + string(step_model)+": LOOKING FOR FIRST EQUILIBRIUM...");
 
 exec (MODEL+"link_C.sce"); // LINKING WITH C FUNCTION
-
 
 equi_function = "economyXC"; // economy economyX "economyC" "economyXC"
 set_function  = "set_paramX";
 
-//Allocates memory for the paramters of economyC. This includes defining nbMKT 
-call("allocate_matrix");
+//Allocates memory for the paramters of economyC and export them to the C. This includes defining nbMKT 
+call("import_parameters_fixed_scilab2C");
+call("import_parameters_dynamic_scilab2C");
 
-updateCparams();
-
-/////////////////////comptage des fsolve
+/////////////////////counting the number of fsolve
 global nb_fsolve
 nb_fsolve=0;
 
@@ -196,48 +226,51 @@ memory = ones(nb_regions*nb_secteur_conso+5*nb_regions+3*nb_regions*nb_sectors+1
 
 [equilibrium, v, info]=solve_equilibrium(equilibrium,equi_function);
 
+printf('\n');
+message( "    Computing the first Equilibirum:")
 if norm(v)<3d-3
-    disp( " First General Equilibrium : [FOUND] "+norm(v)); 
+    message( "       -> First General Equilibrium : [FOUND] "+norm(v)); 
 else
-    disp( " First General Equilibrium was not FOUND =("+norm(v))
+    message( "       -> First General Equilibrium was not FOUND =("+norm(v))
     mkalert( "error")
     pause
 end
 
-if metaRecMessOn
-    disp("Obtained precision for first equilibrium = "+max(abs(v)));
-end
+message("       -> Obtained precision for first equilibrium = "+max(abs(v)));
 
 exec(MODEL+"extraction-first.sce");
 
-disp( " Executing one more time the First Equilibrium after the first result extraction\nin order to increase accuracy");
+printf('\n');
+printf( "    Executing one more time the First Equilibrium after the first result extraction \n      in order to increase accuracy");
 [equilibrium, v, info]=solve_equilibrium(equilibrium,equi_function);
-disp("Obtained precision for first equilibrium = "+max(abs(v)));
+message("       -> Obtained precision for first equilibrium = "+max(abs(v)));
 
 exec(MODEL+"calibration.nexus.eei.sce");
 exec(MODEL+'calibration.fuel.substitution.sce');
-// old calibration of nexus industry, see revision 29335
 
 ////////////////////////////////////////////////////////////
 // 	DYNAMIC RESOLUTION
 ////////////////////////////////////////////////////////////
 
+step_model = step_model + 1;
+printf('\n');
+message("STEP " + string(step_model)+": MODEL RESOLUTION (RECURSIVE DYNAMIC TEMPORAL LOOP)...");
+
 is_terminate = %f;
-disp("STEP 5: MODEL RESOLUTION...");
 lref = l;
 
 if ind_NLU_sensit == 0
-   // 3 Execution de la boucle principale
-   exec(MODEL+"res_dyn_loop.sce");
-   //returning to stab_imaclim when badtax or error
-   if wasError
-       say("wasError")
-       return
-   end
+    // Execution of the main recursive dynamic loop
+    exec(MODEL+"res_dyn_loop.sce");
+    //returning to stab_imaclim when badtax or error
+    if wasError
+        say("wasError")
+        return
+    end
 
-   // 4 extraction et affichage des resultats
-   exec("terminate.sce");
-   printf("Elapsed time was " + toc()/3600 + " hours\n");
+    // Results extraction
+    exec("terminate.sce");
+    printf("Elapsed time was " + toc()/3600 + " hours\n");
 else
-   exec('NLU_sensit.sce')
+    exec('NLU_sensit.sce')
 end

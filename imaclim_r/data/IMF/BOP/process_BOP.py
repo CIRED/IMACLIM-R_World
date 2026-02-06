@@ -3,7 +3,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Nicolas Graves, Florian Leblanc
+#     Florian Leblanc, Nicolas Graves
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -208,6 +208,10 @@ df['Balance'] = df['Total Debit']+df['Total Credit']
 # regional agregation and export
 df['Region_Im'] = list(map(lambda x: IMFcode_2_Imaclim[x], df['Country Code']))
 
+# ensure all numerical columns are floats
+list_num_col = [c for c in df.columns if not c in ['Region_Im', 'year', 'Country Code']]
+df = df.drop('Country Code', axis=1)
+df[list_num_col] = df[list_num_col].astype(float)
 df_im = df.groupby(['Region_Im', 'year']).sum()
 
 df_im = df_im.reset_index()

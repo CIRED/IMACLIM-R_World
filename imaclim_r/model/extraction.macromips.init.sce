@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Nicolas Graves, Florian Leblanc
+//     Florian Leblanc, Nicolas Graves
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -33,11 +33,11 @@ Mtoe_EJ=0.041868;
 
 // counting number of variable (to be multiplied by number of regions+1)
 if ~isdef("nbLines")
-  if ind_NLU ==0
-    nbLines = count_str_pattern( 'extraction.outputs.'+ETUDEOUTPUT+'.region.sce', 'varname =') ;
-  else
-    nbLines = count_str_pattern( 'extraction.outputs.'+ETUDEOUTPUT+'.region.sce', 'varname =') + count_str_pattern( 'extraction.outputs.'+ETUDEOUTPUT+'.region.landuse.sce', 'varname =');
-  end
+    if ind_NLU ==0
+        nbLines = count_str_pattern( 'extraction.outputs.'+ETUDEOUTPUT+'.region.sce', 'varname =') ;
+    else
+        nbLines = count_str_pattern( 'extraction.outputs.'+ETUDEOUTPUT+'.region.sce', 'varname =') + count_str_pattern( 'extraction.outputs.'+ETUDEOUTPUT+'.region.landuse.sce', 'varname =');
+    end
 end
 
 // nb lines for variables which are drivers of NLU:
@@ -56,9 +56,9 @@ end
 // initiates the numerical matrice and headers of varaible name (str), comments (comments) and units (unit)
 if current_time_im==0
     if ind_NLU>0
-      outputs_temp=zeros(nbLines*(reg+1)+ nbLines_NLU_driver,TimeHorizon+1);
+        outputs_temp=zeros(nbLines*(reg+1)+ nbLines_NLU_driver,TimeHorizon+1);
     else
-      outputs_temp=zeros(nbLines*(reg+1),TimeHorizon+1);
+        outputs_temp=zeros(nbLines*(reg+1),TimeHorizon+1);
     end
     outputs_temp(:,:) = %nan; // all to 'nan'
     list_output_str = list();
@@ -74,40 +74,40 @@ end
 // usefull to run NLU without running Imaclim
 // will be only present in full output file, not in the reduced (year) or smooth one
 if ind_NLU >0
-	for k=1:reg
-		counter_NLU = 0;
-		varname_driver = 'Imaclim2NLU|Price|Carbon';
-		outputs_temp(nbLines*13+counter_NLU*12+k,current_time_im+1) = reg_taxeC(k);
+    for k=1:reg
+        counter_NLU = 0;
+        varname_driver = 'Imaclim2NLU|Price|Carbon';
+        outputs_temp(nbLines*13+counter_NLU*12+k,current_time_im+1) = reg_taxeC(k);
 
-		counter_NLU = counter_NLU +1;
-		varname_driver = 'Imaclim2NLU|Added_Value|Price|Agriculture';
-		moutputs_temp(nbLines*13+counter_NLU*12+k,current_time_im+1) = va_agri(k) * usd_year1_year2;
+        counter_NLU = counter_NLU +1;
+        varname_driver = 'Imaclim2NLU|Added_Value|Price|Agriculture';
+        moutputs_temp(nbLines*13+counter_NLU*12+k,current_time_im+1) = va_agri(k) * usd_year1_year2;
 
-		counter_NLU = counter_NLU +1;
-		varname_driver = 'Imaclim2NLU|Population';
-		outputs_temp(nbLines*13+counter_NLU*12+k,current_time_im+1) = pop(k) ;
+        counter_NLU = counter_NLU +1;
+        varname_driver = 'Imaclim2NLU|Population';
+        outputs_temp(nbLines*13+counter_NLU*12+k,current_time_im+1) = pop(k) ;
 
-		counter_NLU = counter_NLU +1;
-		varname_driver = 'Imaclim2NLU|Primary Energy|Biomass';
-		outputs_temp(nbLines*13+counter_NLU*12+k,current_time_im+1) = reg_in_bioelec(k) ;
-	end;
+        counter_NLU = counter_NLU +1;
+        varname_driver = 'Imaclim2NLU|Primary Energy|Biomass';
+        outputs_temp(nbLines*13+counter_NLU*12+k,current_time_im+1) = reg_in_bioelec(k) ;
+    end;
 
-	// outputs Imaclim drivers for NLU
-	// usefull to run NLU without running Imaclim
-	// will be only present in full output file.
-	counter_NLU = 1;
-	varname_driver = 'Imaclim2NLU|Secondary Energy|Price|Lightoil';
-	outputs_temp(nbLines*13+counter_NLU+4*12,current_time_im+1) = wlightoil_price ;
+    // outputs Imaclim drivers for NLU
+    // usefull to run NLU without running Imaclim
+    // will be only present in full output file.
+    counter_NLU = 1;
+    varname_driver = 'Imaclim2NLU|Secondary Energy|Price|Lightoil';
+    outputs_temp(nbLines*13+counter_NLU+4*12,current_time_im+1) = wlightoil_price ;
 
-	counter_NLU = counter_NLU +1;
-	varname_driver = 'Imaclim2NLU|Primary Energy|Price|Gas';
-	outputs_temp(nbLines*13+counter_NLU+4*12,current_time_im+1) = wnatgas_price ;
+    counter_NLU = counter_NLU +1;
+    varname_driver = 'Imaclim2NLU|Primary Energy|Price|Gas';
+    outputs_temp(nbLines*13+counter_NLU+4*12,current_time_im+1) = wnatgas_price ;
 
-	counter_NLU = counter_NLU +1;
-	varname_driver = 'Imaclim2NLU|Current time';
-	outputs_temp(nbLines*13+counter_NLU+4*12,current_time_im+1) = current_time_im ;
+    counter_NLU = counter_NLU +1;
+    varname_driver = 'Imaclim2NLU|Current time';
+    outputs_temp(nbLines*13+counter_NLU+4*12,current_time_im+1) = current_time_im ;
 
-	counter_NLU = counter_NLU +1;
-	varname_driver = 'Imaclim2NLU|Current year';
-	outputs_temp(nbLines*13+counter_NLU+4*12,current_time_im+1) = current_time_im + 2000;
+    counter_NLU = counter_NLU +1;
+    varname_driver = 'Imaclim2NLU|Current year';
+    outputs_temp(nbLines*13+counter_NLU+4*12,current_time_im+1) = current_time_im + 2000;
 end

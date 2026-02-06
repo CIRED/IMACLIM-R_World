@@ -16,109 +16,109 @@ end
 
 
 // but with exceptions
-list_techind_temp=[indice_CGS,indice_ICG,indice_PSS,indice_PFC,indice_LCT,indice_CCT,indice_GGS,indice_GGC,indice_GGT,indice_GCT,indice_NUC,indice_NND,indice_CSP,indice_CPV,indice_RPV,indice_WNO,indice_WND,indice_WNO,indice_WND,indice_BIGCCS,indice_BIGCC,indice_HYD,indice_SHY];
+list_techind_temp=[indice_CGS,indice_ICG,indice_PSS,indice_PFC,indice_LCT,indice_CCT,indice_GGS,indice_GGC,indice_GGT,indice_GCT,indice_NUC,indice_NND,indice_CSP,indice_CPV,indice_RPV,indice_WNO,indice_WND,indice_WNO,indice_WND,indice_BIS,indice_BIG,indice_HYD,indice_SHY];
 for vary=['Capital Cost','Efficiency','OM Cost|Fixed','OM Cost|Variable']
-indy=0;
-for technoy=['Electricity|CSP','Electricity|PV','Liquids|Oil','|Electricity|Coal|w/ CCS','|Electricity|Coal|w/o CCS','|Electricity|Coal|w/ CCS|2','|Electricity|Coal|w/o CCS|2','|Electricity|Coal|w/o CCS|3','|Electricity|Coal|w/o CCS|4','|Electricity|Gas|w/ CCS','|Electricity|Gas|w/o CCS','|Electricity|Gas|w/o CCS|2','|Electricity|Gas|w/o CCS|3','|Electricity|Nuclear','|Electricity|Nuclear|2','|Electricity|Solar|CSP','|Electricity|Solar|PV','|Electricity|Solar|PV|2','|Electricity|Wind','|Electricity|Biomass|w/ CCS','|Electricity|Biomass|w/o CCS','|Electricity|Hydro','|Electricity|Hydro|2']
-str_varname = vary + technoy;
-lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-indy = indy+1;
-temp_techs = list_techind_temp(indy);
-if lineVAR<>0
-temp_reg_not_nans = ~isnan(sum(prod_elec_techno(:,temp_techs),2) .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum(sum(prod_elec_techno(temp_reg_not_nans,temp_techs),2) .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
-        sum(prod_elec_techno(temp_reg_not_nans,temp_techs)) , ..
-        %nan);
+    indy=0;
+    for technoy=['Electricity|CSP','Electricity|PV','Liquids|Oil','|Electricity|Coal|w/ CCS','|Electricity|Coal|w/o CCS','|Electricity|Coal|w/ CCS|2','|Electricity|Coal|w/o CCS|2','|Electricity|Coal|w/o CCS|3','|Electricity|Coal|w/o CCS|4','|Electricity|Gas|w/ CCS','|Electricity|Gas|w/o CCS','|Electricity|Gas|w/o CCS|2','|Electricity|Gas|w/o CCS|3','|Electricity|Nuclear','|Electricity|Nuclear|2','|Electricity|Solar|CSP','|Electricity|Solar|PV','|Electricity|Solar|PV|2','|Electricity|Wind','|Electricity|Biomass|w/ CCS','|Electricity|Biomass|w/o CCS','|Electricity|Hydro','|Electricity|Hydro|2']
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        indy = indy+1;
+        temp_techs = list_techind_temp(indy);
+        if lineVAR<>0
+            temp_reg_not_nans = ~isnan(sum(prod_elec_techno(:,temp_techs),2) .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum(sum(prod_elec_techno(temp_reg_not_nans,temp_techs),2) .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
+                sum(prod_elec_techno(temp_reg_not_nans,temp_techs)) , ..
+            %nan);
+        end
     end
-   end
 end
 
 for vary=['Capital Cost','Efficiency','OM Cost|Fixed','OM Cost|Variable']
     for technoy=['|Electricity|Geothermal','|Electricity|Transmission|AC','|Electricity|Transmission|DC','|Gases|Biomass|w/ CCS','|Gases|Biomass|w/o CCS','|Gases|Coal|w/ CCS','|Gases|Coal|w/o CCS','|Heat|Biomass|w/ CCS','|Heat|Biomass|w/o CCS','|Heat|Gas|w/ CCS','|Heat|Gas|w/o CCS','|Heat|Geothermal','|Heat|Oil','|Heat|Propane','|Heat|Solar','|Hydrogen|Biomass|w/ CCS','|Hydrogen|Biomass|w/o CCS','|Hydrogen|Coal|w/ CCS','|Hydrogen|Coal|w/o CCS','|Hydrogen|Gas|w/ CCS','|Hydrogen|Gas|w/o CCS','|Hydrogen|Electricity','|Liquids|Biomass|Biodiesel|w/ CCS','|Liquids|Biomass|Biodiesel|w/o CCS','|Liquids|Biomass|Cellulosic Nondiesel|w/ CCS','|Liquids|Biomass|Cellulosic Nondiesel|w/o CCS','|Liquids|Biomass|Conventional Ethanol|w/ CCS','|Liquids|Biomass|Conventional Ethanol|w/o CCS','|Liquids|Biomass|Other|w/ CCS','|Liquids|Biomass|Other|w/o CCS','|Liquids|Coal|w/ CCS','|Liquids|Coal|w/o CCS','|Liquids|Gas|w/ CCS','|Liquids|Gas|w/o CCS','|Liquids|Oil']
-    str_varname = vary + technoy;
-    lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-    if lineVAR
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = %nan;
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = %nan;
+        end
     end
-  end
 end
 
 
 for vary=['Capital Cost','Efficiency','OM Cost|Fixed','OM Cost|Variable']
     for technoy=['|Liquids|Oil']
-str_varname = vary + technoy;
-lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-if lineVAR<>0
-temp_reg_not_nans = ~isnan( Q(:,indice_oil) .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( Q(:,indice_oil) .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
-        sum( Q(:,indice_oil)) , ..
-        %nan);
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR<>0
+            temp_reg_not_nans = ~isnan( Q(:,indice_oil) .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( Q(:,indice_oil) .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
+                sum( Q(:,indice_oil)) , ..
+            %nan);
+        end
     end
-  end
 end
 for vary=['Capital Cost','Efficiency','OM Cost|Fixed','OM Cost|Variable']
     for technoy=['|Liquids|Coal|w/o CCS']
-str_varname = vary + technoy;
-lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-if lineVAR<>0
-temp_reg_not_nans = ~isnan( Q(:,indice_coal) .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( Q(:,indice_coal) .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
-        sum( Q(:,indice_coal)) , ..
-        %nan);
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR<>0
+            temp_reg_not_nans = ~isnan( Q(:,indice_coal) .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( Q(:,indice_coal) .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
+                sum( Q(:,indice_coal)) , ..
+            %nan);
+        end
     end
-  end
 end
 for vary=['Capital Cost','Efficiency','OM Cost|Fixed','OM Cost|Variable']
     for technoy=['|Hydrogen|Biomass|w/ CCS']
-str_varname = vary + technoy;
-lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-if lineVAR<>0
-temp_reg_not_nans = ~isnan( glob_in_bioelec_Hyd_reg .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( glob_in_bioelec_Hyd_reg .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
-        sum( glob_in_bioelec_Hyd_reg) , ..
-        %nan);
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR<>0
+            temp_reg_not_nans = ~isnan( glob_in_bioelec_Hyd_reg .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( glob_in_bioelec_Hyd_reg .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
+                sum( glob_in_bioelec_Hyd_reg) , ..
+            %nan);
+        end
     end
-  end
 end
 for vary=['Capital Cost','Efficiency','OM Cost|Fixed','OM Cost|Variable']
     for technoy=['|Hydrogen|Biomass|w/ CCS']
-str_varname = vary + technoy;
-lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-if lineVAR<>0
-temp_reg_not_nans = ~isnan( glob_in_bioelec_Hyd_reg .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( glob_in_bioelec_Hyd_reg .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
-        sum( glob_in_bioelec_Hyd_reg) , ..
-        %nan);
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR<>0
+            temp_reg_not_nans = ~isnan( glob_in_bioelec_Hyd_reg .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( glob_in_bioelec_Hyd_reg .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
+                sum( glob_in_bioelec_Hyd_reg) , ..
+            %nan);
+        end
     end
-  end
 end
 
 weight_var = share1G .* share_biofuel .* squeeze( energy_balance(refi_eb,et_eb,:));
 for vary=['Capital Cost','Efficiency','OM Cost|Fixed','OM Cost|Variable']
     for technoy=['|Liquids|Biomass|Other|w/o CCS']
-str_varname = vary + technoy;
-lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-if lineVAR<>0
-temp_reg_not_nans = ~isnan( weight_var .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( weight_var .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
-        sum( weight_var) , ..
-        %nan);
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR<>0
+            temp_reg_not_nans = ~isnan( weight_var .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( weight_var .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
+                sum( weight_var) , ..
+            %nan);
+        end
     end
-  end
 end
 
 weight_var = glob_in_bioelec_Et_reg';
 for vary=['Capital Cost','Efficiency','OM Cost|Fixed','OM Cost|Variable']
     for technoy=['|Liquids|Biomass|Cellulosic Nondiesel|w/o CCS']
-str_varname = vary + technoy;
-lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-if lineVAR<>0
-temp_reg_not_nans = ~isnan( weight_var .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( weight_var .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
-        sum( weight_var) , ..
-        %nan);
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR<>0
+            temp_reg_not_nans = ~isnan( weight_var .* outputs_temp(nbLines*[0:11] + lineVAR,current_time+1));
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = divide( sum( weight_var .* outputs_temp(nbLines*[find(temp_reg_not_nans)-1] + lineVAR,current_time+1) ) , ..
+                sum( weight_var) , ..
+            %nan);
+        end
     end
-  end
 end
 
 varname = 'Capital Cost|Liquids|Biomass|Cellulosic Nondiesel|w/o CCS'; //$/kW
@@ -137,22 +137,22 @@ outputs_temp(nbLines*reg+lineVAR,current_time+1) = 0; //todo
 
 for vary=['Capital Cost']
     for technoy=['|Gases|Transmission|AC']
-    str_varname = vary + technoy;
-    lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-    if lineVAR
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = %nan;
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = %nan;
+        end
     end
-  end
 end
 
 for vary=['Final Energy']
     for technoy=['|Transportation|Gases']
-    str_varname = vary + technoy;
-    lineVAR = find_index_list( list_output_str, str_varname); // $/kW
-    if lineVAR
-      outputs_temp(nbLines*reg+lineVAR,current_time+1) = %nan;
+        str_varname = vary + technoy;
+        lineVAR = find_index_list( list_output_str, str_varname); // $/kW
+        if lineVAR
+            outputs_temp(nbLines*reg+lineVAR,current_time+1) = %nan;
+        end
     end
-  end
 end
 
 
@@ -210,8 +210,8 @@ outputs_temp(nbLines*reg+lineVAR,current_time+1) = 0;
 // compute indexes
 
 if is_terminate
-  lineVAR = find_index_list( list_output_str, "Price|Agriculture|Non-Energy Crops|Index"); 
-  outputs_temp(nbLines*[0:12] + lineVAR,current_time+1) = outputs_temp(nbLines*[0:12] + lineVAR,current_time+1) ./ outputs_temp(nbLines*[0:12] + lineVAR,4);
+    lineVAR = find_index_list( list_output_str, "Price|Agriculture|Non-Energy Crops|Index"); 
+    outputs_temp(nbLines*[0:12] + lineVAR,current_time+1) = outputs_temp(nbLines*[0:12] + lineVAR,current_time+1) ./ outputs_temp(nbLines*[0:12] + lineVAR,4);
 end
 
 
@@ -263,72 +263,72 @@ if current_time==1
         disp(size(list_output_str))
     else
         fileout = mopen(OUTPUT+'/list_outputs_str.csv', "w");
-        for ii=1:(numberOfRegion+1)
-        for elt=1:nbLines
-            mfprintf(fileout,"%s\n", list_output_str(elt))
-        end
+        for ii=1:(nb_regions+1)
+            for elt=1:nbLines
+                mfprintf(fileout,"%s\n", list_output_str(elt))
+            end
         end
         mclose(fileout);
-//
+        //
         fileout = mopen(OUTPUT+'/list_outputs_str_withNLU.csv', "w");
-        for ii=1:(numberOfRegion+1)
-        for elt=1:nbvar_NLU_driver
-            mfprintf(fileout,"%s\n", list_output_str(elt+nbLines))
-        end
+        for ii=1:(nb_regions+1)
+            for elt=1:nbvar_NLU_driver
+                mfprintf(fileout,"%s\n", list_output_str(elt+nbLines))
+            end
         end
         for elt=['Imaclim2NLU|Price|Carbon','Imaclim2NLU|Added_Value|Price|Agriculture','Imaclim2NLU|Population','Imaclim2NLU|Population','Imaclim2NLU|Primary Energy|Biomass']
-        for ii=1:(numberOfRegion+1)
-            mfprintf(fileout,"%s\n", elt)
-        end
+            for ii=1:(nb_regions+1)
+                mfprintf(fileout,"%s\n", elt)
+            end
         end
         for elt=['Imaclim2NLU|Secondary Energy|Price|Lightoil', 'Imaclim2NLU|Primary Energy|Price|Gas', 'Imaclim2NLU|Current time', 'Imaclim2NLU|Current year']
             mfprintf(fileout,"%s\n", elt)
         end
         mclose(fileout);
-//
+        //
         fileout = mopen(OUTPUT+'/list_outputs_units.csv', "w");
-        for ii=1:(numberOfRegion+1)
-        for elt=1:nbLines
-            mfprintf(fileout,"%s\n", list_output_unit(elt))
-        end
+        for ii=1:(nb_regions+1)
+            for elt=1:nbLines
+                mfprintf(fileout,"%s\n", list_output_unit(elt))
+            end
         end
         mclose(fileout);
-//
+        //
         fileout = mopen(OUTPUT+'/list_outputs_units_withNLU.csv', "w");
-        for ii=1:(numberOfRegion+1)
-        for elt=1:nbvar_NLU_driver
-            mfprintf(fileout,"%s\n", list_output_str(nbLines+elt))
-        end
+        for ii=1:(nb_regions+1)
+            for elt=1:nbvar_NLU_driver
+                mfprintf(fileout,"%s\n", list_output_str(nbLines+elt))
+            end
         end
         for elt=["$/tCO2", "billion US$2005/yr", "million", "Mkcal/yr"]
-        for ii=1:(numberOfRegion+1)
-            mfprintf(fileout,"%s\n", elt)
-        end
+            for ii=1:(nb_regions+1)
+                mfprintf(fileout,"%s\n", elt)
+            end
         end
         for elt=["US$2005/tep","US$2005/tep","",""]
             mfprintf(fileout,"%s\n", elt)
         end
         mclose(fileout);
-//
+        //
         fileout = mopen(OUTPUT+'/list_template_region.csv', "w");
-	list_region_tpt=["USA","CAN","EUR","JAN","CIS","CHN","IND","BRA","MDE","AFR","RAS","RAL","World"];
-        for ii=1:(numberOfRegion+1)
-        for elt=1:nbLines
-            mfprintf(fileout,"%s\n", list_region_tpt(ii))
-        end
+        list_region_tpt=["USA","CAN","EUR","JAN","CIS","CHN","IND","BRA","MDE","AFR","RAS","RAL","World"];
+        for ii=1:(nb_regions+1)
+            for elt=1:nbLines
+                mfprintf(fileout,"%s\n", list_region_tpt(ii))
+            end
         end
         mclose(fileout);
         fileout = mopen(OUTPUT+'/list_template_comments.csv', "w");
         list_output_comments(nbLines+1)="";// usefull to be sure the list is at least as big as nbLines
-        for ii=1:(numberOfRegion+1)
-        for ii=1:nbLines
-          try
-            elt=list_output_comments(ii);
-          catch
-            elt="";
-          end
-          mfprintf(fileout,"%s\n", elt)
-        end
+        for ii=1:(nb_regions+1)
+            for ii=1:nbLines
+                if isempty(list_output_comments(ii))
+                    elt="";
+                else
+                    elt=list_output_comments(ii);
+                end
+                mfprintf(fileout,"%s\n", elt)
+            end
         end
         mclose(fileout);
     end

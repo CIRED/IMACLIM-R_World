@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -76,7 +76,7 @@ done
 
 for i in 5012  #1.5D
 do
-    echo "tax2019=60;taxbreak_1=1500;tax2100=2300;exo_maxmshbiom=35/1000;ind_global_wacc =0;ind_uniform_DR = %t;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
+    echo "tax2019=60;taxbreak_1=1500;tax2100=2300;exo_maxmshbiom=18/1000;ind_global_wacc =0;ind_uniform_DR = %t;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
     echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
     #echo "echo 'The job $i was done in `pwd`' | /bin/mail -s 'Job $i done on $HOSTNAME' -S from='The Master of Imaclim <un@owen>' $USER@centre-cired.fr"                                                                                                                              >> run.batchCmd$i
     sh run.batchCmd$i &
@@ -84,21 +84,21 @@ done
 
 for i in 5013  #1.5D_WACC
 do
-    echo "tax2019=60;taxbreak_1=1375;tax2100=2200;exo_maxmshbiom=35/1000;ind_global_wacc =1;ind_uniform_DR = %f;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
+    echo "tax2019=60;taxbreak_1=1375;tax2100=2200;exo_maxmshbiom=18/1000;ind_global_wacc =1;ind_uniform_DR = %f;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
     echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
     #echo "echo 'The job $i was done in `pwd`' | /bin/mail -s 'Job $i done on $HOSTNAME' -S from='The Master of Imaclim <un@owen>' $USER@centre-cired.fr"                                                                                                                              >> run.batchCmd$i
     sh run.batchCmd$i &
 done
 for i in 5014  #1.5D_CONV
 do
-    echo "tax2019=60;taxbreak_1=1200;tax2100=2000;exo_maxmshbiom=35/1000;ind_global_wacc =2;ind_uniform_DR = %f;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
+    echo "tax2019=60;taxbreak_1=1200;tax2100=2000;exo_maxmshbiom=18/1000;ind_global_wacc =2;ind_uniform_DR = %f;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
     echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
     #echo "echo 'The job $i was done in `pwd`' | /bin/mail -s 'Job $i done on $HOSTNAME' -S from='The Master of Imaclim <un@owen>' $USER@centre-cired.fr"                                                                                                                              >> run.batchCmd$i
     sh run.batchCmd$i &
 done
 for i in 5015  #1.5D_LNR
 do
-    echo "tax2019=60;taxbreak_1=1200;tax2100=2050;exo_maxmshbiom=35/1000;ind_global_wacc =3;ind_uniform_DR = %f;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
+    echo "tax2019=60;taxbreak_1=1200;tax2100=2050;exo_maxmshbiom=18/1000;ind_global_wacc =3;ind_uniform_DR = %f;combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  > run.cmdFile$i.sce
     echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$i.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$i
     #echo "echo 'The job $i was done in `pwd`' | /bin/mail -s 'Job $i done on $HOSTNAME' -S from='The Master of Imaclim <un@owen>' $USER@centre-cired.fr"                                                                                                                              >> run.batchCmd$i
     sh run.batchCmd$i &

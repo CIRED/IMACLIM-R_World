@@ -10,6 +10,9 @@ import pandas as pd
 import sys
 import csv
 
+# to be removed in later pandas version
+pd.set_option('future.no_silent_downcasting', True)
+
 iso_file, iso2gtap_file, gtap2imaclim_file = sys.argv[1], sys.argv[2], sys.argv[3]
 outpute_file = sys.argv[4]
 #iso_file='/data/public_data/ISO_wikipedia/results/List_of_ISO_3166_country_codes_1_cleaned.csv'
@@ -42,8 +45,8 @@ for key, val in dict_manual_complete.items():
 
 # Manually add ANT & SCG to df_iso
 list_ISO_as_country_groups = ['SCG','ANT'] # to be removed in the list considering only countries which are not group of countries
-df_iso = df_iso.append( {'Alpha-3 code':'SCG', 'Country name':'Serbia and Montenegro'}, ignore_index=True)
-df_iso = df_iso.append( {'Alpha-3 code':'ANT', 'Country name':'Netherlands Antilles'}, ignore_index=True)
+df_iso = pd.concat( [df_iso, pd.Series({'Alpha-3 code':'SCG', 'Country name':'Serbia and Montenegro'})], ignore_index=True)
+df_iso = pd.concat( [df_iso, pd.Series({'Alpha-3 code':'ANT', 'Country name':'Netherlands Antilles'})], ignore_index=True)
 
 # renaming
 df_iso2gtap = df_iso2gtap.rename( {'REG_V10':'GTAP_V10', 'ISO':'Alpha-3 code'}, axis=1)
@@ -81,7 +84,7 @@ df_iso_nogroups = df_iso[ ~df_iso['Alpha-3 code'].isin(list_ISO_as_country_group
 df_iso_nogroups[ col2keep].to_csv(outpute_file, sep='|', index=False)
 
 df_iso_groups = df_iso #[ df_iso['Alpha-3 code'].isin(list_ISO_as_country_groups)]
-name, ext = outpute_file.split('.')
-outpute_file_with_groups = name + "__with_groups" + '.' + ext
+list_output_file = outpute_file.split('.')
+outpute_file_with_groups = '.'.join(list_output_file[0:-1]) + "__with_groups" + '.' + list_output_file[-1]
 
 df_iso_groups[ col2keep].to_csv(outpute_file_with_groups, sep='|', index=False)

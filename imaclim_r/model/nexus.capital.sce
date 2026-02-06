@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Thomas Le Gallic, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 //#############################################################################################
 //#############################################################################################
 //### STEP 1: new Kapital
@@ -6,10 +14,9 @@
 
 //////////////////////////////////////////////////////////////////////////////
 Kprev=K;
-K=K.*(1-delta)+DeltaK;
+K=K.*(1-delta_modified)+DeltaK;
 
 K(:,indice_oil)=K_expected(:,indice_oil);
-K(:,indice_elec)=(sum(Cap_elec_MW_dep,'c')+sum(Inv_MW,'c'))./sum(Cap_elec_MWref,'c').*Kref(:,indice_elec);
 
 Capvintagecomposite(:,current_time_im+dureedeviecomposite)=DeltaK(:,indice_composite);
 sumCaptempcomposite=zeros(1,reg);
@@ -60,10 +67,15 @@ K(:,indice_industries)=sumCaptempindustries;
 //#############################################################################################
 
 Cap=alphaK.*(K.^betaK);
+// special case for the electricity sector, in which there is no decomissioning of existing but unused capacities
+Cap(:,indice_elec) = (peak_W_anticip_tot_1 ./ peak_W_anticip_tot_ref) .* Capref(:,indice_elec);
+// could be peak_W_anticip_tot_i_1 as well
+// this is not considering the case of investment shortage in the electricity nexus,
+// actual shortage is complicated to compute because there could be an excess of capacities even with a shortage of investement
 
-Cap(:,indice_gaz)=max(Cap(:,indice_gaz),0.97*Cap_prev(:,indice_gaz));
+Cap(:,indice_gas)=max(Cap(:,indice_gas),0.97*Cap_prev(:,indice_gas));
 
-//rustine: on rajoute de l'inertie quand on ne produit presque plus de petrole, de gaz ou de charbon
+// Inertia is added when their is very low level of production for oil, gas and coal
 if current_time_im==1
     start_inertia=zeros(reg,1);
 end
@@ -82,7 +94,7 @@ for k=1:reg,
     end
 end
 
-//rustine: on rajoute de l'inertie quand on ne produit presque plus
+// Inertia is added when their is very low level of production for gas
 if current_time_im==1
     start_inertia_gas=zeros(reg,1);
 end
@@ -99,7 +111,7 @@ for k=1:reg,
     end
 end
 
-//rustine: on rajoute de l'inertie quand on ne produit presque plus
+// Inertia is added when their is very low level of production for coal
 if current_time_im==1
     start_inertia_coal=zeros(reg,1);
 end
@@ -116,11 +128,11 @@ for k=1:reg
     end
 end
 
-////////////////////////On calcule la variation de capacité de production du secteur électrique corespondante
+//////////////////////// Production capacity variation of the electricity sector is computed
 //Cap(:,indice_elec)=(sum(Cap_elec_MW_dep,'c')+sum(Inv_MW,'c'))./sum(Cap_elec_MWref,'c').*Capref(:,indice_elec);
 
 if or(Cap<0)
     disp(Cap);
-    warning("There are negative capacities!!!!");
+    warning("There are negative production Capacities!");
     Cap(Cap<0) = 0.001;
 end

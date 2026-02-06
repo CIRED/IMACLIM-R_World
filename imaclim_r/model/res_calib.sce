@@ -1,4 +1,12 @@
-//calibration residentiel, 7 usages:
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
+//calibration of residential energy usage, 7 usages:
 // 1  Space heating
 // 2  Space cooling
 // 3  Fridges
@@ -8,7 +16,7 @@
 // 7  Water heating
 nb_usage_res=7;
 
-//definition des indices correspondant aux usages
+//indices definition
 indice_chauffage=1;
 indice_clim=2;
 indice_frigo=3;
@@ -17,77 +25,64 @@ indice_eclairage=5;
 indice_cuisine=6;
 indice_chauffEau=7;
 
-////on divise la chine en plusieurs regions (selon climat et urbain/rural)
+////China is divided into several sub-regions
 reg_chine=6;
 
-/////////////////////////////////////////
-//////hypotheses de scenario////////////
-/////////////////////////////////////////
-
 /////////////////////////////
-////inhomogeneite de marche
-////////////////////////////
-
-//definition de la puissance dans la fonction de parts logit des nouveaux equipements. Ce parametre corespond au degre d'inhomogeneite du marche
+//// no homogenous market
+//elasticity of the logit for new equipment
 Res_nu=2.5*ones(reg,1,nb_usage_res);
 
 // for j=1:nb_usage_res,
 // 	Res_nu(:,:,j)=[2;1;1;1;1;1;1;1;1;1;1;1];
 // end
 
-//hypotheses pour les elasticites et asymptotes des services energetiques unitiares commerciaux (energie utile) pour les USA
-//elasticite du service energetique unitaire commercial (energie utile) au revenu disponible, valeurs initiales pour les USA (par usage)
+// income elasticity assumption for unitary energy services (commercial, useful energy) for the USA, per usage
 Res_elast_USA_ini=[0.29;0.29;0.35;0.35;0.31;0.04;0.09];
-//asymptote du service energetique unitaire commercial (energie utile) des USA, valeurs indicielles (par usage)
+// asymptote of unitary energy services (commercial, useful energy) for the USA, indices per usage
 Res_indice_max_USA=[1.1;1.3;1.1;2;1.1;1.02;1.1];
-//hypothese pour les elasticites des autres regions, selon les usages
+// elasticity assumption for other regions
 Res_elast_tot_ini=[1,1,1.5,2,1,0.3,0.5];
-//asymptotes basses des services energetiques unitaires (energie utile), valeurs indicielles (par usage)
-//on considere que le meme indice est valable pour toutes les regions (a changer...)
+// asymptote of unitary energy services (commercial, useful energy), indices per usage, for other regions
 Res_se_unit_min=[0.7;0.7;0.7;0.7;0.8;0.9;0.8];
 
-
-//Elasticites du service energetique unitaire commercial aux prix de l'energie utilisee
-//Pour l'instant l'elasticite varie uniquement selon les usages (ni selon les regions, ni selon le niveau absolu de service energetique unitaire commercial)
-//d'apres une etude pour Markal belgique
+// price elasticity of unitary energy services (commercial)
 //Res_elast_prix=[-0.3;-0.3;-0.3;-0.3;-0.3;-0.1;-0.3];
 //Res_elast_prix=[-0.38;-0.4;-0.4;-0.4;-0.4;-0.1;-0.36];
 Res_elast_prix=[0;0;0;0;0;0;0];
 
-//bornes des efficacites des technologies (selon les regions, selon les usages et selon l'energie commerciale utilisee)
-//il s'agit d'une borne sur le parc de technologies nouvelles et prend donc en compte la penetration des technologies sur les marches
+// bound for efficiency of technology, by region, usage and commercial energy use
 res_efficacite_max=ones(reg,nb_usage_res,4);
 for k=1:reg,
-	res_efficacite_max(k,:,:)=[
-	0.4 0.8 0.8 1.2
-	1 1 1 1.5
-	1 1 1 2
-	1 1 1 1.5
-	1 1 1.5E12 7E14
-	0.3 0.6 0.6 0.9
-	0.4 0.7 0.7 1
-	];
-	if k<5 then res_efficacite_max(k,:,:)=[
-				0.6 0.9 0.9 1.3
-				1 1 1 2
-				1 1 1 3
-				1 1 1 2.5
-				1 1 1.5E12 7E14
-				0.3 0.7 0.7 1
-				0.5 0.8 0.8 1.1
-				];
-	end			
+    res_efficacite_max(k,:,:)=[
+    0.4 0.8 0.8 1.2
+    1 1 1 1.5
+    1 1 1 2
+    1 1 1 1.5
+    1 1 1.5E12 7E14
+    0.3 0.6 0.6 0.9
+    0.4 0.7 0.7 1
+    ];
+    if k<5 then res_efficacite_max(k,:,:)=[
+        0.6 0.9 0.9 1.3
+        1 1 1 2
+        1 1 1 3
+        1 1 1 2.5
+        1 1 1.5E12 7E14
+        0.3 0.7 0.7 1
+        0.5 0.8 0.8 1.1
+        ];
+    end			
 end
 
-//compteur des prix hauts (utiliser pour declencher une amelioration plus rapide des efficacites des technologies)
+// tracking high prices (for energy efficiency technologies)
 res_prixhaut=zeros(reg,4);
 
 ///////////////////////////////////////////////////////////////
 ///////calibration////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
-//voir fichiers calib_residentiel_v6_bio.xls et calibration courbes part bio.xls
+// see file calib_residentiel_v6_bio.xls & calibration courbes part bio.xls
 
-//on importe les 7 tableaux excel donnant la calibration a l'annee de base (un par usage)
 Res_SH=[17062000000	1	2.7	0	1	2159	882	2.19993E-12	81.03857885	0	0	0.1	0	0	1	0	81.03857885	0	0	0	0	0.008798587	0.658503357	0.210301023	0.122397033	0.5	0.7	0.7	1	1.42605	76.2345375	24.34642286	9.9188816
 1461000000	1	2	0	1	4493	171	1.67066E-12	10.96663677	0	0	0.1	0	0	1	0	10.96663677	0	0	0	0	0.001341008	0.562633981	0.139843154	0.296181857	0.5	0.7	0.7	1	0.0294127	8.814575	2.190870103	3.248118845
 19193000000	1	2	0	1	3000	300	2.16832E-12	124.8498224	0	0	0.1	0	0	1	0	124.8498224	0	0	0	0	0.043315268	0.554893686	0.308623941	0.093167105	0.5	0.8	0.8	1	10.81580715	86.59797263	48.16455526	11.63189648
@@ -197,87 +192,85 @@ Res_tot(:,:,indice_eclairage)=Res_RL;
 Res_tot(:,:,indice_cuisine)=Res_RK;
 Res_tot(:,:,indice_chauffEau)=Res_HW;
 
-////////extraction des variables
+////////variable extraction
 
-////variable de volume (m2 pour le chauffage et l'air conditionne, population pour les autres usages)
+////volume variable (m2 for heating and air conditioning, population for other usage)
 Res_Mref=Res_tot(:,1,:);
 
-////variables generales
-////pour les variables generales, la valeur est la meme dans les 7 usages: on l'extrait dans le SH
+////general variables: identical for the 7 usage
 
-//coefficient de Gini (alpha est en fait (1+Gini)/(1-Gini))
+//FINI coefficient (alpha = (1+Gini)/(1-Gini))
 Res_alpharef=Res_tot(:,3,indice_chauffage);
 
-//corrections climat: jours de chauffage et jours de climatisation
+//correction because of climate change: heating and cooling days
 Res_HDDref=Res_tot(:,6,indice_chauffage);
 Res_CDDref=Res_tot(:,7,indice_chauffage);
 Res_climat=ones(reg,1,nb_usage_res);
 Res_climat(:,:,indice_chauffage)=Res_HDDref;
 Res_climat(:,:,indice_clim)=Res_CDDref;
 
-////taux d'acces a l'usage et taux d'equipement
-//taux d'acces(1 pour usages generaux, taux d'electrification pour l'electricite specifique)
+////access rate to use equipment
 Res_muref=Res_tot(:,2,:);
 
-//taux d'equipement
+//equipment rate
 Res_lambdaref=Res_tot(:,5,:);
 
-//Gini equipement (non utilise par la suite)
+//Gini equipment
 Res_betaref=Res_tot(:,4,:);
 
-//////////energies "non commerciales"
+////////// "non comemercial" energies
 
-//energies traditionnelles
-//proportion de la population (ou des m2 dans le cas du chauffage) recourant a la biomasse traditionnelle (nulle pour toutes les regions dans le cas des usages: space cooling, fridges, electric appliances et lighting)
+//Traditional energy
+//share of population (or m2 for heating) using traditional biomass (zero for all following usage: space cooling, fridges, electric appliances et lighting)
 Res_part_bioref=Res_tot(:,10,:);
-//Demande en energie finale pour la biomasse traditionnelle (par usage)
+//Final energy demand for traditional biomass, per usage
 Res_DEF_bioref=Res_tot(:,11,:);
-//Demande totale en energie finale pour la biomasse traditionnelle (somme sur les usages)
+//total final energy demand for traditional biomass, per usage
 Res_DEF_bio_totref=Res_DEF_bioref(:,:,indice_chauffage)+Res_DEF_bioref(:,:,indice_clim)+Res_DEF_bioref(:,:,indice_frigo)+Res_DEF_bioref(:,:,indice_electromenager)+Res_DEF_bioref(:,:,indice_eclairage)+Res_DEF_bioref(:,:,indice_cuisine)+Res_DEF_bioref(:,:,indice_chauffEau);
-//Efficacite de la biomasse
+//Biomass efficiency
 Res_rho_bioref=Res_tot(:,12,:);
-//Service energetique (energie utile) assure par la biomasse traditionnelle
+//Energy services (usefull energy) for traditional biomass
 Res_SE_bioref=Res_tot(:,13,:);
 
-//energies modernes (renouvenables)
-//Demande en energie finale pour les renouvelables (par usage)
+//modern energy (renewable)
+//final energy demand for renewables (per usage)
 Res_DEF_enrref=Res_tot(:,14,:);
-//Efficacite des renouvelables
+//efficiencyh of renewables
 Res_rho_enrref=Res_tot(:,15,:);
-//Service energetique (energie utile) assure par les renouvelables
+//energy services (usefull energy) for renewables
 Res_SE_enrref=Res_tot(:,16,:);
 
-/////////services energetiques
-//Service energetique (energie utile) assure par les energies "commerciales" (hors biomasse traditionnelle et renouvelables) (par usage)
+/////////energy services
+//energy services (usefull energy) given by "commercial" energies (tradional biomass and renewables excluded), per usage
 Res_SE_comref=Res_tot(:,17,:);
-//Service energetique total (energie utile) (par usage)
+//total energy services (usefull energy), per usage
 Res_SE_totref=Res_tot(:,9,:);
-//Service energetique unitaire total 
-//rapporte a la variable de volume, au taux d'equipement, et corrige, le cas echeant, par les jours de chauffage ou de climatisation
+//total unitary energy services
+//per volume variable, to the equipment rate, and corrected by heating or cooling days
 Res_SE_unitref=Res_tot(:,8,:);
-//Service energetique unitaire pour les utilisateurs de la biomasse
-//rapporte a la variable de volume (le nombre de personnes, ou de m2, qui "utilisent" la biomasse), au taux d'equipement, et corrige, le cas echeant, par les jours de chauffage ou de climatisation
+//unitary energy services for biomass
+//per volume variable (number of person, or m2, which uses biomass), to the equipment rate, and corrected by heating or cooling days
 for k=1:reg,
-	for j=1:nb_usage_res,
-		if Res_part_bioref(k,1,j)==0 then Res_SE_unit_bioref(k,1,j)=0;
-			else Res_SE_unit_bioref(k,1,j)=Res_SE_bioref(k,1,j)./(Res_part_bioref(k,1,j).*Res_Mref(k,1,j).*Res_climat(k,1,j).*Res_lambdaref(k,1,j));
-		end
-	end
+    for j=1:nb_usage_res,
+        if Res_part_bioref(k,1,j)==0 then Res_SE_unit_bioref(k,1,j)=0;
+        else Res_SE_unit_bioref(k,1,j)=Res_SE_bioref(k,1,j)./(Res_part_bioref(k,1,j).*Res_Mref(k,1,j).*Res_climat(k,1,j).*Res_lambdaref(k,1,j));
+        end
+    end
 end		
-//Service energetique unitaire pour les utilisateurs d'energies commerciales 
-//rapporte a la variable de volume (le nombre de personnes, ou de m2, qui "utilisent" les energies commerciales), au taux d'equipement, et corrige, le cas echeant, par les jours de chauffage ou de climatisation
+//unitary energy services  for commercial energy users
+///per volume variable (number of person, or m2, which uses comemrcial energy)to the equipment rate, and corrected by heating or cooling days
 Res_SE_unit_comref=Res_SE_comref./((1-Res_part_bioref).*Res_Mref.*Res_climat.*Res_lambdaref);
 
-///////////////couts fixes des differentes techno
+///////////////fixed technology costs
 //Res_CFref=zeros(reg,4,7);
 //for j=1:4,
 //	Res_CFref(:,j,:)=Res_tot(:,17+j,:);
 //end
 
-/////////////parts, dans le parc d'equipement, des differentes "technologies" (pour l'instant "energie", ie utilisant le charbon, le gas, les produits petroliers ou l'electricite)
+/////////////share in the equipment parc, of the different technologies
 Res_shref=zeros(reg,4,nb_usage_res);
 for j=1:4,
-	Res_shref(:,j,:)=Res_tot(:,21+j,:);
+    Res_shref(:,j,:)=Res_tot(:,21+j,:);
 end
 
 Res_sh_coalref=Res_tot(:,22,:);
@@ -285,10 +278,10 @@ Res_sh_gasref=Res_tot(:,23,:);
 Res_sh_oilref=Res_tot(:,24,:);
 Res_sh_elecref=Res_tot(:,25,:);
 
-/////////////efficacite des differentes "technologies"
+/////////////technology efficiency
 Res_rhoref=zeros(reg,4,nb_usage_res);
 for j=1:4,
-	Res_rhoref(:,j,:)=Res_tot(:,25+j,:);
+    Res_rhoref(:,j,:)=Res_tot(:,25+j,:);
 end
 
 Res_rho_coalref=Res_tot(:,26,:);
@@ -296,10 +289,10 @@ Res_rho_gasref=Res_tot(:,27,:);
 Res_rho_oilref=Res_tot(:,28,:);
 Res_rho_elecref=Res_tot(:,29,:);
 
-/////////////demandes d'energie finale par usage
+/////////////final energy demand per usage
 Res_DEFref=zeros(reg,4,nb_usage_res);
 for j=1:4,
-	Res_DEFref(:,j,:)=Res_tot(:,29+j,:);
+    Res_DEFref(:,j,:)=Res_tot(:,29+j,:);
 end
 
 Res_DEF_coalref=Res_tot(:,30,:);
@@ -308,19 +301,15 @@ Res_DEF_oilref=Res_tot(:,32,:);
 Res_DEF_elecref=Res_tot(:,33,:);
 
 
-////////////demande totale d'energie finale par type d'energie (somme sur les usages)
+////////////finale energy demand by energy type, sum over usage
 Res_DEF_coal_totref=Res_DEF_coalref(:,:,indice_chauffage)+Res_DEF_coalref(:,:,indice_clim)+Res_DEF_coalref(:,:,indice_frigo)+Res_DEF_coalref(:,:,indice_electromenager)+Res_DEF_coalref(:,:,indice_eclairage)+Res_DEF_coalref(:,:,indice_cuisine)+Res_DEF_coalref(:,:,indice_chauffEau);
 Res_DEF_gas_totref=Res_DEF_gasref(:,:,indice_chauffage)+Res_DEF_gasref(:,:,indice_clim)+Res_DEF_gasref(:,:,indice_frigo)+Res_DEF_gasref(:,:,indice_electromenager)+Res_DEF_gasref(:,:,indice_eclairage)+Res_DEF_gasref(:,:,indice_cuisine)+Res_DEF_gasref(:,:,indice_chauffEau);
 Res_DEF_oil_totref=Res_DEF_oilref(:,:,indice_chauffage)+Res_DEF_oilref(:,:,indice_clim)+Res_DEF_oilref(:,:,indice_frigo)+Res_DEF_oilref(:,:,indice_electromenager)+Res_DEF_oilref(:,:,indice_eclairage)+Res_DEF_oilref(:,:,indice_cuisine)+Res_DEF_oilref(:,:,indice_chauffEau);
 Res_DEF_elec_totref=Res_DEF_elecref(:,:,indice_chauffage)+Res_DEF_elecref(:,:,indice_clim)+Res_DEF_elecref(:,:,indice_frigo)+Res_DEF_elecref(:,:,indice_electromenager)+Res_DEF_elecref(:,:,indice_eclairage)+Res_DEF_elecref(:,:,indice_cuisine)+Res_DEF_elecref(:,:,indice_chauffEau);
-//demande totale d'energie finale (somme sur les types d'energie)
+//total final energy demand (sum over energy type)
 Res_DEF_totref=Res_DEF_coal_totref+Res_DEF_gas_totref+Res_DEF_oil_totref+Res_DEF_elec_totref;
 
-////////////////////////////////////attribution des valeurs au premier pas (initialisation)
 Res_alpha=Res_alpharef;
-
-//Res_HDD=Res_HDDref;
-//Res_CDD=Res_CDDref;
 
 Res_SE_unit=Res_SE_unitref;
 Res_SE_unit_bio=Res_SE_unit_bioref;
@@ -342,7 +331,7 @@ Res_M=Res_Mref;
 Res_SE_tot=Res_SE_totref;
 Res_SE_com=Res_SE_comref;
 
-//efficacite moyenne du parc
+//average efficiency
 Res_rho_coal=Res_rho_coalref;
 Res_rho_gas=Res_rho_gasref;
 Res_rho_oil=Res_rho_oilref;
@@ -353,25 +342,25 @@ Res_rho_gas_prev=Res_rho_gasref;
 Res_rho_oil_prev=Res_rho_oilref;
 Res_rho_elec_prev=Res_rho_elecref;
 
-//efficacite des nouveaux equipements (a calibrer differemment?)
+//efficiency of new equipment
 Res_rho_coal_exo=Res_rho_coalref;
 Res_rho_gas_exo=Res_rho_gasref;
 Res_rho_oil_exo=Res_rho_oilref;
 Res_rho_elec_exo=Res_rho_elecref;
 
-//part des energies dans le parc d'equipement
+//share of eneryg in total equipment
 Res_sh_coal=Res_sh_coalref;
 Res_sh_gas=Res_sh_gasref;
 Res_sh_oil=Res_sh_oilref;
 Res_sh_elec=Res_sh_elecref;
 
-//part des energies dans les nouveaux equipements (a calibrer differemment?)
+//share of energy in new equipment
 Res_part_coal_prev=Res_sh_coal;
 Res_part_gas_prev=Res_sh_gas;
 Res_part_oil_prev=Res_sh_oil;
 Res_part_elec_prev=Res_sh_elec;
 
-//demande d'energie finale
+//final energy demand
 Res_DEF_coal=Res_DEF_coalref;
 Res_DEF_gas=Res_DEF_gasref;
 Res_DEF_oil=Res_DEF_oilref;
@@ -383,35 +372,29 @@ Res_DEF_oil_tot=Res_DEF_oil_totref;
 Res_DEF_elec_tot=Res_DEF_elec_totref;
 Res_DEF_tot=Res_DEF_totref;
 
-///////grandeurs calculees qui serviront dans dynamics
-
-////Proportion de la population ayant moins de 2$ par jour (attention aux unites: Rdisp est en millions de $).
-//Formule tiree d'une hypothese de distribution des revenus selon une courbe de Lorenz de parametre Res_alpha
+////share of population living under 2$ per day
 Res_F2dollarsref=(2*365.*ones(reg,1)./Res_alpharef./(Rdispref./Ltot0.*1000000)).^(ones(reg,1)./(Res_alpharef-ones(reg,1)));
 Res_F2dollars=Res_F2dollarsref;
 
-//calibration de la courbe donnant la relation entre la proportion de la population utilisant la biomasse traditionnelle 
-//et la proportion de la population ayant moins de 2$ par jour
-//on choisit une forme part_bio=gamma*(F2dollars-a)^beta
+//curve calibration giving the relation between the share of people using traditional biomass
+// and the share of population living with less than 2$ per day
+// form: part_bio=gamma*(F2dollars-a)^beta
 Res_gamma_bioref=[1;1;1;1;1;1.12;0.8;0.8;1;1.12;1;1.12];
 Res_beta_bioref=[0.7;0.7;0.7;0.7;0.7;0.7;0.7;0.7;0.7;0.7;0.7;0.7];
 for j=1:nb_usage_res,
-	Res_a_bioref(:,j)=Res_F2dollarsref-(Res_part_bioref(:,j)./Res_gamma_bioref).^(ones(reg,1)./Res_beta_bioref);
+    Res_a_bioref(:,j)=Res_F2dollarsref-(Res_part_bioref(:,j)./Res_gamma_bioref).^(ones(reg,1)./Res_beta_bioref);
 end
-
                            
-////nombre d'utilisateurs par usage et par energie (attention dans le cas du chauffage et de la climatisation les "utilisateurs" sont en fait des m2)
+////number of users per usage and per energy 
 Res_N_coal=Res_sh_coalref.*(1-Res_part_bioref).*Res_Mref;
 Res_N_gas=Res_sh_gasref.*(1-Res_part_bioref).*Res_Mref;
 Res_N_oil=Res_sh_oilref.*(1-Res_part_bioref).*Res_Mref;
 Res_N_elec=Res_sh_elecref.*(1-Res_part_bioref).*Res_Mref;
 
-//efficacité énergétique de l'habitat (intervient dans le calcul de la demande d'energie finale)
-//initialise a 1 pour toutes les regions et les usages
+//energy efficiency of housing 
 res_effHabitat=ones(reg,1,nb_usage_res);
 
-
-//Consommation d'energies par m2 (en realite, rapporte a une evolution indicielle de la surface de batiments residentiels)
+//energy consumption per m2
 alphaCoalm2ref=Res_DEF_coal_tot./stockbatimentref;
 alphaGazm2ref=Res_DEF_gas_totref./stockbatimentref;
 alphaEtm2ref=Res_DEF_oil_totref./stockbatimentref;
@@ -422,14 +405,13 @@ alphaGazm2=alphaGazm2ref;
 alphaEtm2=alphaEtm2ref;
 alphaelecm2=alphaelecm2ref;
 
-//prix reels (rapportes aux prix du composite dans chaque region)
+//real prices (to the composite price of each region)
 for k=1:reg,
-	p_prev_resid(k,:)=pArmDFref(k,:);
+    p_prev_resid(k,:)=pArmDFref(k,:);
 end	
 
-
-///calibration des couts (fixe et intangible) des technologies (moyenne sur les technologies utilisant une meme energie)
-///pour reproduire les parts de marche
+///cost calibration, fixed and intangible, for technologies (average over similar energy consumption)
+///to reproduce market shares
 Res_CFref=zeros(reg,4,nb_usage_res);
 
 Res_CF_coalref=Res_CFref(:,1,:);
@@ -442,8 +424,5 @@ Res_CF_gas=Res_CF_gasref;
 Res_CF_oil=Res_CF_oilref;
 Res_CF_elec=Res_CF_elecref;
 
-//service collectif (valable pour le chauffage en Chine)
+//collective services (for heating in China)
 SE_collectif=zeros(reg,1,nb_usage_res);
-
-
-

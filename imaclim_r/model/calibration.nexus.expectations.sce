@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Thibault Briera
+//     Thibault Briera, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -18,8 +18,11 @@ expectations.duration       = 50;
 
 if ind_climpol_uncer>0
     expectations.horizon.signal = horizon_CT; // temporal horizon for forward looking expectations on carbon price schedule, set by scenario
-    if ind_fooled
-        expectations.priceSignal = taxMKTexo_fooled // using post 2030 NPi/NDC signal if fooled
+    if ind_wait_n_see==1
+        expectations.priceSignal = (1-proba_ndc_init)*taxMKTexo(1:nbMKT,:) + proba_ndc_init*taxMKTexo_wait_n_see //non-binary regime of beliefs pre tightening of policies
+        if ~isdef("nb_year_dec_proba")
+            nb_year_dec_proba = 5
+        end
     end
 end
 // how the priceSignal is extrapolated after 2100

@@ -136,10 +136,13 @@ if do_verbose:
 iea_imaclim_web = pd.read_csv( iea_agg_file_path + 'Imaclim__EDS_Gtap_Aggregation.csv', sep='|', header=3)
 iea_imaclim_web = iea_imaclim_web.round(decimals = 15)
 
+iea_imaclim_web_autocons = pd.read_csv( iea_agg_file_path + 'Imaclim__EDS_Gtap_Aggregation__auto_consumption.csv', sep='|', header=4)
+
 iea_imaclim_web_world_flows = pd.read_csv( iea_agg_file_path + 'Imaclim__World_Flows.csv', sep='|', header=3)
 
 iea_imaclim_web[ iea_imaclim_web.select_dtypes(np.number).columns] = iea_imaclim_web[ iea_imaclim_web.select_dtypes(np.number).columns].mul( ktoe2Mtoe)
 iea_imaclim_web_world_flows[ iea_imaclim_web_world_flows.select_dtypes(np.number).columns] = iea_imaclim_web_world_flows[ iea_imaclim_web_world_flows.select_dtypes(np.number).columns].mul( ktoe2Mtoe)
+iea_imaclim_web_autocons[ iea_imaclim_web_autocons.select_dtypes(np.number).columns] = iea_imaclim_web_autocons[ iea_imaclim_web_autocons.select_dtypes(np.number).columns].mul( ktoe2Mtoe)
 
 # reindexing energy product in order
 iea_imaclim_web_world_flows = iea_imaclim_web_world_flows[ ['Flow'] + list_energy_sec_order_ref].set_index(['Flow']) #removing Year and WLD region
@@ -166,12 +169,21 @@ for elt in list_region_gtap:
         iea_imaclim_web_elt[ list_energy_sec] *= 0
         iea_imaclim_web_elt.loc[ :,lambda df: ['Region_Gtap']] = elt
         iea_imaclim_web = pd.concat( [iea_imaclim_web, iea_imaclim_web_elt])
+        # autocons
+        iea_imaclim_web_elt = iea_imaclim_web_autocons.loc[lambda df: df['Region_Gtap']=='usa',:].copy()
+        iea_imaclim_web_elt[ list_energy_sec] *= 0
+        iea_imaclim_web_elt.loc[ :,lambda df: ['Region_Gtap']] = elt
+        iea_imaclim_web_autocons = pd.concat( [iea_imaclim_web_autocons, iea_imaclim_web_elt])
 
 iea_imaclim_web_copy = iea_imaclim_web.copy()
 # re_indexing energy products
 iea_imaclim_web = iea_imaclim_web[ ['Region_Gtap','Flow'] + list_energy_sec_order_ref]  #removing Year
 order_flows_gtap_consistent = sec_nonTrans + [elt for elt in list(set(iea_imaclim_web['Flow'])) if elt not in sec_nonTrans]
 iea_imaclim_web = iea_imaclim_web.set_index(['Flow','Region_Gtap']).reindex( order_flows_gtap_consistent, level='Flow').reindex( list_regions_order_ref, level='Region_Gtap')
+
+iea_imaclim_web_autocons = iea_imaclim_web_autocons[ ['Region_Gtap','Flow'] + list_energy_sec_order_ref]  #removing Year
+order_flows_gtap_consistent = sec_nonTrans + [elt for elt in list(set(iea_imaclim_web_autocons['Flow'])) if elt not in sec_nonTrans]
+iea_imaclim_web_autocons = iea_imaclim_web_autocons.set_index(['Flow','Region_Gtap']).reindex( order_flows_gtap_consistent, level='Flow').reindex( list_regions_order_ref, level='Region_Gtap')
 
 if do_verbose:
     print("Check re-indexing (!=0): ", ( np.abs(iea_imaclim_web_copy['coa'].to_numpy() - iea_imaclim_web['coa'].to_numpy())).sum() )
@@ -698,6 +710,13 @@ output_data_sam_hybrid['Ener_Exp'][index_ener_sam_ref, :] = iea_imaclim_web.loc[
  
 output_data_sam_hybrid['Ener_Prod'][index_ener_sam_ref, :] =(iea_imaclim_web.groupby('Region_Gtap').sum().values.transpose() - 2*iea_imaclim_web.loc[('Imports', list_regions_order_ref),:].values.transpose() ) 
 
+# add auto-consumption, not considerered in the energy balanced:
+output_data_sam_hybrid[ 'Ener_CI_autocons'] = 0*output_data_sam_hybrid['CI_dom']
+output_data_dimensions_sam_hybrid[ 'Ener_CI_autocons'] = input_data_dimensions_sam[ 'CI_dom']
+
+for ind_web, ener in enumerate(list_energy_sec_order_ref):
+    ind_gtap = input_dimensions_values_sam[ input_data_dimensions_sam['Prod'][0]].index( ener)
+    output_data_sam_hybrid['Ener_CI_autocons'][ ind_gtap, ind_gtap, :] = iea_imaclim_web_autocons.loc[ ( ener, list_regions_order_ref), ener].values
 
 if do_verbose:
     print('\n//////////////////////////////////////')

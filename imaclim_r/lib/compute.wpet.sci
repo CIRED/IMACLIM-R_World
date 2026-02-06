@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -20,12 +20,12 @@ function [y] =  compute_wp_Et( )
     // compute oil production
     QCdom = [];
     for k=1:reg
-   	QCdom=[QCdom ; (A(k,:).*Q(k,:))*((CI_temp(:,:,k).*partDomCI(:,:,k))') ];
+        QCdom=[QCdom ; (A_CI(k,:).*Q(k,:))*((CI_temp(:,:,k).*partDomCI(:,:,k))') ];
     end
     QCdom=QCdom +DF.*partDomDF+DG.*partDomDG+DI.*partDomDI;
     Imp = [];
     for k=1:reg
-  	Imp=[Imp ; (A(k,:).*Q(k,:))*((CI_temp(:,:,k).*partImpCI(:,:,k))') ];
+        Imp=[Imp ; (A_CI(k,:).*Q(k,:))*((CI_temp(:,:,k).*partImpCI(:,:,k))') ];
     end
     Imp=Imp +DF.*(partImpDF)+DG.*(partImpDG)+DI.*(partImpDI);
     Exp = marketshare.*(ones(reg,1)*sum(Imp,"r"));
@@ -55,14 +55,14 @@ function [y] =  compute_wp_Et( )
     for k=1:reg,
         costs_CI(k,:)=sum(pArmCI(:,:,k).*CI_temp(:,:,k),"r");
     end
-    p_temp=(A.*(costs_CI+w.*l_temp.*(1+sigma).*(energ_sec+FCCtemp.*non_energ_sec))+FCCmarkup_oil.*markup_temp.*ploc.*((energ_sec+non_energ_sec))).*(1+qtax);
+    p_temp=(A_CI.*costs_CI+A.*w.*l_temp.*(1+sigma).*(energ_sec+FCCtemp.*non_energ_sec)+FCCmarkup_oil.*markup_temp.*ploc.*((energ_sec+non_energ_sec))).*(1+qtax);
     wp_temp = sum( Exp .* p_temp .* (1+xtax), "r" ) ./ sum( Exp , "r" ) ;
 
     // compute corresponding  wp et
     for k=1:reg,
         pArmCItemp(1:nbsecteurenergie,:,k)=((ploc(k,1:nbsecteurenergie)'*ones(1,sec)).*(1+taxCIdom(1:nbsecteurenergie,:,k))).*(1-partImpCI(1:nbsecteurenergie,:,k))+((( wp_temp(1:nbsecteurenergie).*(1+mtax(k,1:nbsecteurenergie))+nit(k,1:nbsecteurenergie)*wpTIaggloc)'*ones(1,sec)).*(1+taxCIimp(1:nbsecteurenergie,:,k))).*partImpCI(1:nbsecteurenergie,:,k)+(taxCO2_CI(1:nbsecteurenergie,:,k).*coef_Q_CO2_CI(1:nbsecteurenergie,:,k)).*(numloc(k,1:nbsecteurenergie)'*ones(1,sec));
     end
-        costs_CI=zeros(reg,sec);
+    costs_CI=zeros(reg,sec);
     for k=1:reg,
         costs_CI(k,:)=sum(pArmCI(:,:,k).*CI_temp(:,:,k),"r");
     end
@@ -76,7 +76,7 @@ function [y] =  compute_wp_Et( )
     end
 
     // price of liquids
-    p_temp=(A.*(costs_CI+w.*l_temp.*(1+sigma).*(energ_sec+FCCtemp.*non_energ_sec))+FCCmarkup_oil.*markup_temp.*ploc.*((energ_sec+non_energ_sec))).*(1+qtax);
+    p_temp=(A_CI.*costs_CI+A.*w.*l_temp.*(1+sigma).*(energ_sec+FCCtemp.*non_energ_sec)+FCCmarkup_oil.*markup_temp.*ploc.*((energ_sec+non_energ_sec))).*(1+qtax);
     p_Et_oil_exp_tax_ethan= p_temp(:,indice_Et) + ( coef_Q_CO2_Et_prod).* taxCO2_DF(:,indice_Et) ;
     p_Et_oil_exp_tax_ethan_o= p(:,indice_Et) + ( coef_Q_CO2_Et_prod_old).* taxCO2_DF(:,indice_Et) ;
 

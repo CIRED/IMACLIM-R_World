@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Adrien Vogt-Schilb, Ruben Bibas, Julie Rozenberg
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 /////////////////////////////////////////////////////////////////////////////////////
 ////																			/////
 ////								PREAMBULE									/////
@@ -5,6 +13,14 @@
 ////	This file get all started to scilab to begin being an IMACLIM session   /////
 ////           It also defines  the *USER CHOICE*  ETUDE                        /////
 /////////////////////////////////////////////////////////////////////////////////////
+
+// Display options
+if ~isdef("verbose")
+    verbose           = 0 ; // displays the values inside the static of last fsolve when equilibrium is not found
+end
+ind.monitor       = %f; // displays a lot of monitor file in res_dyn_loop (just before finding equilibrium)
+nbSubdivisionsMax = 9;
+nbCapTaxesMax     = 20;
 
 //TECHNICAL PREAMBULE TO THE PREAMBULE
 
@@ -22,7 +38,6 @@ end
 // (e.g. avoid 'redefining %current_time_im' error)
 bigs_nb_sys_var = size(who("local"),"*")-1; //-1 stands for IsPreambule_exec
 
-stacksize(3e7); //max stacksize is buggy, do not use
 lines(0);       //No asking (continue to display) (scilab option)
 
 ///////
@@ -43,22 +58,26 @@ EMISSIONS  = PARENT + "study_frames"+sep+"DataEmissions"+sep ;
 TAXDIR  = PARENT + "study_frames"+sep+"DataTaxes"+sep ;
 externals_dir = PARENT + 'externals' + sep ;
 common_codes_dir = externals_dir + 'common_code_for_nlu'+sep+'scilab'+sep;
+common_codes_head_dir = externals_dir + 'common_code_head'+sep+'scilab'+sep;
 
 mkdir(OUTPUT);
-
-//////////////////////////////////////////////////////////////////////////////
-//   GETTING SOURCES FOR DATA LOADING 
-
-// temporary switch to use old data
-if ~isdef('run_ImaclimR_v1_2001')
-	run_ImaclimR_v1_2001=%f;
-end
 
 //////////////////////////////////////////////////////////////////////////////
 //   GETTING  FUNCTIONS and INDEXES
 
 //Gets all the functions in LIB dir
 getd(LIB);
+// load graphical librairy only in graphic mode
+try
+    get("current_figure"); // will raise an error if not in graphical mode
+    getd(LIB+"plot_lib/");
+    str_temp = "Graphic window is open. Plotting librairy loaded";
+catch
+    str_temp = "Graphic window is not open, plotting librairy could not be loaded";
+end
+if verbose>=1
+    warning(str_temp);
+end
 getd(common_codes_dir);
 
 
@@ -68,17 +87,17 @@ desag_industry	= 0;
 desag_services	= 0;
 
 if desag_industry == 0
-nb_sectors_industry = 1;
+    nb_sectors_industry = 1;
 else
-nb_sectors_industry = 8;
+    nb_sectors_industry = 8;
 end
 
 if desag_services == 0 //MULTISECTOR: to be updated
-nb_sectors_services = 1;
+    nb_sectors_services = 1;
 else
-nb_sectors_services = 8; 
+    nb_sectors_services = 8; 
 end
-// indices et tailles des matrices
+// indices, matrix sizes, units
 exec(MODEL+"indexes.sce");
 exec(MODEL+"units.sce");
 
@@ -89,9 +108,9 @@ if ~isdef('ETUDE')
     ETUDE ="base";
 end
 if ~isdef('ETUDEOUTPUT')
-    ETUDEOUTPUT="navigate"
+    ETUDEOUTPUT="navigate";
 end
-//Fiche d'identité de l'étude
+// indices of the different scenario in the study
 matrice_indices=read_matrice_indices();
 
 // FUNCTIONS ALIAS
@@ -103,12 +122,3 @@ clg = clearglobal;
 
 //Remembers this as been executed
 IsPreambule_exec=%t;
-
-// Display options
-verbose           = 0 ; // displays the values inside the static of last fsolve when equilibrium is not found
-ind.monitor       = %f; // displays a lot of monitor file in res_dyn_loop (just before finding equilibrium)
-nbSubdivisionsMax = 9;
-nbCapTaxesMax     = 20;
-
-
-

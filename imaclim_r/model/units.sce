@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Thibault Briera, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 // X * X2Y  = Y
 exa2giga        =                 1e9; // G / E
 tep2gj          =              41.855; // GJ/tep
@@ -40,25 +48,30 @@ giga2mega = giga2unity ./ mega2unity;
 factor_MJ_C=zeros(1,3);
 factor_MJ_C(indice_coal)=1e-3*0.0258;
 factor_MJ_C(indice_oil)=1e-3*0.02;
-factor_MJ_C(indice_gaz)=1e-3*0.0153;
+factor_MJ_C(indice_gas)=1e-3*0.0153;
 
 factor_C_CO2=44/12;
 factor_CO2_C=12/44;
 
-//PING_FL : tout doit disparaitre ici 
-// le //PING_FL est encadré d'###### quand il y a du CPI sur un bloc
+//PING_FL : TODO remove CPI indices as declared below
 ////////////// REQUIRED TO COMPUTE - TO FIX IF A COMMON METHOD IS CHOSED////////
 // CPI - SOurce https://www.inflationtool.com/us-dollar, starts in 2001, then 2007 and 2010+
 CPI = [633.48,649.25,659.33,675,687.69, 710.07, 734.33, 752.98, 783.72,784.43,805.78,817.83,842.06,856.72,869.59,876.16,882.56,900.87,919.87,937.44,952.09/940.49*937.44];
 
+CPI_1990_to_2001 = 135.52 / 100;
 CPI_2020_to_2014 = CPI(15)/CPI(21);
 CPI_2019_to_2014 = CPI(15)/CPI(20);
 CPI_2018_to_2014 = CPI(15)/CPI(19);
+CPI_2017_to_2014 = CPI(15)/CPI(18);
 CPI_2015_to_2014 = CPI(15)/CPI(16);
+CPI_2012_to_2014 = CPI(15)/CPI(13);
 CPI_2010_to_2014 = CPI(15)/CPI(11);
 CPI_2000_to_2014 = CPI(15)/CPI(1);
-CPI_2001_to_2014 = CPI(15)/CPI(2);
 CPI_2007_to_2014 = CPI(15)/CPI(8);
+CPI_2005_to_2014 = CPI(15)/CPI(6);
+CPI_2001_to_2014 = CPI(15)/CPI(2);
+CPI_1990_to_2014 = CPI_1990_to_2001 * CPI_2001_to_2014;
+
 //Exchange rate - Source IEA (2020) "Power generation assumptions in the Stated Policies and SDS Scenarios in the World Energy Outlook 2020""
 EUR_to_USD = 1/0.89;
 

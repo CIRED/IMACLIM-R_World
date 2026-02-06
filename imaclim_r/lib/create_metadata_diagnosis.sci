@@ -61,7 +61,7 @@ function create_metadata_diagnos(outputfile, combi, outputrunname, ind_sc_names,
 
     // Create the metadata file
     if outputrunname==[]
-	outputrunname="None";
+        outputrunname="None";
     end
     metadata_sc=[["combi";combi],["Run Name";outputrunname],["Run Time"; run_date],["Model version"; svn_branch_name + ' -r'+svn_revision_nb+suffix_revision_name]["Commentary";scenario_commentary],[ind_sc_names(2:$)';ind_sc_values],suffix_for_metadata];
     csvWrite( metadata_sc, outputfile, "|");

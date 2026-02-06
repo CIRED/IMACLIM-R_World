@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Aurélie Méjean, Nicolas Graves
+//     Florian Leblanc, Nicolas Graves, Aurélie Méjean
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -40,7 +40,7 @@ counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_st
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = gini_income(k);
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "";end;//
 
-varname = 'Inequality index|Absolute Poverty index'; // Absolute Povert Rate (1.9$ threshold)
+varname = 'Inequality index|Absolute Poverty index'; // Absolute Poverty Rate (1.9$ threshold)
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = poverty_rate(k);
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "%";end;//
@@ -321,45 +321,45 @@ if ind_climat > 2 & ind_climat <>99
 
     varname = 'Policy Cost|Default for CAV';
     counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = - ( sum(DF(k,:).*pArmDF(k,:)) - sum(base_DF(k,:,current_time_im+1) .* base_pArmDF(k,:,current_time_im+1)))/1e3*usd_year1_year2;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = - ( sum(DF(k,:).*pArmDF(k,:)) - sum(base_DF(k,:,current_time_im+1) .* base_pArmDF(k,:,current_time_im+1)))/1e3*usd_year1_year2;
 
-    varname = 'Policy Cost|GDP Loss';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    if current_time_im==yr_start & k==1;list_output_comments(counterLine)="GDP MER";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (GDP_MER_real(k) - GDP_base_MER_real(k,current_time_im+1)) / 1e3*usd_year1_year2; // negative numbers requested by EMF
+varname = 'Policy Cost|GDP Loss';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+if current_time_im==yr_start & k==1;list_output_comments(counterLine)="GDP MER";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (GDP_MER_real(k) - GDP_base_MER_real(k,current_time_im+1)) / 1e3*usd_year1_year2; // negative numbers requested by EMF
 
-    varname = 'Policy Cost|Consumption Loss';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = ( sum(DF(k,:).*pArmDF(k,:)) - sum(base_DF(k,:,current_time_im+1) .* base_pArmDF(k,:,current_time_im+1)))/1e3*usd_year1_year2;
+varname = 'Policy Cost|Consumption Loss';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = ( sum(DF(k,:).*pArmDF(k,:)) - sum(base_DF(k,:,current_time_im+1) .* base_pArmDF(k,:,current_time_im+1)))/1e3*usd_year1_year2;
 
-    varname = 'Policy Cost|Additional Total Energy System Cost';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (energyInvestment(k) - energyInvestment_base(k,current_time_im+1)) / 1e3 * usd_year1_year2;
+varname = 'Policy Cost|Additional Total Energy System Cost';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (energyInvestment(k) - energyInvestment_base(k,current_time_im+1)) / 1e3 * usd_year1_year2;
 
 else
     varname_temp = 'Policy Cost|Default for CAV';
     counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
 
-    varname_temp = 'Policy Cost|GDP Loss';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+varname_temp = 'Policy Cost|GDP Loss';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
 
-    varname_temp = 'Policy Cost|Consumption Loss';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+varname_temp = 'Policy Cost|Consumption Loss';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
 
-    varname_temp = 'Policy Cost|Additional Total Energy System Cost';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+varname_temp = 'Policy Cost|Additional Total Energy System Cost';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
 
 end
 
@@ -379,3 +379,8 @@ counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_st
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)= - emi_evitee(k)/1e6 ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";
 end;
+
+varname = 'Labour revenue share'; // Labour share of revenues
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = labour_share(k);
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "";end;//

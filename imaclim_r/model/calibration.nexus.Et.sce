@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Ruben Bibas, Nicolas Graves, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Nicolas Graves, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -174,7 +174,8 @@ Q_oil_refin=Qref(:,indice_Et);
 
 
 //computing CTL production cost, depending on coal price
-//from http://www.iea-etsap.org/web/E-TechDS/PDF/S02-CTL&GTL-GS-gct.pdf ETSAP Energy system analysis programme - Technology brief S02 May 2010 - Liquid fuels production from coal and gas, on sait que les couts variables (hors charbon) du CTL sont en gros egaux aux couts en charbon et les couts en capital en gros 10 fois plus eleves pour une duree de vie d'environ 30 (en levelized annual capital cost, cela donne en gros en cout en capital egal a 0.8 fois le cout en charbon
+//from http://www.iea-etsap.org/web/E-TechDS/PDF/S02-CTL&GTL-GS-gct.pdf ETSAP Energy system analysis programme - Technology brief S02 May 2010 - Liquid fuels production from coal and gas
+// We know that variable costs (coal excluded) of Coal-to-Liquids are more or less equal to the cost of coal, and that capital costs are around 10 times higher for a 30 year lifetime (in term of annual levelized capital cost, this gives capital cost being 0.8 times the cost of coal)
 
 cost_CTL_coal_w=wpref(coal)*(1/yield_CTL);
 cost_CTL_OMref=ratio_OM_coal_CTL*cost_CTL_coal_w;

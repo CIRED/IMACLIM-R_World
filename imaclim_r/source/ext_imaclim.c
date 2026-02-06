@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Severine Wiltgen
+//     Florian Leblanc, SÃ©verine Wiltgen, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -28,6 +28,8 @@
 
 */
 
+#include "api_scilab.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +38,6 @@
 #include "/usr/lib/scilab-4.0/routines/stack-c.h" 
 #include "C:\Program Files\scilab-4.0\routines\stack-c.h"
 */
-#include "stack-c.h" //this one works fine when compiled through ilib_for_link
 #include "sciprint.h"
 
 
@@ -56,6 +57,8 @@ struct hyperm {
 };
 
 typedef struct hyperm hyperm;
+
+int verbose_C=0;
 
 int reg;
 int sec;
@@ -79,7 +82,7 @@ int indice_Et;
 int indice_elec;
 int indice_coal;
 int indice_oil;
-int indice_gaz;
+int indice_gas;
 int nb_trans;
 int indice_transport_1;
 int indice_transport_2;
@@ -176,10 +179,12 @@ double *alphaelecm2;
 double *alphaCoalm2;
 double *alphaGazm2;
 double **A;
+double **A_CI;
 double *L;
 double *coef_Q_CO2_Et_prod;
 double *QuotasRevenue;
 double *CO2_obj_MKTparam;
+double *CO2_untaxed;
 double *areEmisConstparam; //todo :  change this to int (prob with allocate matrixe)
 double *verbose;
 double *shareBiomassTaxElec;
@@ -195,7 +200,7 @@ double **bRD;
 double **cRD;
 double **DG;
 double **DIinfra;
-double **DIprodref;
+double **DIprod;
 double **DFref;
 double *DFair_exo;
 double **pArmDFref;
@@ -215,15 +220,12 @@ double *toair;
 double *toautomobile;
 double *toNM;
 double *toOT;
-// double **p;
-// double **w;
 double **Ttax;
 double **Conso;
 double *aw;
 double *bw;
 double *cw;
-/* div est reserve, on utilise divi */
-double *divi;
+double *divi; /* div is a C function, we use divi instead*/
 double *partExpK;
 double *partImpK;
 double *IR;
@@ -234,8 +236,7 @@ double **wref;
 double **xtax;
 double **xtaxref;
 double *wpEnerref;
-/* l sert pour les indices grrrrrr... on utilise lll */
-double **lll;
+double **lll; /* l is used for indices, we use lll instead */
 double **markup;
 double **pref;
 double **markupref;
@@ -250,6 +251,7 @@ double **partDomDFref;
 double **partDomDGref;
 double **partDomDIref;
 double **partDomDF_stock;
+double **partDomDF_min;
 double **partDomDG_stock;
 double **partDomDI_stock;
 double **qtax;
@@ -318,23 +320,12 @@ double ***coef_Q_CO2_CI;
 double ***pArmCI;
 double ***partDomCIref;
 double ***partDomCI_stock;
+double ***partDomCI_min;
 double ***taxCIdom;
 double ***taxCIimp;
 double ***alpha_partCI;
 
-// FILE * fp;
-
-// /* used for debugging */
-// double *sci_rs;
-// double *sci_rc;
-// double *sci_r3;
-// double *sci_rt;
-// double *sci_r;
-// double *sci_s;
-// double *sci_t;
-// double *sci_e;
-
-#define HYPERM_NR 12
+#define HYPERM_NR 13
 /*pour les hypermatrices*/
 hyperm hyperm_list[HYPERM_NR] = {
     { "bCI", &bCI },
@@ -346,50 +337,11 @@ hyperm hyperm_list[HYPERM_NR] = {
     { "taxCO2_CI", &taxCO2_CI },
     { "partDomCIref", &partDomCIref },
     { "partDomCI_stock", &partDomCI_stock },
+    { "partDomCI_min", &partDomCI_min },
     { "taxCIdom", &taxCIdom },
     { "taxCIimp", &taxCIimp },
     { "alpha_partCI", &alpha_partCI }
 };
-
-/* macro used to get an index from scilab 
-   to put the value associated with the index with name 'sci_index' in scilab
-   in the C variable 'c_index', call
-   get_index("sci_index",c_index)
-   */
-#define get_index(sci_index_name,c_index_name) \
-    GetMatrixptr(sci_index_name,&m,&n,&lp); \
-c_index_name=*stk(lp);
-
-/* called like
-   get_param_matrix2d("scilab_matrix_name",c_matrix_var,c_first_dimension_var,c_second_dimension_var) */
-#define get_param_matrix2d(sci_param_matrix_name,c_param_matrix_name,dim1,dim2) \
-    GetMatrixptr(sci_param_matrix_name,&m,&n,&lp); \
-for (k=0 ; k<dim1 ;k++)\
-{\
-    for (j=0; j<dim2;j++)\
-    c_param_matrix_name[k][j]=*stk(k+dim1*j+lp);\
-}
-
-// #define get_param_matrix2d_int(sci_param_matrix_name,c_param_matrix_name,dim1,dim2) \
-// GetMatrixptr(sci_param_matrix_name,&m,&n,&lp); \
-// for (j=0; j<dim2;j++)\
-// {\
-// for (k=0 ; k<dim1 ;k++)\
-// c_param_matrix_name[k][j]=*istk(k+dim1*j+lp);\
-// }
-
-#define get_param_matrix1d(sci_param_matrix_name,c_param_matrix_name,dim1) \
-    GetMatrixptr(sci_param_matrix_name,&m,&n,&lp); \
-for (k=0 ; k<dim1 ;k++)\
-c_param_matrix_name[k]=*stk(k+lp);
-
-// #define get_param_matrix1d_int(sci_param_matrix_name,c_param_matrix_name,dim1) \
-// GetMatrixptr(sci_param_matrix_name,&m,&n,&lp); \
-// for (k=0 ; k<dim1 ;k++)\
-// c_param_matrix_name[k]=*istk(k+lp);
-
-#define get_param_matrix(sci_param_matrix_name,c_param_matrix_name) \
-    get_param_matrix2d(sci_param_matrix_name,c_param_matrix_name,reg,sec)
 
 #define allocate_matrix2d(matrix_name,dim1,dim2) \
     matrix_name = (double **) malloc(sizeof(double *) * dim1); \
@@ -422,102 +374,171 @@ for (k = 0;k < dim1;k++) \
     for (k = 0;k < dim;k++) \
 vec_name[k] = val;
 
-/*
-#define get_param_matrix(sci_param_matrix_name,c_param_matrix_name) \
-GetMatrixptr(sci_param_matrix_name,&m,&n,&lp); \
-for (k=0 ; k<reg ;k++)\
-{\
-for (j=0; j<sec;j++)\
-c_param_matrix_name[k][j]=*stk(k+reg*j+lp);\
-}
-*/
-
-/* find the matrix structure using its name */
-int find_hyperm(char* name, double ****matrix)
+// empty function - to have a good .so file title in scilab
+int imaclim_static_cge()
 {
-    int i;
-    for (i = 0; i < HYPERM_NR; i++)
-    {
-        if (strcmp(name,hyperm_list[i].name) == 0)
-        {
-            (*matrix) = (*hyperm_list[i].matrix);
-            return 1;
-        }
-    }
-    return 0;
+	return 0;
 }
 
-/* called from scilab to fill a submatrix of an hypermatrix */
-void fill_2d_matrix(int *index, int* nb_row, int* nb_col, double* matrix, char* mat_name, int *status)
-{   
-    int k, j;
-    double ****hypermat;
-    hypermat = (double ****) malloc(sizeof(double ***));
-    /*
-       printf("mat %s, nc %d, nr %d, index %d\n", mat_name, *nb_col,  *nb_row, *index);
-       */
-    if (!find_hyperm(mat_name,hypermat))
-    {
-        printf("Warning: hypermatrix %s not found\n", mat_name);
-        *status = 0;
-        free(hypermat);
-        return;
-    }
+/////////////////////////////////////////////////////////
+// Allocation functions: scilab v6.0 and greater
+//
 
-    //ne pas "optimiser" l'ordre des boucles, il faut que ce soit dans le bon ordre pour scilab!
-    for (j = 0; j < *nb_col; j++)
-    {
-        for (k = 0; k < *nb_row; k++)
-        {
-            (*hypermat)[k][j][*index-1] = matrix[k+j*(*nb_row)];
+// Function to convert a double vector into a double matrix
+void vectorToMatrix(double* vector, int rows, int cols, double*** matrixPtr) {
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            (*matrixPtr)[i][j] = vector[i + j * rows];
         }
     }
-
-    *status = 1;
-    free(hypermat);
 }
 
-/* depuis scilab, appeller:
-   call('allocate_matrix')
-   */
-int allocate_matrix()
+int assign_fromScilabVal_scalar_int(scilabEnv env, const char* var_str, int* var)
+{
+        SciErr sciErr;
+        int** var_pointer = NULL;
+	var_pointer = (int**)malloc(sizeof(int*));
+        int n_row = 0;
+        int n_col = 0;
+        double* scalar_double       = NULL;
+        sciErr = getVarAddressFromName( env, var_str, var_pointer);
+        sciErr = getMatrixOfDouble( env, *var_pointer, &n_row, &n_col, &scalar_double);
+        *var = (int)scalar_double[0]; 
+	if (verbose_C==1) {
+	    printf("Character: %s\n", var_str);
+	    printf("   %s %i\n", var_str, var[0]);
+	}
+        return STATUS_OK;
+}
+
+int assign_fromScilabVal_scalar_double(scilabEnv env, const char* var_str, double* var)
+{
+        SciErr sciErr;
+        int** var_pointer = NULL;
+	var_pointer = (int**)malloc(sizeof(int*));
+        int n_row = 0;
+        int n_col = 0;
+        double* scalar_double       = NULL;
+        sciErr = getVarAddressFromName( env, var_str, var_pointer);
+        sciErr = getMatrixOfDouble( env, *var_pointer, &n_row, &n_col, &scalar_double);
+        *var = scalar_double[0]; 
+	if (verbose_C==1) {
+	    printf("Character: %s\n", var_str);
+	    for (int i; i< n_row*n_col; ++i) {
+	        printf("   %s %.2f \n", var_str, scalar_double[i]);
+	    }
+ 	}
+        return STATUS_OK;
+}
+
+int assign_fromScilabVal_vector_double(scilabEnv env, const char* var_str, double *var)
+{
+        SciErr sciErr;
+        int** var_pointer = NULL;
+	var_pointer = (int**)malloc(sizeof(int*));
+	double* pdblReal        = NULL;
+        int n_row = 0;
+        int n_col = 0;
+        sciErr = getVarAddressFromName( env, var_str, var_pointer);
+        sciErr = getMatrixOfDouble( env, *var_pointer, &n_row, &n_col, &pdblReal);
+    	for (int i = 0; i < n_row; ++i) {
+        	for (int j = 0; j < n_col; ++j) {
+            	    var[i + j * n_row] = pdblReal[i + j * n_row];
+	    }
+    	}
+	if (verbose_C==1) {
+	    printf("Character: %s\n", var_str);
+	    for (int i; i< n_row*n_col; ++i) {
+	        printf("   %s %.10f \n", var_str, var[i]);
+	    }
+	}
+        return STATUS_OK;
+}
+
+int assign_fromScilabVal_vector_int(scilabEnv env, const char* var_str, int *var)
+{
+        SciErr sciErr;
+        int** var_pointer = NULL;
+        int n_row = 0;
+	var_pointer = (int**)malloc(sizeof(int*));
+        int n_col = 0;
+	double* var_double = NULL;
+        sciErr = getVarAddressFromName( env, var_str, var_pointer);
+        sciErr = getMatrixOfDouble( env, *var_pointer, &n_row, &n_col, &var_double);
+	// convert to int
+	for (int j = 0; j < n_row*n_col; ++j) {
+		var[j] = (int)var_double[j];
+	}
+        return STATUS_OK;
+}
+
+int assign_fromScilabVal_matrix_double(scilabEnv env, const char* var_str, double **var)
+{
+        SciErr sciErr;
+        int** var_pointer = NULL;
+	var_pointer = (int**)malloc(sizeof(int*));
+	double* pdblReal        = NULL;
+        int n_row = 0;
+        int n_col = 0;
+        sciErr = getVarAddressFromName( env, var_str, var_pointer);  
+        sciErr = getMatrixOfDouble( env, *var_pointer, &n_row, &n_col, &pdblReal);
+        vectorToMatrix(pdblReal, n_row, n_col, &var);
+        return STATUS_OK;
+}
+
+// Function to convert a double vector into a double matrix
+void vectorToHyperMatrix(double* vector, int* dims, int ndims, double**** matrixPtr) {
+    for (int i = 0; i < dims[2]; ++i) {
+        for (int j = 0; j < dims[1]; ++j) {
+        	for (int k = 0; k < dims[0]; ++k) {
+            		(*matrixPtr)[k][j][i] = vector[i * dims[1] * dims[0] + j * dims[0] + k];
+		}
+        }
+    }
+    if (verbose_C==1) {
+        for (int i = 0; i < dims[2]; ++i) {
+            for (int j = 0; j < dims[1]; ++j) {
+        	for (int k = 0; k < dims[0]; ++k) {
+			printf("        %i %i %i: %.2f\n", i, j, k, vector[i * dims[1] * dims[2] + j * dims[2] + k]);
+			printf("        %i %i %i: %.6f\n", k+1, j+1, i+1, vector[i * dims[1] * dims[0] + j * dims[0] + k]);
+			printf("        %i %i %i: %.2f\n", i, j, k, vector[i + dims[0] * j + dims[1] * dims[2] + k]);
+		}
+            } 
+        }
+    }			
+}
+
+int assign_fromScilabVal_hypermatrix_double(scilabEnv env, const char* var_str, double ***var)
+{
+        SciErr sciErr;
+        int** var_pointer = NULL;
+        var_pointer = (int**)malloc(sizeof(int*));
+        double* pdblReal        = NULL;
+        int n_row = 0;
+        int n_col = 0;
+	int* dims = NULL;
+	int ndims = 0;
+        sciErr = getVarAddressFromName( env, var_str, var_pointer);
+        sciErr = getHypermatOfDouble( env, *var_pointer, &dims, &ndims, &pdblReal);
+        if (ndims==3) {
+	    if (verbose_C==1) { printf("Character: %s\n", var_str);}
+            vectorToHyperMatrix(pdblReal, dims, ndims, &var);
+	}
+	//else {
+	//    printf(" I DONT HAVE 3 NDIMS fr %s but %i\n", var_str, ndims);
+	//}
+        if (verbose_C==1) {
+	    printf("Character: %s\n", var_str);
+	    for (int i = 0; i < dims[1] * dims[2] * dims[0]; ++i ) {
+		printf("    %s  at %i: %.2f\n", var_str, i, pdblReal[i]);
+	    }
+	}
+        return STATUS_OK;
+}
+
+int initial_memory_allocation()
 {
     int k,j;
-    int m,n,lp;
-
-    // /*calcul de pi*/
-    // pi = 4*atan(1);  
-    get_index("reg",reg);
-    get_index("sec",sec);
-    get_index("nb_secteur_conso",nb_secteur_conso);
-    get_index("indice_energiefossile1",indice_energiefossile1);
-    get_index("indice_energiefossile2",indice_energiefossile2);
-    get_index("indice_construction",indice_construction);
-    get_index("nbsecteurenergie",nbsecteurenergie);
-    get_index("indice_composite",indice_composite);
-    get_index("indice_mer",indice_mer);
-    get_index("indice_air",indice_air);
-    get_index("indice_OT",indice_OT);
-    get_index("indice_Et",indice_Et);
-    get_index("indice_elec",indice_elec);
-    get_index("indice_coal",indice_coal);
-    get_index("indice_oil",indice_oil);
-    get_index("indice_gaz",indice_gaz);
-    get_index("nb_trans",nb_trans);
-    get_index("indice_transport_1",indice_transport_1);
-    get_index("indice_transport_2",indice_transport_2);
-    get_index("indice_agriculture",indice_agriculture);
-	get_index("nb_sectors_industry",nb_sectors_industry);
-    get_param_matrix1d("indice_industries",indice_industries,nb_sectors_industry);
-    get_index("nbsecteurcomposite",nbsecteurcomposite);
-    get_index("nb_secteur_utile",nb_secteur_utile);
-    get_index("nbMKT",nbMKT);
-    get_index("nb_use",nb_use);
-    get_index("iu_df",iu_df);
-    get_index("iu_dg",iu_dg);
-    get_index("iu_di",iu_di);
-    get_index("new_Et_msh_computation",new_Et_msh_computation);
-    get_index("exo_pkmair_scenario",exo_pkmair_scenario);
 
     allocate_matrix2d(ploc,reg,sec);
     allocate_matrix2d(wloc,reg,sec);
@@ -584,11 +605,8 @@ int allocate_matrix()
     allocate_matrix2d(Sector_budget,reg,sec);
 
     allocate_matrix2d(xsi,reg,sec-nbsecteurenergie-nb_trans+1);
-
     allocate_matrix2d(Utility,reg,(nb_secteur_conso+2));
-
     allocate_matrix2d(marketshareTI,reg,nb_trans);
-
     allocate_matrix3d(pArmCI,sec,sec,reg);
 
     /*matrices parametres*/
@@ -659,6 +677,7 @@ int allocate_matrix()
 
     taxMKT = (double *) malloc(sizeof(double) * nbMKT);
     CO2_obj_MKTparam = (double *)  malloc(sizeof(double) * nbMKT);
+    CO2_untaxed = (double *)  malloc(sizeof(double) * reg);
     areEmisConstparam = (double *) malloc(sizeof(double) * nbMKT);
     verbose = (double *) malloc(sizeof(double) * 1);
     shareBiomassTaxElec = (double *) malloc(sizeof(double) * 1);
@@ -703,6 +722,7 @@ int allocate_matrix()
     allocate_matrix3d(taxCO2_CI,sec,sec,reg);
     allocate_matrix3d(partDomCIref,sec,sec,reg);
     allocate_matrix3d(partDomCI_stock,sec,sec,reg);
+    allocate_matrix3d(partDomCI_min,sec,sec,reg);
     allocate_matrix3d(taxCIdom,sec,sec,reg);
     allocate_matrix3d(taxCIimp,sec,sec,reg);
     allocate_matrix3d(alpha_partCI,nbsecteurenergie,sec,reg);
@@ -710,12 +730,14 @@ int allocate_matrix()
     allocate_matrix3d(partImpCI,sec,sec,reg);
 
     allocate_matrix2d(A,reg,sec);
+    allocate_matrix2d(A_CI,reg,sec);
+
     allocate_matrix2d(aRD,reg,sec);
     allocate_matrix2d(bRD,reg,sec);
     allocate_matrix2d(cRD,reg,sec);
     allocate_matrix2d(DG,reg,sec);
     allocate_matrix2d(DIinfra,reg,sec);
-    allocate_matrix2d(DIprodref,reg,sec);
+    allocate_matrix2d(DIprod,reg,sec);
     allocate_matrix2d(DFref,reg,sec);
     allocate_matrix2d(pArmDFref,reg,sec);
     allocate_matrix2d(bn,reg,sec);
@@ -742,12 +764,11 @@ int allocate_matrix()
     allocate_matrix2d(partDomDGref,reg,sec);
     allocate_matrix2d(partDomDIref,reg,sec);
     allocate_matrix2d(partDomDF_stock,reg,sec);
+    allocate_matrix2d(partDomDF_min,reg,sec);
     allocate_matrix2d(partDomDG_stock,reg,sec);
     allocate_matrix2d(partDomDI_stock,reg,sec);
     allocate_matrix2d(qtax,reg,sec);
     allocate_matrix2d(sigma,reg,sec);
-    // allocate_matrix2d(p,reg,sec);
-    // allocate_matrix2d(w,reg,sec);
     allocate_matrix2d(Ttax,reg,sec);
     allocate_matrix2d(taxCO2_DF,reg,sec);
     allocate_matrix2d(taxCO2_DG,reg,sec);
@@ -759,238 +780,253 @@ int allocate_matrix()
     allocate_matrix2d(taxDIdom,reg,sec);
     allocate_matrix2d(taxDIimp,reg,sec);
 
-    /*allocate_matrix2d(Utility,reg,(nb_secteur_conso+2));*/
-    // sci_rs = (double *) malloc(sizeof(double) * reg*sec);
-    // sci_rc = (double *) malloc(sizeof(double) * reg*nb_secteur_conso);
-    // sci_r3 = (double *) malloc(sizeof(double) * reg*3);
-    // sci_rt = (double *) malloc(sizeof(double) * reg*nb_trans);
-    // sci_r =  (double *) malloc(sizeof(double) * reg);
-    // sci_s =  (double *) malloc(sizeof(double) * sec);
-    // sci_t =  (double *) malloc(sizeof(double) * nb_trans);
-    // sci_e = (double *) malloc(sizeof(double) * nbsecteurenergie);
+    return 0;
+}                                                                                               
+
+int import_parameters_fixed_scilab2C(scilabEnv env, int nin, scilabVar* in, int nopt, scilabOpt opt, int nout, scilabVar* out)
+{
+    int m,n,lp;
+    int k,j;
+
+    // Get indexes from scialb before memory allocation
+    assign_fromScilabVal_scalar_int( env, "reg",&reg);
+    //	printf("   REGG %s %i\n", "reg", reg);
+    assign_fromScilabVal_scalar_int( env, "sec",&sec);
+    assign_fromScilabVal_scalar_int( env, "nb_secteur_conso",&nb_secteur_conso);
+    assign_fromScilabVal_scalar_int( env, "indice_energiefossile1",&indice_energiefossile1);
+    assign_fromScilabVal_scalar_int( env, "indice_energiefossile2",&indice_energiefossile2);
+    assign_fromScilabVal_scalar_int( env, "indice_construction",&indice_construction);
+    assign_fromScilabVal_scalar_int( env, "nbsecteurenergie",&nbsecteurenergie);
+    assign_fromScilabVal_scalar_int( env, "indice_composite",&indice_composite);
+    assign_fromScilabVal_scalar_int( env, "indice_mer",&indice_mer);
+    assign_fromScilabVal_scalar_int( env, "indice_air",&indice_air);
+    assign_fromScilabVal_scalar_int( env, "indice_OT",&indice_OT);
+    assign_fromScilabVal_scalar_int( env, "indice_Et",&indice_Et);
+    assign_fromScilabVal_scalar_int( env, "indice_elec",&indice_elec);
+    assign_fromScilabVal_scalar_int( env, "indice_coal",&indice_coal);
+    assign_fromScilabVal_scalar_int( env, "indice_oil",&indice_oil);
+    assign_fromScilabVal_scalar_int( env, "indice_gas",&indice_gas);
+    assign_fromScilabVal_scalar_int( env, "nb_trans",&nb_trans);
+    assign_fromScilabVal_scalar_int( env, "indice_transport_1",&indice_transport_1);
+    assign_fromScilabVal_scalar_int( env, "indice_transport_2",&indice_transport_2);
+    assign_fromScilabVal_scalar_int( env, "indice_agriculture",&indice_agriculture);
+    assign_fromScilabVal_scalar_int( env, "nb_sectors_industry",&nb_sectors_industry);
+    assign_fromScilabVal_scalar_int( env, "nbsecteurcomposite",&nbsecteurcomposite);
+    assign_fromScilabVal_scalar_int( env, "nb_secteur_utile",&nb_secteur_utile);
+    assign_fromScilabVal_scalar_int( env, "nbMKT",&nbMKT);
+    assign_fromScilabVal_scalar_int( env, "nb_use",&nb_use);
+    assign_fromScilabVal_scalar_int( env, "iu_df",&iu_df);
+    assign_fromScilabVal_scalar_int( env, "iu_dg",&iu_dg);
+    assign_fromScilabVal_scalar_int( env, "iu_di",&iu_di);
+    assign_fromScilabVal_scalar_int( env, "new_Et_msh_computation",&new_Et_msh_computation);
+    assign_fromScilabVal_scalar_int( env, "exo_pkmair_scenario",&exo_pkmair_scenario);
+
     nX = reg*nb_secteur_conso+5*reg+3*reg*sec+5;
 
-    get_param_matrix("DIprodref",DIprodref);
-    get_param_matrix("DFref",DFref);
-    get_param_matrix("pArmDFref",pArmDFref);
-    get_param_matrix("xtaxref",xtaxref);
-    get_param_matrix("wref",wref);
-    get_param_matrix("pref",pref);
-    get_param_matrix("markupref",markupref);
-    get_param_matrix1d("pkmautomobileref",pkmautomobileref,reg);
-    get_param_matrix1d("TNMref",TNMref,reg);
-    get_param_matrix1d("wpEnerref",wpEnerref,nbsecteurenergie);
-    get_param_matrix1d("partTIref",partTIref,nb_trans);
-    get_param_matrix1d("pindref",pindref,reg);
+    // Memory Allocation
+    initial_memory_allocation();
+
+    // Assign fixed parameters
+    assign_fromScilabVal_matrix_double( env, "DIprod",DIprod);
+    assign_fromScilabVal_matrix_double( env,"DFref",DFref);
+    assign_fromScilabVal_matrix_double( env,"pArmDFref",pArmDFref);
+    assign_fromScilabVal_matrix_double( env,"xtaxref",xtaxref);
+    assign_fromScilabVal_matrix_double( env,"wref",wref);
+    assign_fromScilabVal_matrix_double( env,"pref",pref);
+    assign_fromScilabVal_matrix_double( env,"markupref",markupref);
+    assign_fromScilabVal_vector_int( env,"indice_industries",indice_industries);
+    assign_fromScilabVal_vector_double( env,"pkmautomobileref",pkmautomobileref);
+    assign_fromScilabVal_vector_double( env,"TNMref",TNMref);
+    assign_fromScilabVal_vector_double( env,"wpEnerref",wpEnerref);
+    assign_fromScilabVal_vector_double( env,"partTIref",partTIref);
+    assign_fromScilabVal_vector_double( env,"pindref",pindref);
+
+    return STATUS_OK;
 }                                                                                               
-/*
 
-#define wr_sci(mat,scistr,wrmat,nb_row,nb_col) \
-for (j=0; j<nb_col; j++) \
-{ \
-for (k=0; k<nb_row; k++) \
-{ \
-wrmat[j*nb_row+k] = mat[k][j]; \
-} \
-} ;\
-WriteMatrix(scistr, &nb_row, &nb_col, wrmat);
-
-#define wr_sci_rs(mat) wr_sci(mat,"sci_rs",sci_rs,reg,sec)
-
-#define wr_sci_vec(vec,scivstr,wrvec,size) \
-for (j=0; j<size; j++) \
-{ \
-wrvec[j] = vec[j]; \
-} ;\
-WriteMatrix(scivstr, &size, &one, wrvec);
-*/
-
-int set_param()
+int import_parameters_dynamic_scilab2C(scilabEnv env, int nin, scilabVar* in, int nopt, scilabOpt opt, int nout, scilabVar* out)
 {        
     int m,n,lp;
     int k,j;
 
-    get_param_matrix1d("partTIref",partTIref,nb_trans);
-    get_param_matrix("DIprodref",DIprodref);
-    get_param_matrix1d("pindref",pindref,reg);
-    get_index("etaTI",etaTI);
-    get_index("etaEtnew",etaEtnew);
-    get_index("inertia_share",inertia_share);
+    assign_fromScilabVal_vector_double( env,"partTIref",partTIref);
+    assign_fromScilabVal_matrix_double( env,"DIprod",DIprod);
+    assign_fromScilabVal_vector_double( env,"pindref",pindref);
+    assign_fromScilabVal_scalar_double( env, "etaTI",&etaTI);
+    assign_fromScilabVal_scalar_double( env, "etaEtnew",&etaEtnew);
+    // 	    printf("  etaEtnew   %s %.2f \n", "etaEtnew", etaEtnew);
+    assign_fromScilabVal_scalar_double( env, "inertia_share",&inertia_share);
     /*pour les matrix reg, sec*/
-    get_param_matrix("A",A);
-    get_param_matrix("aRD",aRD);
-    get_param_matrix("bRD",bRD);
-    get_param_matrix("cRD",cRD);
-    get_param_matrix("DG",DG);
-    get_param_matrix("DIinfra",DIinfra);
-    get_param_matrix("bn",bn);
-    get_param_matrix("Cap",Cap);
-    get_param_matrix("coef_Q_CO2_DF",coef_Q_CO2_DF);
-    get_param_matrix("coef_Q_CO2_DG",coef_Q_CO2_DG);
-    get_param_matrix("coef_Q_CO2_DI",coef_Q_CO2_DI);
-    // get_param_matrix("p",p);
-    // get_param_matrix("w",w);
-    get_param_matrix("Ttax",Ttax);
+    assign_fromScilabVal_matrix_double( env,"A",A);
+    assign_fromScilabVal_matrix_double( env,"A_CI",A_CI);
+    assign_fromScilabVal_matrix_double( env,"aRD",aRD);
+    assign_fromScilabVal_matrix_double( env,"bRD",bRD);
+    assign_fromScilabVal_matrix_double( env,"cRD",cRD);
+    assign_fromScilabVal_matrix_double( env,"DG",DG);
+    assign_fromScilabVal_matrix_double( env,"DIinfra",DIinfra);
+    assign_fromScilabVal_matrix_double( env,"bn",bn);
+    assign_fromScilabVal_matrix_double( env,"Cap",Cap);
+    assign_fromScilabVal_matrix_double( env,"coef_Q_CO2_DF",coef_Q_CO2_DF);
+    assign_fromScilabVal_matrix_double( env,"coef_Q_CO2_DG",coef_Q_CO2_DG);
+    assign_fromScilabVal_matrix_double( env,"coef_Q_CO2_DI",coef_Q_CO2_DI);
+    // assign_fromScilabVal_matrix_double( env,"p",p);
+    // assign_fromScilabVal_matrix_double( env,"w",w);
+    assign_fromScilabVal_matrix_double( env,"Ttax",Ttax);
 
-    get_param_matrix("xtax",xtax);
+    assign_fromScilabVal_matrix_double( env,"xtax",xtax);
 
-    get_param_matrix("l",lll);
-    get_param_matrix("markup",markup);
+    assign_fromScilabVal_matrix_double( env,"l",lll);
+    assign_fromScilabVal_matrix_double( env,"markup",markup);
 
-    get_param_matrix("partDomDGref",partDomDGref);
-    get_param_matrix("partDomDIref",partDomDIref);
-    get_param_matrix("partDomDFref",partDomDFref);
+    assign_fromScilabVal_matrix_double( env,"partDomDGref",partDomDGref);
+    assign_fromScilabVal_matrix_double( env,"partDomDIref",partDomDIref);
+    assign_fromScilabVal_matrix_double( env,"partDomDFref",partDomDFref);
 
-    get_param_matrix("markup_lim_oil",markup_lim_oil);
-    get_param_matrix("mtax",mtax);
-    get_param_matrix("energ_sec",energ_sec);
-    get_param_matrix("nit",nit);
-    get_param_matrix("non_energ_sec",non_energ_sec);
-    get_param_matrix("partDomDF_stock",partDomDF_stock);
-    get_param_matrix("partDomDG_stock",partDomDG_stock);
-    get_param_matrix("partDomDI_stock",partDomDI_stock);
-    get_param_matrix("qtax",qtax);
-    get_param_matrix("sigma",sigma);
-    get_param_matrix("taxCO2_DF",taxCO2_DF);
-    get_param_matrix("taxCO2_DG",taxCO2_DG);
-    get_param_matrix("taxCO2_DI",taxCO2_DI);
-    get_param_matrix("taxDFdom",taxDFdom);
-    get_param_matrix("taxDFimp",taxDFimp);
-    get_param_matrix("taxDGdom",taxDGdom);
-    get_param_matrix("taxDGimp",taxDGimp);
-    get_param_matrix("taxDIdom",taxDIdom);
-    get_param_matrix("taxDIimp",taxDIimp);
+    assign_fromScilabVal_matrix_double( env,"markup_lim_oil",markup_lim_oil);
+    assign_fromScilabVal_matrix_double( env,"mtax",mtax);
+    assign_fromScilabVal_matrix_double( env,"energ_sec",energ_sec);
+    assign_fromScilabVal_matrix_double( env,"nit",nit);
+    assign_fromScilabVal_matrix_double( env,"non_energ_sec",non_energ_sec);
+    assign_fromScilabVal_matrix_double( env,"partDomDF_stock",partDomDF_stock);
+    assign_fromScilabVal_matrix_double( env,"partDomDF_min",partDomDF_min);
+    assign_fromScilabVal_matrix_double( env,"partDomDG_stock",partDomDG_stock);
+    assign_fromScilabVal_matrix_double( env,"partDomDI_stock",partDomDI_stock);
+    assign_fromScilabVal_matrix_double( env,"qtax",qtax);
+    assign_fromScilabVal_matrix_double( env,"sigma",sigma);
+    assign_fromScilabVal_matrix_double( env,"taxCO2_DF",taxCO2_DF);
+    assign_fromScilabVal_matrix_double( env,"taxCO2_DG",taxCO2_DG);
+    assign_fromScilabVal_matrix_double( env,"taxCO2_DI",taxCO2_DI);
+    assign_fromScilabVal_matrix_double( env,"taxDFdom",taxDFdom);
+    assign_fromScilabVal_matrix_double( env,"taxDFimp",taxDFimp);
+    assign_fromScilabVal_matrix_double( env,"taxDGdom",taxDGdom);
+    assign_fromScilabVal_matrix_double( env,"taxDGimp",taxDGimp);
+    assign_fromScilabVal_matrix_double( env,"taxDIdom",taxDIdom);
+    assign_fromScilabVal_matrix_double( env,"taxDIimp",taxDIimp);
 
     /*pour les matrix reg, 1*/
-    get_param_matrix1d("alphaCompositeauto",alphaCompositeauto,reg);
-    get_param_matrix1d("weight_regional_tax",weight_regional_tax,reg);
+    assign_fromScilabVal_vector_double( env,"alphaCompositeauto",alphaCompositeauto);
+    assign_fromScilabVal_vector_double( env,"weight_regional_tax",weight_regional_tax);
 
-    get_param_matrix1d("alphaEtauto",alphaEtauto,reg);
-    get_param_matrix1d("alphaelecauto",alphaelecauto,reg);
-    get_param_matrix1d("alphaEtm2",alphaEtm2,reg);
-    get_param_matrix1d("stockbatiment",stockbatiment,reg);
-    get_param_matrix1d("alphaelecm2",alphaelecm2,reg);
-    get_param_matrix1d("alphaCoalm2",alphaCoalm2,reg);
-    get_param_matrix1d("alphaGazm2",alphaGazm2,reg);
-    get_param_matrix1d("L",L,reg);
-    get_param_matrix1d("coef_Q_CO2_Et_prod",coef_Q_CO2_Et_prod,reg);
-    get_param_matrix1d("QuotasRevenue",QuotasRevenue,reg);
-    get_param_matrix1d("alphaair",alphaair,reg);
-    get_param_matrix1d("ptc",ptc,reg);
-    get_param_matrix1d("a4_mult_oil",a4_mult_oil,reg);
-    get_param_matrix1d("a3_mult_oil",a3_mult_oil,reg);
-    get_param_matrix1d("a2_mult_oil",a2_mult_oil,reg);
-    get_param_matrix1d("a1_mult_oil",a1_mult_oil,reg);
-    get_param_matrix1d("a0_mult_oil",a0_mult_oil,reg);
-    get_param_matrix1d("a4_mult_gaz",a4_mult_gaz,reg);
-    get_param_matrix1d("a3_mult_gaz",a3_mult_gaz,reg);
-    get_param_matrix1d("a2_mult_gaz",a2_mult_gaz,reg);
-    get_param_matrix1d("a1_mult_gaz",a1_mult_gaz,reg);
-    get_param_matrix1d("a0_mult_gaz",a0_mult_gaz,reg);
-    get_param_matrix1d("a4_mult_coal",a4_mult_coal,reg);
-    get_param_matrix1d("a3_mult_coal",a3_mult_coal,reg);
-    get_param_matrix1d("a2_mult_coal",a2_mult_coal,reg);
-    get_param_matrix1d("a1_mult_coal",a1_mult_coal,reg);
-    get_param_matrix1d("a0_mult_coal",a0_mult_coal,reg);
-    get_param_matrix1d("alphaOT",alphaOT,reg);
-    get_param_matrix1d("Rdisp",Rdisp,reg);
-    get_param_matrix1d("bnair",bnair,reg);
-    get_param_matrix1d("bnautomobile",bnautomobile,reg);
-    get_param_matrix1d("bnNM",bnNM,reg);
-    get_param_matrix1d("bnOT",bnOT,reg);
-    get_param_matrix1d("Tautomobile",Tautomobile,reg);
-    get_param_matrix1d("Tdisp",Tdisp,reg);
+    assign_fromScilabVal_vector_double( env,"alphaEtauto",alphaEtauto);
+    assign_fromScilabVal_vector_double( env,"alphaelecauto",alphaelecauto);
+    assign_fromScilabVal_vector_double( env,"alphaEtm2",alphaEtm2);
+    assign_fromScilabVal_vector_double( env,"stockbatiment",stockbatiment);
+    assign_fromScilabVal_vector_double( env,"alphaelecm2",alphaelecm2);
+    assign_fromScilabVal_vector_double( env,"alphaCoalm2",alphaCoalm2);
+    assign_fromScilabVal_vector_double( env,"alphaGazm2",alphaGazm2);
+    assign_fromScilabVal_vector_double( env,"L",L);
+    assign_fromScilabVal_vector_double( env,"coef_Q_CO2_Et_prod",coef_Q_CO2_Et_prod);
+    assign_fromScilabVal_vector_double( env,"QuotasRevenue",QuotasRevenue);
+    assign_fromScilabVal_vector_double( env,"alphaair",alphaair);
+    assign_fromScilabVal_vector_double( env,"ptc",ptc);
+    assign_fromScilabVal_vector_double( env,"a4_mult_oil",a4_mult_oil);
+    assign_fromScilabVal_vector_double( env,"a3_mult_oil",a3_mult_oil);
+    assign_fromScilabVal_vector_double( env,"a2_mult_oil",a2_mult_oil);
+    assign_fromScilabVal_vector_double( env,"a1_mult_oil",a1_mult_oil);
+    assign_fromScilabVal_vector_double( env,"a0_mult_oil",a0_mult_oil);
+    assign_fromScilabVal_vector_double( env,"a4_mult_gaz",a4_mult_gaz);
+    assign_fromScilabVal_vector_double( env,"a3_mult_gaz",a3_mult_gaz);
+    assign_fromScilabVal_vector_double( env,"a2_mult_gaz",a2_mult_gaz);
+    assign_fromScilabVal_vector_double( env,"a1_mult_gaz",a1_mult_gaz);
+    assign_fromScilabVal_vector_double( env,"a0_mult_gaz",a0_mult_gaz);
+    assign_fromScilabVal_vector_double( env,"a4_mult_coal",a4_mult_coal);
+    assign_fromScilabVal_vector_double( env,"a3_mult_coal",a3_mult_coal);
+    assign_fromScilabVal_vector_double( env,"a2_mult_coal",a2_mult_coal);
+    assign_fromScilabVal_vector_double( env,"a1_mult_coal",a1_mult_coal);
+    assign_fromScilabVal_vector_double( env,"a0_mult_coal",a0_mult_coal);
+    assign_fromScilabVal_vector_double( env,"alphaOT",alphaOT);
+    assign_fromScilabVal_vector_double( env,"Rdisp",Rdisp);
+    assign_fromScilabVal_vector_double( env,"bnair",bnair);
+    assign_fromScilabVal_vector_double( env,"bnautomobile",bnautomobile);
+    assign_fromScilabVal_vector_double( env,"bnNM",bnNM);
+    assign_fromScilabVal_vector_double( env,"bnOT",bnOT);
+    assign_fromScilabVal_vector_double( env,"Tautomobile",Tautomobile);
+    assign_fromScilabVal_vector_double( env,"Tdisp",Tdisp);
 
-    get_param_matrix1d("toair",toair,reg);
-    get_param_matrix1d("DFair_exo",DFair_exo,reg);
-    get_param_matrix1d("toautomobile",toautomobile,reg);
-    get_param_matrix1d("toNM",toNM,reg);
-    get_param_matrix1d("toOT",toOT,reg);
+    assign_fromScilabVal_vector_double( env,"toair",toair);
+    assign_fromScilabVal_vector_double( env,"DFair_exo",DFair_exo);
+    assign_fromScilabVal_vector_double( env,"toautomobile",toautomobile);
+    assign_fromScilabVal_vector_double( env,"toNM",toNM);
+    assign_fromScilabVal_vector_double( env,"toOT",toOT);
 
-    get_param_matrix1d("eta",eta,(sec-nbsecteurenergie));
-    get_param_matrix1d("etamarketshareener",etamarketshareener,nbsecteurenergie);
+    assign_fromScilabVal_vector_double( env,"eta",eta);
+    assign_fromScilabVal_vector_double( env,"etamarketshareener",etamarketshareener);
 
-    get_param_matrix1d("aw",aw,reg);
-    get_param_matrix1d("bw",bw,reg);
-    get_param_matrix1d("cw",cw,reg);
-    get_param_matrix1d("div",divi,reg);
-    get_param_matrix1d("partExpK",partExpK,reg);
-    get_param_matrix1d("partImpK",partImpK,reg);
-    get_param_matrix1d("IR",IR,reg);
+    assign_fromScilabVal_vector_double( env,"aw",aw);
+    assign_fromScilabVal_vector_double( env,"bw",bw);
+    assign_fromScilabVal_vector_double( env,"cw",cw);
+    assign_fromScilabVal_vector_double( env,"div",divi);
+    assign_fromScilabVal_vector_double( env,"partExpK",partExpK);
+    assign_fromScilabVal_vector_double( env,"partImpK",partImpK);
+    assign_fromScilabVal_vector_double( env,"IR",IR);
 
-    get_param_matrix1d("sigmatrans",sigmatrans,reg);
-    get_param_matrix1d("xsiT",xsiT,reg);
-    get_param_matrix1d("weightEt_new",weightEt_new,reg);
+    assign_fromScilabVal_vector_double( env,"sigmatrans",sigmatrans);
+    assign_fromScilabVal_vector_double( env,"xsiT",xsiT);
+    assign_fromScilabVal_vector_double( env,"weightEt_new",weightEt_new);
+    // 	    printf("  weightEt_new   %s %.2f \n", "weightEt_new", weightEt_new[11]);
 
     /*pour les matrix 2d autres que reg, sec*/
-    get_param_matrix2d("alpha_partDF",alpha_partDF,reg,nbsecteurenergie);
-    get_param_matrix2d("alpha_partDG",alpha_partDG,reg,nbsecteurenergie);
-    get_param_matrix2d("alpha_partDI",alpha_partDI,reg,nbsecteurenergie);
-    get_param_matrix2d("itgbl_cost_DFdom",itgbl_cost_DFdom,reg,nbsecteurenergie);
-    get_param_matrix2d("itgbl_cost_DGdom",itgbl_cost_DGdom,reg,nbsecteurenergie);
-    get_param_matrix2d("itgbl_cost_DIdom",itgbl_cost_DIdom,reg,nbsecteurenergie);
-    get_param_matrix2d("itgbl_cost_DFimp",itgbl_cost_DFimp,reg,nbsecteurenergie);
-    get_param_matrix2d("itgbl_cost_DGimp",itgbl_cost_DGimp,reg,nbsecteurenergie);
-    get_param_matrix2d("itgbl_cost_DIimp",itgbl_cost_DIimp,reg,nbsecteurenergie);
-    get_param_matrix2d("p_stock",p_stock,reg,nbsecteurenergie);
-    get_param_matrix2d("bmarketshareener",bmarketshareener,reg,nbsecteurenergie);
+    assign_fromScilabVal_matrix_double( env,"alpha_partDF",alpha_partDF);
+    assign_fromScilabVal_matrix_double( env,"alpha_partDG",alpha_partDG);
+    assign_fromScilabVal_matrix_double( env,"alpha_partDI",alpha_partDI);
+    assign_fromScilabVal_matrix_double( env,"itgbl_cost_DFdom",itgbl_cost_DFdom);
+    assign_fromScilabVal_matrix_double( env,"itgbl_cost_DGdom",itgbl_cost_DGdom);
+    assign_fromScilabVal_matrix_double( env,"itgbl_cost_DIdom",itgbl_cost_DIdom);
+    assign_fromScilabVal_matrix_double( env,"itgbl_cost_DFimp",itgbl_cost_DFimp);
+    assign_fromScilabVal_matrix_double( env,"itgbl_cost_DGimp",itgbl_cost_DGimp);
+    assign_fromScilabVal_matrix_double( env,"itgbl_cost_DIimp",itgbl_cost_DIimp);
+    assign_fromScilabVal_matrix_double( env,"p_stock",p_stock);
+    // 	    printf("  P_STOCK   %s %.2f \n", "p_stock", p_stock[11][2]);
+    assign_fromScilabVal_matrix_double( env,"bmarketshareener",bmarketshareener);
 
-    get_param_matrix2d("atrans",atrans,reg,nb_trans);
-    get_param_matrix2d("btrans",btrans,reg,nb_trans);
-    get_param_matrix2d("Captransport",Captransport,reg,nb_trans);
-    get_param_matrix2d("ktrans",ktrans,reg,nb_trans);
-    get_param_matrix2d("weightTI",weightTI,reg,nb_trans);
-    get_param_matrix2d("xsi",xsi,reg,sec-nbsecteurenergie-nb_trans+1);
-    get_param_matrix2d("weight",weight,reg,(sec-nbsecteurenergie));
-    get_param_matrix2d("bDF",bDF,reg,(sec-nbsecteurenergie));
-    get_param_matrix2d("bDG",bDG,reg,(sec-nbsecteurenergie));
-    get_param_matrix2d("bDI",bDI,reg,(sec-nbsecteurenergie));
-    get_param_matrix2d("etaDF",etaDF,reg,(sec-nbsecteurenergie));
-    get_param_matrix2d("etaDG",etaDG,reg,(sec-nbsecteurenergie));
-    get_param_matrix2d("etaDI",etaDI,reg,(sec-nbsecteurenergie));
-    get_param_matrix2d("betatrans",betatrans,reg,(nb_trans+1));
-    get_param_matrix2d("Conso",Conso,reg,nb_secteur_conso);
+    assign_fromScilabVal_matrix_double( env,"atrans",atrans);
+    assign_fromScilabVal_matrix_double( env,"btrans",btrans);
+    assign_fromScilabVal_matrix_double( env,"Captransport",Captransport);
+    assign_fromScilabVal_matrix_double( env,"ktrans",ktrans);
+    assign_fromScilabVal_matrix_double( env,"weightTI",weightTI);
+    assign_fromScilabVal_matrix_double( env,"xsi",xsi);
+    assign_fromScilabVal_matrix_double( env,"weight",weight);
+    assign_fromScilabVal_matrix_double( env,"bDF",bDF);
+    assign_fromScilabVal_matrix_double( env,"bDG",bDG);
+    assign_fromScilabVal_matrix_double( env,"bDI",bDI);
+    assign_fromScilabVal_matrix_double( env,"etaDF",etaDF);
+    assign_fromScilabVal_matrix_double( env,"etaDG",etaDG);
+    assign_fromScilabVal_matrix_double( env,"etaDI",etaDI);
+    assign_fromScilabVal_matrix_double( env,"betatrans",betatrans);
+    assign_fromScilabVal_matrix_double( env,"Conso",Conso);
 
-    /*verifie que c'est les memes chiffres que scilab
-      for (k=0 ; k<reg; k++)
-      {
-      for (j=0; j<sec;j++)
-      printf("%15.10g ", p[k][j]);
-      printf("\n");
-      }
-      */
+    assign_fromScilabVal_hypermatrix_double( env, "bCI", bCI);
+    assign_fromScilabVal_hypermatrix_double( env, "etaCI", etaCI);
+    assign_fromScilabVal_hypermatrix_double( env, "itgbl_cost_CIdom", itgbl_cost_CIdom);
+    assign_fromScilabVal_hypermatrix_double( env, "itgbl_cost_CIimp", itgbl_cost_CIimp);
+    assign_fromScilabVal_hypermatrix_double( env, "partDomCIref", partDomCIref);
+    assign_fromScilabVal_hypermatrix_double( env, "partDomCI_stock", partDomCI_stock);
+    assign_fromScilabVal_hypermatrix_double( env, "partDomCI_min", partDomCI_min);
+    assign_fromScilabVal_hypermatrix_double( env, "taxCIdom", taxCIdom);
+    assign_fromScilabVal_hypermatrix_double( env, "taxCIimp", taxCIimp);
+    assign_fromScilabVal_hypermatrix_double( env, "alpha_partCI", alpha_partCI);
+    assign_fromScilabVal_hypermatrix_double( env, "taxCO2_CI", taxCO2_CI);
+    assign_fromScilabVal_hypermatrix_double( env, "coef_Q_CO2_CI", coef_Q_CO2_CI);
+    assign_fromScilabVal_hypermatrix_double( env, "CI", CI);
+    // 	    printf("  CI   %s %.2f \n", "CI", CI[5][4][11]);
 
-}
-
-
-int set_paramX()
-{
-    //    fp = fopen("myfile.txt","a");
-    int m,n,lp;
-    int k,j;
-    // int one = 1;
-
-    set_param();
-
-    get_param_matrix1d("taxMKT",taxMKT,nbMKT);
-    get_param_matrix2d("whichMKT_reg_use",whichMKT_reg_use,reg,nb_use);
-    get_param_matrix1d("CO2_obj_MKTparam",CO2_obj_MKTparam,nbMKT);
-    get_param_matrix1d("areEmisConstparam",areEmisConstparam,nbMKT);
-    get_param_matrix1d("verbose",verbose,1);
-    get_param_matrix1d("shareBiomassTaxElec",shareBiomassTaxElec,1);
-    get_param_matrix1d("is_taxexo_MKTparam",is_taxexo_MKTparam,nbMKT);
-
-
-    //    fclose(fp);
+    assign_fromScilabVal_vector_double( env,"taxMKT",taxMKT);
+    assign_fromScilabVal_matrix_double( env,"whichMKT_reg_use",whichMKT_reg_use);
+    assign_fromScilabVal_vector_double( env,"CO2_obj_MKTparam",CO2_obj_MKTparam);
+    assign_fromScilabVal_vector_double( env,"CO2_untaxed",CO2_untaxed);
+    assign_fromScilabVal_vector_double( env,"areEmisConstparam",areEmisConstparam);
+    assign_fromScilabVal_vector_double( env,"verbose",verbose);
+    assign_fromScilabVal_vector_double( env,"shareBiomassTaxElec",shareBiomassTaxElec);
+    assign_fromScilabVal_vector_double( env,"is_taxexo_MKTparam",is_taxexo_MKTparam);
+    return STATUS_OK;
 }
 
 /*function [y] = economy(x);*/
 void economyC(int *n, double x[],double v[],int *iflag)
 {
-    int k, j, l;
+    int k, j, l, i;
     int m = 0;
     int m_out;
-    // int one = 1;
     double sum, sum1, sum2, sum3, sum4;
 
     //ne pas "optimiser" l'ordre des boucles, il faut que ce soit dans le bon ordre pour scilab!
@@ -1181,7 +1217,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
 
         DFloc[k][indice_coal-1] = alphaCoalm2[k]*stockbatiment[k] ;
 
-        DFloc[k][indice_gaz-1] = alphaGazm2[k]*stockbatiment[k] ;
+        DFloc[k][indice_gas-1] = alphaGazm2[k]*stockbatiment[k] ;
     }
 
     /*    wr_sci_rs(DFloc); */
@@ -1233,7 +1269,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
     {
         for (j=0; j<sec; j++)
         {
-            FCCtemp[k][j] = aRD[k][j] + bRD[k][j] * tanh(cRD[k][j] * (Qloc[k][j]/Cap[k][j] - 1));
+            FCCtemp[k][j] = aRD[k][j] + bRD[k][j] * tanh(cRD[k][j] * (Qloc[k][j]*A[k][j]/Cap[k][j] - 1));
         }
     }
     /*    
@@ -1254,7 +1290,8 @@ void economyC(int *n, double x[],double v[],int *iflag)
             /*            FCCmarkup[k][j]=(markupref[k][j]+(1-markupref[k][j])/0.008*pow((Qloc[k][j]/Cap[k][j]-0.8),3))/markup[k][j];
                           FCCmarkup=((markup_lim_oil-markupref)/(1-0.8).*(Q./Cap-0.8*ones(reg,sec))+markupref)./markup; */
         {
-            FCCmarkup[k][j]=((markup_lim_oil[k][j]-markupref[k][j])/(1-0.8)*(Qloc[k][j]/Cap[k][j]-0.8)
+            FCCmarkup[k][j]=((markup_lim_oil[k][j]-markupref[k][j])/(1-0.8)*(Qloc[k][j]*A[k][j]/Cap[k][j]-0.8) 
+
                     +markupref[k][j])/markup[k][j];
         }
 
@@ -1416,7 +1453,6 @@ void economyC(int *n, double x[],double v[],int *iflag)
 
                 // if (k==indice_agriculture-1 &&j==indice_elec-1 && !(pArmCI[k][j][l]>0) )
                 // {
-                // fprintf (fp, "pArmCI[%i][%i][%i] :%g \n",k,j,l,pArmCI[k][j][l]);  
 
                 // }
 
@@ -1518,8 +1554,8 @@ void economyC(int *n, double x[],double v[],int *iflag)
     /*wr_sci_rs(partDomDF)*/
     for (k=0; k<reg; k++)
     {
-        mult_oil[k]=(a4_mult_oil[k]*pow(Qloc[k][indice_oil-1]/Cap[k][indice_oil-1],4)+ a3_mult_oil[k]*pow(Qloc[k][indice_oil-1]/Cap[k][indice_oil-1],3) +a2_mult_oil[k]*pow(Qloc[k][indice_oil-1]/Cap[k][indice_oil-1],2)+a1_mult_oil[k]*(Qloc[k][indice_oil-1]/Cap[k][indice_oil-1])+a0_mult_oil[k]);
-        if ((Qloc[k][indice_oil-1]/Cap[k][indice_oil-1])>0.999)
+        mult_oil[k]=(a4_mult_oil[k]*pow(Qloc[k][indice_oil-1]*A[k][indice_oil-1]/Cap[k][indice_oil-1],4)+ a3_mult_oil[k]*pow(Qloc[k][indice_oil-1]*A[k][indice_oil-1]/Cap[k][indice_oil-1],3) +a2_mult_oil[k]*pow(Qloc[k][indice_oil-1]*A[k][indice_oil-1]/Cap[k][indice_oil-1],2)+a1_mult_oil[k]*(Qloc[k][indice_oil-1]*A[k][indice_oil-1]/Cap[k][indice_oil-1])+a0_mult_oil[k]);
+        if ((Qloc[k][indice_oil-1]*A[k][indice_oil-1]/Cap[k][indice_oil-1])>0.999)
         {
             mult_oil[k]=(a4_mult_oil[k]*pow(0.999,4)+ a3_mult_oil[k]*pow(0.999,3) +a2_mult_oil[k]*pow(0.999,2)+a1_mult_oil[k]*(0.999)+a0_mult_oil[k]);
         }
@@ -1530,8 +1566,8 @@ void economyC(int *n, double x[],double v[],int *iflag)
     }
     for (k=0; k<reg; k++)
     {
-        mult_gaz[k]=(a4_mult_gaz[k]*pow(Qloc[k][indice_gaz-1]/Cap[k][indice_gaz-1],4)+ a3_mult_gaz[k]*pow(Qloc[k][indice_gaz-1]/Cap[k][indice_gaz-1],3) +a2_mult_gaz[k]*pow(Qloc[k][indice_gaz-1]/Cap[k][indice_gaz-1],2)+a1_mult_gaz[k]*(Qloc[k][indice_gaz-1]/Cap[k][indice_gaz-1])+a0_mult_gaz[k]);
-        if ((Qloc[k][indice_gaz-1]/Cap[k][indice_gaz-1])>0.999)
+        mult_gaz[k]=(a4_mult_gaz[k]*pow(Qloc[k][indice_gas-1]*A[k][indice_gas-1]/Cap[k][indice_gas-1],4)+ a3_mult_gaz[k]*pow(Qloc[k][indice_gas-1]*A[k][indice_gas-1]/Cap[k][indice_gas-1],3) +a2_mult_gaz[k]*pow(Qloc[k][indice_gas-1]*A[k][indice_gas-1]/Cap[k][indice_gas-1],2)+a1_mult_gaz[k]*(Qloc[k][indice_gas-1]*A[k][indice_gas-1]/Cap[k][indice_gas-1])+a0_mult_gaz[k]);
+        if ((Qloc[k][indice_gas-1]*A[k][indice_gas-1]/Cap[k][indice_gas-1])>0.999)
         {
             mult_gaz[k]=(a4_mult_gaz[k]*pow(0.999,4)+ a3_mult_gaz[k]*pow(0.999,3) +a2_mult_gaz[k]*pow(0.999,2)+a1_mult_gaz[k]*(0.999)+a0_mult_gaz[k]);
         }
@@ -1543,8 +1579,8 @@ void economyC(int *n, double x[],double v[],int *iflag)
 
     for (k=0; k<reg; k++)
     {
-        mult_coal[k]=(a4_mult_coal[k]*pow(Qloc[k][indice_coal-1]/Cap[k][indice_coal-1],4)+ a3_mult_coal[k]*pow(Qloc[k][indice_coal-1]/Cap[k][indice_coal-1],3) +a2_mult_coal[k]*pow(Qloc[k][indice_coal-1]/Cap[k][indice_coal-1],2)+a1_mult_coal[k]*(Qloc[k][indice_coal-1]/Cap[k][indice_coal-1])+a0_mult_coal[k]);
-        if ((Qloc[k][indice_coal-1]/Cap[k][indice_coal-1])>0.999)
+        mult_coal[k]=(a4_mult_coal[k]*pow(Qloc[k][indice_coal-1]*A[k][indice_coal-1]/Cap[k][indice_coal-1],4)+ a3_mult_coal[k]*pow(Qloc[k][indice_coal-1]*A[k][indice_coal-1]/Cap[k][indice_coal-1],3) +a2_mult_coal[k]*pow(Qloc[k][indice_coal-1]*A[k][indice_coal-1]/Cap[k][indice_coal-1],2)+a1_mult_coal[k]*(Qloc[k][indice_coal-1]*A[k][indice_coal-1]/Cap[k][indice_coal-1])+a0_mult_coal[k]);
+        if ((Qloc[k][indice_coal-1]*A[k][indice_coal-1]/Cap[k][indice_coal-1])>0.999)
         {
             mult_coal[k]=(a4_mult_coal[k]*pow(0.999,4)+ a3_mult_coal[k]*pow(0.999,3) +a2_mult_coal[k]*pow(0.999,2)+a1_mult_coal[k]*(0.999)+a0_mult_coal[k]);
         }
@@ -1578,15 +1614,15 @@ void economyC(int *n, double x[],double v[],int *iflag)
 
         if (mult_gaz[k]<1)
         {
-            partDomDF[k][indice_gaz-1]=mult_gaz[k]*partDomDF[k][indice_gaz-1];
-            partDomDG[k][indice_gaz-1]=mult_gaz[k]*partDomDG[k][indice_gaz-1];
-            partDomDI[k][indice_gaz-1]=mult_gaz[k]*partDomDI[k][indice_gaz-1];
+            partDomDF[k][indice_gas-1]=mult_gaz[k]*partDomDF[k][indice_gas-1];
+            partDomDG[k][indice_gas-1]=mult_gaz[k]*partDomDG[k][indice_gas-1];
+            partDomDI[k][indice_gas-1]=mult_gaz[k]*partDomDI[k][indice_gas-1];
         }
         if (mult_gaz[k]<0)
         {
-            partDomDF[k][indice_gaz-1]=0;
-            partDomDG[k][indice_gaz-1]=0;
-            partDomDI[k][indice_gaz-1]=0;
+            partDomDF[k][indice_gas-1]=0;
+            partDomDG[k][indice_gas-1]=0;
+            partDomDI[k][indice_gas-1]=0;
         }
 
         if (mult_coal[k]<1)
@@ -1611,6 +1647,8 @@ void economyC(int *n, double x[],double v[],int *iflag)
             partDomDF[k][j]=partDomDF[k][j]*inertia_share+partDomDF_stock[k][j]*(1-inertia_share);
             partDomDG[k][j]=partDomDG[k][j]*inertia_share+partDomDG_stock[k][j]*(1-inertia_share);
             partDomDI[k][j]=partDomDI[k][j]*inertia_share+partDomDI_stock[k][j]*(1-inertia_share);
+            // Here we introduce sovereignty policies.
+            partDomDF[k][j] = fmax(partDomDF_min[k][j], partDomDF[k][j]);
         }
     }
 
@@ -1663,12 +1701,12 @@ void economyC(int *n, double x[],double v[],int *iflag)
             }
             if (mult_gaz[l]<1)
             {
-                partDomCI[indice_gaz-1][j][l]=mult_gaz[l]*partDomCI[indice_gaz-1][j][l];
+                partDomCI[indice_gas-1][j][l]=mult_gaz[l]*partDomCI[indice_gas-1][j][l];
             }
 
             if (mult_gaz[l]<0)
             {
-                partDomCI[indice_gaz-1][j][l]=0;
+                partDomCI[indice_gas-1][j][l]=0;
             }
 
             if (mult_coal[l]<1)
@@ -1691,6 +1729,9 @@ void economyC(int *n, double x[],double v[],int *iflag)
             for (l=0; l<reg; l++)
             {
                 partDomCI[k][j][l]=partDomCI[k][j][l]*inertia_share+partDomCI_stock[k][j][l]*(1-inertia_share);
+            
+                // Apply the lower bound (sovereignty constraint)
+                partDomCI[k][j][l] = fmax(partDomCI_min[k][j][l], partDomCI[k][j][l]);
 
             }
         }
@@ -1756,19 +1797,19 @@ void economyC(int *n, double x[],double v[],int *iflag)
     {
         if (mult_gaz[k]<1)
         {
-            marketshare[k][indice_gaz-1]=mult_gaz[k]*marketshare[k][indice_gaz-1];
+            marketshare[k][indice_gas-1]=mult_gaz[k]*marketshare[k][indice_gas-1];
         }
-        if (marketshare[k][indice_gaz-1]<0.00000001)
+        if (marketshare[k][indice_gas-1]<0.00000001)
         {
-            marketshare[k][indice_gaz-1]=0.00000001;
+            marketshare[k][indice_gas-1]=0.00000001;
         }
 
-        sum1+=marketshare[k][indice_gaz-1];
+        sum1+=marketshare[k][indice_gas-1];
     }
 
     for (k=0; k<reg; k++)
     {
-        marketshare[k][indice_gaz-1]=marketshare[k][indice_gaz-1]/sum1;
+        marketshare[k][indice_gas-1]=marketshare[k][indice_gas-1]/sum1;
     }
 
     sum1=0;
@@ -1910,9 +1951,9 @@ void economyC(int *n, double x[],double v[],int *iflag)
 
         sum1 =0;
         for (j=0; j<sec; j++)
-            sum1 += DIprodref[k][j] * pArmDI[k][j]; 
+            sum1 += DIprod[k][j] * pArmDI[k][j]; 
         for (j=0; j<sec; j++)
-            DIloc[k][j] = DIinfra[k][j] + DIprodref[k][j] * (NRBtemp[k] -  sum) / sum1;
+            DIloc[k][j] = DIinfra[k][j] + DIprod[k][j] * (NRBtemp[k] -  sum) / sum1;
     }
 
     for (l=0; l<reg; l++)
@@ -1922,7 +1963,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
             QCdomtemp[l][j] = 0;
             for (k =0; k<sec; k++)
             {
-                QCdomtemp[l][j] += A[l][k] * 
+                QCdomtemp[l][j] += A_CI[l][k] * 
                     Qloc[l][k] * CI[j][k][l] *partDomCI[j][k][l]; 
             }
             QCdomtemp[l][j] += DFloc[l][j] * partDomDF[l][j] 
@@ -1938,7 +1979,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
             Imptemp[l][j] = 0;
             for (k =0; k<sec; k++)
             {
-                Imptemp[l][j] += A[l][k] *
+                Imptemp[l][j] += A_CI[l][k] *
                     Qloc[l][k] * CI[j][k][l] *partImpCI[j][k][l];
             }
             Imptemp[l][j] += DFloc[l][j] * partImpDF[l][j] 
@@ -1998,7 +2039,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
             for (k =0; k<sec; k++)
                 sum += ploc[l][j] * taxCIdom[j][k][l]
                     * partDomCI[j][k][l] * CI[j][k][l] 
-                    * Qloc[l][k] * A[l][k];
+                    * Qloc[l][k] * A_CI[l][k];
         }
 
         sum1 =0; 
@@ -2008,7 +2049,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
                 sum1 += (wploc[j] * (1+ mtax[l][j]) 
                         + nit[l][j] * wpTIaggloc) * taxCIimp[j][k][l] 
                     * partImpCI[j][k][l] * CI[j][k][l] 
-                    * Qloc[l][k] * A[l][k];
+                    * Qloc[l][k] * A_CI[l][k];
         }
         taxCItemp[l] = sum + sum1;
     }
@@ -2023,7 +2064,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
             TAXCO2temp_dom[l][j] = 0;
             for (k =0; k<sec; k++)
             {
-                TAXCO2temp_dom[l][j] += A[l][k] * 
+                TAXCO2temp_dom[l][j] += A_CI[l][k] * 
                     Qloc[l][k] * CI[j][k][l] *partDomCI[j][k][l]*taxCO2_CI[j][k][l]*coef_Q_CO2_CI[j][k][l]*numloc[l][j]; 
             }
             TAXCO2temp_dom[l][j] += DFloc[l][j] * partDomDF[l][j] * taxCO2_DF[l][j] * coef_Q_CO2_DF[l][j] * numloc[l][j]
@@ -2039,7 +2080,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
             TAXCO2temp_imp[l][j] = 0;
             for (k =0; k<sec; k++)
             {
-                TAXCO2temp_imp[l][j] += A[l][k] *
+                TAXCO2temp_imp[l][j] += A_CI[l][k] *
                     Qloc[l][k] * CI[j][k][l] *partImpCI[j][k][l]*taxCO2_CI[j][k][l]*coef_Q_CO2_CI[j][k][l]*numloc[l][j];
             }
             TAXCO2temp_imp[l][j] += DFloc[l][j] * partImpDF[l][j] * taxCO2_DF[l][j] * coef_Q_CO2_DF[l][j] * numloc[l][j] 
@@ -2056,7 +2097,7 @@ void economyC(int *n, double x[],double v[],int *iflag)
             TAXCO2temp[k] += TAXCO2temp_imp[k][j]+TAXCO2temp_dom[k][j];    
         }
 
-        //l'Etat re-récupère le produit de la subvention sequestration carbone, ie (-la ta taxe)
+        //The State gets back the product of the carbon sequestration subsidy (minus the tax then)
         TAXCO2temp[k] -= (1-shareBiomassTaxElec[0])* CI[indice_elec-1][indice_elec-1][k] * coef_Q_CO2_CI[indice_elec-1][indice_elec-1][k]
             * taxCO2_CI[indice_elec-1][indice_elec-1][k] * numloc[k][indice_elec-1] * Qloc[k][indice_elec-1];
 
@@ -2212,11 +2253,11 @@ void economyC(int *n, double x[],double v[],int *iflag)
             {
 
                 Sector_budget[k][j] = 
-                    (A[k][j] *
+                    (
                      (
-                      costs_CI[k][j] 
-                      - (1-shareBiomassTaxElec[0]) * CI[j][j][k] * coef_Q_CO2_CI[j][j][k] * taxCO2_CI[j][j][k] * numloc[k][j]  //prelevement de la subvention, ie de la (-tax)
-                      + wloc[k][j] * lll[k][j] * (1+ sigma[k][j]) * (energ_sec[k][j] + FCCtemp[k][j] * 
+                        A_CI[k][j] *(costs_CI[k][j] 
+                      - (1-shareBiomassTaxElec[0]) * CI[j][j][k] * coef_Q_CO2_CI[j][j][k] * taxCO2_CI[j][j][k] * numloc[k][j])  //prelevement de la subvention, ie de la (-tax)
+                      + A[k][j] *wloc[k][j] * lll[k][j] * (1+ sigma[k][j]) * (energ_sec[k][j] + FCCtemp[k][j] * 
                           non_energ_sec[k][j])
                      )    
                      + markup[k][j] *FCCmarkup_oil[k][j] * ploc[k][j]  * (energ_sec[k][j] + non_energ_sec[k][j])
@@ -2230,8 +2271,8 @@ void economyC(int *n, double x[],double v[],int *iflag)
             }
             else
             {
-                Sector_budget[k][j] = (A[k][j] * ( costs_CI[k][j] + wloc[k][j] * lll[k][j] * (1+ sigma[k][j]) * (energ_sec[k][j] + FCCtemp[k][j] * 
-                                non_energ_sec[k][j])) + markup[k][j] *FCCmarkup_oil[k][j] * ploc[k][j]
+                Sector_budget[k][j] = ( A_CI[k][j]*costs_CI[k][j] + A[k][j]*wloc[k][j] * lll[k][j] * (1+ sigma[k][j]) * (energ_sec[k][j] + FCCtemp[k][j] * 
+                                non_energ_sec[k][j]) + markup[k][j] *FCCmarkup_oil[k][j] * ploc[k][j]
                         * (energ_sec[k][j] + non_energ_sec[k][j])) * (1+ qtax[k][j])
                     - ploc[k][j];
             }
@@ -2384,8 +2425,8 @@ void economyXC(int *n, double x[],double v[],int *iflag)
 {  
 
     int k, j, l;
-
-
+    double sum_CO2_MKT;
+	
     //extrait taxMKT de x
     for (j=0 ; j<nbMKT; j++)
     {
@@ -2407,8 +2448,8 @@ void economyXC(int *n, double x[],double v[],int *iflag)
         { 
             for (k=0 ; k<sec; k++)
             {
-                //on coupe la taxe sur les autoconso FF  : taxCO2_CI(1:nbsecteurenergie,[indice_coal indice_gaz indice_oil],1:reg)=0;
-                if ( j<indice_gaz && k<nbsecteurenergie ) 
+                //on coupe la taxe sur les autoconso FF  : taxCO2_CI(1:nbsecteurenergie,[indice_coal indice_gas indice_oil],1:reg)=0;
+                if ( j<indice_gas && k<nbsecteurenergie ) 
                 {
                     taxCO2_CI[k][j][l]=0;
                 }
@@ -2450,10 +2491,18 @@ void economyXC(int *n, double x[],double v[],int *iflag)
 
     for (j=0 ; j<nbMKT; j++)
     {
+        sum_CO2_MKT = CO2_obj_MKTparam[j];
+	for (l=0; l<reg; l++)
+	{
+		if (whichMKT_reg_use[l][iu_df-1] == 1)
+		{
+			sum_CO2_MKT += CO2_untaxed[l];
+		}
+	}
         //le marche est contraint et n'est pas un fatalower 
         if (areEmisConstparam[j] )
         {
-            v[nX+j]=E_CO2_MKT[j]/CO2_obj_MKTparam[j]-1;
+            v[nX+j]=E_CO2_MKT[j]/sum_CO2_MKT-1;
         }
         else
         {
@@ -2462,5 +2511,3 @@ void economyXC(int *n, double x[],double v[],int *iflag)
     }
 
 }
-
-

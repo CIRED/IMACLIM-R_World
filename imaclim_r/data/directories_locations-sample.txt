@@ -12,6 +12,8 @@ export gas_resource_data=$basedata/Gas_resources/
 
 export oil_resource_data=$basedata/Oil_resources/
 export bauer_FF_resource=$public_data/Bauer_Fossil_Fuel_availability_SSP/extracted/
+export Rose_coal_resource=$public_data/RoSE_project_fossil_fuels/manual_extraction/
+export shift_project_cumulaitve_FF_resource=$public_data/ShiftProject_dataportal/download/
 
 export tight_oil_projection=$public_data/Energy_Information_Administration/Frack_Lab/data/oil/EIA/
 export tight_oil_projection_2015=$public_data/Energy_Information_Administration/AEO2015/
@@ -25,6 +27,7 @@ export buildings_data=$public_data/deetman_marinova_buildings/
 
 export UNO_population_data=$public_data/UNO_world_population_prospect/normalized/
 export SSP_Koch_Leimbach_data=$public_data/SSP_update_NAVIGATE/extracted/
+export IIASA_scenario_explorer_public=$public_data/IIASA_scenario_explorer_public/download/
 
 export ilostat_data=$public_data/ILOSTAT/ 
 
@@ -43,7 +46,7 @@ export OECD_DAC=$public_data/OECD_DAC/download
 
 export WB_data_common=$public_data/World_Bank_Data_Catalog/extracted/
 export WB_data=$public_data/World_Bank_Data_Catalog_21052022/
-export WB_data_WDI=$WB_data/extracted/
+export WB_data_WDI=$WB_data/
 
 export klems_data=$basedata/klems/
 export klems_data_EU=$klems_data/raw/euklems/www.euklems.net/data/
@@ -52,3 +55,6 @@ export klems_data_france=$klems_data/raw/france/
 export aviationintegratedmodel_data=$basedata/AviationIntegratedModel_TIAM_UCL/data/
 
 export path_data_ndc=$public_data/VandeVenetal_NDC
+
+export path_OICA=$public_data/OICA/
+export path_nexus_cars=$public_data/nexus_cars_IMACLIM/

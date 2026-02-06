@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Julie Rozenberg, Adrien Vogt-Schilb
+//     Julie Rozenberg, Adrien Vogt-Schilb, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -13,23 +13,23 @@
 
 
 function [wasError,wastooManysubs,SAVEDIR]=exec_imaclim(combi,liste_savedir,tooManySubs,ignoreOldTries);
-//Executes Imaclim, with no need of clearing, as variables in the function disappear when the function terminates
-//This to be used for all types of combis, except for emissions-prescripted runs.
-//Emissions-prescripted runs are done with exec_stab_imaclim
-// INPUTS
-//      combi : provide this INTEGER compatible with level_0 ETUDE variable defined in preamble
-//      ignoreOldTries : Boolean. OPTIONAL. If %t, liste_savedir and tooManySubs are ignored.
-//                  Default is %f;
-//                  Can be useful e.g provided as 'or(combi==[1 4 12])'
-//      liste_savedir : if provided, checks if run relative to combi already exists in liste_savedir. 
-//                      if so, nothing is runed and returns [%f,%f,SAVEDIR]
-//      tooManySubs : if provided, checks if run relative to combi already exists in tooManySubs. 
-//                      if so, nothing is runed and returns  [%t,%f,SAVEDIR]
-//                      This is to be changed to [%t,%t,SAVEDIR] when make_savedir will be really toomanysubs-friendly
-// OUTPUTS
-//      wasError :      Boolean. True if execution was not done
-//      wastooManysubs :Boolean. True if res_dyn_loop broke and said too Many Subdivionss 
-//      SAVEDIR :       String. The savedir
+    //Executes Imaclim, with no need of clearing, as variables in the function disappear when the function terminates
+    //This to be used for all types of combis, except for emissions-prescripted runs.
+    //Emissions-prescripted runs are done with exec_stab_imaclim
+    // INPUTS
+    //      combi : provide this INTEGER compatible with level_0 ETUDE variable defined in preamble
+    //      ignoreOldTries : Boolean. OPTIONAL. If %t, liste_savedir and tooManySubs are ignored.
+    //                  Default is %f;
+    //                  Can be useful e.g provided as 'or(combi==[1 4 12])'
+    //      liste_savedir : if provided, checks if run relative to combi already exists in liste_savedir. 
+    //                      if so, nothing is runed and returns [%f,%f,SAVEDIR]
+    //      tooManySubs : if provided, checks if run relative to combi already exists in tooManySubs. 
+    //                      if so, nothing is runed and returns  [%t,%f,SAVEDIR]
+    //                      This is to be changed to [%t,%t,SAVEDIR] when make_savedir will be really toomanysubs-friendly
+    // OUTPUTS
+    //      wasError :      Boolean. True if execution was not done
+    //      wastooManysubs :Boolean. True if res_dyn_loop broke and said too Many Subdivionss 
+    //      SAVEDIR :       String. The savedir
 
     //DEFAULT VALUES
     if argn(2)<4
@@ -40,18 +40,18 @@ function [wasError,wastooManysubs,SAVEDIR]=exec_imaclim(combi,liste_savedir,tooM
     if ~ignoreOldTries
         if argn(2)>1
             if isdir(liste_savedir(combi))
-            wasError=%f; wastooManysubs=%f; SAVEDIR=liste_savedir(combi);
-            disp( '!!exec_imaclim ignores combi '+combi+' present in liste_savedir. more info? copypaste next line.')
-            disp( 'head_comments exec_imaclim') 
-            return
+                wasError=%f; wastooManysubs=%f; SAVEDIR=liste_savedir(combi);
+                disp( '!!exec_imaclim ignores combi '+combi+' present in liste_savedir. more info? copypaste next line.')
+                disp( 'head_comments exec_imaclim') 
+                return
             end
         end
         if argn(2)>2
             if isdir(tooManySubs(combi))
-            wasError=%t; wastooManysubs=%f; SAVEDIR=tooManySubs(combi);
-            disp( '!!exec_imaclim ignores combi '+combi+' present in tooManySubs. more info? copypaste next line.')
-            disp( 'head_comments exec_imaclim') 
-            return
+                wasError=%t; wastooManysubs=%f; SAVEDIR=tooManySubs(combi);
+                disp( '!!exec_imaclim ignores combi '+combi+' present in tooManySubs. more info? copypaste next line.')
+                disp( 'head_comments exec_imaclim') 
+                return
             end
         end
     end
@@ -59,8 +59,7 @@ function [wasError,wastooManysubs,SAVEDIR]=exec_imaclim(combi,liste_savedir,tooM
     ebi_prev_dir = pwd(); //remembers curent dir (be carrefull: do not use a variable name used by imaclim
     
     //ACTUAL WORK
-    metaExtractioOn=%f;//imalcim options
-    metaBeepOn =%f; metaRecMessOn=%f;
+    metaBeepOn =%f;
     chdir (MODEL);
     
     if exec('imaclimr.sce','errcatch');
@@ -70,8 +69,8 @@ function [wasError,wastooManysubs,SAVEDIR]=exec_imaclim(combi,liste_savedir,tooM
         end
     end
     
-	//definition des sorties de cette fonction en cas d'erreur
-	if wastooManysubs | wasError
+    //here we define output in care of an error 
+    if wastooManysubs | wasError
         if ~isdef('SAVEDIR')
             SAVEDIR = 'ERROR-NOTADIR';
         end
@@ -80,11 +79,11 @@ function [wasError,wastooManysubs,SAVEDIR]=exec_imaclim(combi,liste_savedir,tooM
 endfunction
 
 function y=diff_output (c1,c2,sens)
-//diff_output(1,2) construit un output comparant la combi 1 et la 2, et le place dans OUTPUT
+    //diff_output(1,2)  build the output by comparing combi 1 to combi 2
 
-if argn(2)<3
-    sens = 1d-4;
-end
+    if argn(2)<3
+        sens = 1d-4;
+    end
 
     ldcsv ("output",liste_savedir(c1))
     o1 = output;

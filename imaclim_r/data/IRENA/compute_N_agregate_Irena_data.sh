@@ -24,7 +24,7 @@ path_output='./capital_costs/'
 mkdir -p $path_output
 R -f "./Capital_cost_compute.R" --args $year_ref $year_obj $path_results_IRENA $path_output
 
-for year in 2018
+for year in 2015 2018
 do
         path_data_temp=$IRENA_data/Prod_$year'.csv'
         path_output='./prod/'

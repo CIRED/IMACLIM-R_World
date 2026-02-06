@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Ruben Bibas, Nicolas Graves
+//     Florian Leblanc, Nicolas Graves, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -24,7 +24,7 @@ end;
 
 varname = 'Final Energy|Gases'; //EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = energy_balance(conso_tot_eb,gaz_eb,k)*Mtoe_EJ ;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = energy_balance(conso_tot_eb,gas_eb,k)*Mtoe_EJ ;
 //todo: needs to be updated with H?
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
@@ -93,8 +93,8 @@ else
     if sum(prod_elec_techno(k,technoBiomass)) + prod_BFU(k)==0
         outputs_temp(nbLines*(k-1)+counterLine,current_time_im) = %nan;
     else
-        qBiom = (msh_elec_techno(k,indice_BIGCC) / rho_elec_nexus(k,indice_BIGCC) ..
-        + msh_elec_techno(k,indice_BIGCCS) / rho_elec_nexus(k,indice_BIGCCS))..
+        qBiom = sum((msh_elec_techno(k,technoBiomassWOCCS) ./ rho_elec_nexus(k,technoBiomassWOCCS)) ..
+            + msh_elec_techno(k,indice_BIS) / rho_elec_nexus(k,indice_BIS))..
         * energy_balance(pwplant_eb,8,k);
         outputs_temp(nbLines*(k-1)+counterLine,current_time_im)=(prod_BFU(k) *  p(k,et) + costBIGCC_noTax(k) * qBiom) * usd_year1_year2 / tep2gj ..
         /(qBiom + prod_BFU(k));
@@ -129,10 +129,10 @@ end;
 varname = 'Primary Energy|Coal|w/ CCS'; //  EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (..
-        - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // raffineries (ctl)
-        - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. //autoconsommation de charbon dans la production de charbon pour le CTL
-        - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. //coal to elec
-        )*Mtoe_EJ;
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // raffineries (ctl)
+    - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. //autoconsommation de charbon dans la production de charbon pour le CTL
+    - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. //coal to elec
+)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
@@ -141,34 +141,34 @@ varname = 'Primary Energy|Coal|w/o CCS'; // EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (..
-        energy_balance(tpes_eb,coal_eb,k) ..
-        - (..
-            - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // affineries (ctl)
-            - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. // autoconsommation de charbon dans la production de charbon pour le CTL
-            - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. //coal to elec
-          )..
-        )*Mtoe_EJ;
+    energy_balance(tpes_eb,coal_eb,k) ..
+    - (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // affineries (ctl)
+    - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. // autoconsommation de charbon dans la production de charbon pour le CTL
+    - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. //coal to elec
+    )..
+)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
 varname = 'Primary Energy|Gas'; //  EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = energy_balance(tpes_eb,gaz_eb,k)*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = energy_balance(tpes_eb,gas_eb,k)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
 varname = 'Primary Energy|Gas|w/ CCS'; //   EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = - energy_balance(pwplant_eb,gaz_eb,k) * sh_CCS_gaz_Q_gaz(k) * Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = - energy_balance(pwplant_eb,gas_eb,k) * sh_CCS_gaz_Q_gaz(k) * Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
 varname = 'Primary Energy|Gas|w/o CCS'; //  EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)=(..
-        energy_balance(tpes_eb,gaz_eb,k) ..
-        - ( - energy_balance(pwplant_eb,gaz_eb,k)) * sh_CCS_gaz_Q_gaz(k) ..
-        )*Mtoe_EJ;
+    energy_balance(tpes_eb,gas_eb,k) ..
+    - ( - energy_balance(pwplant_eb,gas_eb,k)) * sh_CCS_gaz_Q_gaz(k) ..
+)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
@@ -251,45 +251,45 @@ if current_time==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
 if ind_NLU ==0
-  varname = 'Primary Energy'; //  EJ/yr
-  counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-  outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (sum(energy_balance(tpes_eb,primary_eb,k)))*Mtoe_EJ;
-  if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
+    varname = 'Primary Energy'; //  EJ/yr
+    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (sum(energy_balance(tpes_eb,primary_eb,k)))*Mtoe_EJ;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
 end
 
 if ind_climat > 2 & ind_climat <>99
 
     varname = 'Policy Cost|Area under MAC Curve';
     counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
 
-    varname = 'Policy Cost|Consumption Loss';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = ( sum(DF(k,:).*pArmDF(k,:)) - sum(base_DF(k,:,current_time_im+1) .* base_pArmDF(k,:,current_time_im+1)))/1e3*usd_year1_year2;
+varname = 'Policy Cost|Consumption Loss';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = ( sum(DF(k,:).*pArmDF(k,:)) - sum(base_DF(k,:,current_time_im+1) .* base_pArmDF(k,:,current_time_im+1)))/1e3*usd_year1_year2;
 
-    varname = 'Policy Cost|Additional Total Energy System Cost';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (energyInvestment(k) - energyInvestment_base(k,current_time_im+1)) / 1e3 * usd_year1_year2;
+varname = 'Policy Cost|Additional Total Energy System Cost';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (energyInvestment(k) - energyInvestment_base(k,current_time_im+1)) / 1e3 * usd_year1_year2;
 
 else
 
     varname_temp = 'Policy Cost|Area under MAC Curve';
     counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
 
-    varname_temp = 'Policy Cost|Consumption Loss';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+varname_temp = 'Policy Cost|Consumption Loss';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
 
-    varname_temp = 'Policy Cost|Additional Total Energy System Cost';
-    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
-    if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
-    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+varname_temp = 'Policy Cost|Additional Total Energy System Cost';
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
 
 end
 
@@ -344,32 +344,32 @@ end;
 
 
 varname = 'Emissions|CO2|Energy|Demand|Residential and Commercial'; //
-//On n'utilise pas E_reg_use(iu_DF) car DF inclut cars et resid 
+//We do not use E_reg_use(iu_DF) because DF includes cars and residential
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)= (..
-+ coef_Q_CO2_DF(k,coal)       .* energy_balance(conso_resid_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil)        .* energy_balance(conso_resid_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz)        .* energy_balance(conso_resid_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)         .* energy_balance(conso_resid_eb,et_eb,k)   ..
-+ coef_Q_CO2_CI(coal,compo,k) .* energy_balance(conso_comp_eb, coal_eb,k) ..
-+ coef_Q_CO2_CI(oil,compo,k)  .* energy_balance(conso_comp_eb, oil_eb,k) ..
-+ coef_Q_CO2_CI(gaz,compo,k)  .* energy_balance(conso_comp_eb, gaz_eb,k)  ..
-+ coef_Q_CO2_CI(et,compo,k)   .* energy_balance(conso_comp_eb, et_eb,k)   ..
+    + coef_Q_CO2_DF(k,coal)       .* energy_balance(conso_resid_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil)        .* energy_balance(conso_resid_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz)        .* energy_balance(conso_resid_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)         .* energy_balance(conso_resid_eb,et_eb,k)   ..
+    + coef_Q_CO2_CI(coal,compo,k) .* energy_balance(conso_comp_eb, coal_eb,k) ..
+    + coef_Q_CO2_CI(oil,compo,k)  .* energy_balance(conso_comp_eb, oil_eb,k) ..
+    + coef_Q_CO2_CI(gaz,compo,k)  .* energy_balance(conso_comp_eb, gas_eb,k)  ..
+    + coef_Q_CO2_CI(et,compo,k)   .* energy_balance(conso_comp_eb, et_eb,k)   ..
 )/1e6;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";
 end;
 
 varname = 'Emissions|CO2|Energy|Demand|Transportation'; //
-//On n'utilise pas E_reg_use(iu_DF) pour cars car DF inclut cars et resid 
+//We do not use E_reg_use(iu_DF) because DF includes cars and residential
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)= (..
-+ coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
-+ coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
-+ coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gaz_eb,k)  ..
-+ coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
-+ E_reg_use(k,iu_air) ..
-+ E_reg_use(k,iu_mer) ..
-+ E_reg_use(k,iu_OT)  ..
+    + coef_Q_CO2_DF(k,coal).* energy_balance(conso_car_eb,coal_eb,k) ..
+    + coef_Q_CO2_DF(k,oil) .* energy_balance(conso_car_eb,oil_eb,k)  ..
+    + coef_Q_CO2_DF(k,gaz) .* energy_balance(conso_car_eb,gas_eb,k)  ..
+    + coef_Q_CO2_DF(k,et)  .* energy_balance(conso_car_eb,et_eb,k)   ..
+    + E_reg_use(k,iu_air) ..
+    + E_reg_use(k,iu_mer) ..
+    + E_reg_use(k,iu_OT)  ..
 )/1e6;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";
 end;
@@ -391,18 +391,18 @@ end;
 varname = 'Carbon Sequestration|CCS|Fossil';
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)= ( ..
-+ coef_Q_CO2_ref(k,coal) * (..
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb,k)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
-- energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
-) ..
-- coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
-- coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
-+ coef_Q_CO2_ref(k,gaz) * (..
-- energy_balance(refi_eb,   gaz_eb,k) * share_CCS_CTL(k) ..
-- energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
-) ..
+    + coef_Q_CO2_ref(k,coal) * (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb,k)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
+    - energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
+    ) ..
+    - coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
+    - coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
+    + coef_Q_CO2_ref(k,gaz) * (..
+    - energy_balance(refi_eb,   gas_eb,k) * share_CCS_CTL(k) ..
+    - energy_balance(losses_eb, gas_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+    ) ..
 )/1e6;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";
 end;
@@ -417,12 +417,12 @@ if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";end;
 varname = 'Carbon Sequestration|CCS|Fossil|Supply|Electricity';
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)= ( ..
-+ coef_Q_CO2_ref(k,coal) * (..
-+ energy_balance(pwplant_eb,elec_eb,k)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
-) ..
-+ coef_Q_CO2_ref(k,gaz) * (..
-+ energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
-) ..
+    + coef_Q_CO2_ref(k,coal) * (..
+    + energy_balance(pwplant_eb,elec_eb,k)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
+    ) ..
+    + coef_Q_CO2_ref(k,gaz) * (..
+    + energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+    ) ..
 )/1e6;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";
 end;
@@ -430,16 +430,16 @@ end;
 varname = 'Carbon Sequestration|CCS|Fossil|Supply|Liquids';
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)= ( ..
-+ coef_Q_CO2_ref(k,coal) * (..
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
-- energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
-) ..
-- coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
-- coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
-+ coef_Q_CO2_ref(k,gaz) * (..
-- energy_balance(refi_eb,   gaz_eb,k) * share_CCS_CTL(k) ..
-- energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
-) ..
+    + coef_Q_CO2_ref(k,coal) * (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
+    - energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
+    ) ..
+    - coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
+    - coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
+    + coef_Q_CO2_ref(k,gaz) * (..
+    - energy_balance(refi_eb,   gas_eb,k) * share_CCS_CTL(k) ..
+    - energy_balance(losses_eb, gas_eb,k) * share_CCS_CTL(k) ..
+    ) ..
 )/1e6;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";
 end;
@@ -584,10 +584,10 @@ end;
 
 
 varname = 'Emissions|CO2|Transportation|Aviation'; //
-//On n'utilise pas E_reg_use(iu_DF) pour cars car DF inclut cars et resid 
+//We do not use E_reg_use(iu_DF) because DF includes cars and residential
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)= (..
-+ E_reg_use(k,iu_air) ..
+    + E_reg_use(k,iu_air) ..
 )/1e6;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";
 end;

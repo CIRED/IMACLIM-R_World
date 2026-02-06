@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Thomas Le Gallic
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 ///////////////////////////////////////////////////////////////
 /////////// Nexus residential buildings ///////////////////////
 ///////////////////////////////////////////////////////////////
@@ -29,22 +37,36 @@ if current_time_im==1
 end
 
 
-if ind_buildingsufficiency == 1	& current_time_im >= start_year_strong_policy-base_year_simulation // NAVIGATE task 3.5 variant: cap for the North, and avoid a quicker catch up from the South. This starts in 2020.
+if ind_buildingsufficiency == 1	& current_time_im >= start_year_strong_policy-base_year_simulation // NAVIGATE task 3.5 variant: cap for the North, and avoid a quicker catch up from the South. This starts in 2026.
     asymptote_surface_pc=[40;40;40;40;40;40;35;40;40;40;40;40];
-	mult_surface_pc_ini=[1.0;1.0;1.0;0.6;1.0;0.4;0.6;1;0.3;1.2;0.7;1.4];
+    mult_surface_pc_ini=[1.0;1.0;1.0;0.6;1.0;0.4;0.6;1;0.3;1.2;0.7;1.4];
+elseif ind_buildingsufficiency == 2	& current_time_im >= start_year_strong_policy-base_year_simulation // Dabbaghian very strict variant : cap for the North, and avoid a quicker catch up from the South. This starts in 2026.
+    mult_surface_pc_ini=[1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.5;1.0;1.5;1.5;1.5];
+    for k=1:nb_regions
+        if stockbatiment_vise_prev(k)/Ltot_prev(k) > 30
+            asymptote_surface_pc(k) = 30;
+        end
+    end
+end
+
+if indice_LED>=1  & current_time_im >= start_year_strong_policy-base_year_simulation 
+    asymptote_surface_pc=[30;30;30;30;30;30;30;30;30;30;30;30];
+    mult_surface_pc_ini=[1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.5;1.0;1.5;1.5;1.5];
+    asymptote_surface_pc(ind_global_north) = 0.8*asymptote_surface_pc(ind_global_north);
+    mult_surface_pc_ini(ind_global_north) = 0.8*mult_surface_pc_ini(ind_global_north);	
 end
 
 if ind_buildingefficiency == 1 & current_time_im == start_year_strong_policy-base_year_simulation
-CINV_res_nexus_ref(:,ind_build_VLE) = 	0.00065 * ones(nb_regions,1); // Variant to meet the task 3.5 NAVIGATE objective, where we need to reach 40% of energy saving by 2030 through renovation (!) and very low NZEB level for insulation in new construction (0.3 W/m2K). This lower investment costs could be reached thanks to massive subsidies for very high efficient buildings.
-max_extra_renov_rate = 0.02*3; // We accelerate the renovation rate until 2035 ...
+    CINV_res_nexus_ref(:,ind_build_VLE) = 	0.00065 * ones(nb_regions,1); // Variant to meet the task 3.5 NAVIGATE objective, where we need to reach 40% of energy saving by 2030 through renovation (!) and very low NZEB level for insulation in new construction (0.3 W/m2K). This lower investment costs could be reached thanks to massive subsidies for very high efficient buildings.
+    max_extra_renov_rate = 0.02*3; // We accelerate the renovation rate until 2035 ...
 end
 
 if ind_buildingefficiency == 1 & current_time_im >= 2035-base_year_simulation
-max_extra_renov_rate = 0.02; // ... and slow it again to 2% after 2035
+    max_extra_renov_rate = 0.02; // ... and slow it again to 2% after 2035
 end
 
 // Initialisation and update of the building stock variable
-if current_time_im==1
+if current_time_im==1 
     stockbatiment_vise_prev=stockbatimentref;
 else
     stockbatiment_vise_prev=stockbatiment_vise;
@@ -85,24 +107,24 @@ stockbatiment 			= stockbatiment_prev + deltastockbatiment;
 //II.1. 	Changes in the energy consumption of BAU buildings
     
 // It is first exogenously defined from POLES pathways	
-    alphaelecm2_BAU=alphaelecm2_IEA(:,min(current_time_im,size_alphaelecm2_IEA(2))).*alphaelecm2ref;
-    alphaEtm2_BAU=  alphaEtm2_IEA(:,min(current_time_im,size_alphaelecm2_IEA(2))).*alphaEtm2ref;
-    alphaCoalm2_BAU=alphaCoalm2_IEA(:,min(current_time_im,size_alphaelecm2_IEA(2))).*alphaCoalm2ref;
-    alphaGazm2_BAU= alphaGazm2_IEA(:,min(current_time_im,size_alphaelecm2_IEA(2))).*alphaGazm2ref;
+alphaelecm2_BAU=alphaelecm2_IEA(:,min(current_time_im,size_alphaelecm2_IEA(2))).*alphaelecm2ref;
+alphaEtm2_BAU=  alphaEtm2_IEA(:,min(current_time_im,size_alphaelecm2_IEA(2))).*alphaEtm2ref;
+alphaCoalm2_BAU=alphaCoalm2_IEA(:,min(current_time_im,size_alphaelecm2_IEA(2))).*alphaCoalm2ref;
+alphaGazm2_BAU= alphaGazm2_IEA(:,min(current_time_im,size_alphaelecm2_IEA(2))).*alphaGazm2ref;
 
 
 // There is an additional "fuel switching" module to move away from liquid fossil fuels if very high prices are reached // TODO: to be checked - especially the specific variables defined and calibrated
 // Two variants are defined: in the standard one, the switch is triggered by a pArmDF_nexus(ET) of 1500$/toe (including taxes), and we move away from fossil fuels in 20 years (see calibration.nexus.building file). The triggering price is lower and the switching period shorter in the other variant.
 //NB: these are ad hoc assumptions, not supported by data or previous studies. I guess it has been useful in some decarbonisation scenarios (history: comes from "scenar_Total_12"), but maybe it would be better to avoid its use as the logit function made the dynamic already sensitive to energy prices, or to support its use by a narrative where we consider policies implementing new norms (obligation to replace oil boilers), instead of supporting it by some technological optimism. In that case, these assumptions could be replaced by a year of start of this policy.
 
-    if current_time_im>1 // Initialisation of the test variable
-        test_Et_resid;
-        pArmDF_nexus;
-        p_decoupl_oil_res;
-    elseif current_time_im==1
-        test_Et_resid=zeros(nb_regions,1);
-        i_Et_resid=zeros(nb_regions,1);
-    end
+if current_time_im>1 // Initialisation of the test variable
+    test_Et_resid;
+    pArmDF_nexus;
+    p_decoupl_oil_res;
+elseif current_time_im==1
+    test_Et_resid=zeros(nb_regions,1);
+    i_Et_resid=zeros(nb_regions,1);
+end
 
 // If the fossil fuel price reach 1000$/Mtep=0.8$/lge or more, the consumption of liquid fossil fuel switches towards elec (with an efficiency improvement of 50%) and gas (efficiency improvement of 30%) within 10 years
 if current_time_im >= start_year_strong_policy-base_year_simulation // This change is not absolutely neutral compared to the trunk (as this module used to start very early, and before 2020), has to be tested.
@@ -125,15 +147,19 @@ end
 // Here we add an extra electrification trend in BAU buildings to reach the electrification target
 if  indice_building_electri == 1 & current_time_im >= start_year_strong_policy-base_year_simulation // 
     if ~isdef("alphaGazm2_BAU_ini")
-			alphaGazm2_BAU_ini = alphaGazm2_BAU;
-	end
-	for k=1:nb_regions	
-			alphaGazm2_BAU_prev(k) = alphaGazm2_BAU(k);
-			alphaGazm2_BAU(k)= max((1-r_decoupl_gas_res*(current_time_im+base_year_simulation-start_year_strong_policy)),0)*alphaGazm2_BAU_ini(k);
-            alphaelecm2_BAU(k)=alphaelecm2_BAU(k) + (1-efficiencyGain_elec_m2+efficiencyGain_gas_m2) * (alphaGazm2_BAU_prev(k) - alphaGazm2_BAU(k)) / coef_primary2final_build;
-	end
+        alphaGazm2_BAU_ini = alphaGazm2_BAU;
+    end
+    for k=1:nb_regions	
+        alphaGazm2_BAU_prev(k) = alphaGazm2_BAU(k);
+        alphaGazm2_BAU(k)= max((1-r_decoupl_gas_res*(current_time_im+base_year_simulation-start_year_strong_policy)),0)*alphaGazm2_BAU_ini(k);
+        alphaelecm2_BAU(k)=alphaelecm2_BAU(k) + (1-efficiencyGain_elec_m2+efficiencyGain_gas_m2) * (alphaGazm2_BAU_prev(k) - alphaGazm2_BAU(k)) / coef_primary2final_build;
+    end
 end
 
+alphaelecm2_BAU = alphaelecm2_BAU .* dynForc_m2_ener; 
+alphaGazm2_BAU = alphaGazm2_BAU .* dynForc_m2_ener;
+alphaEtm2_BAU = alphaEtm2_BAU .* dynForc_m2_ener;
+alphaCoalm2_BAU = alphaCoalm2_BAU .* dynForc_m2_ener;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -176,20 +202,20 @@ CINV_res			= zeros (nb_regions,nb_type_buildings);
 // Changes in investment costs are driven by cumulated sales (learning by doing, with full spill-over: ie it is the cumulated sales at the global level that decrease costs for all regions)
 	    
 //We thus first compute the cumulated sales for each type of building, and then compute the resulting investment costs for each type of building
-	Cum_BAU = Cum_BAU + stockbatiment_BAU;
-    CINV_res_nexus(:,ind_build_BAU) = max((CINV_res_nexus_ref(:,ind_build_BAU)).*(1-LR_ITC_res(ind_build_BAU)).^(log(Cum_BAU./Cum_BAU_ref)/log(2)),A_CINV_res_ITC_ref(ind_build_BAU));//Minimum bound on purshase cost (representing a technical asymptote)
+Cum_BAU = Cum_BAU + stockbatiment_BAU;
+CINV_res_nexus(:,ind_build_BAU) = max((CINV_res_nexus_ref(:,ind_build_BAU)).*(1-LR_ITC_res(ind_build_BAU)).^(log(Cum_BAU./Cum_BAU_ref)/log(2)),A_CINV_res_ITC_ref(ind_build_BAU));//Minimum bound on purshase cost (representing a technical asymptote)
 				
-	Cum_SLE = Cum_SLE + stockbatiment_SLE;
-    CINV_res_nexus(:,ind_build_SLE) = max((CINV_res_nexus_ref(:,ind_build_SLE)).*(1-LR_ITC_res(ind_build_SLE)).^(log(Cum_SLE./Cum_SLE_ref)/log(2)),A_CINV_res_ITC_ref(ind_build_SLE));
+Cum_SLE = Cum_SLE + stockbatiment_SLE;
+CINV_res_nexus(:,ind_build_SLE) = max((CINV_res_nexus_ref(:,ind_build_SLE)).*(1-LR_ITC_res(ind_build_SLE)).^(log(Cum_SLE./Cum_SLE_ref)/log(2)),A_CINV_res_ITC_ref(ind_build_SLE));
 		
-	Cum_VLE = Cum_VLE + stockbatiment_VLE;
-    CINV_res_nexus(:,ind_build_VLE) = max((CINV_res_nexus_ref(:,ind_build_VLE)).*(1-LR_ITC_res(ind_build_VLE)).^(log(Cum_VLE./Cum_VLE_ref)/log(2)),A_CINV_res_ITC_ref(ind_build_VLE));
+Cum_VLE = Cum_VLE + stockbatiment_VLE;
+CINV_res_nexus(:,ind_build_VLE) = max((CINV_res_nexus_ref(:,ind_build_VLE)).*(1-LR_ITC_res(ind_build_VLE)).^(log(Cum_VLE./Cum_VLE_ref)/log(2)),A_CINV_res_ITC_ref(ind_build_VLE));
 
 
 // Equivalent in annual terms, to compute annual total cost of construction/renovation
 
-	CRF_res=disc_res./(1-(1+disc_res).^(-Life_time_res));
-	CINV_res = CRF_res.*CINV_res_nexus;  
+CRF_res=disc_res./(1-(1+disc_res).^(-Life_time_res_LCC));
+CINV_res = CRF_res.*CINV_res_nexus;  
 
 // All these parameters are important and defined in calibration.nexus.buildings. Some are mostly exogenous and ad hoc assumptions, some others could be the first targets of policies to encourage efficiency in buildings (e.g. subsidies that decrease investment costs).
 
@@ -199,19 +225,19 @@ CINV_res			= zeros (nb_regions,nb_type_buildings);
 
 // We use anticipated energy prices to compute these fuel costs
 
-    p_coal_res_anticip = squeeze(expected.pArmDF(: , coal , 1:Life_time_res));
-    p_gaz_res_anticip  = squeeze(expected.pArmDF(: , gaz  , 1:Life_time_res));
-    p_et_res_anticip   = squeeze(expected.pArmDF(: , et   , 1:Life_time_res));
-    p_elec_res_anticip = squeeze(expected.pArmDF(: , elec , 1:Life_time_res));
+p_coal_res_anticip = squeeze(expected.pArmDF(: , coal , 1:Life_time_res));
+p_gaz_res_anticip  = squeeze(expected.pArmDF(: , gaz  , 1:Life_time_res));
+p_et_res_anticip   = squeeze(expected.pArmDF(: , et   , 1:Life_time_res));
+p_elec_res_anticip = squeeze(expected.pArmDF(: , elec , 1:Life_time_res));
 
 // Intialisation of the energy cost variables for each type of building
-    CFuel_res_BAU=zeros(nb_regions,1);
-    CFuel_res_SLE=zeros(nb_regions,1);
-	CFuel_res_VLE=zeros(nb_regions,1);
+CFuel_res_BAU=zeros(nb_regions,1);
+CFuel_res_SLE=zeros(nb_regions,1);
+CFuel_res_VLE=zeros(nb_regions,1);
 
 CFuel_res = zeros(nb_regions, nb_type_buildings, nb_building_ener);
 // Computing of the energy costs	
-for t=1:Life_time_res
+for t=1:Life_time_res_LCC
     for b_type=1:nb_type_buildings
         CFuel_res(:,b_type,:) = matrix(CFuel_res(:,b_type,:),nb_regions,nb_building_ener) + [p_coal_res_anticip(:,t), p_et_res_anticip(:,t), p_gaz_res_anticip(:,t), p_elec_res_anticip(:,t)] / ((1+disc_res)^t)*CRF_res;
     end
@@ -229,6 +255,11 @@ alphaelecm2_SLE = alphaelecm2_SLE_sh .* build_SLE_ener_cons / coef_primary2final
 alphaGazm2_SLE  = (1-alphaelecm2_SLE_sh) .* build_SLE_ener_cons;
 alphaelecm2_VLE = alphaelecm2_VLE_sh .* build_VLE_ener_cons / coef_primary2final_build + build_VLE_ener_cons_fix;
 alphaGazm2_VLE  = (1-alphaelecm2_VLE_sh) .* build_VLE_ener_cons;
+
+if current_time_im >= start_year_strong_policy-base_year_simulation
+    alphaelecm2_VLE = dynForc_resid_TBE3 .*alphaelecm2_VLE;
+    alphaGazm2_VLE = dynForc_resid_TBE3 .*alphaGazm2_VLE;
+end
 
 
 alpha_m2_building = zeros(nb_regions, nb_type_buildings, nb_building_ener);
@@ -256,6 +287,9 @@ for k=1:nb_regions
         MSH_res(k,j)=(LCC_res(k,j)).^(-var_hom_res(k))./sum(((LCC_res(k,1:3)).^(-var_hom_res(k)*ones(1, size(1:3,'c')))));
     end
 end
+MSH_res(:,3) = MSH_res(:,3) .* dynForc_resid_TBE1;
+MSH_res = MSH_res ./ (sum(MSH_res,"c") * ones(1,3));
+
 // We use these share as follows: (1) for new construction (even due to demolitions), we use all the shares; (2) for 'natural' renovations, we only consider the relative shares of BAU and SLE (the underlying assumption is that these renovations do not result in VLE buildings); (3) for additional renovations, we only consider the relative shares of SLE and VLE (as these renovations are supposed to be "energy oriented renovations"). See III.5 below for the application.
 
 
@@ -268,15 +302,15 @@ end
 
 // Current definition of the additional renovation rate, which makes changes in the composition of the building stock more sensitive to the carbon tax. As said above, some improvements could be envisaged here.
 if current_time_im < start_year_strong_policy-base_year_simulation
-taux_renov_suppl = 0; // We start the policy only after the start year policy
+    taux_renov_suppl = 0; // We start the policy only after the start year policy
 else
-if tax_threshold_insulation == 0 // We add the possibility to impose a rhythm of renovation even without tax, as it is expected in Navigate task 3.5
-taux_renov_suppl = max_extra_renov_rate;
-else
-taux_renov_suppl=min(1, taxCO2_DF(:,indice_Et) / (tax_threshold_insulation *1e-6) ) * max_extra_renov_rate;
-end
+    if tax_threshold_insulation == 0 // We add the possibility to impose a rhythm of renovation even without tax, as it is expected in Navigate task 3.5
+        taux_renov_suppl = max_extra_renov_rate;
+    else
+        taux_renov_suppl=min(1, taxCO2_DF(:,indice_Et) / (tax_threshold_insulation *1e-6) ) * max_extra_renov_rate;
+    end
 end	 
-
+taux_renov_suppl = taux_renov_suppl.*dynForc_resid_TBE2;
 
 // TODO: write the code with one matrix for the three building stocks?
 // TODO: consider the case when stockbatiment_BAU_prev = 0, so that taux_renov_suppl is applying to stockbatiment_SLE_prev.
@@ -294,13 +328,13 @@ stockbatiment_VLE_prev=stockbatiment_VLE;
 
 share_demolition = zeros(nb_regions,nb_type_buildings);
 for k=1:nb_regions 
-share_demolition(k,1) = max(0,min (1, stockbatiment_BAU_prev(k)/(stockbatiment_prev(k)*(depreciationm2_demolish(k)+depreciationm2_refurbish(k)))));
-	if (stockbatiment_BAU_prev(k) + stockbatiment_SLE_prev(k)) >= (stockbatiment_prev(k)*(depreciationm2_demolish(k)+depreciationm2_refurbish(k)))
-		share_demolition(k,2) = 1 - share_demolition(k,1);
-	else
-		share_demolition(k,2) = max(0,min (1, stockbatiment_SLE_prev(k)/(stockbatiment_prev(k)*(depreciationm2_demolish(k)+depreciationm2_refurbish(k)))));
-	end
-share_demolition(k,3) = 1 - share_demolition(k,1) - share_demolition(k,2);
+    share_demolition(k,1) = max(0,min (1, stockbatiment_BAU_prev(k)/(stockbatiment_prev(k)*(depreciationm2_demolish(k)+depreciationm2_refurbish(k)))));
+    if (stockbatiment_BAU_prev(k) + stockbatiment_SLE_prev(k)) >= (stockbatiment_prev(k)*(depreciationm2_demolish(k)+depreciationm2_refurbish(k)))
+        share_demolition(k,2) = 1 - share_demolition(k,1);
+    else
+        share_demolition(k,2) = max(0,min (1, stockbatiment_SLE_prev(k)/(stockbatiment_prev(k)*(depreciationm2_demolish(k)+depreciationm2_refurbish(k)))));
+    end
+    share_demolition(k,3) = 1 - share_demolition(k,1) - share_demolition(k,2);
 end
 
  
@@ -312,21 +346,21 @@ end
 /////////// a)  Resulting changes in the composition of the building stock
  
 stockbatiment_BAU= max(0, stockbatiment_BAU_prev +... // Initial stock
-- stockbatiment_prev.*(depreciationm2_demolish+depreciationm2_refurbish).*share_demolition(:,1) +... 	// Building outflow from depreciation
-+ (deltastockbatiment + stockbatiment_prev.*(depreciationm2_demolish)) .* MSH_res(:,1) +... 				// new BAU building from construction
-+ (stockbatiment_prev.*(depreciationm2_refurbish)) .* (MSH_res(:,1)./(MSH_res(:,1)+MSH_res(:,2))) +... 	// new BAU building from 'natural' renovation
+    - stockbatiment_prev.*(depreciationm2_demolish+depreciationm2_refurbish).*share_demolition(:,1) +... 	// Building outflow from depreciation
+    + (deltastockbatiment + stockbatiment_prev.*(depreciationm2_demolish)) .* MSH_res(:,1) +... 				// new BAU building from construction
+    + (stockbatiment_prev.*(depreciationm2_refurbish)) .* (MSH_res(:,1)./(MSH_res(:,1)+MSH_res(:,2))) +... 	// new BAU building from 'natural' renovation
 - stockbatiment_BAU_prev .* taux_renov_suppl);																	// Building outflow from additional renovations; exclusively applied to the BAU stock, these renovations lead to SLE or VLE buildings only
 
 stockbatiment_SLE= max(0, stockbatiment_SLE_prev +... // Initial stock
-- stockbatiment_prev.*(depreciationm2_demolish+depreciationm2_refurbish).*share_demolition(:,2) +... 	// Building outflow from depreciation (only if no BAU buildings anymore)
-+ (deltastockbatiment + stockbatiment_prev.*(depreciationm2_demolish)) .* MSH_res(:,2) +... 				// new SLE buildings from construction
-+ (stockbatiment_prev.*(depreciationm2_refurbish)) .* (MSH_res(:,2)./(MSH_res(:,1)+MSH_res(:,2))) +...	// new SLE buildings from 'natural' renovation
+    - stockbatiment_prev.*(depreciationm2_demolish+depreciationm2_refurbish).*share_demolition(:,2) +... 	// Building outflow from depreciation (only if no BAU buildings anymore)
+    + (deltastockbatiment + stockbatiment_prev.*(depreciationm2_demolish)) .* MSH_res(:,2) +... 				// new SLE buildings from construction
+    + (stockbatiment_prev.*(depreciationm2_refurbish)) .* (MSH_res(:,2)./(MSH_res(:,1)+MSH_res(:,2))) +...	// new SLE buildings from 'natural' renovation
 + stockbatiment_BAU_prev .* taux_renov_suppl .*(MSH_res(:,2)./(MSH_res(:,2)+MSH_res(:,3)))); 			// new SLE building from additional renovations
 
 stockbatiment_VLE= max(0, stockbatiment_VLE_prev +... // Initial stock
-- stockbatiment_prev.*(depreciationm2_demolish+depreciationm2_refurbish).*share_demolition(:,3) +... 	// Building outflow from depreciation (only if no BAU+SLE buildings anymore)
-+ (deltastockbatiment + stockbatiment_prev.*(depreciationm2_demolish)) .* MSH_res(:,3) +... 				// new VLE buildings from construction
-+ (stockbatiment_prev.*(depreciationm2_refurbish)) .* zeros(nb_regions,1) +...								// new VLE buildings from 'natural' renovation; set to zero as we consider that natural renovation can only lead to BAU or SLE, for technical reasons // TODO: could be an option/variant
+    - stockbatiment_prev.*(depreciationm2_demolish+depreciationm2_refurbish).*share_demolition(:,3) +... 	// Building outflow from depreciation (only if no BAU+SLE buildings anymore)
+    + (deltastockbatiment + stockbatiment_prev.*(depreciationm2_demolish)) .* MSH_res(:,3) +... 				// new VLE buildings from construction
+    + (stockbatiment_prev.*(depreciationm2_refurbish)) .* zeros(nb_regions,1) +...								// new VLE buildings from 'natural' renovation; set to zero as we consider that natural renovation can only lead to BAU or SLE, for technical reasons // TODO: could be an option/variant
 + stockbatiment_BAU_prev .* taux_renov_suppl .*(MSH_res(:,3)./(MSH_res(:,2)+MSH_res(:,3))));				// new VLE building from additional renovations
  
  

@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Ruben Bibas, Florian Leblanc
+#     Florian Leblanc, Thibault Briera, Ruben Bibas
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -76,7 +76,7 @@ do
       for tax2100 in 3700
       do
  
-      for mshbio in 20
+      for mshbio in 10
       do
       for max_CCS_injection in 5263
       do
@@ -107,7 +107,7 @@ do
       for tax2100 in 7500
       do
  
-      for mshbio in 30
+      for mshbio in 15
       do
       for max_CCS_injection in 55
       do
@@ -136,7 +136,7 @@ do
       for tax2100 in 2300
       do
  
-      for mshbio in 35 
+      for mshbio in 18 
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -162,7 +162,7 @@ do
       for tax2100 in 1300 
       do
  
-      for mshbio in 60 
+      for mshbio in 31
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"

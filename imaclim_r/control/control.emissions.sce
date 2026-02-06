@@ -7,7 +7,7 @@
 // =============================================
 
 disp([..
-["ECO2",secnames(1:5)',"sum";..
-[regnames],..
-[string([round(10 * E_CO2(:,1:5)/1e6),10 * sum(E_CO2(:,1:5)/1e6,2)]/10)]..
+    ["ECO2",secnames(1:5)',"sum";..
+    [regnames],..
+    [string([round(10 * E_CO2(:,1:5)/1e6),10 * sum(E_CO2(:,1:5)/1e6,2)]/10)]..
 ]]);

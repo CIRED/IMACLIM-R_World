@@ -1,3 +1,11 @@
+# =============================================
+# Contact: <imaclim.r.world@gmail.com>
+# Licence: AGPL-3.0
+# Authors:
+#     Florian Leblanc
+#     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+# =============================================
+
 # -*- coding: utf-8 -*-
 
 import copy
@@ -254,7 +262,7 @@ prod_bioCCS_glob_tep = prod_bioCCS_tep[:,:,ind_bioCCS,:].sum(axis=1)
 emi_evitee_glob = emi_evitee.sum(axis=1)
 
 emi_evitee_glob_GtCO2_EJ = emi_evitee_glob / 1e9 /1e6 / (prod_bioCCS_glob_tep* tep2ej)
-# emi_evitee(:,1) = prod_elec_techno(:,24) / tep2MWh / 1e6 ./ rho_elec_moyen(:,indice_BIGCCS) * elecBiomassInitial.emissionsCCS;
+# emi_evitee(:,1) = prod_elec_techno(:,24) / tep2MWh / 1e6 ./ rho_elec_moyen(:,indice_BIS) * elecBiomassInitial.emissionsCCS;
 
 data_2plot=prepareArray2plot( Q_biofuel_anticip_reg[combi_all,:][:,tptScale] * 1e6 * tep2ej,timeset[tptScale])
 linePlot(data_2plot,outdir+"Q_biofuel_anticip_reg" , combi_Legend_all,"Q biofuel (EJ)",colour_all,plot_nb_line,-0.50,-0.30,linestyle=style_line_all)

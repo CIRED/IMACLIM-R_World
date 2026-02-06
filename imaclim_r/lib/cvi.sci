@@ -2,11 +2,11 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
-//fonctions pour le calcul du CVI (Compensating Variation of Income)
+//function to compute the CVI (Compensating Variation of Income)
 function [y]=HH_budget_Rcst_pays(Consoloc,Tautomobileloc)
     DFtemp=DFinduite_pays(Consoloc,Tautomobileloc)
     //DFtemp=DFtemp(pays,:);
@@ -26,15 +26,15 @@ function [y]=CalculConsoRevenu_pays(xloc)
     // if (Rdisp(k)<=0) then Rdisp(k)=0.00001; end
     if (Tautomobileloc<=bnautomobile(pays)) then Tautomobileloc=bnautomobile(pays)+0.0000001; end
     if (TNMloc<=bnNM(pays)) then TNMloc=bnNM(pays)+0.0000001; end
-    //pour les secteurs non transport:
+    //transport sectors
     for j=[1,2,6,7]
         if (Consoloc(1,j)<=bn(pays,j+5)) then  Consoloc(1,j)=bn(pays,j+5)+0.000001; end
     end
-    //pour l'air
+    // air sector
     if (Consoloc(1,indice_air-5)<=0) then Consoloc(1,indice_air-5)=0+0.0000001; end
-    // pour la mer  
+    // sea sector
     if (Consoloc(1,indice_mer-5)<=bn(pays,indice_mer)) then Consoloc(1,indice_mer-5)=bn(pays,indice_mer)+0.000001; end
-    //pour OT
+    //Other Transport sector
     if (Consoloc(1,indice_OT-5)<=bnOT(pays)) then Consoloc(1,indice_OT-5)=bnOT(pays)+0.000001; end 
 
     // Utility_temp=matrix(Utility(Consoloc,Tautomobileloc,TNMloc,lambdaloc,muloc),reg,-1);
@@ -42,7 +42,7 @@ function [y]=CalculConsoRevenu_pays(xloc)
     // Time_budget_temp=Time_budget(Consoloc,Tautomobileloc,TNMloc);
 
     y=real([	Utility_pays(Consoloc,Tautomobileloc,TNMloc,lambdaloc,muloc),...
-    HH_budget_Rcst_pays(Consoloc,Tautomobileloc),...
+        HH_budget_Rcst_pays(Consoloc,Tautomobileloc),...
     Time_budget_pays(Consoloc,Tautomobileloc,TNMloc)
     ]');
 
@@ -102,15 +102,15 @@ function [y]=IndirectUtility_pays(Rcst)
     // if (Rdisp(k)<=0) then Rdisp(k)=0.00001; end
     if (Tautomobile<=bnautomobile(pays)) then Tautomobile=bnautomobile(pays)+0.0000001; end
     if (TNM<=bnNM(pays)) then TNM=bnNM(pays)+0.0000001; end
-    //pour les secteurs non transport:
+    //non transport sectors
     for j=[1,2,6,7]
         if (Conso(1,j)<=bn(pays,j+5)) then  Conso(1,j)=bn(pays,j+5)+0.000001; end
     end
-    //pour l'air
+    //air transport
     if (Conso(1,indice_air-5)<=0) then Conso(1,indice_air-5)=0+0.0000001; end
-    // pour la mer  
+    // sea transport
     if (Conso(1,indice_mer-5)<=bn(pays,indice_mer)) then Conso(1,indice_mer-5)=bn(pays,indice_mer)+0.000001; end
-    //pour OT
+    // Other Transport sector
     if (Conso(1,indice_OT-5)<=bnOT(pays)) then Conso(1,indice_OT-5)=bnOT(pays)+0.000001; end 
 
     DFtemp2=DFinduite_pays(Conso,Tautomobile);
@@ -153,13 +153,14 @@ function [y] = Utility_pays(Consoloc,Tautomobileloc,TNMloc,lambdaloc,muloc) ;
 endfunction
 
 
-//fonction qui calcule la demande finale de ménages en fonction de leur consommation, pour le moment le logement n'est pas pris en compte
+//function that compute household final energy demand based on their consumption
+// at the moment housing is not included
 function [y] = DFinduite_pays(Consoloc,Tautomobileloc) ;
 
     y1 = zeros(1,sec);
-    //voir les problèmes de calibration
+    //see calibratin problems
     y1(:,indice_energiefossile1:indice_energiefossile2)=DFref(pays,indice_energiefossile1:indice_energiefossile2);
-    //secteur conso
+    //consumption sectors
     y1(:,indice_construction)=Consoloc(:,indice_construction-nbsecteurenergie);
     y1(:,indice_composite)=Consoloc(:,indice_composite-nbsecteurenergie)+Tautomobileloc.*alphaCompositeauto(pays).*pkmautomobileref(pays)./100;
     y1(:,indice_mer)=Consoloc(:,indice_mer-nbsecteurenergie);
@@ -167,11 +168,11 @@ function [y] = DFinduite_pays(Consoloc,Tautomobileloc) ;
     y1(:,indice_OT)=Consoloc(:,indice_OT-nbsecteurenergie);
     y1(:,indice_agriculture)=Consoloc(:,indice_agriculture-nbsecteurenergie);
     y1(:,indice_industries)=Consoloc(:,indice_industries-nbsecteurenergie);
-    //conso induites énergie
+    //energyh induced consumption
     y1(:,indice_Et)=Tautomobileloc.*alphaEtauto(pays).*pkmautomobileref(pays)./100+alphaEtm2(pays).*stockbatiment(pays);
     y1(:,indice_elec)=alphaelecm2(pays).*stockbatiment(pays)+Tautomobileloc.*alphaelecauto(pays).*pkmautomobileref(pays)./100;
     y1(:,indice_coal)=alphaCoalm2(pays).*stockbatiment(pays);
-    y1(:,indice_gaz)=alphaGazm2(pays).*stockbatiment(pays);
+    y1(:,indice_gas)=alphaGazm2(pays).*stockbatiment(pays);
 
     y=y1;
 endfunction
@@ -199,7 +200,7 @@ function noCVIflag = compute_cvi(SAVEDIRALTER, SAVEDIRREF,listepays,forceRecalc)
     //  SAVEDIRALTER: A savedir. Optional. Will be prompted if not provided.
     //  SAVEDIRREF  : A savedir. Optional. Will be prompted if not provided.
     //  listepays   : OPTIONAL. Default is (1:reg). An interger row. Liste of regions where CVI should be computed
-    //  forceRecalc : Bolean. Default %f. Forces to compute cvi even if a CVI.sav is found in SAVEDIRALTER.
+    //  forceRecalc : Bolean. Default %f. Forces to compute cvi even if a CVI.dat is found in SAVEDIRALTER.
     //  OUTPUTS
     //  noCVIflag   : Boolean. %t if CVI was not calculated AND is not already present in SAVEDIRALTER
 
@@ -220,11 +221,11 @@ function noCVIflag = compute_cvi(SAVEDIRALTER, SAVEDIRREF,listepays,forceRecalc)
     //remembers current workdir
     ccvi_prevdir = pwd()
 
-    //Tests de routine....
-    SAVEDIRALTER= pathconvert (SAVEDIRALTER,%t);//cette fonction scialb transforme ici les SAVEDIR pour qu ils finissent par '/'
+    //Routine test
+    SAVEDIRALTER= pathconvert (SAVEDIRALTER,%t);//scilab function that add '/' to SAVEDIR
     SAVEDIRREF  = pathconvert (SAVEDIRREF,%t);
 
-    //valuer par defaut en cas de pepin  
+    //default value
     noCVIflag=%t
 
     if ~and(check_wasdone([SAVEDIRALTER SAVEDIRREF]))
@@ -233,13 +234,13 @@ function noCVIflag = compute_cvi(SAVEDIRALTER, SAVEDIRREF,listepays,forceRecalc)
         return
     end
 
-    if isfile (SAVEDIRALTER+'save/CVI.sav') & ~forceRecalc //This happens if the file exists yet
+    if isfile (SAVEDIRALTER+'save/CVI.dat') & ~forceRecalc //This happens if the file exists yet
         noCVIflag = %f
         return
     end
 
-    if ~isfile (SAVEDIRALTER+'save/UtilityHH.sav') //This happens if the file doesn't exist
-        disp( ' no UtilityHH exception. UtilityHH.sav should exist in SAVEDIRREF.')
+    if ~isfile (SAVEDIRALTER+'save/UtilityHH.dat') //This happens if the file doesn't exist
+        disp( ' no UtilityHH exception. UtilityHH.dat should exist in SAVEDIRREF.')
         noCVIflag = %t
         return
     end
@@ -263,7 +264,7 @@ function noCVIflag = compute_cvi(SAVEDIRALTER, SAVEDIRREF,listepays,forceRecalc)
     'Tdisp'
     ];
 
-    //coefficients techniques sauvegardés dans save_generic
+    //technical coefficient save by save_generic
     varTmp=[ 'Conso'
     'Tautomobile'
     'TNM'
@@ -275,8 +276,8 @@ function noCVIflag = compute_cvi(SAVEDIRALTER, SAVEDIRREF,listepays,forceRecalc)
     varalpha
     ];
 
-    load( CALIB+'calib.sav','bnNM','bn','bnair','alphaOT','bnOT','xsiT',..
-    'toOT','toautomobile','toNM','IR','DFref','betatrans','alphaair',..
+    load( CALIB+'calib.dat','bnNM','bn','bnair','alphaOT','bnOT','xsiT',..
+        'toOT','toautomobile','toNM','IR','DFref','betatrans','alphaair',..
     'sigmatrans','pkmautomobileref','toair','atrans','btrans','ktrans','make_calib_trace_id');
 
 
@@ -287,7 +288,7 @@ function noCVIflag = compute_cvi(SAVEDIRALTER, SAVEDIRREF,listepays,forceRecalc)
     ldsav( varalpha+'_sav');
     execstr ( varalpha+'='+varalpha+'_sav');
 
-    //Chargement du  Scenario de REFERENCE
+    //Load the REFERENCE scenario
     SAVEDIR = SAVEDIRREF
     cd(MODEL);
     exec 'get_all_sg_var.sce';
@@ -295,12 +296,12 @@ function noCVIflag = compute_cvi(SAVEDIRALTER, SAVEDIRREF,listepays,forceRecalc)
     ldsav ( 'UtilityHH','',SAVEDIRREF)
     Utility_REF	=UtilityHH;
 
-    //Calcul du CVI
-    //Initialisation du CVI  et du Surplus
+    //Compute the CVI
+    //Initialisation of CVI and the Surplus
     CVI=zeros(reg,TimeHorizon+1);
     Surplus=zeros(reg,TimeHorizon+1);
 
-    //Calcul du CVI (Compensating Variation of Income) et du Surplus
+    //Compute the CVI (Compensating Variation of Income) and the Surplus
     execstr ( varTmp+'_glo = '+varTmp);
     disp( 'Compare CVI: there we go'); timer;
     winId=waitbar( 'CVI in process. ');

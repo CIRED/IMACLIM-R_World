@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Thomas Le-Gallic, Nicolas Graves, Florian Leblanc
+//     Florian Leblanc, Nicolas Graves, Thomas Le Gallic
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -50,18 +50,20 @@ nb_building_ener = size(ind_build_ener,"c");
 // Trend-based variant, based on data analysis (data from IEA - Energy Efficiency Indicators) - it led with V1 to [78;71;46;43;45;49;32;40;32;36;39;43] in 2100 when testing with a standard baseline (productivity growth consistent with SSP2). In 2050: [73;;64;42;39;35;43;23;33;26;24;31;31]
 if style_dev_res == 0 
     asymptote_surface_pc=[80;75;50;50;50;50;35;50;50;40;40;50]; // = asymptote (m²/cap)
-	mult_surface_pc_ini=[2;2;1;0.6;2;0.4;0.6;1;0.3;1.2;0.7;1.4]; // = some kind of income elasticities, indicating how sentitive the need for new building area is to income growth.
+    mult_surface_pc_ini=[2;2;1;0.6;2;0.4;0.6;1;0.3;1.2;0.7;1.4]; // = some kind of income elasticities, indicating how sentitive the need for new building area is to income growth.
 
-// "Increasing inequalities" variant (between countries) - with the same test, it led to [90;87;61;48;66;69;19;42;43;12;22;25] in 2100, with slow increase in developing countries. In 2050: [86;77;50;41;51;59;14;35;31;10;;15;20].
+    // "Increasing inequalities" variant (between countries) - with the same test, it led to [90;87;61;48;66;69;19;42;43;12;22;25] in 2100, with slow increase in developing countries. In 2050: [86;77;50;41;51;59;14;35;31;10;;15;20].
 elseif style_dev_res == 1 
     asymptote_surface_pc=[90;90;70;70;70;70;35;50;70;35;35;50];
-	mult_surface_pc_ini=[4.1;2.7;1.2;0.2;3.0;0.5;0.2;1.2;0.4;0.2;0.2;0.4];
+    mult_surface_pc_ini=[4.1;2.7;1.2;0.2;3.0;0.5;0.2;1.2;0.4;0.2;0.2;0.4];
 
-// "Rebalancing and convergence" variant (between countries) - with the same test, it led to [70;59;42;45;33;45;44;41;43;43;45;41] in 2100, including quite optimistic assumptions regarding the construction pace in developing countries. In 2050: [66;55;40;44;27;45;36;35;37;30;41;31].
+    // "Rebalancing and convergence" variant (between countries) - with the same test, it led to [70;59;42;45;33;45;44;41;43;43;45;41] in 2100, including quite optimistic assumptions regarding the construction pace in developing countries. In 2050: [66;55;40;44;27;45;36;35;37;30;41;31].
 elseif style_dev_res == 2	 
     asymptote_surface_pc=[75;65;45;45;45;45;45;45;45;45;45;45];
-	mult_surface_pc_ini=[1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.5;1.0;1.5;1.5;1.5];
+    mult_surface_pc_ini=[1.0;1.0;1.0;1.0;1.0;1.0;1.0;1.5;1.0;1.5;1.5;1.5];
 end
+
+asymptote_surface_pc_ref = asymptote_surface_pc;
 
 //These two lines are useless, but kept as a comment if someone is looking for these variables with the old name.
 //asymptote_surface_pc=asp_cff; 
@@ -92,7 +94,7 @@ Traditional_biomass_EJ = [0.15; 0.04; 1.44; 0.04; 0.12; 7.56700; 4.00100; 3.0020
 alphaelecm2ref = DFref(:,indice_elec)./stockbatimentref;
 alphaEtm2ref = (DFref(:,indice_Et)-DF_HHtransport(:,indice_Et))./stockbatimentref;
 alphaCoalm2ref = DFref(:,indice_coal)./stockbatimentref;
-alphaGazm2ref = DFref(:,indice_gaz)./stockbatimentref;
+alphaGazm2ref = DFref(:,indice_gas)./stockbatimentref;
 
 alphaelecm2 = alphaelecm2ref;
 alphaEtm2 = alphaEtm2ref;
@@ -167,17 +169,25 @@ stockbatiment_SLE=stockbatimentref*share_SLE_baseyear;
 stockbatiment_VLE=stockbatimentref*share_VLE_baseyear;
 
 //Initialisation of cumulative stock variables for the learning rate functions
-    Cum_BAU_ref = stockbatimentref * share_BAU_baseyear; // TODO: to be symplified into one variable CUM_res?
-	Cum_SLE_ref = stockbatimentref * max(share_SLE_baseyear,0.01);
-	Cum_VLE_ref = stockbatimentref * max(share_VLE_baseyear,0.01);
-	Cum_BAU = Cum_BAU_ref;
-    Cum_SLE = Cum_SLE_ref;
-	Cum_VLE = Cum_VLE_ref;
+Cum_BAU_ref = stockbatimentref * share_BAU_baseyear; // TODO: to be symplified into one variable CUM_res?
+Cum_SLE_ref = stockbatimentref * max(share_SLE_baseyear,0.01);
+Cum_VLE_ref = stockbatimentref * max(share_VLE_baseyear,0.01);
+Cum_BAU = Cum_BAU_ref;
+Cum_SLE = Cum_SLE_ref;
+Cum_VLE = Cum_VLE_ref;
 
 // III.2. Parameters used in the logit function
 
 var_hom_res=5*ones(nb_regions,1); //Heterogeneity parameter used in the logit function of technology choices. A high value means low heterogeneity, i.e., cheaper technologies take most of the market share; a low value means faster diffusion of new technologies, but a lower maximum share - note that for cars, other models use values in the range 5-10
 Life_time_res=35; // residential depreciation period taken into account in investment decisions // Note that we could distinguish here renovation (30 years) and construction (40 years as assumed by Ürge-Vorsatz et al, 2020
+//--- Life-time adjustement for truncaded LCC computation
+// to get a proper short term horizon for investment, we assume that the lifetime of the techno is the same as the time horizon of the model, to compute truncated LCC.
+//typical value for the electricity sector is 10-20y (Keppo & Strubegger, 2010, http://dx.doi.org/10.1016/j.energy.2010.01.019)
+if ind_short_term_hor== 1
+    Life_time_res_LCC = min(Life_time_res, nb_year_expect_LCC); // Life_time_LCC replaces Life_time when computing truncated LCC components
+else
+    Life_time_res_LCC = Life_time_res;
+end
 disc_res=0.03; // discount rate considered for this nexus - the same as assumed by Ürge-Vorsatz et al, 2020 (fig. 8)
 LR_ITC_res = [0.00 ; 0.08 ; 0.10]; // Learning rate for each type of building. The higher the value is, the faster costs will decrease. By convention, no improvement related to the cost of BAU constructions (however, the code would be sensitive to an alternative value)
 
@@ -210,24 +220,24 @@ A_CINV_res_ITC_ref(:,ind_build_VLE) = 0.0002 * A_CINV_res_ITC_ref(:,ind_build_VL
 if indice_building_electri==1  // 
     i_decoupl_oil_res=10;// quick replacement
     p_decoupl_oil_res=1000;// NB: it is reached quite quickly in some regions (first decade(s))
-	// Share sustituted from refined oil product to electricity during the fuel switching period, the other share is gas. Moved as part of the variants in V2, as it can be seen as a part of the decarbonisation package.
-	share_elec_subsituted_m2 = 1; 	//In this variant, we consider this optimistic rate
+    // Share sustituted from refined oil product to electricity during the fuel switching period, the other share is gas. Moved as part of the variants in V2, as it can be seen as a part of the decarbonisation package.
+    share_elec_subsituted_m2 = 1; 	//In this variant, we consider this optimistic rate
 elseif ind_buildingefficiency==1
-i_decoupl_oil_res=25;// proposal, can be changed
+    i_decoupl_oil_res=25;// proposal, can be changed
     p_decoupl_oil_res=1100;// proposal, can be changed; NB: it is reached quite quickly in some regions (first decade(s))
-	// Share sustituted from refined oil product to electricity during the fuel switching period, the other share is gas. Moved as part of the variants in V2, as it can be seen as a part of the decarbonisation package.
-	share_elec_subsituted_m2 = 0.5; 	
+    // Share sustituted from refined oil product to electricity during the fuel switching period, the other share is gas. Moved as part of the variants in V2, as it can be seen as a part of the decarbonisation package.
+    share_elec_subsituted_m2 = 0.5; 	
 else
     i_decoupl_oil_res=40;// proposal, can be changed // Navigate 3.5 : made less optimistic in baseline (20 to 25)
     p_decoupl_oil_res=1200;// proposal, can be changed // Navigate 3.5 : made less optimistic in baseline (1500 to 2500) // EDIT (21/09/2022): this change made the runs stop in 2017...
-	// Share sustituted from refined oil product to electricity during the fuel switching period, the other share is gas
-	share_elec_subsituted_m2 = 0.5; 
+    // Share sustituted from refined oil product to electricity during the fuel switching period, the other share is gas
+    share_elec_subsituted_m2 = 0.5; 
 end
 
 // We add an exogenous trend of conversion from gas to electricity in BAU buildings in the "fuel switching" option, as we didn't reach the electrification target (60% instead of 70%, and phase-out of non-clean fuels by 2050) in baseline (EDIT 27/06/2023)
 if indice_building_electri==1  // 
     r_decoupl_gas_res=0.03; // ~ share of BAU gas building (2025 stock) converted to elec each year.
-	r_decoupl_gas_com=0.015; // proxy rate of conversion to elec in commercial buildings
+    r_decoupl_gas_com=0.015; // proxy rate of conversion to elec in commercial buildings
 end	
     
 
@@ -256,11 +266,11 @@ efficiencyGain_gas_m2 = 0.15; //15% - quite optimistic value, considering a chan
 
 // ... multiplied by a maximum rate of supplementary revonation. This is probably the most important assumption of this module, as it drives the maximum renovation pace. //TODO: could be linked to the size/number of employees in the construction sector.
 if ind_buildingefficiency == 1
-tax_threshold_insulation = 0; // $/ton. For the "efficiency variant" in NAVIGATE task 3.5, we set it to zero to reach the max extra renovation rate in the "efficiency without tax" scenario. Should be adjusted afterward.
-max_extra_renov_rate = 0.02; // Note that this is updated between 2020 and 2032 (in nexus.buildings) to reach the energy saving target from renovation in Navigate task 3.5
+    tax_threshold_insulation = 0; // $/ton. For the "efficiency variant" in NAVIGATE task 3.5, we set it to zero to reach the max extra renovation rate in the "efficiency without tax" scenario. Should be adjusted afterward.
+    max_extra_renov_rate = 0.02; // Note that this is updated between 2020 and 2032 (in nexus.buildings) to reach the energy saving target from renovation in Navigate task 3.5
 else
-tax_threshold_insulation = 300; // $/ton
-max_extra_renov_rate = 0.01;
+    tax_threshold_insulation = 300; // $/ton
+    max_extra_renov_rate = 0.01;
 end
 
 

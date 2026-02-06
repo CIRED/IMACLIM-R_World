@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Liesbeth Defosse, Florian Leblanc
+#     Florian Leblanc, Liesbeth Defosse
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 

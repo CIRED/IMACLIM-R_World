@@ -1,10 +1,15 @@
 1|NoPolicy_Default
 11|SUP_NPi_Default
+14|Impfor-NDC
 1011|NAV_Dem-NPi-ref
 1012|NAV_Dem-NPi-act
 1013|NAV_Dem-NPi-tec
 1014|NAV_Dem-NPi-ele
 1015|NAV_Dem-NPi-all
+1440|Impfor-NZ
+1441|Impfor-NZ_WS
+1442|Impfor-NZD
+1443|Impfor-NZD_WS
 4001|NAV_Dem-20C-ref
 4002|NAV_Dem-20C-act_u
 4003|NAV_Dem-20C-tec_u
@@ -55,3 +60,6 @@
 6302|PC-15C-LowCE
 6303|PC-15C-AdvPE
 6304|PC-15C-AllEn
+112|WO-NPi-ElecIndus
+172|WO-NDCLTT-ElecIndus
+4202|WO-15C-ElecIndus

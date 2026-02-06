@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Thomas Le Gallic, Ruben Bibas, Céline Guivarch, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 //Sommaire
 //Tous les fichiers qui s'occupent de faire du combi->parametre ont étés regroupés ici.
 //Cette feuille est divisée en quatre chapitres
@@ -8,19 +16,11 @@
 
 exec(STUDY+"default_parameters.sce");
 ind_exo_afforestation=1;
+ind_navigateWP3 =0;
 
 /////////////////////////////////////////////////////////////////////////////
 //	Paramètres d'IMACLIM-R
 /////////////////////////////////////////////////////////////////////////////
-if run_ImaclimR_v1_2001
-    base_year_simulation = 2001;
-else
-    base_year_simulation = 2014;
-end
-final_year_simulation=2100;
-if ~isdef('TimeHorizon')
-    TimeHorizon=final_year_simulation-base_year_simulation; // warning : the default time horizon is 99 but could be overwritten in STUDY.sce
-end
 
 i_year_strong_policy = start_year_strong_policy - base_year_simulation +1;
 
@@ -35,19 +35,6 @@ ind_beccs = 1;
 k_expt=[3];
 
 new_Et_msh_computation = 0; // account for CO2 content for liquids market share attribution in the static equilibrium
-
-ind_AMPERE_harm = 0;
-// Indice utilisé quand on veut harmoniser les PIB pour le projet AMPERE
-// Cet indice a pour effet de :
-// - Harmoniser les populations totales (calibration.growthdrivers.sce)
-// - Harmoniser les taux de croisssance de la population active (calibration.growthdrivers.sce)
-// - Prendre les taux de croissance de la productivité du travail (TC_l) qui font coller les PIB réels PPP (calibration.growthdrivers.sce)
-// - Diminuer les prix du charbon à court terme (Dynamic.sce)
-
-ind_harm_FE = 0;
-// ind_harm_FE = 0: pas d'harmonisation de l'energie finale (cas de WP3 d'AMPERE)
-// ind_harm_FE = 1: harmonisation de l'energie finale sur le cas REF (AMPERE)
-// ind_harm_FE = 2: harmonisation de l'energie finale sur le cas LOW (AMPERE)
 
 // Tax_max et taxmin dans res_dyn_loop: limitent les variations de la taxe d'une année à l'autre
 cff_taxmax = 0.2;
@@ -84,19 +71,6 @@ TC_EEI_decarb_endo=1;
 
 ///////Spécificités progres technique pour les batiments TBE
 TC_TBE_endo=1;
-
-///////Spécificités croissance endogène avec politique
-indice_TC_l_endo=0;
-indice_ATC_calib_REF=1;
-if indice_TC_l_endo==1&indice_ATC_calib_REF==1
-    pause;
-end
-
-//boucles de test
-
-if TC_elec_ATC_pol==1&TC_elec_endo==1
-    pause;
-end
 
 /////Variantes ONERC
 indice_E=1;
@@ -141,10 +115,6 @@ gamma_charge_coal = 0.3;
 gamma_ress_coal = 2;
 obj_charge_coal = 0.8;
 ind_coal_ress = 0; //ind_coal_ress = 0 means pessimistic case ("low" resources, used in EMF24 2nd round study), ind_coal_ress = 1 means optimistic case (higher resources)
-
-//Simulation d'une excise type TIPP dans les taxes là où les données étaient disponibles
-//ajustement_taxes.sce dans WORKDIR joue avec ça (recomended value is %t)
-imaNewTaxes = %t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -243,9 +213,6 @@ ind_msp_opt = ind_develo;
 ind_res_opt = ind_develo;
 ind_hdf_opt = ind_develo;
 
-//Croissance
-ind_cri_opt = 0; // a un effet si indice_TC_l_endo=0
-
 //Stratégie du MO
 ind_prf_opt = ind_straMO;
 
@@ -253,28 +220,28 @@ ind_prf_opt = ind_straMO;
 
 if ind_sufficiency == 1 // Variant monitoring the options regarding sufficiency: 0 = default (initially in the trunk); 1 = sufficient variant; 2 = BAU or non-sufficient variant
 
-ind_shipFret_A = 1; // reduce speed in shipping (A for Activity) // NAVIGATE - task 3.5
-ind_roadFret_A = 1; // reduce terrestrial fret transport in climate policy scenarios only (A for Activity) // NAVIGATE - task 3.5
-ind_buildingsufficiency = 1; // Cap of the size of dwelling, especially in global North
-ind_transportsufficiency = 1; //  Decreases the share of expenditure dedicated to transport (-0.8%/yr) & increase the occupancy rate in cars (+1%/yr)// NAVIGATE - task 3.5
-//ind_polInfra = 1; //  Implement a set of change in transport infrastructures policies, notably in favor of public transport (but not only) // Removed from here as it is defined in standard combi
+    ind_shipFret_A = 1; // reduce speed in shipping (A for Activity) // NAVIGATE - task 3.5
+    ind_roadFret_A = 1; // reduce terrestrial fret transport in climate policy scenarios only (A for Activity) // NAVIGATE - task 3.5
+    ind_buildingsufficiency = 1; // Cap of the size of dwelling, especially in global North
+    ind_transportsufficiency = 1; //  Decreases the share of expenditure dedicated to transport (-0.8%/yr) & increase the occupancy rate in cars (+1%/yr)// NAVIGATE - task 3.5
+    //ind_polInfra = 1; //  Implement a set of change in transport infrastructures policies, notably in favor of public transport (but not only) // Removed from here as it is defined in standard combi
 
 end
 
 if ind_efficiency == 1 // Variant monitoring the options regarding efficiency: 0 = default; 1 = efficient variant. Note that some default assumptions have been changed (slower energy efficiency improvements in aviation and cars, lower max extra renovation rate in the residential sector) since the first runs of NAVIGATE.
 
-ind_buildingefficiency = 1; //  speeds up energy efficiency improvements in dwellings // NAVIGATE - task 3.5
-ind_transportefficiency = 1; //  speeds up energy efficiency improvements in aviation and cars (ICE & BEV) sectors // NAVIGATE - task 3.5
-ind_shipFret_I = 1; // improve energy efficiency of ships (I for Improve) // NAVIGATE - task 3.5
-ind_roadFret_I = 1; // improve energy efficiency for trucks (I for Improve) // NAVIGATE - task 3.5
+    ind_buildingefficiency = 1; //  speeds up energy efficiency improvements in dwellings // NAVIGATE - task 3.5
+    ind_transportefficiency = 1; //  speeds up energy efficiency improvements in aviation and cars (ICE & BEV) sectors // NAVIGATE - task 3.5
+    ind_shipFret_I = 1; // improve energy efficiency of ships (I for Improve) // NAVIGATE - task 3.5
+    ind_roadFret_I = 1; // improve energy efficiency for trucks (I for Improve) // NAVIGATE - task 3.5
 
 end
 
 if ind_fuelswitching == 1 // Variant monitoring the options regarding fuel switching: 0 = default; 1 = efficient variant. Note that a default assumption have been changed (more pessimistic electrification of low energy standards in buildings) since the first runs of NAVIGATE.
 
-ind_OT_electrification = 1; // electrification of other transport
-ind_shipping_air_electri = 1; // electrification of air and shipping sectors
-indice_building_electri = 1; // electrification of the building sector
+    ind_OT_electrification = 1; // electrification of other transport
+    ind_shipping_air_electri = 1; // electrification of air and shipping sectors
+    indice_building_electri = 1; // electrification of the building sector
 
 end
 
@@ -323,60 +290,6 @@ else
     error("Unknown ind_trade");
 end
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////****************         Growth drivers             *******************/////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-if ~isdef("ind_ssp")
-    ind_ssp=2;//by default we assume ssp2 like trajectories
-	ind_pop=2;
-	ind_productivity=2;//medium growth for high income countries
-	ind_productivity_st=1;//medium growth in the short term
-	ind_catchup=2;//medium speed of catch up
-else
-    // labor productivity growth and population growth of ssp
-    if ind_ssp==1
-        ind_pop=1;
-		ind_productivity=2;//medium growth for high income countries
-		ind_productivity_st=1;//medium growth in the short term
-		ind_catchup=1;//fast speed of catch up
-    elseif ind_ssp==2
-        ind_pop=2;
-		ind_productivity=2;//medium growth for high income countries
-		ind_productivity_st=1;//medium growth in the short term
-		ind_catchup=2;//medium speed of catch up
-    elseif ind_ssp==3
-        ind_pop=3;
-		ind_productivity=3;//slow growth for high income countries
-		ind_productivity_st=2;//slow growth in the short term
-		ind_catchup=3;//slow speed of catch up		
-    elseif ind_ssp==4
-        ind_pop=4;
-		ind_productivity=2;//medium growth for high income countries
-		ind_productivity_st=1;//medium growth in the short term
-		ind_catchup=3;//slow speed of catch up
-    elseif ind_ssp==5
-        ind_pop=5;
-		ind_productivity=1;//fast growth for high income countries
-		ind_productivity_st=0;//fast growth in the short term
-		ind_catchup=1;//fast speed of catch up		
-    end
-end
-
-ind_productivity_leader=ind_productivity;//exogenous trend over time of labor productivity growth in leading country (USA)
-ind_productivity_li=ind_catchup;
-ind_productivity_mi=ind_catchup;
-ind_productivity_hi=ind_productivity;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////****************         Marche des capitaux     *******************/////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-if isdef("ind_K")
-    ind_partExpK = ind_K; // trade balance evolution
-else
-    ind_partExpK = 0;
-end
-
 ///////////////////////////// Offre de biens énergétiques fossiles///////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -417,11 +330,11 @@ end  //fraction des réserves restantes à partir de laquelle se déclenche la d
 point_equilibre_gaz = 0; //tx de croissance de la prod qui annule le tx de croissance du prix
 
 if ind_gaz_opt == 1
-    pente_gaz_1 = 1; //elasticité de la croissance du prix à la croissance de la prod si sous point_equilibre_gaz
-    pente_gaz_2 = 1.5;
+    slope_gas_1 = 1; //elasticité de la croissance du prix à la croissance de la prod si sous point_equilibre_gaz
+    slope_gas_2 = 1.5;
 else
-    pente_gaz_1 = 1;
-    pente_gaz_2 = 4;
+    slope_gas_1 = 1;
+    slope_gas_2 = 4;
 end
 
 // charbon
@@ -430,11 +343,11 @@ point_equilibre_coal=0; //tx de croissance de la prod qui annule le tx de croiss
 
 select ind_coa_opt
 case 0
-    pente_coal_1_sc = 1;
-    pente_coal_2_sc = 4;
+    slope_coal_1_sc = 1;
+    slope_coal_2_sc = 4;
 case 1
-    pente_coal_1_sc = 1;     //elasticité de la croissance du prix à la croissance de la prod si sous cff_col_price_1
-    pente_coal_2_sc = 1.5;   //elasticité de la croissance du prix à la croissance de la prod si sur cff_col_price_1
+    slope_coal_1_sc = 1;     //elasticité de la croissance du prix à la croissance de la prod si sous cff_col_price_1
+    slope_coal_2_sc = 1.5;   //elasticité de la croissance du prix à la croissance de la prod si sur cff_col_price_1
 else
     error("ind_coa_opt is ill-defined");
 end
@@ -509,7 +422,7 @@ if isdef("exo_maxmshbiom")
 else
     select ind_MSHBioSup
     case 0
-        elecBiomassInitial.MSHBioSup = 0.8;
+        elecBiomassInitial.MSHBioSup = 0.018;
     case 1
         elecBiomassInitial.MSHBioSup = 0.3;
     else
@@ -571,7 +484,7 @@ if ind_sbc_opt == 0
 elseif ind_sbc_opt == 2
     sbc_cff = 1.3;//optimistic on the supply potential of biofuels
 else
-	sbc_cff = 1;//default assumption for the supply curves of biofuels
+    sbc_cff = 1;//default assumption for the supply curves of biofuels
 end; //multiplication factor to biofuel supply curves
 
 
@@ -608,7 +521,7 @@ case 1
     cff_lea  = 0.98; //(1-cff_lea) = exogenous EEI rate of the leader at fixed energy prices
     max_eei  = 1.5;
     max_aeei = 1.5;
-    cff_y    = 0.01; //Level of EEI gained by the laggards in XRef years (defines speed of convergence)
+    cff_y    = 0.01; //The EEI gap between leader and laggards is multiplied by cff_y after X years (defines speed of convergence: the higher cff_y, the slower the convergence).
     fin_lev  = 0.99; //Final level (share of the leader's EEI) targeted by laggards
 case 0
     cff_lea  = 0.9971; //(1-cff_lea) = exogenous EEI rate of the leader at fixed energy prices
@@ -718,14 +631,14 @@ end; //niveau de saturation demande finale des ménages
 //////////////////////// Labour market flexibility
 /// wage-unemployment curve elasticity
 select ind_labour
-    case 0
-        ew = -0.55;
-    case 1
-        ew = -1;
-    case 2
-        ew = -2;
-    case 3
-        ew = -0.2;
+case 0
+    ew = -0.55;
+case 1
+    ew = -1;
+case 2
+    ew = -2;
+case 3
+    ew = -0.2;
 end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -759,16 +672,16 @@ end
 
 // exogenous scenario of aviation demand
 if exo_pkmair_scenario>0
-select exo_pkmair_scenario
-case 1
-    sc_exo_air_demand = "REF_SSP2";
-case 2
-    sc_exo_air_demand = "1.5C";
-case 3
-    sc_exo_air_demand = "1.5C_LD_SSP2";
-else
-    error("ind_taxFinalLevel is ill-defined");
-end
+    select exo_pkmair_scenario
+    case 1
+        sc_exo_air_demand = "REF_SSP2";
+    case 2
+        sc_exo_air_demand = "1.5C";
+    case 3
+        sc_exo_air_demand = "1.5C_LD_SSP2";
+    else
+        error("ind_taxFinalLevel is ill-defined");
+    end
 end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -793,339 +706,3 @@ case 6
 case 7
     sc_CO2Tax_recycl="RealLumpSum More Efficient";
 end
-
-//////////////////////////////////////////////////////////////////////////////
-//
-//              EXOGENOUS EMISSIONS PART
-//
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-// CO2 market parameter NOT TO BE CHANGED
-
-//emission de CO2 en 2001 (tCO2)
-//(reg,1). This helps to define objective in "facteur" terms
-
-
-//////////////////////////////////////////////////////////////////////////////
-//  *USER CHOICE* CO2 market OPTIONS
-//  USER, READ THIS
-//
-// *Pleas fill the MKT_ variables as a function of combi
-// (in our case, ind_climat is a function of combi, see first line of this sheet,
-// you probably want to act similarly. Find out in savedir_lib how, looking for combi2indices)
-// *Note that MKT_ variables are used as paremeters of the new_lin_dlog function
-// new_lin_dlog function is nicelly DOCUMENTED in ANALYSIS_FUNCTION.sci
-// *Never forget other ways of defining an emissions' objective are possible
-//////////////////////////////////////////////////////////////////////////////
-
-// case ind_lindhal=1, regional carbon prices and convergence
-convergence_regional_tax = ones(TimeHorizon,1);
-convergence_regional_tax(start_year_policy-base_year_simulation:year_convergence_reg_tax-base_year_simulation) = linspace(0,1,year_convergence_reg_tax-start_year_policy+1)';
-
-//nb de "marches" carbonne differents
-nbMKT=1;
-
-//In which market is each (region,sector)
-whichMKT_reg_use = ones(reg,nb_use); //here everything is in the market 1. Use this to control global emissions.
-
-// for each MKT, is it emissions-constrained?
-is_quota_MKT = zeros(1,nbMKT);
-// for ech MKT, is its carbon price constrained?
-is_taxexo_MKT = zeros(is_quota_MKT);
-
-MKT_start_year = %nan * zeros(is_quota_MKT);
-
-startExo = 10;
-ind_taxFinalLevel = 0; // default
-select ind_taxFinalLevel
-case 0
-    taxParams.finalLevel     =    0 * ones(nbMKT,1) * 1e-6 ;
-case 1
-    taxParams.finalLevel     = 1000 * ones(nbMKT,1) * 1e-6 ;
-case 2
-    taxParams.finalLevel     = 2000 * ones(nbMKT,1) * 1e-6 ;
-case 3
-    taxParams.finalLevel     = 300 * ones(nbMKT,1) * 1e-6 ;
-case 4
-    taxParams.finalLevel     = 100 * ones(nbMKT,1) * 1e-6 ;
-else
-    error("ind_taxFinalLevel is ill-defined");
-end
-taxParams.slopeParameter = 20;
-taxParams.duration       = 50;
-taxParams.endTime        = TimeHorizon+1+taxParams.duration;
-taxParams.priceSignal    = zeros(nbMKT,taxParams.endTime);
-// exponential profile
-taxParams.priceSignal(:,startExo:taxParams.endTime) = ..
-(ones(nbMKT,1) * exp( (startExo:taxParams.endTime) ./ taxParams.slopeParameter )) ..
-./ exp( (taxParams.endTime) ./ taxParams.slopeParameter ) ..
-.* ( taxParams.finalLevel * ones(1,taxParams.endTime - startExo + 1));
-// tanh profile
-taxParams.priceSignal(:,startExo:taxParams.endTime) = ..
-taxParams.finalLevel / 2 ..
-.* ( ones(nbMKT,1) * tanh(((1:taxParams.endTime-startExo+1)-50)/35) ) ..
-+ taxParams.finalLevel / 2 * ( 1 - tanh((1-50)/35) - 1) ;
-
-if ind_climat~=0 & ind_climat~=2 & ind_expectations == 1
-    ldsav("taxMKT_sav","",myopicCombi);
-    myopicTax = taxMKT_sav;
-    taxParams.priceSignal(:,1:TimeHorizon+1) = myopicTax;
-    taxParams.priceSignal(:,TimeHorizon+2:taxParams.endTime) = myopicTax(:,$) * cumprod( 1.08 * ones(1,taxParams.duration) ) ;
-end
-
-if ~is_bau // case 0 is the baseline
-
-    //CONSTRUCTION DES TRAJECTOIRES OBJECTIF
-    ldsav("E_reg_use_sav","",baseline_combi) ;
-    CO2_base = sum(E_reg_use_sav,"r");
-
-    //ldsav("realGDP_sav","",baseline_combi);
-    //GDP_base= realGDP_sav;
-    ldsav("GDP_PPP_constant_sav","",baseline_combi); //AMPERE
-    GDP_base_PPP_constant= GDP_PPP_constant_sav; //AMPERE
-
-    ldsav("GDP_MER_real_sav","",baseline_combi); //AMPERE
-    GDP_base_MER_real= GDP_MER_real_sav; //AMPERE
-
-    ldsav("energyInvestment_sav","",baseline_combi);
-    energyInvestment_base= energyInvestment_sav;
-
-    // load reference intermediate inputs - mainly for terrestrial fret inputs to sectors:
-    ldsav("CI_sav","",baseline_combi);
-    base_CI = rgv(CI_sav,TimeHorizon+1,sec,sec,reg);
-
-    ldsav("GDP_MER_nominal_sav","",baseline_combi);
-    ldsav("GDP_MER_real_sav","",baseline_combi);
-    ldsav("DF_sav","",baseline_combi);
-    ldsav("pArmDF_sav","",baseline_combi);
-    ldsav("sigma_sav","",baseline_combi);
-    ldsav("qtax_sav","",baseline_combi);
-    ldsav("Ttax_sav","",baseline_combi);
-	base_GDP_MER_nominal = zeros(reg,TimeHorizon+1);
-    base_GDP_MER_real = zeros(reg,TimeHorizon+1);
-    base_DF = zeros(reg,sec,TimeHorizon+1);
-    base_pArmDF = zeros(reg,sec,TimeHorizon+1);
-    base_sigma = zeros(reg,sec,TimeHorizon+1);
-    base_qtax = zeros(reg,sec,TimeHorizon+1);
-    base_Ttax = zeros(reg,sec,TimeHorizon+1);
-    for year = 1:TimeHorizon+1
-		base_GDP_MER_nominal(:,year) = matrix(    GDP_MER_nominal_sav(:,year),12);
-        base_GDP_MER_real(:,year) = matrix(    GDP_MER_real_sav(:,year),12);
-        base_DF(:,:,year) = matrix(    DF_sav(:,year),12,12);
-        base_pArmDF(:,:,year) = matrix(pArmDF_sav(:,year),12,12);
-        base_sigma(:,:,year) = matrix(sigma_sav(:,year),12,12);
-        base_qtax(:,:,year) = matrix(qtax_sav(:,year),12,12);
-        base_Ttax(:,:,year) = matrix(Ttax_sav(:,year),12,12);
-    end
-
-    if ~isdef("exo_tax_increase")
-        exo_tax_increase=1;
-    end
-
-    select ind_climat
-    case 3
-                is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
- 		temp = csvread(STUDY+"tax_trajectory_example.csv");
-                taxMKTexo = temp'*1e-6/usd2001_2005*exo_tax_increase;
-    case 4
-                is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-                temp = zeros(TimeHorizon+1,1);
-                if ~isdef("tax2020")
-                    tax2020 = 75;
-                end
-                if ~isdef("tax2050")
-                    tax2050 = 1600;
-                end
-                if ~isdef("tax2100")
-                    tax2100 = 3200;
-                end
-                temp(6:36) = linspace(tax2020,tax2050,30+1)'*1e-6;
-                temp(36:87) = linspace(tax2050,tax2100,52)'*1e-6;
-                temp(6:11) = linspace(0,1,6)' .* temp(6:11); // smoothing taxe increase from 2020 to 2025
-		//temp(57:87) = ones(87-57+1,1)*temp(56);
-                taxMKTexo = temp'/usd2001_2005;
-
-    case 5
-                is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-                temp = csvread(STUDY+"tax_trajectory_example.csv");
-                taxMKTexo = 1.1*temp'*1e-6/usd2001_2005*0.85;
-                taxMKTexo = 1.1*temp'*1e-6/usd2001_2005*0.55;
-    case 6
-                is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-                temp = csvread(STUDY+"tax_trajectory_example.csv");
-                taxMKTexo = 0.8*temp'*1e-6/usd2001_2005*0.85;
-                taxMKTexo = 0.8*temp'*1e-6/usd2001_2005*0.55;
-    case 7
-                is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-                temp = csvread(STUDY+"tax_trajectory_example.csv");
-                taxMKTexo = 1.2*temp'*1e-6/usd2001_2005*0.85;
-                taxMKTexo = 1.2*temp'*1e-6/usd2001_2005*0.55;
-    case 8
-                is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-                temp = csvread(STUDY+"tax_trajectory_example.csv");
-                taxMKTexo = 0.7*temp'*1e-6/usd2001_2005*0.85;
-                taxMKTexo = 0.7*temp'*1e-6/usd2001_2005*0.55;
-    case 9
-                is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-                temp = csvread(STUDY+"tax_trajectory_example.csv");
-                taxMKTexo = 1.3* temp'*1e-6/usd2001_2005*0.85;
-                taxMKTexo = 1.3* temp'*1e-6/usd2001_2005*0.55;
-    case 1150
-		temp = csvread(STUDY+"trajectories-emf27.csv");
-		CO2_obj_MKT = [CO2_base(1:4),temp(5:87,5)'*1e9];
-		MKT_start_year = 5*ones(nbMKT,1);
-		is_quota_MKT = ones(nbMKT,1);
-    case 650
-		temp = csvread(STUDY+"trajectories-emf27.csv");
-		CO2_obj_MKT = [CO2_base(1:4),temp(5:87,4)'*1e9];
-		MKT_start_year = 5*ones(nbMKT,1);
-		is_quota_MKT = ones(nbMKT,1);
-    case 651 //650 GtCO2 recycl = 0 (lump) taxexo - WP4_650_redist
-		is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-		temp = csvread(STUDY+"taxwp4.csv");
-                taxMKTexo = temp(:,2)'*1e-6/usd2001_2005;
-		tax2020 = 50;
-		tax2050 = 200;
-		tax2100 = 3000; 
-		exo_maxmshbiom = 40/1000;
-		elecBiomassInitial.MSHBioSup = exo_maxmshbiom;
-    case 19  //659 650 GtCO2 recycl = 1 (labor) taxexo - WP4_650
-		is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-		temp = csvread(STUDY+"taxwp4.csv");
-                taxMKTexo = temp(:,3)'*1e-6/usd2001_2005;
-    case 151 //1150 GtCO2 recycl = 0 (lump) taxexo - WP4_1150_redist
-		is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-		temp = csvread(STUDY+"taxwp4.csv");
-                taxMKTexo = temp(:,4)'*1e-6/usd2001_2005;
-	  	tax2020 = 50;
-		tax2050 = 200;
-		tax2100 = 3000; 
-		exo_maxmshbiom = 30/1000;
-		elecBiomassInitial.MSHBioSup = exo_maxmshbiom;
-    case 159 //1150 GtCO2 recycl = 1 (labour) taxexo - WP4_1150
-		is_quota_MKT = %f;
-                is_taxexo_MKT = 1;
-		temp = csvread(STUDY+"taxwp4.csv");
-                taxMKTexo = temp(:,5)'*1e-6/usd2001_2005;
-end
-end
-
-select ind_climat
-// case 1 and 2 corresponding to NPi/NDC carbon tax trajectories
-// see model/diagnostic.sce for details about their construction
-// A 0$ carbon tax was privileged before 2020 to align with other models' practices
-case 1 // NPi case 
-        us_0 = 0; //2015
-        us_1 = 0; //2019
-        us_2 = 0;//2020
-        us_3 = 0; //2025
-        us_4 = 0; //2030
-        us_5 = us_4;
-        eu_0 = 0; //2015
-        eu_1 = 0; //2019
-        eu_2 = 0; //2020
-        eu_3 = 0; //2025
-        eu_4 = 0; //2030
-        eu_5 = eu_4; //2100
-        rw_0 = 0; //2015
-        rw_1 = 0; //2019
-        rw_2 = 0; //2020
-        rw_3 = 0; //2025
-        rw_4 = 0; //2030
-        rw_5 = rw_4; //2100
-case 2 //NDC Case
-        us_0 = 0; //2015
-        us_1 = 0; //2019
-        us_2 = 40;//2020
-        us_3 = 80; //2025
-        us_4 = 100; //2030
-        us_5 = us_4;
-        eu_0 = 0; //2015
-        eu_1 = 0; //2019
-        eu_2 = 10; //2020
-        eu_3 = 45; //2025
-        eu_4 = 50; //2030
-        eu_5 = eu_4; //2100
-        rw_0 = 0; //2015
-        rw_1 = 0;//2019
-        rw_2 = 0; //2020
-        rw_3 = 0; //2025
-        rw_4 = 0; //2030
-        rw_5 = rw_4; //2100
-        eu_0 = 0; //2015
-        eu_1 = 0; //2019
-        eu_2 = 10; //2020
-        eu_3 = 45; //2025
-        eu_4 = 50; //2030
-        eu_5 = eu_4; //2100
-        rw_0 = 0; //2015
-        rw_1 = 0; //2019
-        rw_2 = 0; //2020
-        rw_3 = 0; //2025
-        rw_4 = 0; //2030
-        rw_5 = rw_4; //2100
-end
-
-if ind_climat==1|ind_climat==2
-    nbMKT = 3;
-    mk_1 = [ind_usa];
-    mk_2 = [ind_can,ind_eur,ind_jan];
-    mk_3 = [ind_cis,ind_chn,ind_ind,ind_bra,ind_mde,ind_afr,ind_ras,ind_ral];
-    is_quota_MKT = [%f,%f,%f];
-    is_taxexo_MKT = [%t,%t,%t];
-    time_matrix =[1,5,6,11,16,87];
-end
-
-
-if ind_climat==1|ind_climat==2 //NPi/NDC
-    val_matrix = [us_0,us_1,us_2,us_3,us_4,us_5;eu_0,eu_1,eu_2,eu_3,eu_4,eu_5;rw_0,rw_1,rw_2,rw_3,rw_4,rw_5;zeros(reg-nbMKT,6)];
-    temp = size(time_matrix);
-    taxMKTexo = CO2_tax_lin(val_matrix, time_matrix)*1e-6 ;
-    whichMKT_reg_use(mk_3,:)=3;
-    whichMKT_reg_use(mk_2,:)=2;
-    whichMKT_reg_use(mk_1,:)=1;
-    MKT_start_year = 1*ones(nbMKT,1);
-    CO2_obj_MKT = ones(nbMKT,TimeHorizon+1)*%nan;
-end
-if ~isdef("CO2_obj_MKT") // in case more than 1 market
-    CO2_obj_MKT = ones(1,TimeHorizon+1)*%nan;
-end
-//    externallyChangedVar.gamma_charge_gaz                 = 0.3;
-//    externallyChangedVar.gamma_charge_coal                = 0.3;
-//    externallyChangedVar.elecBiomassInitial.maxGrowthMSH  = 0.02;
-//    externallyChangedVar.cff_taxmin                       = 0.78;
-//    externallyChangedVar.cff_taxmax                       = 0.21;
-//elseif combi == 20
-//    externallyChangedVar.gamma_charge_gaz                 = 0.3;
-//    externallyChangedVar.gamma_charge_coal                = 0.3;
-//    externallyChangedVar.elecBiomassInitial.maxGrowthMSH  = 0.02;
-//    externallyChangedVar.cff_taxmin                       = 0.79;
-//    externallyChangedVar.cff_taxmax                       = 0.2;
-//end
-
-if isdef("externallyChangedVar")
-    disp(externallyChangedVar);
-    for names=fieldnames(externallyChangedVar)'
-        if isstruct(evstr("externallyChangedVar."+names))
-            disp(evstr("externallyChangedVar."+names))
-            for names2=fieldnames("externallyChangedVar."+names)'
-                execstr(names +"."+names2 "=externallyChangedVar."+names+"."+names2+";");
-            end
-        else
-            execstr(names + "=externallyChangedVar."+names+";")
-        end
-    end
-end
-
-exec(STUDY+"testStudy.sce");

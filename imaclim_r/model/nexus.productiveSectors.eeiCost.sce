@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Thomas Le Gallic, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////secteur services
@@ -14,7 +22,7 @@ for k=1:nb_regions
     for j=1:Life_time_ser
         pArmCIantTxCO2ser_temp=matrix(pArmCI_anticip_taxCO2(:,j),nb_sectors,nb_sectors,nb_regions);
         p_coal_ser_anticip(k,j)=  pArmCIantTxCO2ser_temp(indice_coal,indice_composite,k);
-        p_gaz_ser_anticip(k,j)=  pArmCIantTxCO2ser_temp(indice_gaz ,indice_composite,k);
+        p_gaz_ser_anticip(k,j)=  pArmCIantTxCO2ser_temp(indice_gas ,indice_composite,k);
         p_Et_ser_anticip(k,j)=  pArmCIantTxCO2ser_temp(indice_Et  ,indice_composite,k);
         p_elec_ser_anticip(k,j)=  pArmCIantTxCO2ser_temp(indice_elec,indice_composite,k);
     end
@@ -24,16 +32,16 @@ end
 CFuel_ser_BAU=zeros(nb_regions,1);
 CFuel_ser_TAX=zeros(nb_regions,1);
 for k=1:nb_regions
-    for t=1:Life_time_ser
+    for j=1:Life_time_ser
         CFuel_ser_BAU(k)=CFuel_ser_BAU(k)+CIdeltacomposite_BAU(indice_coal,indice_composite,k)*p_coal_ser_anticip(k,j)/((1+disc_ser)^t)*CRF_ser+...
-        CIdeltacomposite_BAU(indice_gaz ,indice_composite,k)* p_gaz_ser_anticip(k,j)/((1+disc_ser)^t)*CRF_ser+...
-        CIdeltacomposite_BAU(indice_Et  ,indice_composite,k)*  p_Et_ser_anticip(k,j)/((1+disc_ser)^t)*CRF_ser+...
-        CIdeltacomposite_BAU(indice_elec,indice_composite,k)*p_elec_ser_anticip(k,j)/((1+disc_ser)^t)*CRF_ser;
+            CIdeltacomposite_BAU(indice_gas ,indice_composite,k)* p_gaz_ser_anticip(k,j)/((1+disc_ser)^j)*CRF_ser+...
+            CIdeltacomposite_BAU(indice_Et  ,indice_composite,k)*  p_Et_ser_anticip(k,j)/((1+disc_ser)^j)*CRF_ser+...
+        CIdeltacomposite_BAU(indice_elec,indice_composite,k)*p_elec_ser_anticip(k,j)/((1+disc_ser)^j)*CRF_ser;
 
         CFuel_ser_TAX(k)=CFuel_ser_TAX(k)+CIdeltacomposite(    indice_coal,indice_composite,k)*p_coal_ser_anticip(k,j)/((1+disc_ser)^t)*CRF_ser+...
-        CIdeltacomposite(    indice_gaz ,indice_composite,k)* p_gaz_ser_anticip(k,j)/((1+disc_ser)^t)*CRF_ser+...
-        CIdeltacomposite(    indice_Et  ,indice_composite,k)*  p_Et_ser_anticip(k,j)/((1+disc_ser)^t)*CRF_ser+...
-        CIdeltacomposite(    indice_elec,indice_composite,k)*p_elec_ser_anticip(k,j)/((1+disc_ser)^t)*CRF_ser;
+            CIdeltacomposite(    indice_gas ,indice_composite,k)* p_gaz_ser_anticip(k,j)/((1+disc_ser)^j)*CRF_ser+...
+            CIdeltacomposite(    indice_Et  ,indice_composite,k)*  p_Et_ser_anticip(k,j)/((1+disc_ser)^j)*CRF_ser+...
+        CIdeltacomposite(    indice_elec,indice_composite,k)*p_elec_ser_anticip(k,j)/((1+disc_ser)^j)*CRF_ser;
     end
 end
 
@@ -55,7 +63,7 @@ for k=1:nb_regions
     for j=1:Life_time_ind
         pArmDFantTxCO2ind_temp=matrix(pArmCI_anticip_taxCO2(:,j),nb_sectors,nb_sectors,nb_regions);
         p_coal_ind_anticip(k,:,j)=  pArmDFantTxCO2ind_temp(indice_coal,indice_industries,k);
-        p_gaz_ind_anticip(k,:,j)=  pArmDFantTxCO2ind_temp(indice_gaz ,indice_industries,k);
+        p_gaz_ind_anticip(k,:,j)=  pArmDFantTxCO2ind_temp(indice_gas ,indice_industries,k);
         p_Et_ind_anticip(k,:,j)=  pArmDFantTxCO2ind_temp(indice_Et  ,indice_industries,k);
         p_elec_ind_anticip(k,:,j)=  pArmDFantTxCO2ind_temp(indice_elec,indice_industries,k);
     end
@@ -65,19 +73,19 @@ end
 CFuel_ind_BAU=zeros(nb_regions,nb_sectors_industry);
 CFuel_ind_TAX=zeros(nb_regions,nb_sectors_industry);
 for k=1:nb_regions
-    for t=1:Life_time_ind
-		for i=1:nb_sectors_industry
-			CFuel_ind_BAU(k,i)=CFuel_ind_BAU(k,i)+CIdeltacomposite_BAU(indice_coal,indice_industries(i),k)*p_coal_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind+...
-			CIdeltacomposite_BAU(indice_gaz ,indice_industries(i),k)* p_gaz_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind+...
-			CIdeltacomposite_BAU(indice_Et  ,indice_industries(i),k)*  p_Et_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind+...
-			CIdeltacomposite_BAU(indice_elec,indice_industries(i),k)*p_elec_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind;
+    for j=1:Life_time_ind
+        for i=1:nb_sectors_industry
+            CFuel_ind_BAU(k,i)=CFuel_ind_BAU(k,i)+CIdeltacomposite_BAU(indice_coal,indice_industries(i),k)*p_coal_ind_anticip(k,i,j)/((1+disc_ind)^j)*CRF_ind+...
+                CIdeltacomposite_BAU(indice_gas ,indice_industries(i),k)* p_gaz_ind_anticip(k,i,j)/((1+disc_ind)^j)*CRF_ind+...
+                CIdeltacomposite_BAU(indice_Et  ,indice_industries(i),k)*  p_Et_ind_anticip(k,i,j)/((1+disc_ind)^j)*CRF_ind+...
+            CIdeltacomposite_BAU(indice_elec,indice_industries(i),k)*p_elec_ind_anticip(k,i,j)/((1+disc_ind)^j)*CRF_ind;
 
-			CFuel_ind_TAX(k,i)=CFuel_ind_TAX(k,i)+CIdeltacomposite(indice_coal,indice_industries(i),k)*p_coal_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind+...
-			CIdeltacomposite(indice_gaz ,indice_industries(i),k)* p_gaz_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind+...
-			CIdeltacomposite(indice_Et  ,indice_industries(i),k)*  p_Et_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind+...
-			CIdeltacomposite(indice_elec,indice_industries(i),k)*p_elec_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind;
-		end
-	end
+            CFuel_ind_TAX(k,i)=CFuel_ind_TAX(k,i)+CIdeltacomposite(indice_coal,indice_industries(i),k)*p_coal_ind_anticip(k,i,j)/((1+disc_ind)^t)*CRF_ind+...
+                CIdeltacomposite(indice_gas ,indice_industries(i),k)* p_gaz_ind_anticip(k,i,j)/((1+disc_ind)^j)*CRF_ind+...
+                CIdeltacomposite(indice_Et  ,indice_industries(i),k)*  p_Et_ind_anticip(k,i,j)/((1+disc_ind)^j)*CRF_ind+...
+            CIdeltacomposite(indice_elec,indice_industries(i),k)*p_elec_ind_anticip(k,i,j)/((1+disc_ind)^j)*CRF_ind;
+        end
+    end
 end
 
 K_ind_TAX=1/CRF_ind*(CFuel_ind_BAU-CFuel_ind_TAX);
@@ -98,7 +106,7 @@ for k=1:nb_regions
     for j=1:Life_time_agr
         pArmCIantTxCO2agr_temp=matrix(pArmCI_anticip_taxCO2(:,j),nb_sectors,nb_sectors,nb_regions);
         p_coal_agr_anticip(k,j)=  pArmCIantTxCO2agr_temp(indice_coal,indice_agriculture,k);
-        p_gaz_agr_anticip(k,j)=  pArmCIantTxCO2agr_temp(indice_gaz ,indice_agriculture,k);
+        p_gaz_agr_anticip(k,j)=  pArmCIantTxCO2agr_temp(indice_gas ,indice_agriculture,k);
         p_Et_agr_anticip(k,j)=  pArmCIantTxCO2agr_temp(indice_Et  ,indice_agriculture,k);
         p_elec_agr_anticip(k,j)=  pArmCIantTxCO2agr_temp(indice_elec,indice_agriculture,k);
     end
@@ -108,16 +116,16 @@ end
 CFuel_agr_BAU=zeros(nb_regions,1);
 CFuel_agr_TAX=zeros(nb_regions,1);
 for k=1:nb_regions
-    for t=1:Life_time_agr
-        CFuel_agr_BAU(k)=CFuel_agr_BAU(k)+CIdeltacomposite_BAU(indice_coal,indice_agriculture,k)*p_coal_agr_anticip(k,j)/((1+disc_agr)^t)*CRF_agr+...
-        CIdeltacomposite_BAU(indice_gaz ,indice_agriculture,k)* p_gaz_agr_anticip(k,j)/((1+disc_agr)^t)*CRF_agr+...
-        CIdeltacomposite_BAU(indice_Et  ,indice_agriculture,k)*  p_Et_agr_anticip(k,j)/((1+disc_agr)^t)*CRF_agr+...
-        CIdeltacomposite_BAU(indice_elec,indice_agriculture,k)*p_elec_agr_anticip(k,j)/((1+disc_agr)^t)*CRF_agr;
+    for j=1:Life_time_agr
+        CFuel_agr_BAU(k)=CFuel_agr_BAU(k)+CIdeltacomposite_BAU(indice_coal,indice_agriculture,k)*p_coal_agr_anticip(k,j)/((1+disc_agr)^j)*CRF_agr+...
+            CIdeltacomposite_BAU(indice_gas ,indice_agriculture,k)* p_gaz_agr_anticip(k,j)/((1+disc_agr)^j)*CRF_agr+...
+            CIdeltacomposite_BAU(indice_Et  ,indice_agriculture,k)*  p_Et_agr_anticip(k,j)/((1+disc_agr)^j)*CRF_agr+...
+        CIdeltacomposite_BAU(indice_elec,indice_agriculture,k)*p_elec_agr_anticip(k,j)/((1+disc_agr)^j)*CRF_agr;
 
-        CFuel_agr_TAX(k)=CFuel_agr_TAX(k)+CIdeltacomposite(    indice_coal,indice_agriculture,k)*p_coal_agr_anticip(k,j)/((1+disc_agr)^t)*CRF_agr+...
-        CIdeltacomposite(    indice_gaz ,indice_agriculture,k)* p_gaz_agr_anticip(k,j)/((1+disc_agr)^t)*CRF_agr+...
-        CIdeltacomposite(    indice_Et  ,indice_agriculture,k)*  p_Et_agr_anticip(k,j)/((1+disc_agr)^t)*CRF_agr+...
-        CIdeltacomposite(    indice_elec,indice_agriculture,k)*p_elec_agr_anticip(k,j)/((1+disc_agr)^t)*CRF_agr;
+        CFuel_agr_TAX(k)=CFuel_agr_TAX(k)+CIdeltacomposite(    indice_coal,indice_agriculture,k)*p_coal_agr_anticip(k,j)/((1+disc_agr)^j)*CRF_agr+...
+            CIdeltacomposite(    indice_gas ,indice_agriculture,k)* p_gaz_agr_anticip(k,j)/((1+disc_agr)^j)*CRF_agr+...
+            CIdeltacomposite(    indice_Et  ,indice_agriculture,k)*  p_Et_agr_anticip(k,j)/((1+disc_agr)^j)*CRF_agr+...
+        CIdeltacomposite(    indice_elec,indice_agriculture,k)*p_elec_agr_anticip(k,j)/((1+disc_agr)^j)*CRF_agr;
     end
 end
 
@@ -139,7 +147,7 @@ for k=1:nb_regions
     for j=1:Life_time_btp
         pArmCIantTxCO2btp_temp=matrix(pArmCI_anticip_taxCO2(:,j),nb_sectors,nb_sectors,nb_regions);
         p_coal_btp_anticip(k,j)=  pArmCIantTxCO2btp_temp(indice_coal,indice_construction,k);
-        p_gaz_btp_anticip(k,j)=  pArmCIantTxCO2btp_temp(indice_gaz ,indice_construction,k);
+        p_gaz_btp_anticip(k,j)=  pArmCIantTxCO2btp_temp(indice_gas ,indice_construction,k);
         p_Et_btp_anticip(k,j)=  pArmCIantTxCO2btp_temp(indice_Et  ,indice_construction,k);
         p_elec_btp_anticip(k,j)=  pArmCIantTxCO2btp_temp(indice_elec,indice_construction,k);
     end
@@ -149,16 +157,16 @@ end
 CFuel_btp_BAU=zeros(nb_regions,1);
 CFuel_btp_TAX=zeros(nb_regions,1);
 for k=1:nb_regions
-    for t=1:Life_time_btp
-        CFuel_btp_BAU(k)=CFuel_btp_BAU(k)+CIdeltacomposite_BAU(indice_coal,indice_construction,k)*p_coal_btp_anticip(k,j)/((1+disc_btp)^t)*CRF_btp+...
-        CIdeltacomposite_BAU(indice_gaz ,indice_construction,k)* p_gaz_btp_anticip(k,j)/((1+disc_btp)^t)*CRF_btp+...
-        CIdeltacomposite_BAU(indice_Et  ,indice_construction,k)*  p_Et_btp_anticip(k,j)/((1+disc_btp)^t)*CRF_btp+...
-        CIdeltacomposite_BAU(indice_elec,indice_construction,k)*p_elec_btp_anticip(k,j)/((1+disc_btp)^t)*CRF_btp;
+    for j=1:Life_time_btp
+        CFuel_btp_BAU(k)=CFuel_btp_BAU(k)+CIdeltacomposite_BAU(indice_coal,indice_construction,k)*p_coal_btp_anticip(k,j)/((1+disc_btp)^j)*CRF_btp+...
+            CIdeltacomposite_BAU(indice_gas ,indice_construction,k)* p_gaz_btp_anticip(k,j)/((1+disc_btp)^j)*CRF_btp+...
+            CIdeltacomposite_BAU(indice_Et  ,indice_construction,k)*  p_Et_btp_anticip(k,j)/((1+disc_btp)^j)*CRF_btp+...
+        CIdeltacomposite_BAU(indice_elec,indice_construction,k)*p_elec_btp_anticip(k,j)/((1+disc_btp)^j)*CRF_btp;
 
-        CFuel_btp_TAX(k)=CFuel_btp_TAX(k)+CIdeltacomposite(    indice_coal,indice_construction,k)*p_coal_btp_anticip(k,j)/((1+disc_btp)^t)*CRF_btp+...
-        CIdeltacomposite(    indice_gaz ,indice_construction,k)* p_gaz_btp_anticip(k,j)/((1+disc_btp)^t)*CRF_btp+...
-        CIdeltacomposite(    indice_Et  ,indice_construction,k)*  p_Et_btp_anticip(k,j)/((1+disc_btp)^t)*CRF_btp+...
-        CIdeltacomposite(    indice_elec,indice_construction,k)*p_elec_btp_anticip(k,j)/((1+disc_btp)^t)*CRF_btp;
+        CFuel_btp_TAX(k)=CFuel_btp_TAX(k)+CIdeltacomposite(    indice_coal,indice_construction,k)*p_coal_btp_anticip(k,j)/((1+disc_btp)^j)*CRF_btp+...
+            CIdeltacomposite(    indice_gas ,indice_construction,k)* p_gaz_btp_anticip(k,j)/((1+disc_btp)^j)*CRF_btp+...
+            CIdeltacomposite(    indice_Et  ,indice_construction,k)*  p_Et_btp_anticip(k,j)/((1+disc_btp)^j)*CRF_btp+...
+        CIdeltacomposite(    indice_elec,indice_construction,k)*p_elec_btp_anticip(k,j)/((1+disc_btp)^j)*CRF_btp;
     end
 end
 
@@ -205,3 +213,33 @@ markup(:,indice_agriculture) =markupref(:,indice_agriculture)+delta_markup_EE_ag
 markup(:,indice_construction)=markupref(:,indice_construction)+delta_markup_EE_btp;
 
 markup=max(markup,0.0001);
+
+//////////////////////////////////////////////////////////////////////////////
+// Scenario on Material efficiency
+// The reduction costs obtained from material efficiency is in some case (indice_LED=4) captured in the added value (through the markup, increased margin)
+// and in other case (indice_LED=9) captures through more services inputes (CI)
+
+delta_CIindus_for_markup = zeros(nb_regions,nb_sectors);
+if ind_exogenous_forcings
+    if current_time_im>=i_year_strong_policy
+        for k=1:nb_regions
+            for jj=nonEnergyIndexes
+                param = max( update_parameter_rule( dynForc_CIindu(k), dynForc_CIindu_2050(k), dynForc_CIindu_istart(k), year_stop_dynForc_CI-(start_year_strong_policy-1), current_time_im-(i_year_strong_policy-1), "ci"), dynForc_CIindu_2050(k));
+                CI_before_change = CI( indus, jj,k);
+                CI( indus, jj,k) = CI( indus, jj,k) .* update_parameter_rule( dynForc_CIindu(k), dynForc_CIindu_2050(k), dynForc_CIindu_istart(k), year_stop_dynForc_CI-(start_year_strong_policy-1), current_time_im-(i_year_strong_policy-1), "ci");
+                delta_CIindus_for_markup(k, jj) = ( CI_before_change - CI0ref( indus, jj,k)) * pArmCIref( indus, jj,k);
+                CI( compo, jj,k) = CI0ref( compo, jj,k) + ( CI_before_change - CI0ref( indus, jj,k)) * pArmCIref( indus, jj,k) ./ pArmCIref( compo, jj,k) .* dynForc_CIindu_CIcomp; // indice_LED=9
+            end
+        end
+        markup = markup + delta_CIindus_for_markup ./pref * dynForc_CIindu_markup; // indice_LED=4
+    end
+end
+
+if same_EEI_agroCons_as_ind
+    for j=energyIndexes
+        for k=1:nb_regions
+            CI(j, indice_construction,k) = CI(j, indice_construction,k) * dynForc_EI_indus(k);
+        end
+    end
+end
+

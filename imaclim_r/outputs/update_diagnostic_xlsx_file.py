@@ -1,3 +1,11 @@
+# =============================================
+# Contact: <imaclim.r.world@gmail.com>
+# Licence: AGPL-3.0
+# Authors:
+#     Florian Leblanc
+#     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+# =============================================
+
 # -*- coding: utf-8 -*-
 
 import csv
@@ -20,7 +28,7 @@ filename_data="data_diagnostic.csv"
 filename_metadata="metadata_diagnostic.csv"
 
 xlsx_filename = "imaclim_scenario_diagnostic"
-xlsx_filepath = path+"../"+xlsx_filename+".xls"
+xlsx_filepath = path+"../"+xlsx_filename+".xlsx"
 
 # Tell imaclim runs the file is being updated
 os.system("echo 0 > " + xlsx_filename + "_available.txt")
@@ -40,7 +48,7 @@ if os.path.isfile(xlsx_filepath):
 data.to_excel( xlsx_filepath, index=False)
 
 # generate a readable copy, not to interfer with th automatic infilling methods
-shutil.copyfile(xlsx_filepath, path+"../"+xlsx_filename+"_toread.xls")
+shutil.copyfile(xlsx_filepath, path+"../"+xlsx_filename+"_readable_copy.xlsx")
 
 # Tell imaclim runs the file is available
 os.system("echo 1 > " + path+"../"+xlsx_filename+"_available.txt")

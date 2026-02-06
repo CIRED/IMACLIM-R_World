@@ -2,23 +2,23 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
 function [equilibrium,v,info] = solve_equilibrium(equilibrium,f)
-//founds equilibrium as f(equilibrium)=0
-//equilibrium is generally the previous equilibrium
-//f is the function that encapsulates all the system's equations, it can be the string 
-//'economyC' our the function economy
+    //founds equilibrium as f(equilibrium)=0
+    //equilibrium is generally the previous equilibrium
+    //f is the function that encapsulates all the system's equations, it can be the string 
+    //'economyC' our the function economy
     // coef_Q_CO2_CI;
     // coef_Q_CO2_CI(coef_Q_CO2_CI<0)=0;
 
     global nb_fsolve
     
-    //actualise les parametres du C
-    updateCparams();
-      
+    //C parameters update
+    call("import_parameters_dynamic_scilab2C");
+
     [equilibrium,v,info] = fsolve(equilibrium,f); 
 
     nb_fsolve=nb_fsolve+1;

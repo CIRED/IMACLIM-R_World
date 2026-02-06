@@ -80,51 +80,51 @@ energy_balance = ones(energy_balance);
 
 
 for current_time=0:(nb_year-2)
-  current_time_im = current_time+1;
-  printf('\n      -------  Doing year ' + string(current_time+1) + '\n')
-  verbose = 1;
-  if break_loop == %t;
-    fixed_nlu_startpoint = %t; // if crashes, do not impulse wrong dynamic on nlu drivers
-    break_loop = %f;
-  end
-  // force drivers
-  reg_taxeC =  eval(driverNLU( 1:12, current_time+1))' ;
-  pop = eval(driverNLU( 25:36, current_time+1))' ;
-  reg_in_bioelec = eval(driverNLU( 37:48, current_time+1)) ;
-  wlightoil_price = eval(driverNLU( 49, current_time+1)) ;
-  wnatgas_price = eval(driverNLU( 50, current_time+1)) ;
-  exec(codes_dir+"update_forcings.sce");
-  // execute nlu timestep
-  exec(MODEL+"landuse.iter.sce");
-  exec(codes_dir+"end_time_step.sce");
-  // create nexus land-use outputs; each year because it bugs
-  if %t // (floor((current_time+1)/10) == ((current_time+1)/10))
-    time=timer();
-    results(find(isnan(results)))=-9.9;
-    global_results(find(isnan(global_results)))=-9.9;
-    write_results(results,results_names,cur_run_output_dir,"simulation_result-ny"+string(current_time+1)+str_val,reg);
-    write_results(global_results,global_results_names,cur_run_output_dir,"simulation_global_results",1);
-    printf("\n Intermediate Number of simulation years: %current_time_im\n",current_time+1);
-    printf("Results stored in: "+cur_run_output_dir+"\n");
-  end
-  // normal outputs
-  current_time_im = current_time_im;
-  if current_time_im>0
-  bioener_costs_Farmgate = Tot_bioelec_cost;
-  bioener_costs_Del = Tot_bioelec_cost_del;
-  w_bioener_costs_Farmgate = W_tot_bioelec_cost ;
-  w_bioener_costs_Del = W_tot_bioelec_cost_del ;
-  bioener_costs_NLU = %nan * bioener_costs_NLU;
-  current_time_im=current_time_im-1;
-  exec('extraction.outputs.emf33.sce');
-  //current_time=current_time-1;
-  exec('extraction.outputs.emf33.landuse.sce');
-  end
+    current_time_im = current_time+1;
+    printf('\n      -------  Doing year ' + string(current_time+1) + '\n')
+    verbose = 1;
+    if break_loop == %t;
+        fixed_nlu_startpoint = %t; // if crashes, do not impulse wrong dynamic on nlu drivers
+        break_loop = %f;
+    end
+    // force drivers
+    reg_taxeC =  evstr(driverNLU( 1:12, current_time+1))' ;
+    pop = evstr(driverNLU( 25:36, current_time+1))' ;
+    reg_in_bioelec = evstr(driverNLU( 37:48, current_time+1)) ;
+    wlightoil_price = evstr(driverNLU( 49, current_time+1)) ;
+    wnatgas_price = evstr(driverNLU( 50, current_time+1)) ;
+    exec(codes_dir+"update_forcings.sce");
+    // execute nlu timestep
+    exec(MODEL+"landuse.iter.sce");
+    exec(codes_dir+"end_time_step.sce");
+    // create nexus land-use outputs; each year because it bugs
+    if %t // (floor((current_time+1)/10) == ((current_time+1)/10))
+        time=timer();
+        results(find(isnan(results)))=-9.9;
+        global_results(find(isnan(global_results)))=-9.9;
+        write_results(results,results_names,cur_run_output_dir,"simulation_result-ny"+string(current_time+1)+str_val,reg);
+        write_results(global_results,global_results_names,cur_run_output_dir,"simulation_global_results",1);
+        printf("\n Intermediate Number of simulation years: %current_time_im\n",current_time+1);
+        printf("Results stored in: "+cur_run_output_dir+"\n");
+    end
+    // normal outputs
+    current_time_im = current_time_im;
+    if current_time_im>0
+        bioener_costs_Farmgate = Tot_bioelec_cost;
+        bioener_costs_Del = Tot_bioelec_cost_del;
+        w_bioener_costs_Farmgate = W_tot_bioelec_cost ;
+        w_bioener_costs_Del = W_tot_bioelec_cost_del ;
+        bioener_costs_NLU = %nan * bioener_costs_NLU;
+        current_time_im=current_time_im-1;
+        exec('extraction.outputs.emf33.sce');
+        //current_time=current_time-1;
+        exec('extraction.outputs.emf33.landuse.sce');
+    end
 end
 
-ldcsv("outputs_"+ETUDE);
-yearlySmoothOutputs= customSmooth(eval("outputs_"+ETUDE));
-yearlyOutputs= eval("outputs_"+ETUDE);
+execstr("outputs_"+ETUDE+"=csvRead("""+SAVEDIR+"outputs_"+ETUDE+fit_combi(combi)+".csv"",""|"",[],[],[],""/\/\//"");");
+yearlySmoothOutputs= customSmooth(evstr("outputs_"+ETUDE));
+yearlyOutputs= evstr("outputs_"+ETUDE);
 
 if do_smooth_outputs==%t
     execstr("sel_outputs_"+ETUDEOUTPUT+" = yearlySmoothOutputs(:, year_to_select)");

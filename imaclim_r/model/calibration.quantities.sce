@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -73,23 +73,23 @@ for k = 1:reg,
 
         // tax for Intermediate Consumptions ///
 
-   for ii=1:sec,
-      if (CI_dom_Im(k,ii,j)==0) then taxCIdom(ii,j,k)=0;
-						else taxCIdom(ii,j,k)=T_CI_dom_Im(k,ii,j)/CI_dom_Im(k,ii,j);
+        for ii=1:sec,
+            if (CI_dom_Im(k,ii,j)==0) then taxCIdom(ii,j,k)=0;
+            else taxCIdom(ii,j,k)=T_CI_dom_Im(k,ii,j)/CI_dom_Im(k,ii,j);
             end
-      if (abs(taxCIdom(ii,j,k))<=1e-7) then taxCIdom(ii,j,k)=0;
-            end
-
-      CIdomref(ii,j,k)=CI_dom_Im(k,ii,j)/pref(k,ii);
-
-      if (CI_imp_Im(k,ii,j)==0) then taxCIimp(ii,j,k)=0;
-				      else taxCIimp(ii,j,k)=T_CI_imp_Im(k,ii,j)/CI_imp_Im(k,ii,j);
-            end
-      if (abs(taxCIimp(ii,j,k))<=1e-8) then taxCIimp(ii,j,k)=0;
+            if (abs(taxCIdom(ii,j,k))<=1e-7) then taxCIdom(ii,j,k)=0;
             end
 
-      CIimpref(ii,j,k)=CI_imp_Im(k,ii,j)./(wpref(ii)*(1+mtax(k,ii))+nit(k,ii)*wpTIagg);
-      end
+            CIdomref(ii,j,k)=CI_dom_Im(k,ii,j)/pref(k,ii);
+
+            if (CI_imp_Im(k,ii,j)==0) then taxCIimp(ii,j,k)=0;
+            else taxCIimp(ii,j,k)=T_CI_imp_Im(k,ii,j)/CI_imp_Im(k,ii,j);
+            end
+            if (abs(taxCIimp(ii,j,k))<=1e-8) then taxCIimp(ii,j,k)=0;
+            end
+
+            CIimpref(ii,j,k)=CI_imp_Im(k,ii,j)./(wpref(ii)*(1+mtax(k,ii))+nit(k,ii)*wpTIagg);
+        end
     end
 end
 
@@ -215,3 +215,15 @@ for k=1:reg,
 end
 CI=CIref;
  
+// Energy auto-consumption by sectors
+ener_autoconsumption = zeros(nb_regions,nbsecteurenergie);
+for i=1:nbsecteurenergie
+    ener_autoconsumption(:,i) = Ener_CI_autocons_Im(:,i,i);
+end
+ener_autoconsumption = max(ener_autoconsumption,0);
+
+if ind_cor_ener_autocons == %t
+    ratio_ener_autocons = ener_autoconsumption ./ Qref(:,1:nbsecteurenergie);
+else
+    ratio_ener_autocons = zeros(nb_regions,nbsecteurenergie);
+end

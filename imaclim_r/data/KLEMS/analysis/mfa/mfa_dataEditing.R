@@ -1,10 +1,10 @@
-// =============================================
-// Contact: <imaclim.r.world@gmail.com>
-// Licence: AGPL-3.0
-// Authors:
-//     Liesbeth Defosse
-//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
-// =============================================
+# =============================================
+# Contact: <imaclim.r.world@gmail.com>
+# Licence: AGPL-3.0
+# Authors:
+#     Liesbeth Defosse
+#     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+# =============================================
 
 # Input for 1970-2007 for 9 countries for which data are available over this period. For JPN only data upto 2006, 
 # input for 10 countries below, including JPN, for 1970-2006.

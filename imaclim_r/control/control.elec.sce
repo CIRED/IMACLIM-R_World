@@ -7,17 +7,17 @@
 // =============================================
 
 disp([..
-["LCC";regnames],..
-["730_seq"   ; string(squeeze(round( LCC_730(:,24)*1000)))],..
-["2190_seq"  ; string(squeeze(round(LCC_2190(:,24)*1000)))],..
-["3650_seq"  ; string(squeeze(round(LCC_3650(:,24)*1000)))],..
-["5110_seq"  ; string(squeeze(round(LCC_5110(:,24)*1000)))],..
-["6570_seq"  ; string(squeeze(round(LCC_6570(:,24)*1000)))],..
-["8030_seq"  ; string(squeeze(round(LCC_8030(:,24)*1000)))],..
-["8760_seq"  ; string(squeeze(round(LCC_8760(:,24)*1000)))],..
-["CCwoBT"    ; string(squeeze(round(CC_elec_i_1WoBioTax)))],..
-["CCref"    ; string(squeeze(round(CC_elec_i_1_ref)))]     ,..
-["pElec"    ; string(squeeze (round(p(:,elec))))]          ..
+    ["LCC";regnames],..
+    ["730_seq"   ; string(squeeze(round( LCC_730(:,24)*1000)))],..
+    ["2190_seq"  ; string(squeeze(round(LCC_2190(:,24)*1000)))],..
+    ["3650_seq"  ; string(squeeze(round(LCC_3650(:,24)*1000)))],..
+    ["5110_seq"  ; string(squeeze(round(LCC_5110(:,24)*1000)))],..
+    ["6570_seq"  ; string(squeeze(round(LCC_6570(:,24)*1000)))],..
+    ["8030_seq"  ; string(squeeze(round(LCC_8030(:,24)*1000)))],..
+    ["8760_seq"  ; string(squeeze(round(LCC_8760(:,24)*1000)))],..
+    ["CCwoBT"    ; string(squeeze(round(CC_elec_i_1WoBioTax)))],..
+    ["CCref"    ; string(squeeze(round(CC_elec_i_1_ref)))]     ,..
+    ["pElec"    ; string(squeeze (round(p(:,elec))))]          ..
 ]);
 //["730 "      ; string(squeeze(round( LCC_730(:,23)*1000)))],..
 //["2190"      ; string(squeeze(round(LCC_2190(:,23)*1000)))],..

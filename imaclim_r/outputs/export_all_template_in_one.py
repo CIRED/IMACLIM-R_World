@@ -1,3 +1,13 @@
+#! /data/software/mambaforge/mambaforge//envs/MostUpdated/bin/python
+# =============================================
+# Contact: <imaclim.r.world@gmail.com>
+# Licence: AGPL-3.0
+# Authors:
+#     Florian Leblanc, Thomas Le Gallic
+#     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+# =============================================
+
+
 import pandas as pd
 import pyam
 import os
@@ -98,5 +108,24 @@ if data_loaded==False:
 #scenario2select=[sc for sc in df.scenario if any(i in sc for i in suceed_run)]
 #df = df.filter(year= year2select, scenario=scenario2select)
 
+#### UNcomment to rename
+#dict_rename_sc = {"scenario": {k:k+"_NodivChange" for k in df.scenario}}
+#df = df.rename(dict_rename_sc)
+
+# Set Manuscript name and DOI
+# where xxx is replaced by a shorthand like „Leblanc et al. (2025)“ and yyy is a DOI (without the https://doi.org/ part)
+DOI=""
+short_citation=""
+df.set_meta(short_citation, "Scientific Manuscript (Citation)")
+df.set_meta(DOI, "Scientific Manuscript (DOI)")
+
+filter_common_definitions_template=False
+if filter_common_definitions_template:
+    df = pd.read_excel("common-definitions-template.xlsx", sheet_name='variable')
+    varname_common = df['variable'].to_list()
+    to_keep = [var for var in df.variables if var in varname_common]
+    df = df.filter(variable = to_keep)
+
 df.to_excel(output_excel, sheet_name='data', iamc_index=True, include_meta=True)
+
 

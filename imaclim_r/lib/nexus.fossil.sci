@@ -30,7 +30,7 @@ function [global_cost_CACC,global_quant_CACC] = from_supplycurve_2_CACC( costs, 
         global_cost_CACC = [global_cost_CACC all_cost_temp(cost+1)];
         for reg=1:nb_regions
             if find(costs(reg,:)==all_cost_temp(cost+1)) <> []
-               global_quant_CACC(cost) = global_quant_CACC(cost) + quantities(reg, find(costs(reg,:)==all_cost_temp(cost+1)))/mtoe2ej;
+                global_quant_CACC(cost) = global_quant_CACC(cost) + quantities(reg, find(costs(reg,:)==all_cost_temp(cost+1)))/mtoe2ej;
             end
         end
     end

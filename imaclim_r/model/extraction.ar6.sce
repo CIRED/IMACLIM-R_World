@@ -7,16 +7,16 @@
 // =============================================
 
 if ~isdef("SAVEDIR")
-exec (".."+filesep()+"preamble.sce");
-SAVEDIR = uigetdir(OUTPUT,"SAVEDIR please") 
+    exec (".."+filesep()+"preamble.sce");
+    SAVEDIR = uigetdir(OUTPUT,"SAVEDIR please") 
 end
 
-//exec(MODEL + "make_calib.sav.sce");
+//exec(MODEL + "make_calib.dat.sce");
 
 combi = run_name2combi(SAVEDIR);
 [ind_climat,ind_EEI,ind_CCS,ind_NUC,ind_ENR,ind_bioEnergy]=combi2indices(combi);
 
-wasdone = isfile(SAVEDIR+"\save\IamDoneFolks.sav")
+wasdone = isfile(SAVEDIR+"\save\IamDoneFolks.dat")
 
 //////////////////////////////////////////// carbon tax
 nbMKT = get_nbMKT(combi);
@@ -28,23 +28,23 @@ if ind_climat
 end
 mksav 'carbonTax'
 
-///////////////////////////////////////////////////émissions de CO2 en tonnes
+/////////////////////////////////////////////////// CO2 emissions (t)
 
-//emissions mondiales
+//world emissions
 ECO2W = sum(sg_get_var("E_reg_use",:),"r");
 mksav 'ECO2W'
 
-//emissions par region
+//regional emissions
 for k=1:reg
     ECO2reg(k,:) = sum(sg_get_var("E_reg_use",k),"r");
 end
 
-//emissions avant sequestration
+//emissions before sequestration
 ECO2woCCSw=sum(sg_get_var("E_CO2_wo_CCS",:),"r");
 mksav 'ECO2woCCSw'
 
 
-//emissions par usage
+//emissions per usage
 for u=1:nb_use
     ECO2W_use(u,:) = sum(sg_get_var("E_reg_use",:,u),"r");
 end
@@ -52,8 +52,8 @@ end
 emi_usage = [usenames, ECO2W_use];
 mkcsv emi_usage
 
-///////////////////////////////////////////////////////////// mobilité
-//voitures
+///////////////////////////////////////////////////////////// mobility
+//cars
 //cars_out = [ strcomb(regnames(1:4), carnames) sg_get_var("MSH_cars",1:4)];
 //mkcsv cars_out
 
@@ -63,10 +63,10 @@ mkcsv emi_usage
 //pkmNM=sg_get_var("TNM").*(pkmautomobileref*ones(1,TimeHorizon+1))/100;
 
 
-///////////////////////////////////////////////// energies fossiles
+///////////////////////////////////////////////// fossil fuels
 wp_coal=sg_get_var("wp",:,indice_coal,1);
 wp_oil=sg_get_var("wp",:,indice_oil,1)/ 7.33;
-wp_gas=sg_get_var("wp",:,indice_gaz,1);
+wp_gas=sg_get_var("wp",:,indice_gas,1);
 
 mksav("wp_coal");
 mksav("wp_oil");
@@ -75,7 +75,7 @@ mksav("wp_gas");
 pIndEner=sg_get_var("pIndEner");
 
 Qcoal = sg_get_var("Q",:,indice_coal);
-Qgas = sg_get_var("Q",:,indice_gaz);
+Qgas = sg_get_var("Q",:,indice_gas);
 Qoil = sg_get_var("Q",:,indice_oil)*7.33/365;
 charge_oil = sg_get_var("charge",:,indice_oil);
 
@@ -102,9 +102,9 @@ mksav wp_Et
 Qbiofuelsw=sum(sg_get_var("Q_biofuel_anticip",:),"r");
 mksav 'Qbiofuelsw'
 
-///////////////////////////////////////////////////////////energie par usage
+///////////////////////////////////////////////////////////energie per usage
 
-//energie par usage
+//energie per usage
 for u=1:nb_use
     EnerW_use(u,:) = sum(sg_get_var("Ener_reg_use",:,u),"r");
 end
@@ -138,7 +138,7 @@ GDP_MER_nominal = sgv("GDP_MER_nominal");
 GDP_MER_real    = sgv("GDP_MER_real");
 GDP_PPP_constant   = sgv("GDP_PPP_constant");
 
-////////////////////////////////////////////////intensité energetique
+//////////////////////////////////////////////// energy intensity
 //if wasdone
 //    IEw=TFCw./realGDPw;
 //    IEocde=TFCocde./realGDPocde;
@@ -154,7 +154,7 @@ GDP_PPP_constant   = sgv("GDP_PPP_constant");
 //mksav IErow
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Utilite des menages
+// Household utility
 
 //xsi=sg_get_var("xsi");
 //xsiT=sg_get_var("xsiT");
@@ -197,24 +197,12 @@ titres_elec = strcomb ( regnames, elecnames);
 //
 //mkcsv rapport_elec
 
-IC_elec=[
-sg_get_var("IC_2190")
-sg_get_var("IC_3650")
-sg_get_var("IC_5110")
-sg_get_var("IC_6570")
-sg_get_var("IC_730" )
-sg_get_var("IC_8030")
-sg_get_var("IC_8760")
-];
-
-mksav IC_elec
-
 wp_elec=sg_get_var("wp",:,indice_elec,1);
 
 mksav wp_elec
 
 /////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////// residentiel
+/////////////////////////////////////////////////////////////////////// residential
 consoCoalm2w=sum(sg_get_var("alphaCoalm2").*sg_get_var("stockbatiment"),"r");
 consoelecm2w=sum(sg_get_var("alphaelecm2").*sg_get_var("stockbatiment"),"r");
 consoEtm2w  =sum(sg_get_var("alphaEtm2"  ).*sg_get_var("stockbatiment"),"r");
@@ -276,9 +264,9 @@ titres_output=[
 
 
 
-ldcsv("outputs_"+ETUDE);
-yearlySmoothOutputs= customSmooth(eval("outputs_"+ETUDE));
-yearlyOutputs= eval("outputs_"+ETUDE);
+execstr("outputs_"+ETUDE+"=csvRead("""+SAVEDIR+"outputs_"+ETUDE+fit_combi(combi)+".csv"",""|"",[],[],[],""/\/\//"");");
+yearlySmoothOutputs= customSmooth(evstr("outputs_"+ETUDE));
+yearlyOutputs= evstr("outputs_"+ETUDE);
 
 if do_smooth_outputs==%t
     execstr("sel_outputs_"+ETUDEOUTPUT+" = yearlySmoothOutputs(:, year_to_select)");

@@ -3,7 +3,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Patrice Dumas, Nicolas Graves
+#     Florian Leblanc, Nicolas Graves, Patrice Dumas
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -47,11 +47,11 @@ for region in set_regions:
     for year in list_years:
         df_temp = pd.read_csv(iea_dataPath + 'wbig_'+year+'_'+region+'.csv', sep=';',index_col=0)
         df_temp['Year']=year
-        web_temp = web_temp.append(df_temp)
+        web_temp = pd.concat( [web_temp,df_temp])
 
     web_temp['Region']=region
     web_temp.set_index(['Year','Region'],append=True,inplace=True)
-    web = web.append(web_temp)
+    web = pd.concat( [web_temp, web])
 
 web.replace(['x','..','c'],np.nan,inplace=True)
 web.replace('x',np.nan,inplace=True)
@@ -59,5 +59,6 @@ web = web.astype('float64',errors='raise',copy=False)
 web.index.rename(['Flow','Year','Region'],inplace=True)
 web = web.swaplevel(0,2)
 
+web = web.sort_index()
 
 os.chdir(current_working_directory)

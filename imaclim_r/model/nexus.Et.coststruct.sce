@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 ///////////////////////////////////////////////////////////////////////////////
 //Note of priority, elements to check or to change in future version of the nexus
 //1.check if the lines that prevent prices and quantities of biofuels to decrease are necessary
@@ -93,28 +101,28 @@ Cost_struc_biofuel=zeros(reg,sec+2);
 // Variant in which we use nexus land use biofuel production computation
 if ind_NLU_bioener == 1 // with NLU linkage
     Q_biofuel_anticip = Qbiofuel_NLU ;
-  // same cost structure as liquid fuels from fossil, except for CI oil and ET
-  if alternCostStructBiofuels
-      Cost_struc_biofuel = Cost_struc_oil_refin_ref;
-      Cost_struc_biofuel(:,[ oil et ]) = 0;
-  end
+    // same cost structure as liquid fuels from fossil, except for CI oil and ET
+    if alternCostStructBiofuels
+        Cost_struc_biofuel = Cost_struc_oil_refin_ref;
+        Cost_struc_biofuel(:,[ oil et ]) = 0;
+    end
 
-  for k=1:reg
-      if Q_biofuel_anticip(k)>0
-          if ~build_et_curve_NLU
-              Cost_struc_biofuel(k,sec+2)= ( pind(k) .* ethan2G_transfo_cost ) ./ ( p(k,et) ) *(1/(1+qtax(k,indice_Et))) ;
-              Cost_struc_biofuel(k,indice_agriculture) = (( Tot_bioelec_cost_del(k)) .* tep2gj )*(1/(1+qtax(k,indice_Et)))/pArmCI(indice_agriculture,indice_Et,k);
-          end
-      end
-  end
+    for k=1:reg
+        if Q_biofuel_anticip(k)>0
+            if ~build_et_curve_NLU
+                Cost_struc_biofuel(k,sec+2)= ( pind(k) .* ethan2G_transfo_cost ) ./ ( p(k,et) ) *(1/(1+qtax(k,indice_Et))) ;
+                Cost_struc_biofuel(k,indice_agriculture) = (( Tot_bioelec_cost_del(k)) .* tep2gj )*(1/(1+qtax(k,indice_Et)))/pArmCI(indice_agriculture,indice_Et,k);
+            end
+        end
+    end
 else // with IEA supply curves
    
-  for k=1:reg
-    if Q_biofuel_anticip(k)>0 
-        Cost_struc_biofuel(k,sec+2)=Cost_struc_oil_refin_ref(k,sec+2);
-        Cost_struc_biofuel(k,indice_agriculture) = ((Q_biodies_anticip(k)*p_biodies_mtep+Q_ethan_anticip(k)*p_ethan_mtep)/Q_biofuel_anticip(k))*(1/(1+qtax(k,indice_Et))-Cost_struc_biofuel(k,sec+2))/pArmCI(indice_agriculture,indice_Et,k);
+    for k=1:reg
+        if Q_biofuel_anticip(k)>0 
+            Cost_struc_biofuel(k,sec+2)=Cost_struc_oil_refin_ref(k,sec+2);
+            Cost_struc_biofuel(k,indice_agriculture) = ((Q_biodies_anticip(k)*p_biodies_mtep+Q_ethan_anticip(k)*p_ethan_mtep)/Q_biofuel_anticip(k))*(1/(1+qtax(k,indice_Et))-Cost_struc_biofuel(k,sec+2))/pArmCI(indice_agriculture,indice_Et,k);
+        end
     end
-  end
 
 end
 
@@ -125,7 +133,7 @@ end
 
 //Variant of the model without synfuel CTL
 if ind_NO_CTL==1 | current_time_im<start_year_strong_policy-base_year_simulation 
-	Q_CTL_anticip=zeros(nb_regions,1);
+    Q_CTL_anticip=zeros(nb_regions,1);
 end;
 
 //recomputing the shares for each types of liquid fuels
@@ -134,44 +142,44 @@ Q_oil_refin_anticip = max( Q_Et_anticip - Q_biofuel_anticip - Q_CTL_anticip , 0)
 max_biofuel=( Q_Et_anticip - Q_CTL_anticip  > Q_biofuel_anticip );
 
 if ind_NLU_bioener ==1
-  // not allowing the share of liquid fuels from oil to go to exactly zero, minimum bound set at 0.0001
-  if current_time_im>1
-      for k=1:reg
-          if Q_oil_refin_anticip(k) == 0
-              share_oil_refin(k) = min_share_oil_refined;
-              Q_oil_refin_anticip(k) = ( Q_biofuel_anticip(k) + Q_CTL_anticip(k)) * share_oil_refin(k) / ( 1- share_oil_refin(k) ) ;
-          end
-       end
-  end 
+    // not allowing the share of liquid fuels from oil to go to exactly zero, minimum bound set at 0.0001
+    if current_time_im>1
+        for k=1:reg
+            if Q_oil_refin_anticip(k) == 0
+                share_oil_refin(k) = min_share_oil_refined;
+                Q_oil_refin_anticip(k) = ( Q_biofuel_anticip(k) + Q_CTL_anticip(k)) * share_oil_refin(k) / ( 1- share_oil_refin(k) ) ;
+            end
+        end
+    end 
 
-  Q_Et_anticip = Q_oil_refin_anticip + Q_biofuel_anticip + Q_CTL_anticip;
+    Q_Et_anticip = Q_oil_refin_anticip + Q_biofuel_anticip + Q_CTL_anticip;
 
-  share_biofuel=divide(Q_biofuel_anticip,Q_Et_anticip,0);
-  share_biofuel= Q_biofuel_anticip ./ Q_Et_anticip;
-  share_oil_refin=divide(Q_oil_refin_anticip,Q_Et_anticip,0);
-  share_CTL=divide(Q_CTL_anticip,Q_Et_anticip,0);
+    share_biofuel=divide(Q_biofuel_anticip,Q_Et_anticip,0);
+    share_biofuel= Q_biofuel_anticip ./ Q_Et_anticip;
+    share_oil_refin=divide(Q_oil_refin_anticip,Q_Et_anticip,0);
+    share_CTL=divide(Q_CTL_anticip,Q_Et_anticip,0);
 else 
-  Q_Et_anticip = Q_oil_refin_anticip + Q_biofuel_anticip + Q_CTL_anticip;
-  //avoiding share_oil_refin to go to 0, adding a non-zero minimum bound
-  if current_time_im>1
-    share_oil_refin_prev=share_oil_refin;
-    share_biofuel_prev=share_biofuel;
-    share_CTL_prev=share_CTL;
-  end
+    Q_Et_anticip = Q_oil_refin_anticip + Q_biofuel_anticip + Q_CTL_anticip;
+    //avoiding share_oil_refin to go to 0, adding a non-zero minimum bound
+    if current_time_im>1
+        share_oil_refin_prev=share_oil_refin;
+        share_biofuel_prev=share_biofuel;
+        share_CTL_prev=share_CTL;
+    end
 
-  share_biofuel=Q_biofuel_anticip./Q_Et_anticip;
-  share_oil_refin=Q_oil_refin_anticip./Q_Et_anticip;
-  share_CTL=Q_CTL_anticip./Q_Et_anticip;
+    share_biofuel=Q_biofuel_anticip./Q_Et_anticip;
+    share_oil_refin=Q_oil_refin_anticip./Q_Et_anticip;
+    share_CTL=Q_CTL_anticip./Q_Et_anticip;
 
-  if current_time_im>1
-    for k=1:reg
-        if share_oil_refin_prev(k)==(1-0.999) 
-            share_oil_refin(k)=share_oil_refin_prev(k);
-            share_biofuel(k)=share_biofuel_prev(k);
-            share_CTL(k)=share_CTL_prev(k);
+    if current_time_im>1
+        for k=1:reg
+            if share_oil_refin_prev(k)==(1-0.999) 
+                share_oil_refin(k)=share_oil_refin_prev(k);
+                share_biofuel(k)=share_biofuel_prev(k);
+                share_CTL(k)=share_CTL_prev(k);
+            end
         end
     end
-  end
 end
 
 //Recomputing the average cost structure for all liquid fuels
@@ -189,17 +197,17 @@ else
         CI(:,indice_Et,k)=Cost_struc_biofuel(k,1:sec)'*share_biofuel(k)+Cost_struc_oil_refin_ref(k,1:sec)'*share_oil_refin(k)+Cost_struc_CTL(k,1:sec)'*share_CTL(k);
         l(k,indice_Et)=Cost_struc_biofuel(k,sec+1)'*share_biofuel(k)+Cost_struc_oil_refin_ref(k,sec+1)'*share_oil_refin(k)+Cost_struc_CTL(k,sec+1)'*share_CTL(k);
         markup(k,indice_Et)=Cost_struc_biofuel(k,sec+2)'*share_biofuel(k)+Cost_struc_oil_refin_ref(k,sec+2)'*share_oil_refin(k)+Cost_struc_CTL(k,sec+2)'*share_CTL(k);
-      if ind_NLU_bioener == 1
-        CI(:,et,k) = inertiaShareEt * CI_prev(:,et,k) + ( 1 - inertiaShareEt) * CI(:,et,k) ;
-        if ~toomuch_bioener & share_biofuel_real(k) > share_biofuel(k)
-            share_biofuel(k) = share_biofuel_real(k);
-        else
-            share_biofuel_real(k) = share_biofuel(k);
+        if ind_NLU_bioener == 1
+            CI(:,et,k) = inertiaShareEt * CI_prev(:,et,k) + ( 1 - inertiaShareEt) * CI(:,et,k) ;
+            if ~toomuch_bioener & share_biofuel_real(k) > share_biofuel(k)
+                share_biofuel(k) = share_biofuel_real(k);
+            else
+                share_biofuel_real(k) = share_biofuel(k);
+            end
+            share_biofuel(k) = 1- divide(CI(indice_coal,indice_Et,k),Cost_struc_CTL(k,indice_coal),0)-CI(indice_oil,indice_Et,k)/CIref(indice_oil,indice_Et,k) ;
+            markup(k,indice_Et) = inertiaShareEt *  markup_prev(k,indice_Et) + ( 1 - inertiaShareEt) *markup(k,indice_Et) ;
+            l(k,indice_Et) = inertiaShareEt *  l_prev(k,indice_Et) + ( 1 - inertiaShareEt) * l(k,indice_Et) ;
         end
-        share_biofuel(k) = 1- divide(CI(indice_coal,indice_Et,k),Cost_struc_CTL(k,indice_coal),0)-CI(indice_oil,indice_Et,k)/CIref(indice_oil,indice_Et,k) ;
-        markup(k,indice_Et) = inertiaShareEt *  markup_prev(k,indice_Et) + ( 1 - inertiaShareEt) *markup(k,indice_Et) ;
-        l(k,indice_Et) = inertiaShareEt *  l_prev(k,indice_Et) + ( 1 - inertiaShareEt) * l(k,indice_Et) ;
-      end
     end
 end
 

@@ -4,8 +4,9 @@ source:
 https://www.iea.org/data-and-statistics/data-product/world-energy-balances
 https://www.iea.org/data-and-statistics/data-product/energy-prices
 date: 
-	release: World Energy Balances 29-07-2021 (downloaded 04-03-2022)
+	release: World Energy Balances 02-08-2022 (downloaded 17-11-2022)
 	release: Energy Prices 23-09-2022 (downloaded 17-11-2022)
+	(old release: World Energy Balances 29-07-2021 (downloaded 04-03-2022) placed in EnergyBalancesDatabases_29072021_release)
 rights: 
 private
 https://iea.blob.core.windows.net/assets/3bf6ce57-3df6-4639-bf60-d73ee8f017c0/IEA-Terms-April-2020.pdf

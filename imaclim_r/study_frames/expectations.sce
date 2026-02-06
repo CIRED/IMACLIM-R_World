@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Nicolas Graves, Ruben Bibas
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 //Sommaire
 //Tous les fichiers qui s'occupent de faire du combi->parametre ont étés regroupés ici.
 //Cette feuille est divisée en quatre chapitres
@@ -11,19 +19,6 @@
 //	Paramètres d'IMACLIM-R
 /////////////////////////////////////////////////////////////////////////////
 ind_inequality = 0;
-
-ind_AMPERE_harm = 0;
-// Indice utilisé quand on veut harmoniser les PIB pour le projet AMPERE
-// Cet indice a pour effet de :
-// - Harmoniser les populations totales (calibration.growthdrivers.sce)
-// - Harmoniser les taux de croisssance de la population active (calibration.growthdrivers.sce)
-// - Prendre les taux de croissance de la productivité du travail (TC_l) qui font coller les PIB réels PPP (calibration.growthdrivers.sce)
-// - Diminuer les prix du charbon à court terme (Dynamic.sce)
-
-ind_harm_FE = 0;
-// ind_harm_FE = 0: pas d'harmonisation de l'energie finale (cas de WP3 d'AMPERE)
-// ind_harm_FE = 1: harmonisation de l'energie finale sur le cas REF (AMPERE)
-// ind_harm_FE = 2: harmonisation de l'energie finale sur le cas LOW (AMPERE)
 
 // Tax_max et taxmin dans res_dyn_loop: limitent les variations de la taxe d'une année à l'autre
 cff_taxmax = 0.2;
@@ -62,19 +57,6 @@ TC_EEI_decarb_endo=1;
 
 ///////Spécificités progres technique pour les batiments TBE
 TC_TBE_endo=1;
-
-///////Spécificités croissance endogène avec politique
-indice_TC_l_endo=0;
-indice_ATC_calib_REF=1;
-if indice_TC_l_endo==1&indice_ATC_calib_REF==1
-    pause;
-end
-
-//boucles de test
-
-if TC_elec_ATC_pol==1&TC_elec_endo==1
-    pause;
-end
 
 /////Variantes ONERC
 indice_E=1;
@@ -121,10 +103,6 @@ gamma_charge_coal = 0.3;
 gamma_ress_coal = 2;
 obj_charge_coal = 0.8;
 ind_coal_ress = 0; //ind_coal_ress = 0 means pessimistic case ("low" resources, used in EMF24 2nd round study), ind_coal_ress = 1 means optimistic case (higher resources)
-
-//Simulation d'une excise type TIPP dans les taxes là où les données étaient disponibles
-//ajustement_taxes.sce dans WORKDIR joue avec ça (recomended value is %t)
-imaNewTaxes = %t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -189,11 +167,7 @@ ind_sbc_opt = ind_biofuel;
 ind_ctl_opt = ind_altern;
 
 //Evolution des technologies
-ind_lrc_opt = ind_techno;//inutilise?
 ind_frt_opt = ind_techno;
-ind_pch_opt = ind_techno;//inutilise?
-ind_aee_opt = ind_techno;//inutilise?
-ind_itx_opt = ind_techno;//inutilise?
 ind_lrt_opt = ind_techno;
 ind_bau_opt = ind_techno;
 ind_ela_opt = ind_techno; // reféfinit indice_tech_OT
@@ -206,9 +180,6 @@ ind_asp_opt = ind_develo;
 ind_msp_opt = ind_develo;
 ind_res_opt = ind_develo;
 ind_hdf_opt = ind_develo;
-
-//Croissance
-ind_cri_opt = 0; // a un effet si indice_TC_l_endo=0
 
 //Stratégie du MO
 ind_prf_opt = ind_straMO;
@@ -277,11 +248,11 @@ end  //fraction des réserves restantes à partir de laquelle se déclenche la d
 point_equilibre_gaz = 0; //tx de croissance de la prod qui annule le tx de croissance du prix
 
 if ind_gaz_opt == 1
-    pente_gaz_1 = 1; //elasticité de la croissance du prix à la croissance de la prod si sous point_equilibre_gaz
-    pente_gaz_2 = 1.5;
+    slope_gas_1 = 1; //elasticité de la croissance du prix à la croissance de la prod si sous point_equilibre_gaz
+    slope_gas_2 = 1.5;
 else
-    pente_gaz_1 = 1;
-    pente_gaz_2 = 4;
+    slope_gas_1 = 1;
+    slope_gas_2 = 4;
 end
 
 // charbon
@@ -290,11 +261,11 @@ point_equilibre_coal=0; //tx de croissance de la prod qui annule le tx de croiss
 
 select ind_coa_opt
 case 0
-    pente_coal_1_sc = 1;
-    pente_coal_2_sc = 4;
+    slope_coal_1_sc = 1;
+    slope_coal_2_sc = 4;
 case 1
-    pente_coal_1_sc = 1;     //elasticité de la croissance du prix à la croissance de la prod si sous cff_col_price_1
-    pente_coal_2_sc = 1.5;   //elasticité de la croissance du prix à la croissance de la prod si sur cff_col_price_1
+    slope_coal_1_sc = 1;     //elasticité de la croissance du prix à la croissance de la prod si sous cff_col_price_1
+    slope_coal_2_sc = 1.5;   //elasticité de la croissance du prix à la croissance de la prod si sur cff_col_price_1
 else
     error("ind_coa_opt is ill-defined");
 end
@@ -360,7 +331,7 @@ end
 
 select ind_MSHBioSup
 case 0
-    elecBiomassInitial.MSHBioSup = 0.8;
+    elecBiomassInitial.MSHBioSup = 0.018;
 case 1
     elecBiomassInitial.MSHBioSup = 0.3;
 else
@@ -456,7 +427,7 @@ case 1
     cff_lea  = 0.98; //(1-cff_lea) = exogenous EEI rate of the leader at fixed energy prices
     max_eei  = 1.5;
     max_aeei = 1.5;
-    cff_y    = 0.01; //Level of EEI gained by the laggards in XRef years (defines speed of convergence)
+    cff_y    = 0.01; //The EEI gap between leader and laggards is multiplied by cff_y after X years (defines speed of convergence: the higher cff_y, the slower the convergence).
     fin_lev  = 0.99; //Final level (share of the leader's EEI) targeted by laggards
 case 0
     cff_lea  = 0.9971; //(1-cff_lea) = exogenous EEI rate of the leader at fixed energy prices
@@ -505,24 +476,6 @@ if ind_car_opt==1
 else
     lr_car=0.07;
 end; //Learning rates techno auto
-
-
-/////////////////////// Usages substituables.
-
-//industrie, services, agriculture : Voir aussi le fichier calibration.fuel.substitution
-
-if ind_aee_opt == 1
-    aee_cff=1.25;
-else
-    aee_cff=1;
-end; //coefficient multiplicateur de l'AEEI
-
-if ind_itx_opt==1
-    itx_cff=[ 0.08 75 0.025 1];
-else
-    itx_cff=[ 0.03 60 0.01 0];
-end; //[taux d'apprentissage, asymptote sur la réactivité à la taxe, asymptote sur les gains d'efficacité]
-
 
 //bâtiments
 
@@ -576,23 +529,6 @@ if ind_hdf_opt==1
 else
     hdf_cff = [ 1.5;1.5;1.5;1.5;3;3;3;3;3;3;3;3];
 end; //niveau de saturation demande finale des ménages
-
-////////////////////////Croissance économique
-
-// Crise courte croissance forte VS crise longue croissance molle  ************ATTENTION CHANGEMENT CRISE PLUS FORTE***************
-crise = ones(1,TimeHorizon);
-
-if ind_AMPERE_harm == 0 // Les TC_l sont directement modifiés dans AMPERE pour décrire la crise
-    if ind_cri_opt == 1 then
-        for tt=7:9
-            crise(tt) = 0; // la crise dure 2 ans
-        end
-    else
-        for tt=7:12
-            crise(tt) = 0; // la crise dure 5 ans
-        end
-    end
-end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////***COMPORTEMENT DES AGENTS ET POLITIQUES CLIMATIQUES***////////////////////////
@@ -682,13 +618,13 @@ taxParams.endTime        = TimeHorizon+1+taxParams.duration;
 taxParams.priceSignal    = zeros(nbMKT,taxParams.endTime);
 // exponential profile
 taxParams.priceSignal(:,startExo:taxParams.endTime) = ..
-(ones(nbMKT,1) * exp( (startExo:taxParams.endTime) ./ taxParams.slopeParameter )) ..
-./ exp( (taxParams.endTime) ./ taxParams.slopeParameter ) ..
+    (ones(nbMKT,1) * exp( (startExo:taxParams.endTime) ./ taxParams.slopeParameter )) ..
+    ./ exp( (taxParams.endTime) ./ taxParams.slopeParameter ) ..
 .* ( taxParams.finalLevel * ones(1,taxParams.endTime - startExo + 1));
 // tanh profile
 taxParams.priceSignal(:,startExo:taxParams.endTime) = ..
-taxParams.finalLevel / 2 ..
-.* ( ones(nbMKT,1) * tanh(((1:taxParams.endTime-startExo+1)-50)/35) ) ..
+    taxParams.finalLevel / 2 ..
+    .* ( ones(nbMKT,1) * tanh(((1:taxParams.endTime-startExo+1)-50)/35) ) ..
 + taxParams.finalLevel / 2 * ( 1 - tanh((1-50)/35) - 1) ;
 
 if ind_climat~=0 & ind_climat~=2 & ind_expectations == 1
@@ -841,8 +777,8 @@ if ~is_bau // case 0 is the baseline
 
         //niveaux en 2020
         Emissions_Group2_2020=sum(CO2_base_reg([ind_afr;ind_ras;ind_ral],19),"r")+...  //baselines pour les petits pays
-        (1-red_intensity_2020_CHN)*GDP_base_PPP_nominal(ind_chn,19)/GDP_base_PPP_nominal(ind_chn,4)*CO2_base_reg(ind_chn,4)+... //pledges pour les autres
-        (1-red_intensity_2020_IND)*GDP_base_PPP_nominal(ind_ind,19)/GDP_base_PPP_nominal(ind_ind,4)*CO2_base_reg(ind_ind,4)+...
+            (1-red_intensity_2020_CHN)*GDP_base_PPP_nominal(ind_chn,19)/GDP_base_PPP_nominal(ind_chn,4)*CO2_base_reg(ind_chn,4)+... //pledges pour les autres
+            (1-red_intensity_2020_IND)*GDP_base_PPP_nominal(ind_ind,19)/GDP_base_PPP_nominal(ind_ind,4)*CO2_base_reg(ind_ind,4)+...
         (1-red_absolu_2020_BRA)* CO2_base_reg(ind_bra,19);
 
         //part de 0 et va au bon pourcentage en 2020

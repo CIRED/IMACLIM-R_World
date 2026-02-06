@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Julie Rozenberg, Florian Leblanc, Adrien Vogt-Schilb
+//     Florian Leblanc, Adrien Vogt-Schilb, Ruben Bibas, Julie Rozenberg
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -36,18 +36,18 @@
 
 function [matrice_indices, noms_des_indices] = read_matrice_indices( mat_path)
     //[matrice_indices, [noms_des_indices] ]= read_matrice_indices(  [mat_path] )
-    //lis la matrice_indice dont le nom est , par defaut STUDY/matrice_ETUDE.tsv
+    //read the matrix matrice_indice whose name is by defaultSTUDY/matrice_ETUDE.tsv
 
     if argn(2)<1
         mat_path = STUDY+"matrice_"+ETUDE+".csv";
     end
 
-    [ matrice_indices , txt ] = csvread( mat_path );
+    matrice_indices = csvRead(mat_path,';',[],[],[],'/\/\//');
 
 endfunction
 
 function [nbMKT] = get_nbMKT(combi)
-    //dirty (but worky) way to get nbMKT as a function of combi
+    //way to get nbMKT as a function of combi
     exec (STUDY+ETUDE+".sce");
 endfunction
 
@@ -66,7 +66,7 @@ function [run_name]=combi2run_name(combi, noETUDEappend, suffix2combi)
     //Adds the number of the combi (transforms 1 to 001 and 15 to 015) to the run name
     if argn(2)<2
         noETUDEappend = %f;
-	suffix2combi = '';
+        suffix2combi = '';
     elseif argn(2)<3
         suffix2combi = '';
     end 
@@ -80,7 +80,7 @@ function [run_name]=combi2run_name(combi, noETUDEappend, suffix2combi)
 endfunction
 
 function strcombi = fit_combi(combi)
-    //transforme le nombre combi en une string avec des zeros au debut: 34->"034"; 123->"123"
+    //transform the number 'combi' into a string with zeros at the beginning: 34->"034"; 123->"123"
 
     tmp = "";
     if combi<10 then tmp="00"; end
@@ -91,11 +91,11 @@ endfunction
 
 function [combi]=run_name2combi(run_name)
 
-    //prend uniquement le run_name si l'input etait un chemin complet
+    //onlmy takes run_name if the input is a complete path
     run_name = svdr2rid(run_name)
 
     //gets the number of the combi from the run name
-    combi = strtod(run_name) //fonction scilab: renvoie le nombre au debut d"une string "224godzila6'->224
+    combi = strtod(run_name) //scilab function: gives back the number at the begining of a string: "224godzila6'->224
 
 endfunction
 
@@ -140,7 +140,7 @@ function combi=str2combi(str,matrice_indices)
     tmp2=strcat (tmp(:,2:$),"","c");
     tmp=[tmp(:,1),tmp2];
     for j=1:size(str,"*")
-        combi(j)=evstr (tmp(find(tmp(:,2)==str(j),1)));
+        combi(j)=evstr( tmp(find(tmp(:,2)==str(j),1)));
     end
 endfunction
 
@@ -196,11 +196,11 @@ function combi_out = switch_indice_in_combi(combi_in,index_ranks,new_index_value
 
     if combi_out==[]
         warning("combi_out is empty")
-        disp(whereami())
+        whereami()
     end
     if size(combi_out)~=size(combi_in)
         warning("some switched combis where not found. combi_out is NOT well ordered.")
-        disp(whereami())
+        whereami()
     end
 
 endfunction
@@ -250,14 +250,14 @@ function nam=get_dirlist(absOption,OUTPUT)
 
     //error management
     if ~isdir(OUTPUT)
-        disp( 'in get_listdir, """+OUTPUT+""" was not a dir');
+        disp( "in get_listdir, """+OUTPUT+""" was not a dir");
         nam=[]
         return
     end
 
     //ACTUAL WORK
 
-    //recuparation d'une liste de dossiers
+    //gets a list of folders
     content = dir(OUTPUT);
     nam = content.name;
     nam = nam(content.isdir);
@@ -265,35 +265,35 @@ function nam=get_dirlist(absOption,OUTPUT)
     //Intercepting bug when nam is empty (happens when OUTPUT is empty)
     if nam~=[] 
         nam=nam(strstr(nam,".svn")==emptystr(nam)); //keeps only the lines which do not include ".svn".
-	if nam~=[] 
+        if nam~=[] 
             nam=nam(strstr(nam,ETUDE)~=emptystr(nam)); //keeps only the lines which include the study name
             if absOption & size(nam,"*")>0
                 nam = OUTPUT+nam ;
             end
-        //proper writing of nam
+            //proper writing of nam
             nam = pathconvert(nam,%t);
         end
     end
 endfunction
 
 function wasdone = check_wasdone(savedir_list)
-    //Checks if a run is done (if IamDoneFolks.sav exists )
+    //Checks if a run is done (if IamDoneFolks.dat exists )
     //INPUTS
     //   savedir_list :  a string matrix. savedirs.
     //OUTPUTS: 
     //   wasdone :  a boolean matrix. for ecah savedir, %t if run was done
 
-    wasdone = isfile(savedir_list+"save"+filesep()+"IamDoneFolks.sav")  | isfile(OUTPUT+savedir_list+"save"+filesep()+"IamDoneFolks.sav")
+    wasdone = isfile(savedir_list+"save"+filesep()+"IamDoneFolks.dat")  | isfile(OUTPUT+savedir_list+"save"+filesep()+"IamDoneFolks.dat")
 endfunction
 
 function wastooManysubs = check_tooManySubs(savedir_list)
-    //Checks if a run is toomanysubdivisions (if wastooManysubs.sav exists )
+    //Checks if a run is toomanysubdivisions (if wastooManysubs.dat exists )
     //INPUTS
     //   savedir_list :  a string matrix. savedirs.
     //OUTPUTS: 
     //   wastooManysubs :  a boolean matrix. for ecah savedir, %t if run was too many subdivisions
 
-    wastooManysubs = isfile(savedir_list+"save"+filesep()+"wastooManysubs.sav") | isfile(OUTPUT+savedir_list+"save"+filesep()+"wastooManysubs.sav")
+    wastooManysubs = isfile(savedir_list+"save"+filesep()+"wastooManysubs.dat") | isfile(OUTPUT+savedir_list+"save"+filesep()+"wastooManysubs.dat")
 
 endfunction
 
@@ -446,7 +446,7 @@ function [liste_savedir, tooManySubs]= make_savedir(OUTPUT,absOption)
     //*Inputs:
     //	**OUTPUT = OPTIONAL a directory (string) where the runs are saved. Level_0 OUTPUT is used when not provided 
     //  **[absOption]: OPTIONAL a boolean. Default is %t. If %t savedirs are absolute (eg. begining with "e:/.." ) else there is only the dir name. 
-    //*Outputs: liste_savedir and tooManySubs : string columns saved in VAR/liste_savedir.sav and VAR/liste_savedir
+    //*Outputs: liste_savedir and tooManySubs : string columns saved in VAR/liste_savedir.dat and VAR/liste_savedir
     //                                          List of succesfull runs
     //                                          List of toomanysubdivision runs
 
@@ -496,7 +496,7 @@ function [wasdone_etude]=adapt_classify2etude(OUTPUT,ETUDE)
     wasdone_etude=matrix (wasdone_etude,-1,1);
 endfunction
 
-//usefulle for scilab.5.1.1
+//usefull for scilab.5.1.1
 // function isit = isfile(pathes)
 // isit = (zeros (pathes)==1);
 // for i_isfile = 1: size(pathes, "*")
@@ -513,7 +513,7 @@ function outDirList = testDirList()
         temp = tokens(outDirList(dim1,5),sep);
         outDirList(dim1,5) = temp($);
         try
-            load(nam(dim1)+"save"+sep+"last_done_year.sav");
+            load(nam(dim1)+"save"+sep+"last_done_year.dat");
         catch
             last_done_year = 0;
         end
@@ -549,7 +549,7 @@ function dates =  get_numerical_dates( name_dir_list, study_name)
         for elt = subs_list
             daty = strsubst( daty($), elt, '') ;
         end
-        dates(itt) = eval(daty) ;
+        dates(itt) = evstr(daty) ;
     end
 endfunction
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

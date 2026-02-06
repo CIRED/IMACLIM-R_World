@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Nicolas Graves, Florian Leblanc
+#     Florian Leblanc, Nicolas Graves
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -34,13 +34,17 @@ def aggregate_flows(aggregation_rules_path,aggregate_from_df,complete_rules=Fals
     #
     #Reading aggregation rules and importing them as a list. 
     if type(aggregation_rules_path)==str:
-        aggregation_list = list(read_aggregation_rules(aggregation_rules_path).items())
+        aggregation_dict = read_aggregation_rules(aggregation_rules_path)
     elif type(aggregation_rules_path) == collections.defaultdict:
-        aggregation_list = list(aggregation_rules_path.items())
+        aggregation_dict = {k:v.copy() for k, v in aggregation_rules_path.items()}
     else:
         raise NameError("First argument aggregation_rules_path is ill-defined: not a collections.defaultdict nor a str path")
-    #
-    # Complete aggregation rules with missing element
+    # Remove from aggregation_list element not present in aggregate_from_df
+    all_element = aggregate_from_df.index.get_level_values('Flow').unique()
+    for k, values in aggregation_dict.items():
+        aggregation_dict[k] = [v for v in values if v in all_element]
+    # Concert to a list
+    aggregation_list = list(aggregation_dict.items()).copy()
     if complete_rules:
         elt_in_extended = [elt for elt in itertools.chain.from_iterable( [ext for agg, ext in aggregation_list])]
         all_elt = aggregate_from_df.index.get_level_values('Flow').unique().tolist()
@@ -53,7 +57,7 @@ def aggregate_flows(aggregation_rules_path,aggregate_from_df,complete_rules=Fals
         temp_mat['Flow'] = aggregated
         temp_mat.set_index('Flow', append=True, inplace=True)
 
-        aggregate_to_df = aggregate_to_df.append(temp_mat)
+        aggregate_to_df = pd.concat([aggregate_to_df,temp_mat])
         #if aggregated not in aggregate_to_df.index:
     return aggregate_to_df 
         #else:

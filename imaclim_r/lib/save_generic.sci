@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Adrien Vogt-Schilb, Nicolas Graves
+//     Nicolas Graves, Adrien Vogt-Schilb, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -103,12 +103,13 @@ function sg_make_list()
     "InvDem"
     "Inv_MW"
     "Inv_val"
+    "Inv_val_sec"
     "K"
     "K_depreciated"
-	"K_cost_ser_TAX"
-	"K_cost_ind_TAX"
-	"K_cost_agr_TAX"
-	"K_cost_btp_TAX"
+    "K_cost_ser_TAX"
+    "K_cost_ind_TAX"
+    "K_cost_agr_TAX"
+    "K_cost_btp_TAX"
     "L"
     "Lact"
     "l"
@@ -122,6 +123,7 @@ function sg_make_list()
     "LCC_cars"
     "Ltot"
     "marketshare"
+    "marketshareTI"
     "markup"
     "markup_stock"
     "MSH_2190_elec"
@@ -149,6 +151,7 @@ function sg_make_list()
     "partImpDI"
     "partImpK"
     "partInvFin"
+    "partTIref"
     "pind"
     "pIndEner"
     "pind_prod"
@@ -159,6 +162,7 @@ function sg_make_list()
     "Q_cum_coal"
     "Q_cum_gaz"
     "Q_elec_anticip"
+    "Q_elec_anticip_tot"
     "QCdom"
     "Ress_coal"
     "Ress_gaz"
@@ -176,7 +180,7 @@ function sg_make_list()
     "stockbatiment"
     "stockbatiment_BAU"
     "stockbatiment_SLE"
-	"stockbatiment_VLE"
+    "stockbatiment_VLE"
     "sumInvDem"
     "Tair"
     "Tautomobile"
@@ -254,12 +258,16 @@ function sg_init(TimeHorizon)
     for isg=1:size(sg_varnams_list,"*")
         if ~isdef(sg_varnams_list(isg));
             ToDeleteIndexes($+1)=isg;
-            warning ( "sg_init is ignoring "+sg_varnams_list(isg))
+            if verbose >=1
+                warning ( "sg_init is ignoring "+sg_varnams_list(isg))
+            end
         end
     end
 
     if size(ToDeleteIndexes,"*")>0
-        disp( "sg_ ignores thoses variables from the list"); disp(sg_varnams_list(ToDeleteIndexes))
+        if verbose >=1
+            disp( "sg_ ignores thoses variables from the list"); disp(sg_varnams_list(ToDeleteIndexes))
+        end
         sg_varnams_list(ToDeleteIndexes) = [];
     end
 
@@ -278,7 +286,9 @@ function sg_init(TimeHorizon)
         //variable name's size chek (if variable as a too long name, 
         //"variable_sav" and "variable_ref" may both be truncated by scilab as "variable_")
         if length(var)>=22
-            disp( "!sg_init: the name "+var+" is too long. Use rustine as sh_CCS_col_Q_col");
+            if verbose>=1
+                disp( "!sg_init: the name "+var+" is too long. Use rustine as sh_CCS_col_Q_col");
+            end
             mkalert( "error");
         end
 
@@ -327,7 +337,9 @@ function sg_update(sg_index)
     
     if is_sg_inited 
     else //CAUTION: do NOT change this if else with a negation ~ before you understand what this line does : (if ~[])
-        disp("sg_update launches sg_init")
+        if verbose>=1
+            disp("sg_update launches sg_init")
+        end
         sg_init()
     end
     
@@ -356,17 +368,21 @@ function sg_save()
     for var=sg_varnams_list'
         global (var+"_sav")
     end
-    disp("sg_save() will save now...")
+    if verbose>=1
+        disp("sg_save() will save now...")
+    end
     //this actually saves. for help, exec this in scilab: head_comments mksav
     mksav (sg_varnams_list+"_sav")
-    disp("...sg_save() is done.")
+    if verbose>=1
+        disp("...sg_save() is done.")
+    end
 endfunction
 
 function sg_clear()
-//robustrly clearglobals each sg_vars
-//avoid bugs if cleargloab does not work
+    //robustrly clearglobals each sg_vars
+    //avoid bugs if cleargloab does not work
 
-   global sg_varnams_list
+    global sg_varnams_list
     for var=sg_varnams_list'
         clearglobal (var+"_sav")
     end
@@ -374,16 +390,16 @@ function sg_clear()
 endfunction
 
 function sg_reload(SAVEDIR)
-    //reucper les var_sav.sav du SAVEIDR/save et reconstruit la sg_varnams_list
+    //reucper les var_sav.dat du SAVEIDR/save et reconstruit la sg_varnams_list
 
     olddir = pwd();
 
     global sg_varnams_list
 
-    //Liste des vars_sav.sav
+    //Liste des vars_sav.dat
     cd(pathconvert(SAVEDIR,%t)+"save")
-    hop=dir("*_sav.sav")
-    sg_varnams_list = strsubst(hop(2),"_sav.sav","") //vire le _sav.sav
+    hop=dir("*_sav.dat")
+    sg_varnams_list = strsubst(hop(2),"_sav.dat","") //vire le _sav.dat
 
     for var=sg_varnams_list'
         global(var+"_sav")
@@ -475,9 +491,6 @@ function out=sg_get_var(matname,which_lines,which_columns,nb_lines,default_orien
         global(matname)
         mat = evstr( matname) 
         if isempty(mat) //varname was not loaded
-            if ~isdef("metaRecMessOn")
-                metaRecMessOn = %t;
-            end
             message("sg_get_var ldsaves "+matname)
             ldsav(matname)
             mat = evstr( matname) 
@@ -584,9 +597,6 @@ function out=sg_get_hyp(matname,which_lines,which_columns,thirdindexes)
         global(matname)
         mat = evstr( matname) 
         if isempty(mat) //varname was loaded
-            if ~isdef("metaRecMessOn")
-                metaRecMessOn = %t;
-            end
             message("sg_get_hyp ldsaves "+matname)
             ldsav(matname)
             mat = evstr( matname) 

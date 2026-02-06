@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Thibault Briera, Florian Leblanc
+#     Florian Leblanc, Thibault Briera
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -43,7 +43,15 @@ chmod a+x run_scenario.sh
 # run with r31998
 #          & svn update -r32011 model/diagnostic.sce
 # 	   & svn update -r32058 lib/diagnostic.sce
-#	   & svn update -r32090 model/extraction-first.sce model/nexus.climatePolicy2.sce study_frames/base.sce study_frames/matrice_base.csv
+#	   & svn update -r32090 model/extraction-first.sce model/nexus.climatePolicy2.sce study_frames/base.sce study_frames/matrice_base.csv study_frames/default_parameters.sce
+#	   & svn update -r32726 lib/npi_ndc.sci lib/compute_emi_ccs.sci lib/diagnostic.sce
+
+# data, do
+#unzip -o /data/public_results/ImaclimR/input_data/input_data-Imaclim2.0-r32070.zip
+#unzip -o /data/public_results/ImaclimR/input_data/input_data-Imaclim2.0-r31996.zip
+
+# then patch
+# patch -p0 -i patch/patch_navigate2.6.patch
 
 # 401515 and 40077 needs to be run 3 times exactly to generate 
 # outputs/ind_lindhal_tax_correction_4007.csv and
@@ -81,7 +89,7 @@ do
       for tax2100 in 1375
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -108,7 +116,7 @@ do
       for tax2100 in  3400 
       do
  
-      for mshbio in 192 
+      for mshbio in 99 
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -134,7 +142,7 @@ do
       for tax2100 in 2990
       do
  
-      for mshbio in 20
+      for mshbio in 10
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -160,7 +168,7 @@ do
       for tax2100 in 2900
       do
  
-      for mshbio in 20
+      for mshbio in 10
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -186,7 +194,7 @@ do
       for tax2100 in 3100
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -212,7 +220,7 @@ do
       for tax2100 in 1575 
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -238,7 +246,7 @@ do
       for tax2100 in 2420
       do
  
-      for mshbio in 147
+      for mshbio in 76
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -264,7 +272,7 @@ do
       for tax2100 in 6000
       do
  
-     for mshbio in 50 
+     for mshbio in 26
      do
 
      for exo_max_CCS_injection in 30
@@ -294,7 +302,7 @@ do
       for tax2100 in 3100
       do
  
-      for mshbio in 206
+      for mshbio in 106
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -321,7 +329,7 @@ do
       for tax2100 in  1375
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -347,7 +355,7 @@ do
       for tax2100 in 1370
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -373,7 +381,7 @@ do
       for tax2100 in 3600
       do
  
-      for mshbio in 20
+      for mshbio in 10
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -399,7 +407,7 @@ do
       for tax2100 in 1820
       do
  
-      for mshbio in 42
+      for mshbio in 22
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"  
@@ -425,7 +433,7 @@ do
       for tax2100 in 2400
       do
  
-      for mshbio in 20
+      for mshbio in 10
       do
 
       for exomaxCCSinjection in 48
@@ -453,7 +461,7 @@ do
       for tax2100 in 1700
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"  
@@ -479,7 +487,7 @@ do
       for tax2100 in 1550 
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
     
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"  
@@ -505,11 +513,11 @@ do
       for tax2100 in 1800
       do
  
-      for mshbio in 5
+      for mshbio in 25
       do
     
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"  
-      echo "record_vett_carbonbudget=%t;tax2019=$tax2019;taxbreak_1=$taxbreak_1;tax2100=$tax2100;exo_maxmshbiom=$mshbio/1000;ind_debug_SC_nlu=%t;suffix2combiName='.tax2019${tax2019}.taxbreak_1${taxbreak_1}.tax2100${tax2100}.${mshbio}'"     > run.cmdFile$runname.sce          
+      echo "record_vett_carbonbudget=%t;tax2019=$tax2019;taxbreak_1=$taxbreak_1;tax2100=$tax2100;exo_maxmshbiom=$mshbio/10000;ind_debug_SC_nlu=%t;suffix2combiName='.tax2019${tax2019}.taxbreak_1${taxbreak_1}.tax2100${tax2100}.${mshbio}'"     > run.cmdFile$runname.sce          
 
       echo "combi=$i;isBatch = %t;deff('clf(varargin)','');deff('plot(varargin)','');exec('imaclimr.sce');exit;"  >> run.cmdFile$runname.sce
       echo "nohup nice $scilabExe -nb -nwni -f run.cmdFile$runname.sce > /dev/null 2> run.batch$i.err < /dev/null"            > run.batchCmd$runname
@@ -531,7 +539,7 @@ do
       for tax2100 in 4100
       do
 
-      for mshbio in 65
+      for mshbio in 33
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"

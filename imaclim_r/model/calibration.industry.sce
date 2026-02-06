@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Thomas Le-Gallic, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Thomas Le Gallic, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -41,10 +41,10 @@ rhoindustrie=repmat([rhocoal_ind;rhooil_ind;rhogaz_ind;rhoEt_ind;rhoelec_ind],1,
 //Composite sector
 Penergieutilecomposite=zeros(reg,4);
 for k=1:reg
-	Penergieutilecomposite(k,1)=shCIsubs_comp(indice_coal,k)*CItotref(indice_coal,indice_composite,k)*rhocoal/(sum(CItotref(1:5,indice_composite,k).*shCIsubs_comp(:,k).*rhocomposite));
-	Penergieutilecomposite(k,2)=((shCIsubs_comp(indice_oil,k)*CItotref(indice_oil,indice_composite,k)+shCIsubs_comp(indice_Et,k)*CItotref(indice_Et,indice_composite,k))*rhooil)/(sum(CItotref(1:5,indice_composite,k).*shCIsubs_comp(:,k).*rhocomposite));
-	Penergieutilecomposite(k,3)=shCIsubs_comp(indice_gaz,k)*CItotref(indice_gaz,indice_composite,k)*rhogaz/(sum(CItotref(1:5,indice_composite,k).*shCIsubs_comp(:,k).*rhocomposite));
-	Penergieutilecomposite(k,4)=shCIsubs_comp(indice_elec,k)*CItotref(indice_elec,indice_composite,k)*rhoelec/(sum(CItotref(1:5,indice_composite,k).*shCIsubs_comp(:,k).*rhocomposite));
+    Penergieutilecomposite(k,1)=shCIsubs_comp(indice_coal,k)*CItotref(indice_coal,indice_composite,k)*rhocoal/(sum(CItotref(1:5,indice_composite,k).*shCIsubs_comp(:,k).*rhocomposite));
+    Penergieutilecomposite(k,2)=((shCIsubs_comp(indice_oil,k)*CItotref(indice_oil,indice_composite,k)+shCIsubs_comp(indice_Et,k)*CItotref(indice_Et,indice_composite,k))*rhooil)/(sum(CItotref(1:5,indice_composite,k).*shCIsubs_comp(:,k).*rhocomposite));
+    Penergieutilecomposite(k,3)=shCIsubs_comp(indice_gas,k)*CItotref(indice_gas,indice_composite,k)*rhogaz/(sum(CItotref(1:5,indice_composite,k).*shCIsubs_comp(:,k).*rhocomposite));
+    Penergieutilecomposite(k,4)=shCIsubs_comp(indice_elec,k)*CItotref(indice_elec,indice_composite,k)*rhoelec/(sum(CItotref(1:5,indice_composite,k).*shCIsubs_comp(:,k).*rhocomposite));
 end
 
 Pcoal_comp_Edeltaref=Penergieutilecomposite(:,1);
@@ -56,10 +56,10 @@ Pelec_comp_Edeltaref=Penergieutilecomposite(:,4);
 
 Penergieutileagric=zeros(reg,4);
 for k=1:reg
-	Penergieutileagric(k,1)=shCIsubs_agri(indice_coal,k)*CItotref(indice_coal,indice_agriculture,k)*rhocoal/(sum(CItotref(1:5,indice_agriculture,k).*shCIsubs_agri(:,k).*rhoagriculture));
-	Penergieutileagric(k,2)=((shCIsubs_agri(indice_oil,k)*CItotref(indice_oil,indice_agriculture,k)+shCIsubs_agri(indice_Et,k)*CItotref(indice_Et,indice_agriculture,k))*rhooil)/(sum(CItotref(1:5,indice_agriculture,k).*shCIsubs_agri(:,k).*rhoagriculture));
-	Penergieutileagric(k,3)=shCIsubs_agri(indice_gaz,k)*CItotref(indice_gaz,indice_agriculture,k)*rhogaz/(sum(CItotref(1:5,indice_agriculture,k).*shCIsubs_agri(:,k).*rhoagriculture));
-	Penergieutileagric(k,4)=shCIsubs_agri(indice_elec,k)*CItotref(indice_elec,indice_agriculture,k)*rhoelec/(sum(CItotref(1:5,indice_agriculture,k).*shCIsubs_agri(:,k).*rhoagriculture));
+    Penergieutileagric(k,1)=shCIsubs_agri(indice_coal,k)*CItotref(indice_coal,indice_agriculture,k)*rhocoal/(sum(CItotref(1:5,indice_agriculture,k).*shCIsubs_agri(:,k).*rhoagriculture));
+    Penergieutileagric(k,2)=((shCIsubs_agri(indice_oil,k)*CItotref(indice_oil,indice_agriculture,k)+shCIsubs_agri(indice_Et,k)*CItotref(indice_Et,indice_agriculture,k))*rhooil)/(sum(CItotref(1:5,indice_agriculture,k).*shCIsubs_agri(:,k).*rhoagriculture));
+    Penergieutileagric(k,3)=shCIsubs_agri(indice_gas,k)*CItotref(indice_gas,indice_agriculture,k)*rhogaz/(sum(CItotref(1:5,indice_agriculture,k).*shCIsubs_agri(:,k).*rhoagriculture));
+    Penergieutileagric(k,4)=shCIsubs_agri(indice_elec,k)*CItotref(indice_elec,indice_agriculture,k)*rhoelec/(sum(CItotref(1:5,indice_agriculture,k).*shCIsubs_agri(:,k).*rhoagriculture));
 end
 
 Pcoal_agric_Edeltaref=Penergieutileagric(:,1);
@@ -71,19 +71,19 @@ Pelec_agric_Edeltaref=Penergieutileagric(:,4);
 
 Penergieutileind=zeros(reg,nb_sectors_industry,4);
 for k=1:reg
-	indice_Penergieutil_zero = sum(CItotref(1:5,indice_industries,k).*shCIsubs_indu(:,:,k).*rhoindustrie,'r')==0;
-	indice_Penergieutil_temp = sum(CItotref(1:5,indice_industries,k).*shCIsubs_indu(:,:,k).*rhoindustrie,'r')<>0;
-	indice_industries_zero=indice_industries(sum(CItotref(1:5,indice_industries,k).*shCIsubs_indu(:,:,k).*rhoindustrie,'r')==0);
-	indice_industries_temp=indice_industries(sum(CItotref(1:5,indice_industries,k).*shCIsubs_indu(:,:,k).*rhoindustrie,'r')<>0);
-	if size(indice_industries_zero,"*") <> 0 // DESAG_INDUSTRY: We assume an equal share when we can't calibrate on existing values... the problem appeared for India (at least) and would need to check the data
-	Penergieutileind(k,indice_Penergieutil_zero,:)=0.25*ones(size(indice_industries_zero,"*"),4);
-	end
-	//we don't consider the case when indice_industries_temp is null (never happens with current data)
+    indice_Penergieutil_zero = sum(CItotref(1:5,indice_industries,k).*shCIsubs_indu(:,:,k).*rhoindustrie,'r')==0;
+    indice_Penergieutil_temp = sum(CItotref(1:5,indice_industries,k).*shCIsubs_indu(:,:,k).*rhoindustrie,'r')<>0;
+    indice_industries_zero=indice_industries(sum(CItotref(1:5,indice_industries,k).*shCIsubs_indu(:,:,k).*rhoindustrie,'r')==0);
+    indice_industries_temp=indice_industries(sum(CItotref(1:5,indice_industries,k).*shCIsubs_indu(:,:,k).*rhoindustrie,'r')<>0);
+    if size(indice_industries_zero,"*") <> 0 // DESAG_INDUSTRY: We assume an equal share when we can't calibrate on existing values... the problem appeared for India (at least) and would need to check the data
+        Penergieutileind(k,indice_Penergieutil_zero,:)=0.25*ones(size(indice_industries_zero,"*"),4);
+    end
+    //we don't consider the case when indice_industries_temp is null (never happens with current data)
 	
-	Penergieutileind(k,indice_Penergieutil_temp,1)=shCIsubs_indu(indice_coal,indice_Penergieutil_temp,k)	.*CItotref(indice_coal,indice_industries_temp,k)*rhocoal./(sum(CItotref(1:5,indice_industries_temp,k).*shCIsubs_indu(:,indice_Penergieutil_temp,k).*rhoindustrie(:,indice_Penergieutil_temp),'r'));
-	Penergieutileind(k,indice_Penergieutil_temp,2)=((shCIsubs_indu(indice_oil,indice_Penergieutil_temp,k)	.*CItotref(indice_oil,indice_industries_temp,k)+shCIsubs_indu(indice_Et,indice_Penergieutil_temp,k).*CItotref(indice_Et,indice_industries_temp,k))*rhooil)./(sum(CItotref(1:5,indice_industries_temp,k).*shCIsubs_indu(:,indice_Penergieutil_temp,k).*rhoindustrie(:,indice_Penergieutil_temp),'r'));
-	Penergieutileind(k,indice_Penergieutil_temp,3)=shCIsubs_indu(indice_gaz,indice_Penergieutil_temp,k)	.*CItotref(indice_gaz,indice_industries_temp,k)*rhogaz./(sum(CItotref(1:5,indice_industries_temp,k).*shCIsubs_indu(:,indice_Penergieutil_temp,k).*rhoindustrie(:,indice_Penergieutil_temp),'r'));
-	Penergieutileind(k,indice_Penergieutil_temp,4)=shCIsubs_indu(indice_elec,indice_Penergieutil_temp,k)	.*CItotref(indice_elec,indice_industries_temp,k)*rhoelec./(sum(CItotref(1:5,indice_industries_temp,k).*shCIsubs_indu(:,indice_Penergieutil_temp,k).*rhoindustrie(:,indice_Penergieutil_temp),'r'));
+    Penergieutileind(k,indice_Penergieutil_temp,1)=shCIsubs_indu(indice_coal,indice_Penergieutil_temp,k)	.*CItotref(indice_coal,indice_industries_temp,k)*rhocoal./(sum(CItotref(1:5,indice_industries_temp,k).*shCIsubs_indu(:,indice_Penergieutil_temp,k).*rhoindustrie(:,indice_Penergieutil_temp),'r'));
+    Penergieutileind(k,indice_Penergieutil_temp,2)=((shCIsubs_indu(indice_oil,indice_Penergieutil_temp,k)	.*CItotref(indice_oil,indice_industries_temp,k)+shCIsubs_indu(indice_Et,indice_Penergieutil_temp,k).*CItotref(indice_Et,indice_industries_temp,k))*rhooil)./(sum(CItotref(1:5,indice_industries_temp,k).*shCIsubs_indu(:,indice_Penergieutil_temp,k).*rhoindustrie(:,indice_Penergieutil_temp),'r'));
+    Penergieutileind(k,indice_Penergieutil_temp,3)=shCIsubs_indu(indice_gas,indice_Penergieutil_temp,k)	.*CItotref(indice_gas,indice_industries_temp,k)*rhogaz./(sum(CItotref(1:5,indice_industries_temp,k).*shCIsubs_indu(:,indice_Penergieutil_temp,k).*rhoindustrie(:,indice_Penergieutil_temp),'r'));
+    Penergieutileind(k,indice_Penergieutil_temp,4)=shCIsubs_indu(indice_elec,indice_Penergieutil_temp,k)	.*CItotref(indice_elec,indice_industries_temp,k)*rhoelec./(sum(CItotref(1:5,indice_industries_temp,k).*shCIsubs_indu(:,indice_Penergieutil_temp,k).*rhoindustrie(:,indice_Penergieutil_temp),'r'));
 	
 end
 

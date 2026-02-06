@@ -29,8 +29,8 @@ for year in `seq 2001 1 2020`
 do
 	iea_data=/data/shared/IEA/IEA_2022_Balances_Prices/results/EnergyBalancesDatabases/wbig_old_iea_code/$year/
 	outputfolder=results_$year/
-        $python3data_imaclim ./GTAP_IEA-aggregation.py --year $year --input-file=$iea_data  --output-file=$outputfolder > main_log_$year.log
+        $python3data_imaclim_env ./GTAP_IEA-aggregation.py --year $year --input-file=$iea_data  --output-file=$outputfolder > main_log_$year.log
 done
 
-$python3data_imaclim ./compute_txCaptemp_ener.py
+$python3data_imaclim_env ./compute_txCaptemp_ener.py
 

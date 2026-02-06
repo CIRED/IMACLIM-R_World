@@ -1,10 +1,10 @@
-// =============================================
-// Contact: <imaclim.r.world@gmail.com>
-// Licence: AGPL-3.0
-// Authors:
-//     Ruben Bibas, Liesbeth Defosse
-//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
-// =============================================
+# =============================================
+# Contact: <imaclim.r.world@gmail.com>
+# Licence: AGPL-3.0
+# Authors:
+#     Liesbeth Defosse, Ruben Bibas
+#     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+# =============================================
 
 
 folder <- paste0(PCA,"/reducedSystem/")

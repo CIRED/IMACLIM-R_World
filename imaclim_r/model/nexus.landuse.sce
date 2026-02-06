@@ -1,9 +1,17 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 
 
 //meant to be executed after nexus.electricity.idealPark.sce and before nexus.electricity.realInvestment.sce and nexus.et.sce
 
 if %f //current_time >= 84
-   do_try_random=%f;
+    do_try_random=%f;
 end
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,8 +34,8 @@ build_et_curve_NLU = %t ;
 // Linear Expectations on carbon tax increase
 txp = taxCO2_CI_prev(1,1,:);
 txn = taxCO2_CI(1,1,:);
-txp = taxCO2_DF_prev(:,indice_gaz);
-txn = taxCO2_DF(:,indice_gaz);
+txp = taxCO2_DF_prev(:,indice_gas);
+txn = taxCO2_DF(:,indice_gas);
 
 for regy=1:nb_regions
     reg_taxeC(regy) = max( 2*txn(regy) -txp(regy),txp(regy)) * 1e6 ; // ($/tCO2eq)
@@ -35,16 +43,16 @@ end
 
 // Afforestation module
 if ind_aff >= 1 & ind_NLU_sensit==0
-  exec(MODEL+"nexus.afforestation.sce");
+    exec(MODEL+"nexus.afforestation.sce");
 end
 
 
 // ancitipated productionqBiomExaJ
 if ~isdef('qBiomExaJ')
-	qBiomExaJ = zeros(nb_regions,1);
+    qBiomExaJ = zeros(nb_regions,1);
 end
 if ~isdef('Q_biofuel_anticip')
-	Q_biofuel_anticip = zeros(nb_regions,1);
+    Q_biofuel_anticip = zeros(nb_regions,1);
 end
 //prod_cellul_bioener = sum(qBiomExaJ,"c").*Exajoule2Mkcal; 
 
@@ -53,15 +61,15 @@ end
 //Timestep of Nexus Land-Use///
 ///////////////////////////////
 if ind_NLU_bioener == 0   // imaclim gives biofuel production to NLU exogeneously
-     printf("We use " + biofuel_scenario + " exo. scenario");
-//    prod_agrofuel = Q_biofuel_anticip' * mtoe2ej * Exajoule2Mkcal;
-//    prod_agrofuel = zeros(1,nb_regions);
+    printf("We use " + biofuel_scenario + " exo. scenario");
+    //    prod_agrofuel = Q_biofuel_anticip' * mtoe2ej * Exajoule2Mkcal;
+    //    prod_agrofuel = zeros(1,nb_regions);
 else // nlu calculate biofuel production for imaclim
-     printf("We use " + biofuel_scenario + " exo. scenario");
-//    producer_lightoil_price = p_Et_oil_exp_tax_ethan ./ (tep2gj) ;
+    printf("We use " + biofuel_scenario + " exo. scenario");
+    //    producer_lightoil_price = p_Et_oil_exp_tax_ethan ./ (tep2gj) ;
     //pcal_eq_agrofuel = (producer_lightoil_price' ./ (G2M .* Megajoule2Mkcal) - ethanol_transfo_cost ./ (density_ethanol .* LHV_ethanol .* Megajoule2Mkcal))  ./ (LHV_sugar ./ (LHV_ethanol .* stechiom_ferment_sugar));
-     //[dsurfagri_s,importsveg_s, importsrumi_s, density_Dyn_new_s, prod_agrofuel_s, prod_agrofuel_max_s, loc_other_agrof_prod_s]=wdsalimener(pcal_eq_agrofuel, pchi, coutfixeint, prod_agrofuel, jint_prev, jint_smooth_from_dc, density_agri, density_veg_from_dc, density_ML_from_dc, density_P_from_dc, density_ot_in_crops_clb, exportsveg,exportsrumi, surfagri, importsrumi, importsveg, %T);
-     //prod_agrofuel = prod_agrofuel_max_s;
+    //[dsurfagri_s,importsveg_s, importsrumi_s, density_Dyn_new_s, prod_agrofuel_s, prod_agrofuel_max_s, loc_other_agrof_prod_s]=wdsalimener(pcal_eq_agrofuel, pchi, coutfixeint, prod_agrofuel, jint_prev, jint_smooth_from_dc, density_agri, density_veg_from_dc, density_ML_from_dc, density_P_from_dc, density_ot_in_crops_clb, exportsveg,exportsrumi, surfagri, importsrumi, importsveg, %T);
+    //prod_agrofuel = prod_agrofuel_max_s;
 end
 
 
@@ -157,12 +165,12 @@ end
 
 
 if ~real_failed
-printf('\n      -------  building cost curves with NLU : first try with past 2G production \n')
+    printf('\n      -------  building cost curves with NLU : first try with past 2G production \n')
 
-stop_increase_2G = %f;
-try
+    stop_increase_2G = %f;
+    try
 
-    exec(MODEL+"landuse.iter.sce");
+        exec(MODEL+"landuse.iter.sce");
 
 
         //if ~isdef("Tot_bioelec_cost_del_pre")
@@ -192,44 +200,44 @@ try
         [biomass_demand_cost, biomass_demand_quant] = add_to_supplycurve(biomass_demand_cost, biomass_demand_quant, Tot_bioelec_cost_del, Qbiofuel_NLU);
         // compute elasticities
         if current_time >1
-          elast_biofuel = build_SC2G_elast( biomass_demand_cost, biomass_demand_quant, linspace(0,100,101) /gj2G_2_gjbiom/mtoe2ej);
+            elast_biofuel = build_SC2G_elast( biomass_demand_cost, biomass_demand_quant, linspace(0,100,101) /gj2G_2_gjbiom/mtoe2ej);
         end
         // restore values
         Qbiofuel_NLU = Qbiofuel_NLU_p0;
         Tot_bioelec_cost_del = Tot_bioelec_cost_delp0;
 
-catch
-    fixed_nlu_startpoint = %t;
-    stop_increase_2G = %t;
-    printf('\n      ------->>>>  Quantity limit reach : Nlu crashed \n')
-end // try
-if ind_debug_SC_nlu == %t
-    suffix_type = "1stTry";
-    exec(MODEL+"nexus.landuse.writeALLresultsDEBUG.sce");
-end
+    catch
+        fixed_nlu_startpoint = %t;
+        stop_increase_2G = %t;
+        printf('\n      ------->>>>  Quantity limit reach : Nlu crashed \n')
+    end // try
+    if ind_debug_SC_nlu == %t
+        suffix_type = "1stTry";
+        exec(MODEL+"nexus.landuse.writeALLresultsDEBUG.sce");
+    end
 
-if break_loop == %T
-      printf('\n      ------->>>>  Break loop on : first try failed \n')
-      break_loop = %F;
-      fixed_nlu_startpoint = %t;
-      stop_increase_2G = %t;
-else
-   bioener_costs_Farmgate = Tot_bioelec_cost;
-   bioener_costs_Del = Tot_bioelec_cost_del;
-   w_bioener_costs_Farmgate = W_tot_bioelec_cost ;
-   w_bioener_costs_Del = W_tot_bioelec_cost_del ;
-   bioener_costs_NLU = pind .* ethan2G_transfo_cost + Tot_bioelec_cost_del .* tep2gj * gj2G_2_gjbiom;
-   // todo : proper value of 1G costs
-   biofuel1G_costs_NLU  = bioener_costs_NLU; 
-   profitable_2G = (p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU ) > 0 ;
-   bioener_costs_NLU_diff = profitable_2G .*(p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU );
-   key_repart_Qbiofuel= divide( bioener_costs_NLU_diff, sum(bioener_costs_NLU_diff), 0);
-   Qbiofuel_NLU = ( prod_agrofuel + key_repart_Qbiofuel' .*glob_in_bioelec_Et / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
+    if break_loop == %T
+        printf('\n      ------->>>>  Break loop on : first try failed \n')
+        break_loop = %F;
+        fixed_nlu_startpoint = %t;
+        stop_increase_2G = %t;
+    else
+        bioener_costs_Farmgate = Tot_bioelec_cost;
+        bioener_costs_Del = Tot_bioelec_cost_del;
+        w_bioener_costs_Farmgate = W_tot_bioelec_cost ;
+        w_bioener_costs_Del = W_tot_bioelec_cost_del ;
+        bioener_costs_NLU = pind .* ethan2G_transfo_cost + Tot_bioelec_cost_del .* tep2gj * gj2G_2_gjbiom;
+        // todo : proper value of 1G costs
+        biofuel1G_costs_NLU  = bioener_costs_NLU; 
+        profitable_2G = (p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU ) > 0 ;
+        bioener_costs_NLU_diff = profitable_2G .*(p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU );
+        key_repart_Qbiofuel= divide( bioener_costs_NLU_diff, sum(bioener_costs_NLU_diff), 0);
+        Qbiofuel_NLU = ( prod_agrofuel + key_repart_Qbiofuel' .*glob_in_bioelec_Et / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
 
-   share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
-   share2G = 1 - share1G ;
-   biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
-end
+        share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
+        share2G = 1 - share1G ;
+        biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
+    end
 else
     stop_increase_2G = %t;
 end
@@ -251,8 +259,8 @@ printf('               world price computed is : ' + string( wp_lightoil_comp) +
 
 // producers take into account their wrong expectation about oil price increase due to scarcity, and correct
 if biofeulProdExp_improved
-   overshoot_wplightoil_ant = wp(indice_Et) ./ wp_lightoil_target; 
-   overshoot_wplightoil_ant = max( overshoot_wplightoil_ant, 1);
+    overshoot_wplightoil_ant = wp(indice_Et) ./ wp_lightoil_target; 
+    overshoot_wplightoil_ant = max( overshoot_wplightoil_ant, 1);
 end
 
 // supply curve if profitable
@@ -278,92 +286,92 @@ glob_in_bioelec_Et_reg_0 = glob_in_bioelec_Et_reg;
 glob_increase2G = 0;
 if (wp_lightoil_comp < wp_lightoil_target) & do_cellulosicFuel
     while (nb_itery<1) & (wp_lightoil_comp < wp_lightoil_target) & do_increase2G_glob & (break_loop == %F) & (~stop_increase_2G)
-    nb_itery = nb_itery+1;
+        nb_itery = nb_itery+1;
 
-    try
-        glob_in_bioelec_Et_reg_s = glob_in_bioelec_Et_reg;
-        key_repart_Qbiofuel_sav = key_repart_Qbiofuel;
-        //Qbiofuel_NLU = (prod_agrofuel + glob_in_bioelec_Et .* (bioener_costs_NLU)' / sum(bioener_costs_NLU)  )' / mtoe2ej / Exajoule2Mkcal;
-        bioener_costs_NLU_diff = profitable_2G .*(p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU );
-        glob_increase2G = glob_increase2G + step_increase2G;
-        glob_in_bioelec_Et = glob_in_bioelec_Et + step_increase2G;
-        // taking into account price elasticity to compute key_repart_Qbiofuel
-        old_key = key_repart_Qbiofuel;
-        [key_repart_Qbiofuel,v,info]= fsolve( key_repart_Qbiofuel,fixedpoint_keyBiofuel);
-        if info~=1
-           error("[key_repart_Qbiofuel,v,info]= fsolve( key_repart_Qbiofuel,fixedpoint_keyBiofuel);");
-        end
-        glob_in_bioelec_Et_reg = glob_in_bioelec_Et_reg_0 + key_repart_Qbiofuel' .* glob_increase2G;
-        Qbiofuel_NLU = ( prod_agrofuel + glob_in_bioelec_Et_reg / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
-        // anticipated price for refined oil
-        exec(MODEL+"nexus.Et.coststruct.sce");
-        //Cap_Et_NLU = max( Q_Et_anticip/0.8 , 0 ) ; 
-        if wp_et_biom_forsight == "forwardlooking"
-            wp_lightoil_target =  compute_wp_Et();
-        else
-            wp_lightoil_target =  wp_et_exp_anticip_nlu; //wp(indice_Et);
-        end
-        glob_in_bioelec = glob_in_bioelec_Elec + glob_in_bioelec_Et + glob_in_bioelec_Hyd;
-        reg_in_bioelec = glob_in_bioelec_Et_reg' + glob_in_bioelec_Hyd_reg + glob_in_bioelec_Elec_reg; 
-        printf('\n      -------  building cost curves with NLU : trying ' + string( glob_in_bioelec_Et) + ' of 2G Mkcal \n')
-        exec(MODEL+"landuse.iter.sce");
-        if ind_debug_SC_nlu == %t
-            suffix_type = "SupplCurv";
-            exec(MODEL+"nexus.landuse.writeALLresultsDEBUG.sce");
-        end
-        //if ~isdef("Tot_bioelec_cost_del_pre")
-        //    Tot_bioelec_cost_del_pre = Tot_bioelec_cost_del;
-        //end
-        //find_high_bioeleccosts = find( Tot_bioelec_cost_del > 5 .* Tot_bioelec_cost_del_pre);
-        //if (find_high_bioeleccosts <> [] & current_time >= 89)
-        //    printf("WARNING: reseting to previous value for regions with price mutliply by 5 ! \n")
-        //    break_loop = %T;
-        //    Tot_bioelec_cost_del_pre( find_high_bioeleccosts) = Tot_bioelec_cost_del( find_high_bioeleccosts);
-        //end
-        if break_loop == %T
-            printf('\n      ------->>>>  Break loop on : cost curve failed at this point \n')
-            break_loop = %F;
-            stop_increase_2G = %t;
-            fixed_nlu_startpoint = %t;
-            glob_in_bioelec_Et_reg = glob_in_bioelec_Et_reg_s;
-            glob_in_bioelec_Et = sum(glob_in_bioelec_Et_reg);
-            key_repart_Qbiofuel = key_repart_Qbiofuel_sav;
-        else
-            bioener_costs_Farmgate = Tot_bioelec_cost;
-            bioener_costs_Del = Tot_bioelec_cost_del;
-            w_bioener_costs_Farmgate = W_tot_bioelec_cost ;
-            w_bioener_costs_Del = W_tot_bioelec_cost_del ;
-            bioener_costs_NLU = pind .* ethan2G_transfo_cost + Tot_bioelec_cost_del .* tep2gj * gj2G_2_gjbiom;
-            // todo : proper balue of 1G costs
-            biofuel1G_costs_NLU  = bioener_costs_NLU;
-            profitable_2G = (p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU ) > 0 ;
+        try
+            glob_in_bioelec_Et_reg_s = glob_in_bioelec_Et_reg;
+            key_repart_Qbiofuel_sav = key_repart_Qbiofuel;
+            //Qbiofuel_NLU = (prod_agrofuel + glob_in_bioelec_Et .* (bioener_costs_NLU)' / sum(bioener_costs_NLU)  )' / mtoe2ej / Exajoule2Mkcal;
             bioener_costs_NLU_diff = profitable_2G .*(p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU );
-            key_repart_Qbiofuel= divide( bioener_costs_NLU_diff, sum(bioener_costs_NLU_diff), 0);
+            glob_increase2G = glob_increase2G + step_increase2G;
+            glob_in_bioelec_Et = glob_in_bioelec_Et + step_increase2G;
+            // taking into account price elasticity to compute key_repart_Qbiofuel
+            old_key = key_repart_Qbiofuel;
+            [key_repart_Qbiofuel,v,info]= fsolve( key_repart_Qbiofuel,fixedpoint_keyBiofuel);
+            if info~=1
+                error("[key_repart_Qbiofuel,v,info]= fsolve( key_repart_Qbiofuel,fixedpoint_keyBiofuel);");
+            end
+            glob_in_bioelec_Et_reg = glob_in_bioelec_Et_reg_0 + key_repart_Qbiofuel' .* glob_increase2G;
+            Qbiofuel_NLU = ( prod_agrofuel + glob_in_bioelec_Et_reg / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
+            // anticipated price for refined oil
+            exec(MODEL+"nexus.Et.coststruct.sce");
+            //Cap_Et_NLU = max( Q_Et_anticip/0.8 , 0 ) ; 
+            if wp_et_biom_forsight == "forwardlooking"
+                wp_lightoil_target =  compute_wp_Et();
+            else
+                wp_lightoil_target =  wp_et_exp_anticip_nlu; //wp(indice_Et);
+            end
+            glob_in_bioelec = glob_in_bioelec_Elec + glob_in_bioelec_Et + glob_in_bioelec_Hyd;
+            reg_in_bioelec = glob_in_bioelec_Et_reg' + glob_in_bioelec_Hyd_reg + glob_in_bioelec_Elec_reg; 
+            printf('\n      -------  building cost curves with NLU : trying ' + string( glob_in_bioelec_Et) + ' of 2G Mkcal \n')
+            exec(MODEL+"landuse.iter.sce");
+            if ind_debug_SC_nlu == %t
+                suffix_type = "SupplCurv";
+                exec(MODEL+"nexus.landuse.writeALLresultsDEBUG.sce");
+            end
+            //if ~isdef("Tot_bioelec_cost_del_pre")
+            //    Tot_bioelec_cost_del_pre = Tot_bioelec_cost_del;
+            //end
+            //find_high_bioeleccosts = find( Tot_bioelec_cost_del > 5 .* Tot_bioelec_cost_del_pre);
+            //if (find_high_bioeleccosts <> [] & current_time >= 89)
+            //    printf("WARNING: reseting to previous value for regions with price mutliply by 5 ! \n")
+            //    break_loop = %T;
+            //    Tot_bioelec_cost_del_pre( find_high_bioeleccosts) = Tot_bioelec_cost_del( find_high_bioeleccosts);
+            //end
+            if break_loop == %T
+                printf('\n      ------->>>>  Break loop on : cost curve failed at this point \n')
+                break_loop = %F;
+                stop_increase_2G = %t;
+                fixed_nlu_startpoint = %t;
+                glob_in_bioelec_Et_reg = glob_in_bioelec_Et_reg_s;
+                glob_in_bioelec_Et = sum(glob_in_bioelec_Et_reg);
+                key_repart_Qbiofuel = key_repart_Qbiofuel_sav;
+            else
+                bioener_costs_Farmgate = Tot_bioelec_cost;
+                bioener_costs_Del = Tot_bioelec_cost_del;
+                w_bioener_costs_Farmgate = W_tot_bioelec_cost ;
+                w_bioener_costs_Del = W_tot_bioelec_cost_del ;
+                bioener_costs_NLU = pind .* ethan2G_transfo_cost + Tot_bioelec_cost_del .* tep2gj * gj2G_2_gjbiom;
+                // todo : proper balue of 1G costs
+                biofuel1G_costs_NLU  = bioener_costs_NLU;
+                profitable_2G = (p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU ) > 0 ;
+                bioener_costs_NLU_diff = profitable_2G .*(p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU );
+                key_repart_Qbiofuel= divide( bioener_costs_NLU_diff, sum(bioener_costs_NLU_diff), 0);
+                //Qbiofuel_NLU = ( prod_agrofuel + key_repart_Qbiofuel' .*glob_in_bioelec_Et / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
+                share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
+                share2G = 1 - share1G ;
+                biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
+                // profitable 2G
+                surfacefor2G = ( max(yield_on_pot_scaled) <= 0.98) ;
+                surfacefor2G_glob = (surfP / (surfML+surfP) >= 0.05) ;
+                [biomass_demand_cost, biomass_demand_quant] = add_to_supplycurve(biomass_demand_cost, biomass_demand_quant, Tot_bioelec_cost_del, Qbiofuel_NLU);
+            end
             //Qbiofuel_NLU = ( prod_agrofuel + key_repart_Qbiofuel' .*glob_in_bioelec_Et / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
             share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
             share2G = 1 - share1G ;
             biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
             // profitable 2G
-            surfacefor2G = ( max(yield_on_pot_scaled) <= 0.98) ;
-            surfacefor2G_glob = (surfP / (surfML+surfP) >= 0.05) ;
-            [biomass_demand_cost, biomass_demand_quant] = add_to_supplycurve(biomass_demand_cost, biomass_demand_quant, Tot_bioelec_cost_del, Qbiofuel_NLU);
-        end
-        //Qbiofuel_NLU = ( prod_agrofuel + key_repart_Qbiofuel' .*glob_in_bioelec_Et / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
-        share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
-        share2G = 1 - share1G ;
-        biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
-        // profitable 2G
-        profitable_2G = (p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU ) > 0 ;
-        do_increase2G = profitable_2G  & max_biofuel;
-        do_increase2G_glob = ( sum( do_increase2G) * surfacefor2G_glob <> 0 ) & surfacefor2G;
+            profitable_2G = (p(:,et)+(coef_Q_CO2_ref(:,indice_Et)-coef_Q_CO2_ethan).* expectedTaxEtDF - biofuel_costs_NLU ) > 0 ;
+            do_increase2G = profitable_2G  & max_biofuel;
+            do_increase2G_glob = ( sum( do_increase2G) * surfacefor2G_glob <> 0 ) & surfacefor2G;
         
-        wp_lightoil_comp = sum( bioener_costs_NLU .* Q(:,et) ) ./ sum( Q(:,et)) ;
-        printf('               world price computed is : ' + string( wp_lightoil_comp) + ' $/tep   -   ref is ' + string( wp_lightoil_target) + '   -   past is ' + string( wp(indice_Et)) + '\n');
-    catch
-        stop_increase_2G = %t;
-        printf('\n      ------->>>>  Quantity limit reach : Nlu crashed \n')
-        fixed_nlu_startpoint = %t;
-    end // try
+            wp_lightoil_comp = sum( bioener_costs_NLU .* Q(:,et) ) ./ sum( Q(:,et)) ;
+            printf('               world price computed is : ' + string( wp_lightoil_comp) + ' $/tep   -   ref is ' + string( wp_lightoil_target) + '   -   past is ' + string( wp(indice_Et)) + '\n');
+        catch
+            stop_increase_2G = %t;
+            printf('\n      ------->>>>  Quantity limit reach : Nlu crashed \n')
+            fixed_nlu_startpoint = %t;
+        end // try
     end // while
 end // if
 
@@ -381,28 +389,28 @@ if (wp_lightoil_comp > wp_lightoil_target) & do_increase2G_glob & (break_loop ==
         wp_lightoil_target =  wp_et_exp_anticip_nlu; //wp(indice_Et);
     end
     printf('\n      -------  last execution of NLU for accuracy\n');
-        glob_in_bioelec = glob_in_bioelec_Elec + glob_in_bioelec_Et + glob_in_bioelec_Hyd;
-        reg_in_bioelec = glob_in_bioelec_Et_reg' + glob_in_bioelec_Hyd_reg + glob_in_bioelec_Elec_reg;
-        exec(MODEL+"landuse.iter.sce");
-        if ind_debug_SC_nlu == %t
-            suffix_type = "SupplCurv";
-            exec(MODEL+"nexus.landuse.writeALLresultsDEBUG.sce");
-        end
-        bioener_costs_Farmgate = Tot_bioelec_cost;
-        bioener_costs_Del = Tot_bioelec_cost_del;
-        w_bioener_costs_Farmgate = W_tot_bioelec_cost ;
-        w_bioener_costs_Del = W_tot_bioelec_cost_del ;
-        bioener_costs_NLU = pind .* ethan2G_transfo_cost + Tot_bioelec_cost_del .* tep2gj * gj2G_2_gjbiom;
-        //biofuel1G_costs_NLU  = bioener_costs_NLU;
-        //share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
-        //share2G = 1 - share1G ;
-        //biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
-        //Qbiofuel_NLU = ( prod_agrofuel + key_repart_Qbiofuel' .*glob_in_bioelec_Et / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
-        //share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
-        //share2G = 1 - share1G ;
-        //biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
-        wp_lightoil_comp = sum( bioener_costs_NLU .* Q(:,et) ) ./ sum( Q(:,et)) ;
-        printf('               world price computed is : ' + string( wp_lightoil_comp) + ' $/tep   -   ref is ' + string( wp_lightoil_target) + '   -   past is ' + string( wp(indice_Et)) + '\n');
+    glob_in_bioelec = glob_in_bioelec_Elec + glob_in_bioelec_Et + glob_in_bioelec_Hyd;
+    reg_in_bioelec = glob_in_bioelec_Et_reg' + glob_in_bioelec_Hyd_reg + glob_in_bioelec_Elec_reg;
+    exec(MODEL+"landuse.iter.sce");
+    if ind_debug_SC_nlu == %t
+        suffix_type = "SupplCurv";
+        exec(MODEL+"nexus.landuse.writeALLresultsDEBUG.sce");
+    end
+    bioener_costs_Farmgate = Tot_bioelec_cost;
+    bioener_costs_Del = Tot_bioelec_cost_del;
+    w_bioener_costs_Farmgate = W_tot_bioelec_cost ;
+    w_bioener_costs_Del = W_tot_bioelec_cost_del ;
+    bioener_costs_NLU = pind .* ethan2G_transfo_cost + Tot_bioelec_cost_del .* tep2gj * gj2G_2_gjbiom;
+    //biofuel1G_costs_NLU  = bioener_costs_NLU;
+    //share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
+    //share2G = 1 - share1G ;
+    //biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
+    //Qbiofuel_NLU = ( prod_agrofuel + key_repart_Qbiofuel' .*glob_in_bioelec_Et / gj2G_2_gjbiom)' / mtoe2ej / Exajoule2Mkcal;
+    //share1G = divide(prod_agrofuel' , Qbiofuel_NLU * mtoe2ej * Exajoule2Mkcal , 1  );
+    //share2G = 1 - share1G ;
+    //biofuel_costs_NLU = share1G .* biofuel1G_costs_NLU + share2G .* bioener_costs_NLU ;
+    wp_lightoil_comp = sum( bioener_costs_NLU .* Q(:,et) ) ./ sum( Q(:,et)) ;
+    printf('               world price computed is : ' + string( wp_lightoil_comp) + ' $/tep   -   ref is ' + string( wp_lightoil_target) + '   -   past is ' + string( wp(indice_Et)) + '\n');
 end // fixed point to be more accurate
 
 if (wp_lightoil_comp < wp_lightoil_target)
@@ -430,10 +438,10 @@ current_time_im = current_time;
 verbose = 0;  // back to 0 (for debugging/coding/coupling with NLU)
 build_et_curve_NLU = %f ;
 
-  if break_loop == %T
-      warning('break_loop is on in nexus land-use, a problem occured');
-      break_loop = %F;
-  end
+if break_loop == %T
+    warning('break_loop is on in nexus land-use, a problem occured');
+    break_loop = %F;
+end
 
 do_try_random=%t;
 

@@ -3,7 +3,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Thibault Briera
+#     Thibault Briera, Florian Leblanc
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -24,5 +24,5 @@ path_data_ndc=$public_data/VandeVenetal_NDC
 # loop on ag_rule, # of aggregated regions, see the aggregate_ar6 function in the R script
 for ag_rule in 1 2 3 4
 do
-    R -f "./process_NPi_NDC.R" --args $path_data_ndc $path_output $crit_emi $ag_rule # add $model if needed
+    $Rdata_imaclim_env -f "./process_NPi_NDC.R" --args $path_data_ndc $path_output $crit_emi $ag_rule # add $model if needed
 done

@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Thibault Briera, Patrice Dumas
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 
 
 
@@ -17,6 +25,15 @@ DATA_OT = DATA + "OtherTerrestrialTransport" + sep;
 path_old_run_Imaclim_v11 = DATA + 'Imaclim_Run/run_v1.1/';
 
 path_autocalibration = DATA + 'auto_calibration/';
+path_autocal_txCap = path_autocalibration + "txCap" + sep;
+path_autocal_tax = path_autocalibration + "tax" + sep;
+path_autocal_slopecoal = path_autocalibration + "slopecoal" + sep;
+path_autocal_covid = path_autocalibration + "covid" + sep;
+path_autocal_exo_prod = path_autocalibration + "exogenous_productivity" + sep;
+path_autocal_RLDC = path_autocalibration + "RLDC"+sep;
+path_autocal_IC_elec = path_autocalibration + "IC_elec"+sep;
+path_autocal_K = path_autocalibration + "calib_K" + sep;
+path_autocal_SSP = path_autocalibration + "SSP_labor_productivity" + sep;
 
 GTAP_hybrid = DATA + 'GTAP'+ sep + 'GTAP_Imaclim_after_hybridation_sector'+string(nb_sectors) + sep + 'outputs_GTAP10_YEAR' + sep ;
 GTAP_nohybrid = DATA + 'GTAP'+ sep + 'GTAP_Imaclim_aggregation_no_hybridation_sector'+string(nb_sectors) + sep + 'outputs_GTAP10_YEAR' + sep ;
@@ -26,7 +43,7 @@ DATA_SAVINGS = DATA + "CEPII_EconMap"  + sep ;
 path_growthdrivers_Ltot = DATA +'UNO_n_SSP_population' + sep + 'results' + sep;
 path_growthdrivers_Ltot_old = DATA + "SSP" + sep;
 path_growthdrivers_Lact1 = DATA + 'UNO_world_population_prospect' + sep + 'results' + sep; 
-path_growthdrivers_Lact = DATA + "SSP"  + sep;
+path_growthdrivers_Lact=path_growthdrivers_Ltot;
 path_growthdrivers_TC_l4 = MISC;
 
 path_employment = DATA + 'ILOSTAT/results_sector'+string(nb_sectors) + sep ;
@@ -58,7 +75,7 @@ path_capital_delta = MISC;
 path_capital_deltaK = CALIB;
 path_capital_price = IEA;
 path_capital_elec_first_try = CALIB;
-path_capital_elec = path_autocalibration + 'elec/';
+path_capital_elec = path_autocal_txCap + 'elec' + sep;
 path_txcapener = IEA_new + sep + "iea_aggregation_for_hybridation" + sep + "txCaptemp_Ener" + sep;
 
 path_salary_mass = DATA + data_previous_version + "BIT"  + sep ;
@@ -89,11 +106,12 @@ path_elec_inv_share = MISC;
 path_elec_capac_MW = MISC;
 path_elec_capac_MW_new = DATA+ "Global_Power_Plant_Database" + sep;
 path_elec_nuke_MW_new = DATA+ "IAEA" + sep;
-path_RLDC_coef = DATA ++ "ADVANCE" + sep;
+path_RLDC_coef = DATA + "ADVANCE" + sep;
 path_elec_CP = DATA + "Damodaran"+sep;
 path_elec_CT = DATA + "KPMG"+sep;
 path_elec_Cap_MW = DATA + "Cap_MW_elec"+sep;
 path_elec_WACC = DATA + "WACC_ETH"; 
+path_elec_calib_MSH = DATA + "IEA" + sep +"ElectricityGeneration"	+ sep;
 
 //VRE calibration
 path_elec_CINV =IRENA +"capital_costs" + sep;
@@ -134,6 +152,8 @@ path_oil_production = DATA + data_previous_version + "lopex+total"  + sep ;
 path_oil_emissions = DATA + data_previous_version + "lopex+total"  + sep ;
 
 path_fossil_SC = DATA + "Bauer_et_al_2016_Fossil/aggregated_supply_curve_ssp" + string(ssp_fossil) +"/";
+path_fossil_coal_SC = DATA + "RoSE_coal_supply_curves/results/";
+path_fossil_cumulative = DATA + "ShiftProject_dataportal"+ sep+"results"+ sep;
 
 path_climatePolicy_Ltot = MISC;
 
@@ -141,10 +161,4 @@ path_climate_impact = DATA + "nexus.climate.impact" + sep ;
 
 path_data_inequalities    = DATA + "inequalitiesnexusdata"  + sep  + 'results' + sep;
 
-// overwrite path to old data in order to reproduce the results aprtially form ImaclimV1.1, starting at 2001
-// Those lines are temporary; delete after the first calibration of ImaclimV2.0 on 2014
-
-if run_ImaclimR_v1_2001
-	path_growthdrivers_Ltot1 = DATA + data_previous_version + "UN" + sep ;
-	path_growthdrivers_Lact1 = DATA + data_previous_version + "UN" + sep ;
-end
+path_data_budget_shares = DATA + "OECD_budget_shares" + sep + 'results' + sep;

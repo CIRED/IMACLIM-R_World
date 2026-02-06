@@ -3,7 +3,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Ruben Bibas, Nicolas Graves, Florian Leblanc
+#     Florian Leblanc, Nicolas Graves, Ruben Bibas
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 

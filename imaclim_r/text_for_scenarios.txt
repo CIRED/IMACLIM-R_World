@@ -1,1 +1,1 @@
-Scenario commentary: <replace this line by a text you want to appear in the log, as a reminder of tests you are currently doing. Only the first line is considerd>
+Scenario commentary (text_for_scenarios.txt): <replace this line by a text you want to appear in the log, as a reminder of tests you are currently doing. Only the first line is considered>

@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -66,7 +66,7 @@ for i in  12
 do
   for taxinc in 800
   do
-      for maxmshbiom in 746
+      for maxmshbiom in 384
       do
       runname="$i-$taxinc-$maxmshbiom"
       echo "ETUDE='navigate33aviation';ETUDEOUTPUT='navigate33aviation';record_vett_carbonbudget=%t;exo_tax_increase=$taxinc/1000;exo_maxmshbiom=$maxmshbiom/10000;ind_debug_SC_nlu=%t;suffix2combiName='.taxinc${taxinc}.maxmshbiom${maxmshbiom}'"     > run.cmdFile$runname.sce
@@ -84,7 +84,7 @@ for i in  11
 do
   for taxinc in 815 
   do
-      for maxmshbiom in 86
+      for maxmshbiom in 44
       do
       runname="$i-$taxinc-$maxmshbiom"
       echo "ETUDE='navigate33aviation';ETUDEOUTPUT='navigate33aviation';record_vett_carbonbudget=%t;exo_tax_increase=$taxinc/1000;exo_maxmshbiom=$maxmshbiom/1000;ind_debug_SC_nlu=%t;suffix2combiName='.taxinc${taxinc}.maxmshbiom${maxmshbiom}'"     > run.cmdFile$runname.sce
@@ -102,7 +102,7 @@ for i in  13
 do
   for taxinc in 711
   do
-      for maxmshbiom in 70
+      for maxmshbiom in 36
       do
       runname="$i-$taxinc-$maxmshbiom"
       echo "ETUDE='navigate33aviation';ETUDEOUTPUT='navigate33aviation';record_vett_carbonbudget=%t;exo_tax_increase=$taxinc/1000;exo_maxmshbiom=$maxmshbiom/1000;ind_debug_SC_nlu=%t;suffix2combiName='.taxinc${taxinc}.maxmshbiom${maxmshbiom}'"     > run.cmdFile$runname.sce
@@ -121,7 +121,7 @@ for i in  22
 do
   for taxinc in 7089
   do
-      for maxmshbiom in 746
+      for maxmshbiom in 384
       do
       runname="$i-$taxinc-$maxmshbiom"
       echo "ETUDE='navigate33aviation';ETUDEOUTPUT='navigate33aviation';record_vett_carbonbudget=%t;exo_tax_increase=$taxinc/10000;exo_maxmshbiom=$maxmshbiom/10000;ind_debug_SC_nlu=%t;suffix2combiName='.taxinc${taxinc}.maxmshbiom${maxmshbiom}'"     > run.cmdFile$runname.sce
@@ -139,7 +139,7 @@ for i in  23
 do
   for taxinc in 678
   do
-      for maxmshbiom in 70
+      for maxmshbiom in 36
       do
       runname="$i-$taxinc-$maxmshbiom"
       echo "ETUDE='navigate33aviation';ETUDEOUTPUT='navigate33aviation';record_vett_carbonbudget=%t;exo_tax_increase=$taxinc/1000;exo_maxmshbiom=$maxmshbiom/1000;ind_debug_SC_nlu=%t;suffix2combiName='.taxinc${taxinc}.maxmshbiom${maxmshbiom}'"     > run.cmdFile$runname.sce

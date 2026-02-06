@@ -2,14 +2,14 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Julie Rozenberg, Adrien Vogt-Schilb, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Adrien Vogt-Schilb, Julie Rozenberg, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
 
 
 A = ones(reg,sec);
-
+A_CI=A;
 x0 = [..
 matrix(Consoref,reg*nb_secteur_conso,1);
 Tautomobileref;
@@ -26,7 +26,7 @@ zeros(nbMKT,1) //<-carbon price
 
 
 nb_car=nombreautomobileref;
-charge = Qref./Cap;
+charge = A.*Qref./Cap;
 stockbatiment = stockbatimentref;
 stockautomobile = stockautomobileref;
 stockinfra = stockinfraref;
@@ -106,4 +106,4 @@ taxCO2_DI_nexus = taxCO2_DI;
 QuotasRevenue=zeros(reg,1);
 x=x0;
 
-disp ( 'Obtained precision for calibration point = '+ norm(economy(x0)));
+message('    Obtained precision for calibration point = '+ string(norm(economy(x0))));

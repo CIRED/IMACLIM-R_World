@@ -1,4 +1,3 @@
-#! /bin/sh
 # =============================================
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
@@ -7,12 +6,14 @@
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
+! /bin/sh
 
 # data paths
 . ./directories_locations.txt
 
 #python version used
-export python3data_imaclim='/data/software/anaconda3/bin/python3'
+export python3data_imaclim_env='/data/software/mambaforge/mambaforge/envs/IMACLIM_R/bin/python'
+export Rdata_imaclim_env='/data/software/mambaforge/mambaforge/envs/IMACLIM_R/bin/R'
 export scilabdata_imaclim='/data/software/scilab-5.4.1/bin/scilab'
 
 #Final aggregation rule, usefull for the order of regions
@@ -22,7 +23,7 @@ export Imaclim_reg_final_rule=$HERE_DIRECTORY'/GTAP/aggregations/aggregation_Ima
 #################################################################
 # ISO and other correspondance
 export ISO_GTAP_IMACLIM_rules=${HERE_DIRECTORY}'/ISO_rules/ISO_GTAP_IMACLIM_rules.csv'
-(cd ISO_rules && $python3data_imaclim create_ISO_rules.py $ISO_wiki/List_of_ISO_3166_country_codes_1_cleaned.csv $ISO3GTAP_path/ISO3166_GTAP.csv ${Imaclim_reg_final_rule} ${ISO_GTAP_IMACLIM_rules})
+(cd ISO_rules && $python3data_imaclim_env create_ISO_rules.py $ISO_wiki/List_of_ISO_3166_country_codes_1_cleaned.csv $ISO3GTAP_path/ISO3166_GTAP.csv ${Imaclim_reg_final_rule} ${ISO_GTAP_IMACLIM_rules})
 
 #################################################################
 # Data with regional / sectoral aggregation
@@ -30,6 +31,7 @@ export ISO_GTAP_IMACLIM_rules=${HERE_DIRECTORY}'/ISO_rules/ISO_GTAP_IMACLIM_rule
 (cd GTAP && ./do_GTAP_before_hybridation.sh)
 (cd ./IEA/iea_aggregation_for_hybridation/ && ./do_iea_agregation.sh)
 (cd ./GTAP_IEA_hybridation/ && ./do_GTAP_IEA_hybridation.sh)
+(cd ./GTAP_IEA_hybridation/ && ./do_product_outside_hybridation.sh)
 
 #Final aggregation rule, usefull for the order of regions
 
@@ -52,16 +54,16 @@ rm -r GTAP/GTAP_Imaclim_before_hybridation/outputs_GTAP*_* GTAP_IEA_hybridation/
 #################################################################
 # Macro data - growth drivers
 
-(cd World_Bank && $python3data_imaclim extract_world_bank_values.py $WB_data_WDI > main.log) 
-(cd CEPII_EconMap && $python3data_imaclim extract_CEPII_EconMap_ImaclimR.py $Imaclim_reg_final_rule > main.log)
+(cd World_Bank && $python3data_imaclim_env extract_world_bank_values.py $WB_data_WDI > main.log) 
+(cd CEPII_EconMap && $python3data_imaclim_env extract_CEPII_EconMap_ImaclimR.py --data-path $econmap_data > main.log)
 (cd UNO_n_SSP_population/ && ./process_population.sh)
-(cd IMF/BOP/ && $python3data_imaclim process_BOP.py $WB_data > main.log)
+(cd IMF/BOP/ && $python3data_imaclim_env process_BOP.py $WB_data > main.log)
 
 #################################################################
 # Emissions data
-(cd PRIMAP-hist && $python3data_imaclim extract_PRIMAP.py $PRIMAP_data ${ISO_GTAP_IMACLIM_rules})
+(cd PRIMAP-hist && $python3data_imaclim_env extract_PRIMAP.py $PRIMAP_data ${ISO_GTAP_IMACLIM_rules})
 (cd Global_Carbon_Budget && ./extract_GCB.sh)
-(cd Minx_et_al_2022 && $python3data_imaclim extract.py $Minx_et_al_2022 ${ISO_GTAP_IMACLIM_rules})
+(cd Minx_et_al_2022 && $python3data_imaclim_env extract.py $Minx_et_al_2022 ${ISO_GTAP_IMACLIM_rules})
 (cd NPi_NDC && ./process_NPi_NDC.sh) # NDC/NPi
 
 #################################################################
@@ -71,6 +73,8 @@ rm -r GTAP/GTAP_Imaclim_before_hybridation/outputs_GTAP*_* GTAP_IEA_hybridation/
 (cd Gas_resources && ./aggregate_gas_resources.sh)
 (cd Oil_resources && ./import_oil_resources.sh)
 (cd Bauer_et_al_2016_Fossil && ./process.sh)
+(cd ShiftProject_dataportal && ./process.sh)
+(cd RoSE_coal_supply_curves/ && ./process.sh)
 
 (cd Enerdata && python3 ./enerdata_extract.py)
 
@@ -86,8 +90,13 @@ rm -r GTAP/GTAP_Imaclim_before_hybridation/outputs_GTAP*_* GTAP_IEA_hybridation/
 # Buildings
 (cd deetman_marinova_buildings/ && ./process.sh)
 
-# Aviation 
+# Transport - cars & Aviation 
 (cd AviationIntegratedModel_TIAM_UCL && $python3data_imaclim extract_AIM_aviation_demand.py $aviationintegratedmodel_data $Imaclim_reg_final_rule > main.log)
+(cd carsnexusdata && $python3data_imaclim compute_msh_EV_sales.py > main.log)
+
+# Cars
+(cp path_OICA/*.csv OICA/)
+(cp path_nexus_cars/*.csv carsnexusdata/)
 
 #################################################################
 # Finance data
@@ -107,4 +116,8 @@ rm -r GTAP/GTAP_Imaclim_before_hybridation/outputs_GTAP*_* GTAP_IEA_hybridation/
 
 # Nexus Inequality
 (cd inequalitiesnexusdata && $scilabdata_imaclim -nwni -f compute_inequalities_indices.sce)
+
+#################################################################
+# Self-calibration part of the model
+(cd ../batch/ && sh NPi_NDC.sh)
 

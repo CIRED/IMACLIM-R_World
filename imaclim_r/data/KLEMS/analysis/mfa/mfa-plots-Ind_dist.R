@@ -1,10 +1,10 @@
-// =============================================
-// Contact: <imaclim.r.world@gmail.com>
-// Licence: AGPL-3.0
-// Authors:
-//     Liesbeth Defosse
-//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
-// =============================================
+# =============================================
+# Contact: <imaclim.r.world@gmail.com>
+# Licence: AGPL-3.0
+# Authors:
+#     Liesbeth Defosse
+#     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+# =============================================
 
 # Plot the coordinates if the normalized distance is smaller then 1.
 #colour_industries <- c("#A6CEE3", "#1F78B4", "#01665E", "#33A02C", "#FB9A99", "#E31A1C", "#FDBF6F", "#FF7F00", "#191970", "#6A3D9A", "#FFD700")

@@ -3,7 +3,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Nicolas Graves, Florian Leblanc
+#     Florian Leblanc, Nicolas Graves
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -21,12 +21,28 @@ import csv
 import sys
 import os
 import copy
-import common_cired
 import aggregation_GTAP
 import collections
 from IPython.display import display
 import argparse
 
+##################
+# Functions
+def replace_inf_nan(df, nan_replace=0, inf_replace=np.finfo(float).max, minf_replace=np.finfo(float).min):
+    """
+    Replace NaN, inf, and -inf values in a DataFrame or array.
+
+    Parameters:
+    - df: pandas DataFrame or numpy array
+    - nan_replace: value to replace NaN with (default: 0)
+    - inf_replace: value to replace inf with (default: largest finite float)
+    - minf_replace: value to replace -inf with (default: smallest finite float)
+
+    Returns:
+    - DataFrame or array with replacements
+    """
+    df = pd.DataFrame(df) if not isinstance(df, pd.DataFrame) else df
+    return df.replace([np.inf, -np.inf], [inf_replace, minf_replace]).fillna(nan_replace)
 
 ###################
 ###Boolean for test
@@ -40,6 +56,7 @@ all_CHP_in_electricity = True
 correct_re_exportations = False
 correct_stock_changes = False
 
+bug_on_enersec_list = False # True for reproductibility; to change to False for the next update of hydribation
 
 #########
 # parse argument
@@ -47,7 +64,7 @@ correct_stock_changes = False
 
 # default argument - usefull for debugging in interractive mode
 output_file_default="results/"
-year_default=2011
+year_default=2014
 input_file_default="/data/shared/IEA/IEA_2022_Balances_Prices/results/EnergyBalancesDatabases/wbig_old_iea_code/"+str(year_default)+"/"
 
 parser = argparse.ArgumentParser('Aggregate IEA energy balances')
@@ -165,6 +182,7 @@ print('Loading IEA data')
 # DataFrame named web. It also defines the variable iea_dataPath.
 exec(open(ieaPath+"import_IEA_energy_balances_to_DataFrame.py").read())
 print('Data IEA loaded')
+
 
 print('Loading WB GDP data')
 # The following script imports all available GDP data in current US$ for "+str(year)+".
@@ -374,7 +392,7 @@ for iea_other_region_lower in ["Other Africa", "Other non-OECD Asia", "Other non
         GDP_WB_pool2share = GDP_WB.reindex( list_iso3_country).sum()
     for iso3_country in [reg for reg in list_iso3_country if reg in GDP_WB.index]:
         country_coeff = (GDP_WB.loc[iso3_country]/ GDP_WB_pool2share).to_numpy()[0]
-        web = web.append(country_coeff*(pd.DataFrame(web_ref_np,index = web_ref_index,columns = web_ref_cols).rename(index={iea_other_region: iso3_country})))
+        web = pd.concat( [web,country_coeff*(pd.DataFrame(web_ref_np,index = web_ref_index,columns = web_ref_cols).rename(index={iea_other_region: iso3_country}))])
     # check total sum
     # print(np.linalg.norm(web.loc[( iea_other_region,slice(None),slice(None)),:].fillna(0) - web.loc[( list_iso3_country,slice(None),slice(None)),:].sum(level='Flow')))
     # Clearing DataFrame
@@ -383,7 +401,7 @@ for iea_other_region_lower in ["Other Africa", "Other non-OECD Asia", "Other non
 
 # Special case : Liechtenstein is missing, we add it with a specific treatment different from coutnry in "Wrl"
 country_coeff = (GDP_WB.loc["LIE"]/GDP_WB.sum() ).to_numpy()[0]
-web = web.append(country_coeff*(pd.DataFrame(web_ref_np,index = web_ref_index,columns = web_ref_cols).rename(index={iea_other_region: "LIE"})))
+web = pd.concat([web,country_coeff*(pd.DataFrame(web_ref_np,index = web_ref_index,columns = web_ref_cols).rename(index={iea_other_region: "LIE"}))])
 web.loc[("LIE", slice(None), slice(None)),products_aggregation_rules['oil']+products_aggregation_rules['p_c']] = 0
 web.loc[("LIE", slice(None), ['Oil and gas extraction (energy)','Oil refineries (energy)','Oil refineries (transf.)','Petrochemical plants (transf.)']),:] = 0
 
@@ -422,7 +440,8 @@ flow_temp = web.xs('BKB/peat briquette plants (transf.)',level='Flow')[['Peat', 
 web.loc[(slice(None),slice(None),'BKB/peat briquette plants (transf.)'), ['Peat', 'Peat products']] = 0 
 #web.xs('BKB/peat briquette plants (transf.)',level='Flow')[['Peat', 'Peat products']] = 0 # set to zero converted transformation processes
 conversion_coeff = flow_temp['Peat']/flow_temp['Peat products']
-conversion_col = np.repeat(common_cired.my_nan_to_num(conversion_coeff.abs().to_numpy(), nan=0.0, posinf=0.0, neginf=0.0) ,number_flows)
+conversion_coeff = replace_inf_nan(conversion_coeff, nan_replace=0, inf_replace=0, minf_replace=0)
+conversion_col = np.repeat(conversion_coeff, number_flows)
 web['Peat products (Peat eq.)'] = web['Peat products']*conversion_col
 # 'Peat products (Peat eq.)' goes to 'Peat' for the first product aggregation
 
@@ -432,7 +451,8 @@ web['Peat products (Peat eq.)'] = web['Peat products']*conversion_col
 
 flow_temp = web.xs('BKB/peat briquette plants (transf.)',level='Flow')[primary_coal+['BKB']]
 conversion_coeff = flow_temp[primary_coal].sum(axis='columns')/flow_temp['BKB']
-conversion_col = np.repeat(common_cired.my_nan_to_num(conversion_coeff.abs().to_numpy(), nan=0.0, posinf=0.0, neginf=0.0) ,number_flows)
+conversion_coeff = replace_inf_nan(conversion_coeff, nan_replace=0, inf_replace=0, minf_replace=0)
+conversion_col = np.repeat(conversion_coeff, number_flows)
 web['BKB (Lignite eq.)'] = web['BKB']*conversion_col
 
 
@@ -442,7 +462,8 @@ web['BKB (Lignite eq.)'] = web['BKB']*conversion_col
 
 flow_temp = web.xs('Patent fuel plants (transf.)',level='Flow')[primary_coal+['Patent fuel']]
 conversion_coeff = flow_temp[primary_coal].sum(axis='columns')/flow_temp['Patent fuel']
-conversion_col = np.repeat(common_cired.my_nan_to_num(conversion_coeff.abs().to_numpy(), nan=0.0, posinf=0.0, neginf=0.0) ,number_flows)
+conversion_coeff = replace_inf_nan(conversion_coeff, nan_replace=0, inf_replace=0, minf_replace=0)
+conversion_col = np.repeat(conversion_coeff, number_flows)
 web['Patent fuel (Other bituminous coal eq.)'] = web['Patent fuel']*conversion_col
 # 'Patent fuel (Other bituminous coal eq.)' goes to 'Other bituminous coal' for the first product aggregation
 
@@ -453,7 +474,8 @@ web['Patent fuel (Other bituminous coal eq.)'] = web['Patent fuel']*conversion_c
 #Treatment of Coke oven coke, and its by-products coke oven gas and coal tar.
 flow_temp = web.xs('Gas works (transf.)',level='Flow')[primary_coal+['Gas works gas']]
 conversion_coeff = flow_temp[primary_coal].sum(axis='columns')/flow_temp['Gas works gas']
-conversion_col = np.repeat(common_cired.my_nan_to_num(conversion_coeff.abs().to_numpy(), nan=0.0, posinf=0.0, neginf=0.0) ,number_flows)
+conversion_coeff = replace_inf_nan(conversion_coeff, nan_replace=0, inf_replace=0, minf_replace=0)
+conversion_col = np.repeat(conversion_coeff, number_flows)
 web['Gas works gas (Other bituminous coal eq.)'] = web['Gas works gas']*conversion_col
 
 #Treatment of Blast furnace gas
@@ -461,7 +483,8 @@ web['Gas works gas (Other bituminous coal eq.)'] = web['Gas works gas']*conversi
 #and then into Other bituminous coal eq.
 flow_temp = web.xs('Blast furnaces (transf.)',level='Flow')[ ['Coke oven coke']+['Blast furnace gas']]
 conversion_coeff = flow_temp['Coke oven coke']/flow_temp['Blast furnace gas']
-conversion_col = np.repeat(common_cired.my_nan_to_num(conversion_coeff.abs().to_numpy(), nan=0.0, posinf=0.0, neginf=0.0) ,number_flows)
+conversion_coeff = replace_inf_nan(conversion_coeff, nan_replace=0, inf_replace=0, minf_replace=0)
+conversion_col = np.repeat(conversion_coeff, number_flows)
 web['Blast furnaces (Coke oven coke eq.)'] = web['Blast furnace gas']*conversion_col
 
 # Treatment of Coke ovens.
@@ -476,7 +499,8 @@ conversion_coeff = flow_temp[primary_coal].sum(axis='columns')/flow_temp['Coke o
 web.loc[('DZA',slice(None),'Coke ovens (transf.)'),'Coke oven coke'] = web.loc[('DZA',slice(None),'Coke ovens (transf.)'),'Coking coal']/conversion_coeff['WLD'].to_numpy()[0]
 web.loc[('DZA',slice(None),'Imports'),'Coke oven coke'] -= web.loc[('DZA',slice(None),'Coke ovens (transf.)'),'Coke oven coke']
 conversion_coeff['DZA'] = conversion_coeff['WLD']
-conversion_col = np.repeat(common_cired.my_nan_to_num(conversion_coeff.abs().to_numpy(), nan=0.0, posinf=0.0, neginf=0.0) ,number_flows)
+conversion_coeff = replace_inf_nan(conversion_coeff, nan_replace=0, inf_replace=0, minf_replace=0)
+conversion_col = np.repeat(conversion_coeff, number_flows)
 
 web['Coke oven coke (Other bituminous coal eq.)'] = web['Coke oven coke']*conversion_col
 
@@ -586,14 +610,17 @@ flow_oil['Crude oil'] = flow_oilgas['Crude oil']
 flow_oil['Natural gas'] = 0
 flow_oil['Flow'] = 'oil extraction (energy)'
 flow_oil.set_index('Flow',append=True,inplace=True)
-web = web.append(flow_oil)
+web = pd.concat([web,flow_oil])
 
 flow_gas = flow_oilgas * (1-share_oil)
 flow_gas['Crude oil'] = 0
 flow_gas['Natural gas'] = flow_oilgas['Natural gas']
 flow_gas['Flow'] = 'gas extraction (energy)'
 flow_gas.set_index('Flow',append=True,inplace=True)
-web = web.append(flow_gas)
+web = pd.concat([web,flow_gas])
+
+# sort_index for better performance
+web = web.sort_index()
 
 print("Check sum for Oil and Gas: ", flow_oilgas.fillna(0).values.sum() - web.xs('gas extraction (energy)',level='Flow').fillna(0).values.sum() - web.xs('oil extraction (energy)',level='Flow').fillna(0).values.sum() ) 
 
@@ -654,6 +681,9 @@ for elt in list__chp_heat_elec__trans:
 # 3.2.z Splitting CHP flows between Heat and electricity, at pro_rata of CHP production
 #NOTE:  data on efficiency should be use for better accuracy. Not the split is only done base on Heat/Elc. output
 
+# sort_index for better performance
+web = web.sort_index()
+list_concat = [web]
 for prefix in ["Main activity producer ", "Autoproducer ", "Own use - Main activity producer "]:
     list_chpEH = [prefix+x for x in list__chp_heat_elec__trans]
     ind_chp, ind_elec, ind_heat = 0, 1, 2
@@ -682,10 +712,15 @@ for prefix in ["Main activity producer ", "Autoproducer ", "Own use - Main activ
         web_chp_splitted.loc[(slice(None),slice(None), list_chpEH[ ind_chp]+" - heat"), 'Heat'] = web_chp.loc[(slice(None),slice(None)),'Heat'].to_numpy()
         #web_chp_splitted.loc[(slice(None),slice(None), list_chpEH[ ind_chp]+" - electricity"), 'Heat'] = 0
         #web_chp_splitted.loc[(slice(None),slice(None), list_chpEH[ ind_chp]+" - heat"), 'Electricity'] = 0
+    list_concat.append(web_chp_splitted.fillna(0))
 
-    web = pd.concat( [web, web_chp_splitted.fillna(0)])
+# concat and sort_index for better performance
+web = pd.concat( list_concat)
+web = web.sort_index()
 
-    print( "Check sum for " + list_chpEH[ind_chp] + ": ", web_chp.fillna(0).values.sum() - web.xs( list_chpEH[ind_chp]+" - electricity",level='Flow').fillna(0).values.sum() - web.xs( list_chpEH[ind_chp]+" - heat",level='Flow').fillna(0).values.sum())
+# check sum
+for prefix in ["Main activity producer ", "Autoproducer ", "Own use - Main activity producer "]:
+    print( "Check sum for " + list_chpEH[ind_chp] + ": ", web.xs( list_chpEH[ind_chp],level='Flow').fillna(0).values.sum() - web.xs( list_chpEH[ind_chp]+" - electricity",level='Flow').fillna(0).values.sum() - web.xs( list_chpEH[ind_chp]+" - heat",level='Flow').fillna(0).values.sum())
 
 transformation_flows_names.remove("Main activity producer CHP plants (transf.)")
 transformation_flows_names.append("Main activity producer CHP plants (transf.) - electricity")
@@ -706,21 +741,21 @@ flow_temp = -web.loc[(countries_with_autoproducer,slice(None),"Autoproducer elec
 distribute_flows_industries = web.loc[(countries_with_autoproducer,slice(None),energy_industries_list+industries_list),'Electricity'].copy().fillna(0)
 
 #For countries without energy industries nor industries identified, we put these in Non-specified flows
-test = distribute_flows_industries.sum(level=['Region','Year'])
+test = distribute_flows_industries.groupby(level=['Region','Year']).sum()
 countries_non_specified = test.loc[test ==0].reset_index()['Region'].to_list()
 countries_industries = test.loc[test !=0].reset_index()['Region'].to_list()
 
 distribute_flows_industries.drop(countries_non_specified, level='Region', inplace=True)
 distribute_flows_non_specified = web.loc[(countries_non_specified,slice(None),['Non-specified (energy)','Non-specified (industry)']),'Electricity'].copy().fillna(0)
 
-shares_all_industries = (distribute_flows_industries.abs()/distribute_flows_industries.abs().sum(level=['Region','Year'])).sort_index(level='Region').copy()
-shares_non_specified = (distribute_flows_non_specified.abs()/distribute_flows_non_specified.abs().sum(level=['Region','Year'])).sort_index(level='Region')
+shares_all_industries = (distribute_flows_industries.abs()/distribute_flows_industries.abs().groupby(level=['Region','Year']).sum()).sort_index(level='Region').copy()
+shares_non_specified = (distribute_flows_non_specified.abs()/distribute_flows_non_specified.abs().groupby(level=['Region','Year']).sum()).sort_index(level='Region')
 
 shares_all_industries = shares_all_industries.fillna(0)
 shares_non_specified = shares_non_specified.fillna(0)
 
 #For countries without any industries even non-specified but with still autoproducers.
-test = shares_non_specified.sum(level=['Region','Year'])
+test = shares_non_specified.groupby(level=['Region','Year']).sum()
 countries_to_correct = test[test ==0].reset_index()['Region'].to_list()
 for country in countries_to_correct:
     shares_non_specified[country] = [0,1] # puts a 100% share on 'Non-specified (industry)'
@@ -763,21 +798,21 @@ flow_temp = -web.loc[(countries_with_autoproducer,slice(None),"Autoproducer CHP 
 distribute_flows_industries = web.loc[(countries_with_autoproducer,slice(None),energy_industries_list+industries_list),'CHP'].copy().fillna(0)
 
 #For countries without energy industries nor industries identified, we put these in Non-specified flows
-test = distribute_flows_industries.sum(level=['Region','Year'])
+test = distribute_flows_industries.groupby(level=['Region','Year']).sum()
 countries_non_specified = test.loc[test ==0].reset_index()['Region'].to_list()
 countries_industries = test.loc[test !=0].reset_index()['Region'].to_list()
 
 distribute_flows_industries.drop(countries_non_specified, level='Region', inplace=True)
 distribute_flows_non_specified = web.loc[(countries_non_specified,slice(None),['Non-specified (energy)','Non-specified (industry)']),'CHP']
 
-shares_all_industries = (distribute_flows_industries.abs()/distribute_flows_industries.abs().sum(level=['Region','Year'])).sort_index(level='Region').copy()
-shares_non_specified = (distribute_flows_non_specified.abs()/distribute_flows_non_specified.abs().sum(level=['Region','Year'])).sort_index(level='Region')
+shares_all_industries = (distribute_flows_industries.abs()/distribute_flows_industries.abs().groupby(level=['Region','Year']).sum()).sort_index(level='Region').copy()
+shares_non_specified = (distribute_flows_non_specified.abs()/distribute_flows_non_specified.abs().groupby(level=['Region','Year']).sum()).sort_index(level='Region')
 
 shares_all_industries = shares_all_industries.fillna(0)
 shares_non_specified = shares_non_specified.fillna(0)
 
 #For countries without any industries even non-specified but with still autoproducers.
-test = shares_non_specified.sum(level=['Region','Year'])
+test = shares_non_specified.groupby(level=['Region','Year']).sum()
 countries_to_correct = test[test ==0].reset_index()['Region'].to_list()
 for country in countries_to_correct:
     shares_non_specified[country] = [0,1] # puts a 100% share on 'Non-specified (industry)'
@@ -815,7 +850,7 @@ flow_temp = -web.loc[(countries_with_autoproducer,slice(None),"Autoproducer heat
 distribute_flows_industries = web.loc[(countries_with_autoproducer,slice(None),energy_industries_list+industries_list),'Heat'].copy().fillna(0)
 
 #For countries without energy industries nor industries identified, we put these in Non-specified flows
-test = distribute_flows_industries.sum(level=['Region','Year'])
+test = distribute_flows_industries.groupby(level=['Region','Year']).sum()
 countries_non_specified = test.loc[test ==0].reset_index()['Region'].to_list()
 countries_industries = test.loc[test !=0].reset_index()['Region'].to_list()
 
@@ -823,14 +858,14 @@ if not countries_non_specified==[]:
     distribute_flows_industries.drop(countries_non_specified, level='Region', inplace=True)
 distribute_flows_non_specified = web.loc[(countries_non_specified,slice(None),['Non-specified (energy)','Non-specified (industry)']),'Heat']
 
-shares_all_industries = (distribute_flows_industries.abs()/distribute_flows_industries.abs().sum(level=['Region','Year'])).sort_index(level='Region').copy()
-shares_non_specified = (distribute_flows_non_specified.abs()/distribute_flows_non_specified.abs().sum(level=['Region','Year'])).sort_index(level='Region')
+shares_all_industries = (distribute_flows_industries.abs()/distribute_flows_industries.abs().groupby(level=['Region','Year']).sum()).sort_index(level='Region').copy()
+shares_non_specified = (distribute_flows_non_specified.abs()/distribute_flows_non_specified.abs().groupby(level=['Region','Year']).sum()).sort_index(level='Region')
 
 shares_all_industries = shares_all_industries.fillna(0)
 shares_non_specified = shares_non_specified.fillna(0)
 
 #For countries without any industries even non-specified but with still autoproducers.
-test = shares_non_specified.sum(level=['Region','Year'])
+test = shares_non_specified.groupby(level=['Region','Year']).sum()
 countries_to_correct = test[test ==0].reset_index()['Region'].to_list()
 for country in countries_to_correct:
     shares_non_specified[country] = [0,1] # puts a 100% share on 'Non-specified (industry)'
@@ -884,6 +919,7 @@ energy_flows.add('Losses')
 transformation_flows = set(map(lambda x: x if x[-9:]=='(transf.)' else (), all_flows))
 transformation_flows.discard(())
 transformation_flows.add('Non-specified (transformation)')
+transformation_flows=list(transformation_flows)
 
 web.loc[(slice(None),slice(None),list(energy_flows)+['Losses']),:] = -web.loc[(slice(None),slice(None),list(energy_flows)+['Losses']),:]
 web.loc[(slice(None),slice(None),transformation_flows),:] = -web.loc[(slice(None),slice(None),transformation_flows),:]
@@ -892,7 +928,7 @@ web.loc[(slice(None),slice(None),transformation_flows),:] = web_copy.mask(web_co
 
 flow_temp = web.loc[(slice(None),slice(None),"Non-specified (transformation)"),:].copy().fillna(0)
 distribute_flows = web.loc[(slice(None),slice(None),transformation_flows_names),:].copy().fillna(0)
-shares_flows = distribute_flows/distribute_flows.sum(level='Region')
+shares_flows = distribute_flows/distribute_flows.groupby(level='Region').sum()
 
 #for product in web.columns:
 #    for region in all_regions :
@@ -900,6 +936,8 @@ shares_flows = distribute_flows/distribute_flows.sum(level='Region')
 #            shares_flows.loc[(region,slice(None),slice(None)),product] = shares_flows.loc[('WLD',slice(None),slice(None)),product].fillna(0)
 #shares_flows = shares_flows.fillna(0)
 
+# sort_index for better performance
+shares_flows = shares_flows.sort_index()
 shares_flows = shares_flows.fillna(0)
 for product in web.columns:
     for region in all_regions :
@@ -908,7 +946,7 @@ for product in web.columns:
 
 for product in web.columns:
     for region in all_regions :
-        if shares_flows.sum(level='Region').loc[(region),product] == 0:
+        if shares_flows.groupby(level='Region').sum().loc[(region),product] == 0:
             shares_flows.loc[(region,slice(None), slice(None)), product] = 1 / len(transformation_flows_names) 
 
 sum0=0
@@ -933,8 +971,9 @@ web.drop('Non-specified (transformation)', level='Flow', inplace=True)
 
 flow_temp = web.loc[(slice(None),slice(None),"Non-specified (energy)"),:].copy().fillna(0)
 distribute_flows = web.loc[(slice(None),slice(None),energy_flows_names),:].copy().fillna(0)
-shares_flows = distribute_flows/distribute_flows.sum(level='Region')
+shares_flows = distribute_flows/distribute_flows.groupby(level='Region').sum()
 
+shares_flows = shares_flows.sort_index()
 shares_flows = shares_flows.fillna(0)
 for product in web.columns:
     for region in all_regions :
@@ -943,7 +982,7 @@ for product in web.columns:
 
 for product in web.columns:
     for region in all_regions :
-        if shares_flows.sum(level='Region').loc[(region),product] == 0:
+        if shares_flows.groupby(level='Region').sum().loc[(region),product] == 0:
             shares_flows.loc[(region,slice(None), slice(None)), product] = 1 / len(energy_flows_names)
 
 sum0=0
@@ -966,7 +1005,7 @@ web.drop('Non-specified (energy)', level='Flow', inplace=True)
 
 #flow_temp = web.loc[(slice(None),slice(None),"Non-specified (industry)"),:].fillna(0).copy()
 #distribute_flows = web.loc[(slice(None),slice(None),industry_flows_names),:].copy().fillna(0)
-#shares_flows = distribute_flows/distribute_flows.sum(level='Region')
+#shares_flows = distribute_flows/distribute_flows.groupby(level='Region').sum()
 
 #shares_flows = shares_flows.fillna(0)
 #for product in web.columns:
@@ -976,7 +1015,7 @@ web.drop('Non-specified (energy)', level='Flow', inplace=True)
 
 #for product in web.columns:
 #    for region in all_regions :
-#        if shares_flows.sum(level='Region').loc[(region),product] == 0:
+#        if shares_flows.groupby(level='Region').sum().loc[(region),product] == 0:
 #            shares_flows.loc[(region,slice(None), slice(None)), product] = 1 / len(industry_flows_names)
 
 #sum0=0
@@ -995,8 +1034,9 @@ web.drop('Non-specified (energy)', level='Flow', inplace=True)
 
 flow_temp = web.loc[(slice(None),slice(None),"Non-specified (transport)"),:].copy().fillna(0)
 distribute_flows = web.loc[(slice(None),slice(None),transport_flows_names),:].copy().fillna(0)
-shares_flows = distribute_flows/distribute_flows.sum(level='Region')
+shares_flows = distribute_flows/distribute_flows.groupby(level='Region').sum()
 
+shares_flows = shares_flows.sort_index()
 shares_flows = shares_flows.fillna(0)
 for product in web.columns:
     for region in all_regions :
@@ -1005,7 +1045,7 @@ for product in web.columns:
 
 for product in web.columns:
     for region in all_regions :
-        if shares_flows.sum(level='Region').loc[(region),product] == 0:
+        if shares_flows.groupby(level='Region').sum().loc[(region),product] == 0:
             shares_flows.loc[(region,slice(None), slice(None)), product] = 1 / len( transport_flows_names)
 
 sum0=0
@@ -1027,8 +1067,9 @@ web.drop('Non-specified (transport)', level='Flow', inplace=True)
 
 flow_temp = web.loc[(slice(None),slice(None),"Losses"),:].copy().fillna(0)
 distribute_flows = web.loc[(slice(None),slice(None),energy_flows_names),:].copy().fillna(0)
-shares_flows = distribute_flows/distribute_flows.sum(level='Region')
+shares_flows = distribute_flows/distribute_flows.groupby(level='Region').sum()
 
+shares_flows = shares_flows.sort_index()
 shares_flows = shares_flows.fillna(0)
 for product in web.columns:
     for region in all_regions :
@@ -1037,7 +1078,7 @@ for product in web.columns:
 
 for product in web.columns:
     for region in all_regions :
-        if shares_flows.sum(level='Region').loc[(region),product] == 0:
+        if shares_flows.groupby(level='Region').sum().loc[(region),product] == 0:
             shares_flows.loc[(region,slice(None), slice(None)), product] = 1 / len( energy_flows_names)
 
 sum0 =0
@@ -1219,9 +1260,25 @@ web_EDS = aggregate_flows( energy_own_use_flows_aggregation_rules, web, complete
 
 ## 4.2 - Cancelling auto-consumption. // Removing non-valued intra-industry uses.
 
-# TODO: need to save auto-consumptions aside
+list_autocons = list()
+
+# Saving auto-consumption
+for energy_indus_agg in ['coa','ely','p_c', 'oil', 'gas_gdt']:
+    for energy_industry in iea_EEB2GTAP_EDS_consumption_flows_aggregation_rules[ energy_indus_agg]:
+        for energy_product in products_aggregation_rules[ energy_indus_agg]:
+            list_autocons.append( pd.DataFrame(web_EDS.loc[(slice(None),slice(None), energy_industry), energy_product]))
+
+web_EDS_autocons = pd.concat( list_autocons)
+
+if bug_on_enersec_list:
+    enersec_list = ['coa','ely','p_c', 'oil', 'gas']
+else:
+    enersec_list = ['coa','ely','p_c', 'oil', 'gas_gdt']
+
+# sort index for performance
+web_EDS = web_EDS.sort_index()
 if do_remove_auto_consumption:
-    for energy_indus_agg in ['coa','ely','p_c', 'oil', 'gas']:
+    for energy_indus_agg in enersec_list:
         for energy_industry in iea_EEB2GTAP_EDS_consumption_flows_aggregation_rules[ energy_indus_agg]:
             for energy_product in products_aggregation_rules[ energy_indus_agg]:
                 web_EDS.loc[(slice(None),slice(None), energy_industry), energy_product] = 0
@@ -1234,6 +1291,7 @@ web_EDS = web_EDS.abs()
 
 #TODO : remove heat from aggregation,
 web_EDS = aggregate_flows( iea_EEB2GTAP_EDS_consumption_flows_aggregation_rules, web_EDS, complete_rules=True)
+web_EDS_autocons = aggregate_flows( iea_EEB2GTAP_EDS_consumption_flows_aggregation_rules, web_EDS_autocons, complete_rules=True)
 
 
 ##############################################################
@@ -1241,12 +1299,14 @@ web_EDS = aggregate_flows( iea_EEB2GTAP_EDS_consumption_flows_aggregation_rules,
 ##############################################################
 
 web_EDS_copy = web_EDS.copy()
+web_EDS_autocons_copy = web_EDS_autocons.copy()
 
 # web_EDS_copy.to_csv(savePath+'./web_EDS.csv',sep='|')
 
 # Products aggregation
 # Here it is the same output product categories for both ~EDS and Imaclim, so we directly aggregate to Imaclim format.
 aggregate_products( products_aggregation_rules, web_EDS_copy, web_EDS_copy, complete_rules=True)
+aggregate_products( products_aggregation_rules, web_EDS_autocons_copy, web_EDS_autocons_copy, complete_rules=True)
 
 all_uses = list()
 #all_uses = [ key for key in iea_EEB2GTAP_EDS_consumption_flows_aggregation_rules.keys() if ( key not in ["Imports", "Exports", "TPES", "Production", "International marine bunkers","International aviation bunkers", "Stock changes"])]
@@ -1256,15 +1316,15 @@ all_uses = [ key for key in iea_EEB2GTAP_EDS_consumption_flows_aggregation_rules
 # 5.1 Before rebalancing imports / exports, we want to check that there is no imports greater than consumptions
 
 """
-import_consumption_ratio = web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').to_numpy()
+import_consumption_ratio = web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().to_numpy()
 import_consumption_ratio = np.where( np.isnan( import_consumption_ratio), 1, import_consumption_ratio)
 where_imports_greater = np.where( import_consumption_ratio >1)
 print("There is imports greater than consumptions", np.where( import_consumption_ratio >1)[0].shape)
 
 for ind, x in enumerate(where_imports_greater[0]):
     y = where_imports_greater[1][ind]
-    print( web_EDS_copy.loc[(slice(None),slice(None),'Production'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'TPES'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').iloc[x, y]) 
-    #print( web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].iloc[x, y] / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').iloc[x, y])
+    print( web_EDS_copy.loc[(slice(None),slice(None),'Production'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'TPES'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().iloc[x, y]) 
+    #print( web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].iloc[x, y] / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().iloc[x, y])
 
 # First: we remove internation marine/aviation from imports (all flux are negative in the original EB)
 #web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:] -= web_EDS_copy.loc[(slice(None),slice(None),'International marine bunkers'),:].fillna(0).to_numpy()
@@ -1283,14 +1343,14 @@ if correct_stock_changes:
 web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:] = imports
 
 # checking again if there is is still imports greater than consumptions
-import_consumption_ratio = web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').to_numpy()
+import_consumption_ratio = web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().to_numpy()
 import_consumption_ratio = np.where( np.isnan( import_consumption_ratio), 1, import_consumption_ratio)
 where_imports_greater = np.where( import_consumption_ratio >1)
 print("There is still imports greater than consumptions", np.where( import_consumption_ratio >1)[0].shape)
 
 # Third rescale imports according to original TPES
-tpes = web_EDS_copy.loc[(slice(None),slice(None), ['TPES']),:].sum(level='Region').to_numpy()
-ratio_tpes = web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').to_numpy() / tpes
+tpes = web_EDS_copy.loc[(slice(None),slice(None), ['TPES']),:].groupby(level='Region').sum().to_numpy()
+ratio_tpes = web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().to_numpy() / tpes
 ratio_tpes = np.where( np.isnan( ratio_tpes), 1, ratio_tpes)
 ratio_tpes = np.where(  ratio_tpes==np.inf, 1, ratio_tpes)
 ratio_tpes = np.where(  import_consumption_ratio<1, 1, ratio_tpes)
@@ -1322,7 +1382,7 @@ if correct_re_exportations:
     web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:] = exports_new
 
 # checking again if there is is still imports greater than consumptions
-import_consumption_ratio = web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').to_numpy()
+import_consumption_ratio = web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().to_numpy()
 import_consumption_ratio = np.where( np.isnan( import_consumption_ratio), 1, import_consumption_ratio)
 import_consumption_ratio = np.where( import_consumption_ratio==np.inf, 1, import_consumption_ratio)
 #import_consumption_ratio = import_consumption_ratio.reshape( ( 192, 34, import_consumption_ratio.shape[1]) )
@@ -1337,6 +1397,8 @@ print("There is still imports greater than consumptions", np.where( import_consu
 # First: We adjust imports and export to the total demand as computed
 
 web_EDS_copy_cons = web_EDS_copy.loc[(slice(None),slice(None),['Production','Exports','Imports']),:].copy()
+# sort index for performance
+web_EDS_copy_cons = web_EDS_copy_cons.sort_index()
 web_EDS_copy_cons.rename(index = {
     "Imports": 'Cons. Flows original',
     "Exports": 'Cons. Flows recomputed',
@@ -1344,9 +1406,9 @@ web_EDS_copy_cons.rename(index = {
 }, level = 'Flow', inplace = True)
 web_EDS_copy_cons.loc[(slice(None),slice(None),slice(None)),:] *= 0
 
-web_EDS_copy_cons.loc[(slice(None),slice(None),'Cons. Flows recomputed'),:] += web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').to_numpy()
+web_EDS_copy_cons.loc[(slice(None),slice(None),'Cons. Flows recomputed'),:] += web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().to_numpy()
 
-web_EDS_copy_cons.loc[(slice(None),slice(None),'Cons. Flows original'),:] += web_EDS_copy.loc[(slice(None),slice(None), ["Imports", "Production", "Transfers", "Statistical differences", "Transformation processes", "Stock changes"]),:].sum(level='Region').to_numpy() - web_EDS_copy.loc[(slice(None),slice(None), "Exports"),:].sum(level='Region').to_numpy()
+web_EDS_copy_cons.loc[(slice(None),slice(None),'Cons. Flows original'),:] += web_EDS_copy.loc[(slice(None),slice(None), ["Imports", "Production", "Transfers", "Statistical differences", "Transformation processes", "Stock changes"]),:].groupby(level='Region').sum().to_numpy() - web_EDS_copy.loc[(slice(None),slice(None), "Exports"),:].groupby(level='Region').sum().to_numpy()
 
 web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:] *= (web_EDS_copy_cons.loc[(slice(None),slice(None),'Cons. Flows recomputed'),:].to_numpy() / web_EDS_copy_cons.loc[(slice(None),slice(None),'Cons. Flows original'),:].to_numpy())
 web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:] *= (web_EDS_copy_cons.loc[(slice(None),slice(None),'Cons. Flows recomputed'),:].to_numpy() / web_EDS_copy_cons.loc[(slice(None),slice(None),'Cons. Flows original'),:].to_numpy())
@@ -1369,14 +1431,14 @@ web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:] = imports
 web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:] = exports_new
 
 # Third: check that there is no imports larger than consumption
-import_consumption_ratio = web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').to_numpy()
+import_consumption_ratio = web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().to_numpy()
 import_consumption_ratio = np.where( np.isnan( import_consumption_ratio), 1, import_consumption_ratio)
 where_imports_greater = np.where( import_consumption_ratio >1)
 print("There is imports greater than consumptions", np.where( import_consumption_ratio >1)[0].shape)
 for ind, x in enumerate(where_imports_greater[0]):
     y = where_imports_greater[1][ind]
-    print( web_EDS_copy.loc[(slice(None),slice(None),'Production'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'TPES'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').iloc[x, y]) 
-    #print( web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].iloc[x, y] / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').iloc[x, y])
+    print( web_EDS_copy.loc[(slice(None),slice(None),'Production'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),'TPES'),:].iloc[x, y], web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().iloc[x, y]) 
+    #print( web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].iloc[x, y] / web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().iloc[x, y])
 
 
 ############################################################
@@ -1395,6 +1457,8 @@ sum_exports = exports.sum()
 coef_imports = 1
 coef_exports = (sum_imports / sum_exports).mask((sum_imports/sum_exports).isin([np.inf,np.nan]), 1)
 
+# sort index for performance
+web_EDS_copy = web_EDS_copy.sort_index()
 if do_rebalance_import_export:
     for product in web_EDS_copy.columns:
         #web_EDS_copy.loc[(slice(None),slice(None),'Imports'),product] *=  coef_imports[product] 
@@ -1406,20 +1470,24 @@ if do_rebalance_import_export:
 
 # Ressources = somme des usages
 web_EDS_append_index = web_EDS.loc[(slice(None),slice(None),all_uses[0]),:].index
-web_EDS_append_index.set_levels(['Ressources']*web_EDS_append_index.size, level='Flow',inplace=True, verify_integrity=False)
-web_EDS_copy = web_EDS_copy.append(pd.DataFrame(web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').to_numpy(),index=web_EDS_append_index, columns = web_EDS_copy.columns))
+web_EDS_append_index = web_EDS_append_index.set_levels(['Ressources']*web_EDS_append_index.size, level='Flow', verify_integrity=False)
+web_EDS_copy = pd.concat([web_EDS_copy,pd.DataFrame(web_EDS_copy.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().to_numpy(),index=web_EDS_append_index, columns = web_EDS_copy.columns)])
 
 # Q = R -I + E
-web_EDS_append_index.set_levels(['Production (recomposed)']*web_EDS_append_index.size, level='Flow',inplace=True, verify_integrity=False)
-web_EDS_copy = web_EDS_copy.append(pd.DataFrame(web_EDS_copy.loc[(slice(None),slice(None),'Ressources'),:].fillna(0).to_numpy() - web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() + web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:].fillna(0).to_numpy() ,index=web_EDS_append_index, columns = web_EDS_copy.columns))
-
+web_EDS_append_index = web_EDS.loc[(slice(None),slice(None),all_uses[0]),:].index
+web_EDS_append_index = web_EDS_append_index.set_levels(['Production (recomposed)']*web_EDS_append_index.size, level='Flow', verify_integrity=False)
+new_df = pd.DataFrame(web_EDS_copy.loc[(slice(None),slice(None),'Ressources'),:].fillna(0).to_numpy() - web_EDS_copy.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() + web_EDS_copy.loc[(slice(None),slice(None),'Exports'),:].fillna(0).to_numpy() ,index=web_EDS_append_index, columns = web_EDS_copy.columns)
+web_EDS_copy = pd.concat([web_EDS_copy.reset_index(), new_df.reset_index()]).set_index( ['Region','Year','Flow'])
 
 ##############################################################
 ## 6 - Saving the matrix in EDS format.
 ##############################################################
+
+web_EDS_copy_flows = web_EDS_copy.index.get_level_values('Flow').unique()
+flow2sav = [e for e in flows_to_save_EDS+flows_to_save_outside_hybridation if e in web_EDS_copy_flows]
 with open(savePath+'EDS_+_outside_hybridation.csv','w') as file:
     file.write('//Modified Energy Balances computed for ImaclimR hybridization (by geographic region and nature of flow, EDS (GTAP) format)\n//calcutated from IEA Energy Balances for '+str(year)+', including data outside pure hybridization\n//Unit: ktoe\n')
-    web_EDS_copy.loc[(slice(None),slice(None),flows_to_save_EDS+flows_to_save_outside_hybridation),products_to_save+products_to_save_outside_hybridation].to_csv(file, sep= '|')
+    web_EDS_copy.loc[(slice(None),slice(None),flow2sav),products_to_save+products_to_save_outside_hybridation].to_csv(file, sep= '|')
 
 with open(savePath+'EDS_saved.csv','w') as file:
     file.write('//Modified Energy Balances computed for ImaclimR hybridization (by geographic region and nature of flow, EDS (GTAP) format)\n//calcutated from IEA Energy Balances for '+str(year)+'\n//Unit: ktoe\n')
@@ -1440,12 +1508,27 @@ with open(savePath+'Imaclim__EDS_Gtap_Aggregation.csv','w') as file:
     file.write('//Modified Energy Balances computed for ImaclimR hybridization (by GTAP geographic region and EDS nature of flow)\n//calcutated from IEA Energy Balances for '+str(year)+'\n//Unit: ktoe\n')
     web_gtap_reg.loc[(slice(None),slice(None), [elt for elt in flows_to_save_EDS if not elt in flow_2_exclude]),products_to_save].to_csv(file,sep= '|')
 
+# saving auto consumption ath the EDS - Gtap agregation level
+web_autocons_gtap_reg = web_EDS_autocons_copy.copy()
+web_autocons_gtap_reg.drop('WLD',level='Region',inplace=True)
+web_autocons_gtap_reg.reset_index(inplace=True)
+web_autocons_gtap_reg['Region_Gtap'] = list(map(lambda x: ISO2GTAP_dict[x], web_autocons_gtap_reg['Region']))
+web_autocons_gtap_reg = web_autocons_gtap_reg.groupby(['Region_Gtap', 'Year', 'Flow']).sum()
+
+with open(savePath+'Imaclim__EDS_Gtap_Aggregation__auto_consumption.csv','w') as file:
+    file.write('//Auto-consumption flows\n//Modified Energy Balances computed for ImaclimR hybridization (by GTAP geographic region and EDS nature of flow)\n//calcutated from IEA Energy Balances for '+str(year)+'\n//Unit: ktoe\n')
+    list_present_flow = web_autocons_gtap_reg.index.get_level_values('Flow').unique()
+    web_autocons_gtap_reg.loc[(slice(None),slice(None), [elt for elt in flows_to_save_EDS if not elt in flow_2_exclude and elt in list_present_flow]),products_to_save].to_csv(file,sep= '|')
 
 # 5bis - Aggregating flows towards an Imaclim format.
 web_Im = aggregate_flows( GTAP_EDS2Imaclim_flows_aggregation_rules, web_EDS, complete_rules=True)
 
+GTAP_EDS2Imaclim_flows_aggregation_rules_auto = collections.defaultdict(list,{k:v for k, v in GTAP_EDS2Imaclim_flows_aggregation_rules.items() if k in ['coal','oil','gas_gdt','Et','elec']})
+web_Im_auto = aggregate_flows( GTAP_EDS2Imaclim_flows_aggregation_rules_auto, web_EDS_autocons, complete_rules=True)
+
 # 6bis - Saving all annex products (not for Imaclim but for comparison.)
-web_Im.loc[(slice(None),slice(None),flows_to_save_Imaclim+flows_to_save_outside_hybridation),products_to_save_outside_hybridation].to_csv(savePath+'Imaclim_+_outside_hybridation.csv', sep= '|')
+flow2sav = [e for e in flows_to_save_Imaclim+flows_to_save_outside_hybridation if e in web_Im.index.get_level_values('Flow').unique()]
+web_Im.loc[(slice(None),slice(None),flow2sav),products_to_save_outside_hybridation].to_csv(savePath+'Imaclim_+_outside_hybridation.csv', sep= '|')
 
 
 ##############################################################
@@ -1454,6 +1537,7 @@ web_Im.loc[(slice(None),slice(None),flows_to_save_Imaclim+flows_to_save_outside_
 # Products aggregation
 # Here it is the same output product categories for both ~EDS and Imaclim, so we directly aggregate to Imaclim format.
 aggregate_products(products_aggregation_rules, web_Im, web_Im, complete_rules=True)
+aggregate_products(products_aggregation_rules, web_Im_auto, web_Im_auto, complete_rules=True)
 
 # Algorithme import/export
 # also works at the disaggregated level
@@ -1473,6 +1557,8 @@ sum_exports = exports.sum()
 coef_imports = 1
 coef_exports = (sum_imports / sum_exports).mask((sum_imports/sum_exports).isin([np.inf,np.nan]), 1)
 
+# sort index for performance
+web_EDS_copy = web_EDS_copy.sort_index()
 if do_rebalance_import_export:
     for product in web_EDS_copy.columns:
         #web_EDS_copy.loc[(slice(None),slice(None),'Imports'),product] *=  coef_imports[product] 
@@ -1487,12 +1573,13 @@ all_uses = [ key for key in GTAP_EDS2Imaclim_flows_aggregation_rules.keys() if (
 
 # Ressources = somme des usages
 web_Im_append_index = web_Im.loc[(slice(None),slice(None),all_uses[0]),:].index
-web_Im_append_index.set_levels(['Ressources']*web_Im_append_index.size, level='Flow',inplace=True, verify_integrity=False)
-web_Im = web_Im.append(pd.DataFrame(web_Im.loc[(slice(None),slice(None),all_uses),:].sum(level='Region').to_numpy(),index=web_Im_append_index, columns = web_Im.columns))
+web_Im_append_index = web_Im_append_index.set_levels(['Ressources']*web_Im_append_index.size, level='Flow', verify_integrity=False)
+web_Im = pd.concat([web_Im,pd.DataFrame(web_Im.loc[(slice(None),slice(None),all_uses),:].groupby(level='Region').sum().to_numpy(),index=web_Im_append_index, columns = web_Im.columns)])
 
 # Q = R -I + E
-web_Im_append_index.set_levels(['Production_recomposed']*web_Im_append_index.size, level='Flow',inplace=True, verify_integrity=False)
-web_Im = web_Im.append(pd.DataFrame(web_Im.loc[(slice(None),slice(None),'Ressources'),:].fillna(0).to_numpy() - web_Im.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() + web_Im.loc[(slice(None),slice(None),'Exports'),:].fillna(0).to_numpy() ,index=web_Im_append_index, columns = web_Im.columns))
+web_Im_append_index = web_Im_append_index.set_levels(['Production_recomposed']*web_Im_append_index.size, level='Flow', verify_integrity=False)
+new_df = pd.DataFrame(web_Im.loc[(slice(None),slice(None),'Ressources'),:].fillna(0).to_numpy() - web_Im.loc[(slice(None),slice(None),'Imports'),:].fillna(0).to_numpy() + web_Im.loc[(slice(None),slice(None),'Exports'),:].fillna(0).to_numpy() ,index=web_Im_append_index, columns = web_Im.columns)
+web_Im = pd.concat([web_Im.reset_index(), new_df.reset_index()]).set_index( ['Region','Year','Flow'])
 
 
 ##############################################################
@@ -1506,6 +1593,7 @@ with open(savePath+'Imaclim__World_Flows.csv','w') as file:
 
 # dropping world again
 web_Im.drop('WLD',level='Region',inplace=True)
+web_Im_auto.drop('WLD',level='Region',inplace=True)
 
 web_gtep_reg = web_Im.copy()
 sum0 = web_gtep_reg.sum(axis=0).values[-5:].sum()
@@ -1530,8 +1618,26 @@ web_Im = web_Im.reindex(order_regions, level="Region_Im").reindex(order_flows,le
 # TODO save outside everything ?
 with open(savePath+'Imaclim_final_+_outside_hybridation.csv','w') as file:
     file.write('//Modified Energy Balances computed for ImaclimR hybridization (by geographic region and nature of flow)\n//calcutated from IEA Energy Balances for '+str(year)+', including data outside pure hybridization\n//Unit: ktoe\n')
-    web_Im.loc[(slice(None),slice(None),flows_to_save_Imaclim+flows_to_save_outside_hybridation),products_to_save+products_to_save_outside_hybridation].to_csv(file,sep= '|')
+    flow2sav = [e for e in flows_to_save_Imaclim+flows_to_save_outside_hybridation if e in web_Im.index.get_level_values('Flow').unique()]
+    web_Im.loc[(slice(None),slice(None),flow2sav),products_to_save+products_to_save_outside_hybridation].to_csv(file,sep= '|')
 
 with open(savePath+'Imaclim_final_saved.csv','w') as file:
     file.write('//Modified Energy Balances computed for ImaclimR hybridization (by geographic region and nature of flow)\n//calcutated from IEA Energy Balances for '+str(year)+'\n//Unit: ktoe\n')
-    web_Im.loc[(slice(None),slice(None),flows_to_save_Imaclim),products_to_save].to_csv(file,sep= '|')
+    flow2sav = [e for e in flows_to_save_Imaclim if e in web_Im.index.get_level_values('Flow').unique()]
+    web_Im.loc[(slice(None),slice(None),flow2sav),products_to_save].to_csv(file,sep= '|')
+
+##########################
+# Export auto consumption
+##########################
+web_Im_auto.reset_index(inplace=True)
+web_Im_auto['Region_Im'] = list(map(lambda x: ISO2Imaclim_dict[x], web_Im_auto['Region']))
+web_Im_auto = web_Im_auto.groupby(['Region_Im', 'Year', 'Flow']).sum()
+web_Im_auto = web_Im_auto.reindex(order_regions, level="Region_Im").reindex(order_flows,level='Flow')
+
+with open(savePath+'Imaclim_auto_consumption_saved.csv','w') as file:
+    file.write('//Auto-consumption flows\n//Modified Energy Balances computed for ImaclimR hybridization (by geographic region and nature of flow)\n//calcutated from IEA Energy Balances for '+str(year)+'\n//Unit: ktoe\n')
+    flow2sav = [e for e in flows_to_save_Imaclim if e in web_Im_auto.index.get_level_values('Flow').unique()]
+    web_Im_auto.loc[(slice(None),slice(None),flow2sav),products_to_save].to_csv(file,sep= '|')
+
+
+

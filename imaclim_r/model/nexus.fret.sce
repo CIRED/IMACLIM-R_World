@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 ///////////////////////////////////////////////////////////////////////////
 //Update fret needs (unitary Intermediate Consumption : air, sea, terrestrial) of sectors
 
@@ -13,7 +21,6 @@ if current_time_im==1
     int_trans_mer_prev=ones(reg,sec);
     int_trans_OTT_prev=ones(reg,sec);
     int_trans_air_prev=ones(reg,sec);
-
 end
 
 ////////////////////////////////////////////////////
@@ -47,7 +54,7 @@ if ETC_infra_fret==0
             int_trans_OTT(:,indice_industries)=int_trans_OTT(:,indice_industries).*(1+EEI_newVintage(:,indice_industries,current_time_im)/1.5);
             //Maritime freight use reduced faster than energy efficiency in industry
             int_trans_mer=int_trans_mer.*(ones(reg,sec)+1/1.5*EEI_newVintage(:,indice_industries($),current_time_im)*ones(1,sec));
-	else
+        else
             //For all regions, industry reduces land transport use as fast as energy efficiency
             int_trans_OTT(:,indice_industries)=int_trans_OTT(:,indice_industries).*(1+EEI_newVintage(:,indice_industries,current_time_im));
             //Maritime freight use reduced as fast as energy efficiency in industry
@@ -102,7 +109,7 @@ if ETC_infra_fret==1
         int_trans_OTT_ETC(:,indice_construction)=int_trans_OTT_ETC(:,indice_construction).*(ones(reg,1)+rate_decoupl_OTT_ETC(:,indice_construction));
         int_trans_OTT_ETC(:,indice_coal)=int_trans_OTT_ETC(:,indice_coal).*(ones(reg,1)+rate_decoupl_OTT_ETC(:,indice_coal));
         int_trans_OTT_ETC(:,indice_oil)=int_trans_OTT_ETC(:,indice_oil).*(ones(reg,1)+rate_decoupl_OTT_ETC(:,indice_oil));
-        int_trans_OTT_ETC(:,indice_gaz)=int_trans_OTT_ETC(:,indice_gaz).*(ones(reg,1)+rate_decoupl_OTT_ETC(:,indice_gaz));
+        int_trans_OTT_ETC(:,indice_gas)=int_trans_OTT_ETC(:,indice_gas).*(ones(reg,1)+rate_decoupl_OTT_ETC(:,indice_gas));
         int_trans_OTT_ETC(:,indice_Et)=int_trans_OTT_ETC(:,indice_Et).*(ones(reg,1)+rate_decoupl_OTT_ETC(:,indice_Et));
         int_trans_OTT_ETC(:,indice_elec)=int_trans_OTT_ETC(:,indice_elec).*(ones(reg,1)+rate_decoupl_OTT_ETC(:,indice_elec));
         int_trans_OTT_ETC(:,indice_agriculture)=int_trans_OTT_ETC(:,indice_agriculture).*(ones(reg,1)+rate_decoupl_OTT_ETC(:,indice_agriculture));
@@ -131,7 +138,7 @@ if ind_roadFret_A==1 & ~is_bau & current_time_im >= start_year_strong_policy-bas
 else
     for k=1:reg
         for j=1:sec
-            CI(indice_OT,j,k)=(CI_prev(indice_OT,j,k)*(1+rate_int_trans_OTT(k,j))*Cap_prev(k,j)*(1-delta(k,j))+CIref(indice_OT,j,k)*int_trans_OTT_ETC(k,j)*DeltaK(k,j))/(Cap_prev(k,j)*(1-delta(k,j))+DeltaK(k,j));
+            CI(indice_OT,j,k)=(CI_prev(indice_OT,j,k)*(1+rate_int_trans_OTT(k,j))*Cap_prev(k,j)*(1-delta_modified(k,j))+CIref(indice_OT,j,k)*int_trans_OTT_ETC(k,j)*DeltaK(k,j))/(Cap_prev(k,j)*(1-delta_modified(k,j))+DeltaK(k,j));
         end
     end
 end
@@ -143,7 +150,7 @@ end
 
 for k=1:reg
     for j=1:sec
-        CI(indice_mer,j,k)=(CI_prev(indice_mer,j,k)*(1+rate_int_trans_mer(k,j))*Cap_prev(k,j)*(1-delta(k,j))+CIref(indice_mer,j,k)*int_trans_mer_ETC(k,j)*DeltaK(k,j))/(Cap_prev(k,j)*(1-delta(k,j))+DeltaK(k,j));
+        CI(indice_mer,j,k)=(CI_prev(indice_mer,j,k)*(1+rate_int_trans_mer(k,j))*Cap_prev(k,j)*(1-delta_modified(k,j))+CIref(indice_mer,j,k)*int_trans_mer_ETC(k,j)*DeltaK(k,j))/(Cap_prev(k,j)*(1-delta_modified(k,j))+DeltaK(k,j));
     end
 end
 
@@ -180,23 +187,23 @@ if exo_pkmair_scenario >0
     DG(:,indice_air) = DGref(:,indice_air) .* pkm_increase_for_sc;
     ////////
     // DI 
-    DI_air = DIinfra(:,indice_air) + DIprodref(:,indice_air);
+    DI_air = DIinfra(:,indice_air) + DIprod(:,indice_air);
     DI_obj = DIref(:,indice_air) .* pkm_increase_for_sc;
     correction_DI_air = DI_obj ./ DI_air;
     //DIinfra(:,indice_air) = correction_DI_air.* DIinfra(:,indice_air);
-    DIprodref(:,indice_air) = correction_DI_air .* DIprodref(:,indice_air);
+    DIprod(:,indice_air) = correction_DI_air .* DIprod(:,indice_air);
     // substitution to mer and OT
     //share_mer = (DIinfra(:,indice_mer).*pArmDI(:,indice_mer)) ./ sum( DIinfra(:,[indice_mer,indice_OT]).*pArmDI(:,[indice_mer,indice_OT]),'c');
     //DIinfra(:,indice_mer) = DIinfra(:,indice_mer) + share_mer .* ( (1-correction_DI_air)./ correction_DI_air .* DIinfra(:,indice_air).*pArmDI(:,indice_air)) ./ pArmDI(:,indice_mer);
     //DIinfra(:,indice_OT) = DIinfra(:,indice_mer) + (1-share_mer) .* ( (1-correction_DI_air)./ correction_DI_air .* DIinfra(:,indice_air).*pArmDI(:,indice_air)) ./ pArmDI(:,indice_OT);
     if sc_exo_air_demand <> "1.5C_LD_SSP2" // subsitution towards other transport mode if this is the aviation demand scenario do not results from behavioral assumptions
-        share_mer = divide( (DIprodref(:,indice_mer).*pArmDI(:,indice_mer)) , sum( DIprodref(:,[indice_mer,indice_OT]).*pArmDI(:,[indice_mer,indice_OT]),'c'), 0);
-        DIprodref(:,indice_mer) = DIprodref(:,indice_mer) + share_mer .* ( (1-correction_DI_air)./ correction_DI_air .* DIprodref(:,indice_air).*pArmDI(:,indice_air)) ./ pArmDI(:,indice_mer);
-        DIprodref(:,indice_OT) = DIprodref(:,indice_mer) + (1-share_mer) .* ( (1-correction_DI_air)./ correction_DI_air .* DIprodref(:,indice_air).*pArmDI(:,indice_air)) ./ pArmDI(:,indice_OT);
+        share_mer = divide( (DIprod(:,indice_mer).*pArmDI(:,indice_mer)) , sum( DIprod(:,[indice_mer,indice_OT]).*pArmDI(:,[indice_mer,indice_OT]),'c'), 0);
+        DIprod(:,indice_mer) = DIprod(:,indice_mer) + share_mer .* ( (1-correction_DI_air)./ correction_DI_air .* DIprod(:,indice_air).*pArmDI(:,indice_air)) ./ pArmDI(:,indice_mer);
+        DIprod(:,indice_OT) = DIprod(:,indice_mer) + (1-share_mer) .* ( (1-correction_DI_air)./ correction_DI_air .* DIprod(:,indice_air).*pArmDI(:,indice_air)) ./ pArmDI(:,indice_OT);
     end
     //no negative values
     DIinfra=max(DIinfra,0);
-    DIprodref=max(DIprodref,0);
+    DIprod=max(DIprod,0);
 
     /////////
     // CI
@@ -208,7 +215,7 @@ if exo_pkmair_scenario >0
     correction_CI_air = CI_obj ./ CI_air;
     for k=1:reg//ii=1:nb_sectors
         for ii=1:sec//k=1:nb_regions
-        CI(indice_air,ii,k) = CI_prev(indice_air,ii,k) * correction_CI_air(k);
+            CI(indice_air,ii,k) = CI_prev(indice_air,ii,k) * correction_CI_air(k);
         end
     end
     // substitution to mer and OT
@@ -221,10 +228,10 @@ if exo_pkmair_scenario >0
             end
         end 
         for k=1:reg//ii=1:nb_sectors
-           for ii=1:sec//k=1:nb_regions
-               share_mer = CI(indice_mer,ii,k).*pArmCI(indice_mer,ii,k) ./ (CI(indice_mer,ii,k).*pArmCI(indice_mer,ii,k) + CI(indice_OT,ii,k).*pArmCI(indice_OT,ii,k));
-               CI(indice_OT,ii,k) = CI_prev(indice_OT,ii,k) + (1-share_mer) .* ( (1-correction_CI_air(k))./ correction_CI_air(k) .* CI_prev(indice_air,ii,k).*pArmCI(indice_air,ii,k)) ./ pArmCI(indice_OT,ii,k);
-           end
+            for ii=1:sec//k=1:nb_regions
+                share_mer = CI(indice_mer,ii,k).*pArmCI(indice_mer,ii,k) ./ (CI(indice_mer,ii,k).*pArmCI(indice_mer,ii,k) + CI(indice_OT,ii,k).*pArmCI(indice_OT,ii,k));
+                CI(indice_OT,ii,k) = CI_prev(indice_OT,ii,k) + (1-share_mer) .* ( (1-correction_CI_air(k))./ correction_CI_air(k) .* CI_prev(indice_air,ii,k).*pArmCI(indice_air,ii,k)) ./ pArmCI(indice_OT,ii,k);
+            end
         end
     end
 
@@ -240,5 +247,3 @@ if exo_pkmair_scenario >0
         partTIref(2) = 1 - sum( partTIref([1,3]));
     end
 end
-
-

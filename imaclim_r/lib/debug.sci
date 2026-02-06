@@ -16,10 +16,10 @@ function tax
 endfunction
 
 function emiPlusTax
-subplot(1,2,1);
-tax;
-subplot(1,2,2);
-emis;
+    subplot(1,2,1);
+    tax;
+    subplot(1,2,2);
+    emis;
 endfunction
 
 function chargoil
@@ -47,16 +47,16 @@ endfunction
 
 
 function basics(r)
-   plot((sgv("Conso",r)./(sgv("bn",r,6:12)+%eps))'-1)
+    plot((sgv("Conso",r)./(sgv("bn",r,6:12)+%eps))'-1)
     legend(secnames(6:12),4)
     plot(zeros(1:TimeHorizon+1),'k')
 endfunction
 
 
 function bascars()
-  hop=sgv("bnautomobile")
-  hop(4:12,1:2) = 1;
-   plot((sgv("Tautomobile")./(hop+%eps))'-1) //TODO
+    hop=sgv("bnautomobile")
+    hop(4:12,1:2) = 1;
+    plot((sgv("Tautomobile")./(hop+%eps))'-1) //TODO
     legend(regnames,4)
     plot(zeros(1:TimeHorizon+1),'k')
 endfunction
@@ -69,12 +69,12 @@ function emis
 endfunction
 
 function explain_v
-"Utility"
-"Household_budget"
-"Time_budget"  
-"Sector_budge" 
-"Market_clear"
-"Wages"    
-"State_budget" 
-"wpEner"   
+    "Utility"
+    "Household_budget"
+    "Time_budget"  
+    "Sector_budge" 
+    "Market_clear"
+    "Wages"    
+    "State_budget" 
+    "wpEner"   
 endfunction

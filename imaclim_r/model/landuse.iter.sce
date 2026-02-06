@@ -8,30 +8,30 @@
 
 // overwrite the end of update_forcings.sce for forest surfaces
 if ind_aff >=1 //& current_time >= 19
-  forest_change = surf_aff;
-  surfforest_par = distrib_forest_prev .* (distrib_forest_scaling' * ones(1,nbpar));
+    forest_change = surf_aff;
+    surfforest_par = distrib_forest_prev .* (distrib_forest_scaling' * ones(1,nbpar));
 
-  for index_region=1:reg
-      distrib_forest_change(index_region,:)= surf_aff(index_region,:) ./ distrib_forest_scaling(index_region);
-  end
-
-  for index_region=1:reg
-    if forest_change(index_region)<0 
-      //Land-use change shared equally between P,ML and veg
-      dens_LUC_share_ML(index_region,:)=ones(1,nbpar);
-      dens_LUC_share_P(index_region,:)=ones(1,nbpar);
-      dens_LUC_share_veg(index_region,:)=ones(1,nbpar);
-      dens_LUC_share_otCrops(index_region,:)=ones(1,nbpar);
-      dens_LUC_share_lcbio(index_region,:)=ones(1,nbpar);
-    else
-      //Land-use change shared equally between P and ML
-      dens_LUC_share_veg(index_region,:)=ones(1,nbpar)./(ones(1,nbpar)+ surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*((1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
-      dens_LUC_share_otCrops(index_region,:)=ones(1,nbpar)./(ones(1,nbpar)+surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
-      dens_LUC_share_lcbio(index_region,:)=ones(1,nbpar)./(ones(1,nbpar)+surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
-      dens_LUC_share_ML(index_region,:)=(ones(1,nbpar)+surf_aff(index_region,:)./distrib_past_scaling(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)))./(ones(1,nbpar)+surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
-      dens_LUC_share_P(index_region,:)=(ones(1,nbpar)+surf_aff(index_region,:)./distrib_past_scaling(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)))./(ones(1,nbpar)+surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
+    for index_region=1:reg
+        distrib_forest_change(index_region,:)= surf_aff(index_region,:) ./ distrib_forest_scaling(index_region);
     end
-  end
+
+    for index_region=1:reg
+        if forest_change(index_region)<0 
+            //Land-use change shared equally between P,ML and veg
+            dens_LUC_share_ML(index_region,:)=ones(1,nbpar);
+            dens_LUC_share_P(index_region,:)=ones(1,nbpar);
+            dens_LUC_share_veg(index_region,:)=ones(1,nbpar);
+            dens_LUC_share_otCrops(index_region,:)=ones(1,nbpar);
+            dens_LUC_share_lcbio(index_region,:)=ones(1,nbpar);
+        else
+            //Land-use change shared equally between P and ML
+            dens_LUC_share_veg(index_region,:)=ones(1,nbpar)./(ones(1,nbpar)+ surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*((1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
+            dens_LUC_share_otCrops(index_region,:)=ones(1,nbpar)./(ones(1,nbpar)+surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
+            dens_LUC_share_lcbio(index_region,:)=ones(1,nbpar)./(ones(1,nbpar)+surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
+            dens_LUC_share_ML(index_region,:)=(ones(1,nbpar)+surf_aff(index_region,:)./distrib_past_scaling(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)))./(ones(1,nbpar)+surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
+            dens_LUC_share_P(index_region,:)=(ones(1,nbpar)+surf_aff(index_region,:)./distrib_past_scaling(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)))./(ones(1,nbpar)+surf_aff(index_region,:)./densityagri_scal_prev(index_region,:).*(( 1 ./surf_total_agri_prev(index_region)).*ones(1,nbpar)));
+        end
+    end
 
 end
 

@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Ruben Bibas
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 if size(is_taxexo_MKT,"*")~=nbMKT | size(is_quota_MKT,"*")~=nbMKT
     error("is_taxexo_MKT,*)~=nbMKT | size(is_quota_MKT,*)~=nbMKT")
 end

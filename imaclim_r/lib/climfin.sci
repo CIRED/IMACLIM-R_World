@@ -38,6 +38,6 @@ function[y] = find_climfin_share(k)
             end
         end
     end 
-y = [share_climfin_1,rerun]
+    y = [share_climfin_1,rerun]
 endfunction
     

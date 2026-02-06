@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Thibault Briera, Thomas Le-Gallic
+#     Florian Leblanc, Thomas Le Gallic, Thibault Briera
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -17,7 +17,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -48,15 +48,15 @@ All=1 # should be 1 if you want to run all of them
 if [ $All -eq 1 ];then
 baselines=1; ref_2C=1; ref_17C=1; suf_2C=1; suf_17C=1; eff_2C=1; eff_17C=1; swi_2C=1; swi_17C=1; all_2C=1; all_17C=1;
 else # define which one if All = 0
-baselines=0; 
+baselines=1; 
 ref_2C=0; 
 ref_17C=0; 
-suf_2C=1; 
+suf_2C=0; 
 suf_17C=0 ;
 eff_2C=0 ;
 eff_17C=0; 
 swi_2C=0; 
-swi_17C=1; 
+swi_17C=0; 
 all_2C=0; 
 all_17C=0;
 fi
@@ -99,7 +99,7 @@ do
       for tax2100 in 1300
       do
  
-      for mshbio in 15
+      for mshbio in 8
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -127,7 +127,7 @@ do
       for tax2100 in  1940
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -158,8 +158,7 @@ do
       for tax2100 in 880
       do
  
-      for mshbio in 15
-      do
+      for mshbio in 8      do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
       echo "record_vett_carbonbudget=%t;tax2019=$tax2019;taxbreak_1=$taxbreak_1;tax2100=$tax2100;exo_maxmshbiom=$mshbio/1000;ind_debug_SC_nlu=%t;suffix2combiName='.tax2019${tax2019}.taxbreak_1${taxbreak_1}.tax2100${tax2100}.${mshbio}'"     > run.cmdFile$runname.sce
@@ -185,7 +184,7 @@ do
       for tax2100 in  1700
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -217,7 +216,7 @@ do
       for tax2100 in 765
       do
  
-      for mshbio in 15
+      for mshbio in 8
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -244,7 +243,7 @@ do
       for tax2100 in 1900
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -276,7 +275,7 @@ do
       for tax2100 in 750
       do
  
-      for mshbio in 15
+      for mshbio in 8
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -303,7 +302,7 @@ do
       for tax2100 in 1300 1325
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -335,7 +334,7 @@ do
       for tax2100 in 350 
       do
  
-      for mshbio in 15
+      for mshbio in 8
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -362,7 +361,7 @@ do
       for tax2100 in 1400
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"

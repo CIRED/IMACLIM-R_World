@@ -3,7 +3,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Nicolas Graves, Florian Leblanc
+#     Florian Leblanc, Nicolas Graves
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -18,6 +18,7 @@ import sys
 
 dataPath = sys.argv[1]
 year_database_version = sys.argv[2]
+active_pop_range = sys.argv[3]
 #dataPath = '/data/public_data/UNO_world_population_prospect/normalized/'
 #year_database_version = '2022' # '2019'
 
@@ -31,6 +32,10 @@ order_regions = pd.Index(genfromtxt('../order_regions.csv',dtype='str'))
 #All projections are for the medium UN scenario
 
 os.makedirs('results/', exist_ok=True)
+
+#minimum and maximum working age
+min_wa = int(active_pop_range.split('-')[0])
+max_wa = int(active_pop_range.split('-')[1])
 
 ##########################################
 ## Load data and dictionnaries
@@ -221,7 +226,8 @@ for reg, ratio in dic_ratio_missing_reg.items():
     loc = df_UN_code[df_UN_code['Location']==reg].LocID.values[0]
     new_df = result.reset_index().assign(LocID=loc, Location=reg)
     new_df['PopTotal'] = new_df['PopTotal'] * ratio
-    total_pop = total_pop.append(new_df, ignore_index=True)
+    #total_pop = total_pop.append(new_df, ignore_index=True)
+    total_pop = pd.concat( [total_pop, new_df], ignore_index=True)
 
 ##########################################
 ## Compute and aggregate datas
@@ -253,7 +259,7 @@ for UN_scenario in list(set(total_pop.reset_index()['Variant'])):
 #Processing active population data
     #Computing active population data 
 pop = pd.read_csv(dataPath + 'WPP'+year_database_version+'_PopulationBySingleAgeSex_Medium_1950-'+str(int(year_database_version)-1)+'.csv', delimiter='|') 
-pop[ pop['AgeGrp'] == '100+'] = '100'
+pop.loc[ pop['AgeGrp'] == '100+','AgeGrp'] = '100'
 pop['AgeGrp'] = pop['AgeGrp'].astype(int)
 pop.set_index('Location',inplace=True)
 pop.set_index('LocID', inplace=True, append=True)
@@ -264,15 +270,16 @@ list_existing_scenario_file = [fil for fil in os.listdir(dataPath) if 'Populatio
 for file_UN_scenario in list_existing_scenario_file:
     output_variant_name = file_UN_scenario.split('_')[2].replace(' ','_').lower()
     pop_projection = pd.read_csv(dataPath + file_UN_scenario, delimiter='|', encoding="utf-8") 
-    pop_projection[ pop_projection['AgeGrp'] == '100+'] = '100'
+    pop_projection.loc[ pop_projection['AgeGrp'] == '100+','AgeGrp'] = '100'
     pop_projection['AgeGrp'] = pop_projection['AgeGrp'].astype(int)
     pop_projection.set_index('Location',inplace=True)
     pop_projection.set_index('LocID', inplace=True, append=True)
     pop_projection.set_index('Time', inplace=True, append=True)
 
-    active_pop = pop.loc[(pop['AgeGrp']>=20)&(pop['AgeGrp']<=59)]['PopTotal'].groupby(level=['Location','Time','LocID']).sum()
+    active_pop = pop.loc[(pop['AgeGrp']>=min_wa)&(pop['AgeGrp']<=max_wa)]['PopTotal'].groupby(level=['Location','Time','LocID']).sum()
 
-    active_pop = active_pop.append(pop_projection.loc[(pop_projection['AgeGrp']>=20)&(pop_projection['AgeGrp']<=59)]['PopTotal'].groupby(level=['Location','Time','LocID']).sum())
+    #active_pop = active_pop.append(pop_projection.loc[(pop_projection['AgeGrp']>=20)&(pop_projection['AgeGrp']<=59)]['PopTotal'].groupby(level=['Location','Time','LocID']).sum())
+    active_pop = pd.concat( [active_pop, pop_projection.loc[(pop_projection['AgeGrp']>=min_wa)&(pop_projection['AgeGrp']<=max_wa)]['PopTotal'].groupby(level=['Location','Time','LocID']).sum()])
 
     #Aggregating to Imaclim
     active_pop = active_pop.reset_index()
@@ -282,8 +289,8 @@ for file_UN_scenario in list_existing_scenario_file:
 
     if 'Medium' in file_UN_scenario:
         for year in list_years:
-            with open('./results/active_population_' + str(year) + '.csv','w') as file:
-                file.write('//Active population (i.e. 20-59 year span) in '+str(year)+' (by geographic region)\n//UNO World Population Prospect '+year_database_version+'\n//thousands of people\n')
+            with open('./results/active_population__range'+active_pop_range+'__' + str(year) + '.csv','w') as file:
+                file.write('//Active population (i.e. '+str(min_wa)+'-'+str(max_wa)+' year span) in '+str(year)+' (by geographic region)\n//UNO World Population Prospect '+year_database_version+'\n//thousands of people\n')
                 active_pop.xs(year,level='Time').reindex(order_regions).to_csv(file, sep='|',header=False,index=False)
 
     #Calculating UN population growth rates
@@ -291,8 +298,8 @@ for file_UN_scenario in list_existing_scenario_file:
     active_pop = active_pop.loc[(slice(None),slice('2002','2100')),:] 
 
     print( "min, max, mean, ", np.min(active_pop['GrowthRate'].values), np.max(active_pop['GrowthRate'].values), np.mean(active_pop['GrowthRate'].values))
-    with open('./results/active_population_growth_rate_'+output_variant_name+'.csv','w') as file:
-        file.write('//Active population growth rate (by geographic region, 2001-2002 to 2099-2100)\n//calcutated from UNO World Population Prospect '+year_database_version+'\n//\n')
+    with open('./results/active_population_growth_rate__range'+active_pop_range+'__'+output_variant_name+'.csv','w') as file:
+        file.write('//Active population (i.e. '+str(min_wa)+'-'+str(max_wa)+') growth rate (by geographic region, 2001-2002 to 2099-2100)\n//calcutated from UNO World Population Prospect '+year_database_version+'\n//\n')
         for ImRegion in order_regions:
             file.write(active_pop.xs(ImRegion,level='Imaclim_region').to_string(columns=['GrowthRate'],index=False,header=False).replace('\n','|')+'\n')
 

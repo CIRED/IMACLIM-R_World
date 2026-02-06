@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas
+//     Florian Leblanc, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -30,12 +30,12 @@ function tax=get_taxes(equilibrium, mkts)
 
     mkts=mkts(:) // mkts should be a column
 
-    tax = equilibrium($ + (mkts - nbMKT))
+    tax = (~is_taxexo_MKT) .* equilibrium($ + (mkts - nbMKT)) + is_taxexo_MKT .* taxMKT;
 
 endfunction
 
 function equilibrium=set_taxes(equilibrium, taxes, mkts)
-    //gets the carbone value in markets mkt
+    //gets the carbon value in markets mkt
     // tax = get_taxes(equilibrium,1:nbMKT)
     //
     // for m=1:nbMKT
@@ -79,7 +79,7 @@ function exotaxes = choose_exotaxes(objLast,emiLast,tax_min,tax_max,taxLast)
     for m=1:nbMKT
         exotaxes(m)= taxLast(m)
         if emiLast >= 0
-            //choisit le niveau exogène des taxes
+            //choose the level of exogenous taxes
             if objLast(m) > emiLast(m) * 1.02
                 exotaxes(m)= tax_min(m)
             end
@@ -111,7 +111,7 @@ function [next_substep, step_size, last_found_substep]=choose_substep(last_found
     //last substep was found
     if last_found_substep == cur_substep
         if ETUDE <> "emf27" & ETUDE <> "wp2ampere" // TODEL - for reproductibility of results
-          step_size = step_size*2
+            step_size = step_size*2
         end
         next_substep = min(cur_substep + step_size, 1)// this min for fancy step sizes
         return
@@ -132,12 +132,12 @@ function [guess, flag_firsttryexo]=guess_next_equilibrium(equilibrium_lastgood, 
     if is_tryexotax_mode
         if flag_firsttryexo; //going back to prev plus exo taxes in order to start in tryexotax mode
             guess = set_taxes(equilibrium_prev,exotaxes,1:nbMKT)
-            message("guess = equilibrium_prev")
+            message("    guess = equilibrium_prev")
             flag_firsttryexo = %f
             return
         else
             guess = set_taxes(equilibrium_lastgood,exotaxes,1:nbMKT)
-            message("guess = equilibrium_lastgood (exotaxes)")
+            message("    guess = equilibrium_lastgood (exotaxes)")
             return
         end
     end
@@ -150,7 +150,7 @@ function [guess, flag_firsttryexo]=guess_next_equilibrium(equilibrium_lastgood, 
                 guess = set_taxes(guess,taxMKT(mkts),mkts);
             end
         end
-        message("guess = " + (1 + substep) + "*equilibrium_prev - " + substep + " * equi_prev_prev")
+        message("        First guess = " + (1 + substep) + "*equilibrium_prev - " + substep + " * equi_prev_prev")
         return
     end
 
@@ -161,7 +161,7 @@ function [guess, flag_firsttryexo]=guess_next_equilibrium(equilibrium_lastgood, 
                 guess = set_taxes(guess,taxMKT(mkts),mkts);
             end
         end
-        message("guess = equilibrium_prev")
+        message("    guess = equilibrium_prev")
         return
     end
 
@@ -173,7 +173,7 @@ function [guess, flag_firsttryexo]=guess_next_equilibrium(equilibrium_lastgood, 
                 guess = set_taxes(guess,taxMKT(mkts),mkts);
             end
         end
-        message("guess = equilibrium_lastgood")
+        message("    guess = equilibrium_lastgood")
         return
     end
 
@@ -181,9 +181,3 @@ function [guess, flag_firsttryexo]=guess_next_equilibrium(equilibrium_lastgood, 
 
 endfunction
 
-
-function []=message(str)
-    if metaRecMessOn
-        printf(str+"\n")
-    end
-endfunction

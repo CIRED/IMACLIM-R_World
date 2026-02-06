@@ -16,15 +16,15 @@ function memTxt = checkMemory()
     sumTotal  = sumLocal + sumGlobal;
 
     varNames = cat(1,localVarNames +"; local",..
-    globalVarNames+";global",..
-    "sumLocal;subTotal",..
-    "sumGlobal;subTotal",..
+        globalVarNames+";global",..
+        "sumLocal;subTotal",..
+        "sumGlobal;subTotal",..
     "sumTotal;total");
 
     varMem   = [ localVarMem ; ..
-    globalVarMem ; ..
-    sumLocal ; ..
-    sumGlobal ; ..
+        globalVarMem ; ..
+        sumLocal ; ..
+        sumGlobal ; ..
     sumTotal ];
 
     [ sortedVarMem , sortIndex  ] = gsort( varMem * 16 / 1e6 );

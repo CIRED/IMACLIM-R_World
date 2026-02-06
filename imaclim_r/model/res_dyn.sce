@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 //nexus residentiel, 7 uses:
 // 1  Space heating
 // 2  Space cooling
@@ -45,14 +53,14 @@ Res_delta_oil=0.1*ones(reg,1,nb_usage_res);
 Res_delta_elec=0.1*ones(reg,1,nb_usage_res);
 //taux de depreciation plus fort pour "autres equipements electromenagers" et eclairage
 for k=1:reg,
-	Res_delta_coal(k,1,indice_electromenager)=0.2;
-	Res_delta_gas(k,1,indice_electromenager)=0.2;
-	Res_delta_oil(k,1,indice_electromenager)=0.2;
-	Res_delta_elec(k,1,indice_electromenager)=0.2;
-	Res_delta_coal(k,1,indice_eclairage)=0.33;
-	Res_delta_gas(k,1,indice_eclairage)=0.33;
-	Res_delta_oil(k,1,indice_eclairage)=0.33;
-	Res_delta_elec(k,1,indice_eclairage)=0.33;
+    Res_delta_coal(k,1,indice_electromenager)=0.2;
+    Res_delta_gas(k,1,indice_electromenager)=0.2;
+    Res_delta_oil(k,1,indice_electromenager)=0.2;
+    Res_delta_elec(k,1,indice_electromenager)=0.2;
+    Res_delta_coal(k,1,indice_eclairage)=0.33;
+    Res_delta_gas(k,1,indice_eclairage)=0.33;
+    Res_delta_oil(k,1,indice_eclairage)=0.33;
+    Res_delta_elec(k,1,indice_eclairage)=0.33;
 end	
 
 
@@ -66,32 +74,32 @@ p_coal_ant=zeros(reg,1,nb_usage_res);
 p_coal_prev=zeros(reg,1,nb_usage_res);
 
 for j=1:nb_usage_res,
-	p_coal_ant(:,:,j)=pArmDF(:,indice_coal)./price_index;
-	p_coal_prev(:,:,j)=p_prev_resid(:,indice_coal);
+    p_coal_ant(:,:,j)=pArmDF(:,indice_coal)./price_index;
+    p_coal_prev(:,:,j)=p_prev_resid(:,indice_coal);
 end
 
 p_gas_ant=zeros(reg,1,nb_usage_res);
 p_gas_prev=zeros(reg,1,nb_usage_res);
 
 for j=1:nb_usage_res,
-	p_gas_ant(:,:,j)=pArmDF(:,indice_gaz)./price_index;
-	p_gas_prev(:,:,j)=p_prev_resid(:,indice_gaz);
+    p_gas_ant(:,:,j)=pArmDF(:,indice_gas)./price_index;
+    p_gas_prev(:,:,j)=p_prev_resid(:,indice_gas);
 end
 
 p_oil_ant=zeros(reg,1,nb_usage_res);
 p_oil_prev=zeros(reg,1,nb_usage_res);
 
 for j=1:nb_usage_res,
-	p_oil_ant(:,:,j)=pArmDF(:,indice_Et)./price_index;
-	p_oil_prev(:,:,j)=p_prev_resid(:,indice_Et);
+    p_oil_ant(:,:,j)=pArmDF(:,indice_Et)./price_index;
+    p_oil_prev(:,:,j)=p_prev_resid(:,indice_Et);
 end
 
 p_elec_ant=zeros(reg,1,nb_usage_res);
 p_elec_prev=zeros(reg,1,nb_usage_res);
 
 for j=1:nb_usage_res,
-	p_elec_ant(:,:,j)=pArmDF(:,indice_elec)./price_index;
-	p_elec_prev(:,:,j)=p_prev_resid(:,indice_elec);
+    p_elec_ant(:,:,j)=pArmDF(:,indice_elec)./price_index;
+    p_elec_prev(:,:,j)=p_prev_resid(:,indice_elec);
 end
 
 
@@ -124,38 +132,38 @@ res_progres_efficacite=0.005*ones(reg,4,nb_usage_res);
 //si l'augmentation du prix est superieure a 4% (3% pour l'elec) pendant trois ans, on suppose que l'efficacite des technologies va deux fois plus vite
 //a revoir...
 for k=1:reg,
-	if p_coal_ant(k,1,1)/p_coal_prev(k,1,1)>1.04 then res_prixhaut(k,1)=res_prixhaut(k,1)+1;
-	else res_prixhaut(k,1)=0;
-	end
-	if p_gas_ant(k,1,1)/p_gas_prev(k,1,1)>1.04 then res_prixhaut(k,2)=res_prixhaut(k,2)+1;
-	else res_prixhaut(k,2)=0;
-	end
-	if p_oil_ant(k,1,1)/p_oil_prev(k,1,1)>1.04 then res_prixhaut(k,3)=res_prixhaut(k,3)+1;
-	else res_prixhaut(k,3)=0;
-	end
-	if p_elec_ant(k,1,1)/p_elec_prev(k,1,1)>1.03 then res_prixhaut(k,4)=res_prixhaut(k,4)+1;
-	else res_prixhaut(k,4)=0;
-	end
+    if p_coal_ant(k,1,1)/p_coal_prev(k,1,1)>1.04 then res_prixhaut(k,1)=res_prixhaut(k,1)+1;
+    else res_prixhaut(k,1)=0;
+    end
+    if p_gas_ant(k,1,1)/p_gas_prev(k,1,1)>1.04 then res_prixhaut(k,2)=res_prixhaut(k,2)+1;
+    else res_prixhaut(k,2)=0;
+    end
+    if p_oil_ant(k,1,1)/p_oil_prev(k,1,1)>1.04 then res_prixhaut(k,3)=res_prixhaut(k,3)+1;
+    else res_prixhaut(k,3)=0;
+    end
+    if p_elec_ant(k,1,1)/p_elec_prev(k,1,1)>1.03 then res_prixhaut(k,4)=res_prixhaut(k,4)+1;
+    else res_prixhaut(k,4)=0;
+    end
 	
-	if res_prixhaut(k,1)==3 then res_progres_efficacite(k,1,:)=2*res_progres_efficacite(k,1,:);
-								res_prixhaut(k,1)=2;
-	end	
-	if res_prixhaut(k,2)==3 then res_progres_efficacite(k,2,:)=2*res_progres_efficacite(k,2,:);
-								res_prixhaut(k,2)=2;
-	end							
-	if res_prixhaut(k,3)==3 then res_progres_efficacite(k,3,:)=2*res_progres_efficacite(k,3,:);
-								res_prixhaut(k,3)=2;
-	end							
-	if res_prixhaut(k,4)==3 then res_progres_efficacite(k,4,:)=2*res_progres_efficacite(k,4,:);
-								res_prixhaut(k,4)=2;
-	end	
+    if res_prixhaut(k,1)==3 then res_progres_efficacite(k,1,:)=2*res_progres_efficacite(k,1,:);
+        res_prixhaut(k,1)=2;
+    end	
+    if res_prixhaut(k,2)==3 then res_progres_efficacite(k,2,:)=2*res_progres_efficacite(k,2,:);
+        res_prixhaut(k,2)=2;
+    end							
+    if res_prixhaut(k,3)==3 then res_progres_efficacite(k,3,:)=2*res_progres_efficacite(k,3,:);
+        res_prixhaut(k,3)=2;
+    end							
+    if res_prixhaut(k,4)==3 then res_progres_efficacite(k,4,:)=2*res_progres_efficacite(k,4,:);
+        res_prixhaut(k,4)=2;
+    end	
 	
-	for j=1:nb_usage_res,	
-		Res_rho_coal_exo(k,1,j)=min(res_efficacite_max(k,j,1),Res_rho_coal_exo_prev(k,1,j)*(1+res_progres_efficacite(k,1,j)));
-		Res_rho_gas_exo(k,1,j)=min(res_efficacite_max(k,j,2),Res_rho_gas_exo_prev(k,1,j)*(1+res_progres_efficacite(k,2,j)));
-		Res_rho_oil_exo(k,1,j)=min(res_efficacite_max(k,j,3),Res_rho_oil_exo_prev(k,1,j)*(1+res_progres_efficacite(k,3,j)));
-		Res_rho_elec_exo(k,1,j)=min(res_efficacite_max(k,j,4),Res_rho_elec_exo_prev(k,1,j)*(1+res_progres_efficacite(k,4,j)));		
-	end										
+    for j=1:nb_usage_res,	
+        Res_rho_coal_exo(k,1,j)=min(res_efficacite_max(k,j,1),Res_rho_coal_exo_prev(k,1,j)*(1+res_progres_efficacite(k,1,j)));
+        Res_rho_gas_exo(k,1,j)=min(res_efficacite_max(k,j,2),Res_rho_gas_exo_prev(k,1,j)*(1+res_progres_efficacite(k,2,j)));
+        Res_rho_oil_exo(k,1,j)=min(res_efficacite_max(k,j,3),Res_rho_oil_exo_prev(k,1,j)*(1+res_progres_efficacite(k,3,j)));
+        Res_rho_elec_exo(k,1,j)=min(res_efficacite_max(k,j,4),Res_rho_elec_exo_prev(k,1,j)*(1+res_progres_efficacite(k,4,j)));		
+    end										
 end
 
 //biomasse, pas d'amelioration de l'efficacite energetique de la biomasse
@@ -181,7 +189,7 @@ Res_elast=ones(1,1,nb_usage_res);
 
 //les elasticites initiales et asymptotes sont definies dans le fichier de calibration (res_calib)
 for j=1:nb_usage_res,
-	Res_elast(1,1,j)=min(Res_elast_USA_ini(j),max(0,Res_elast_USA_ini(j)/(Res_indice_max_USA(j)-1)*(Res_indice_max_USA(j)-Res_SE_unit_com(1,1,j)/Res_SE_unit_comref(1,1,j))));
+    Res_elast(1,1,j)=min(Res_elast_USA_ini(j),max(0,Res_elast_USA_ini(j)/(Res_indice_max_USA(j)-1)*(Res_indice_max_USA(j)-Res_SE_unit_com(1,1,j)/Res_SE_unit_comref(1,1,j))));
 end
 
 //Calcul du service energetique unitaire pour les USA
@@ -194,17 +202,17 @@ Res_elast_tot(1,1,:)=Res_elast;
 
 for k=2:reg,
 
-	for j=1:nb_usage_res,
-		//Calcul des elasticite revenu en fonction de la distance a l'asymptote, ici l'asymptote est mouvante et vaut 
-		//le service energetique unitaire des USA 
-		if Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j)>0.8 then Res_elast_tot(k,1,j)=Res_elast_tot_ini(j)*max(0,1-Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j));
-			elseif Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j)<0.3 then Res_elast_tot(k,1,j)=Res_elast_tot_ini(j)*1.2;
-			elseif Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j)<0.5 then Res_elast_tot(k,1,j)=Res_elast_tot_ini(j)*0.5;
-			elseif Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j)<0.8 then Res_elast_tot(k,1,j)=Res_elast_tot_ini(j)*0.3;
-		end	
-		//Calcul du service energetique unitaire pour les regions autres que les USA en le faisant evoluer de facon elastique au revenu disponible reel per capita
-		Res_SE_unit_com_exo(k,1,j)=Res_SE_unit_com(k,1,j)*((Rdisp(k)/price_index(k))/Ltot_prev(k)/Rdisp_real_prev(k)*Ltot_prev_stock(k))^Res_elast_tot(k,1,j);
-	end
+    for j=1:nb_usage_res,
+        //Calcul des elasticite revenu en fonction de la distance a l'asymptote, ici l'asymptote est mouvante et vaut 
+        //le service energetique unitaire des USA 
+        if Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j)>0.8 then Res_elast_tot(k,1,j)=Res_elast_tot_ini(j)*max(0,1-Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j));
+        elseif Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j)<0.3 then Res_elast_tot(k,1,j)=Res_elast_tot_ini(j)*1.2;
+        elseif Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j)<0.5 then Res_elast_tot(k,1,j)=Res_elast_tot_ini(j)*0.5;
+        elseif Res_SE_unit_com(k,1,j)/Res_SE_unit_com(1,1,j)<0.8 then Res_elast_tot(k,1,j)=Res_elast_tot_ini(j)*0.3;
+        end	
+        //Calcul du service energetique unitaire pour les regions autres que les USA en le faisant evoluer de facon elastique au revenu disponible reel per capita
+        Res_SE_unit_com_exo(k,1,j)=Res_SE_unit_com(k,1,j)*((Rdisp(k)/price_index(k))/Ltot_prev(k)/Rdisp_real_prev(k)*Ltot_prev_stock(k))^Res_elast_tot(k,1,j);
+    end
 end
 
 //evolution des services energetiques unitaires en fonction des prix des energies, evolution distinguee selon l energie utilisee
@@ -219,13 +227,13 @@ Res_SE_unit_com_exo_Elec=Res_SE_unit_com_exo.*Res_sh_elec;
 //Pour l'instant l'elasticite varie uniquement selon les usages (ni selon les regions, ni selon le niveau absolu de service energetique unitaire)
 //l'elasticite est definie dans le fichier de calibration du residentiel (res_calib)
 for k=1:reg,
-	for j=1:nb_usage_res,
-	//On fait l'hypothese que les menages reagissent au prix reel (rapporte au pouvoir d'achat)
-		Res_SE_unit_com_exo_Coal(k,1,j)=Res_SE_unit_com_exo_Coal(k,1,j)*(pArmDF(k,indice_coal)/price_index(k)/Res_rho_coal(k,1,j)/(p_prev_resid(k,indice_coal)/Res_rho_coal_prev(k,1,j)))^Res_elast_prix(j);
-		Res_SE_unit_com_exo_Gas(k,1,j)=Res_SE_unit_com_exo_Gas(k,1,j)*(pArmDF(k,indice_gaz)/price_index(k)/Res_rho_gas(k,1,j)/(p_prev_resid(k,indice_gaz)/Res_rho_gas_prev(k,1,j)))^Res_elast_prix(j);
-		Res_SE_unit_com_exo_Oil(k,1,j)=Res_SE_unit_com_exo_Oil(k,1,j)*(pArmDF(k,indice_Et)/price_index(k)/Res_rho_oil(k,1,j)/(p_prev_resid(k,indice_Et)/Res_rho_oil_prev(k,1,j)))^Res_elast_prix(j);
-		Res_SE_unit_com_exo_Elec(k,1,j)=Res_SE_unit_com_exo_Elec(k,1,j)*(pArmDF(k,indice_elec)/price_index(k)/Res_rho_elec(k,1,j)/(p_prev_resid(k,indice_elec)/Res_rho_elec_prev(k,1,j)))^Res_elast_prix(j);
-	end
+    for j=1:nb_usage_res,
+        //On fait l'hypothese que les menages reagissent au prix reel (rapporte au pouvoir d'achat)
+        Res_SE_unit_com_exo_Coal(k,1,j)=Res_SE_unit_com_exo_Coal(k,1,j)*(pArmDF(k,indice_coal)/price_index(k)/Res_rho_coal(k,1,j)/(p_prev_resid(k,indice_coal)/Res_rho_coal_prev(k,1,j)))^Res_elast_prix(j);
+        Res_SE_unit_com_exo_Gas(k,1,j)=Res_SE_unit_com_exo_Gas(k,1,j)*(pArmDF(k,indice_gas)/price_index(k)/Res_rho_gas(k,1,j)/(p_prev_resid(k,indice_gas)/Res_rho_gas_prev(k,1,j)))^Res_elast_prix(j);
+        Res_SE_unit_com_exo_Oil(k,1,j)=Res_SE_unit_com_exo_Oil(k,1,j)*(pArmDF(k,indice_Et)/price_index(k)/Res_rho_oil(k,1,j)/(p_prev_resid(k,indice_Et)/Res_rho_oil_prev(k,1,j)))^Res_elast_prix(j);
+        Res_SE_unit_com_exo_Elec(k,1,j)=Res_SE_unit_com_exo_Elec(k,1,j)*(pArmDF(k,indice_elec)/price_index(k)/Res_rho_elec(k,1,j)/(p_prev_resid(k,indice_elec)/Res_rho_elec_prev(k,1,j)))^Res_elast_prix(j);
+    end
 end
 
 //recomposition des services energetiques unitaires
@@ -233,10 +241,10 @@ Res_SE_unit_com_exo=Res_SE_unit_com_exo_Coal+Res_SE_unit_com_exo_Gas+Res_SE_unit
 
 //asymptotes basses des services energetiques unitaires
 for k=1:reg,
-	for j=1:nb_usage_res,
-		if Res_SE_unit_com_exo(k,1,j)<Res_se_unit_min(j)*Res_SE_unit_comref(k,1,j) then Res_SE_unit_com_exo(k,1,j)=Res_se_unit_min(j)*Res_SE_unit_comref(k,1,j);
-		end
-	end
+    for j=1:nb_usage_res,
+        if Res_SE_unit_com_exo(k,1,j)<Res_se_unit_min(j)*Res_SE_unit_comref(k,1,j) then Res_SE_unit_com_exo(k,1,j)=Res_se_unit_min(j)*Res_SE_unit_comref(k,1,j);
+        end
+    end
 end
 	
 //Actualisation du service energetique unitaire (energie utile)
@@ -260,14 +268,14 @@ Res_part_bio=zeros(reg,1,nb_usage_res);
 //seuls les usages suivants sont concernes: chauffage(1), cuisine(6) et chauffage de l'eau(7)
 //seules les regions suivantes sont concernees: Chine(6), Inde(7), Bresil (8), Afrique(10), Rest of SE Asie(11), Rest of Latin America(12) 
 for k=6:8,
-	Res_part_bio(k,1,indice_chauffage)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_chauffage)))).^Res_beta_bioref(k);
-	Res_part_bio(k,1,indice_cuisine)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_cuisine)))).^Res_beta_bioref(k);
-	Res_part_bio(k,1,indice_chauffEau)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_chauffEau)))).^Res_beta_bioref(k);
+    Res_part_bio(k,1,indice_chauffage)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_chauffage)))).^Res_beta_bioref(k);
+    Res_part_bio(k,1,indice_cuisine)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_cuisine)))).^Res_beta_bioref(k);
+    Res_part_bio(k,1,indice_chauffEau)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_chauffEau)))).^Res_beta_bioref(k);
 end
 for k=10:reg,
-	Res_part_bio(k,1,indice_chauffage)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_chauffage)))).^Res_beta_bioref(k);
-	Res_part_bio(k,1,indice_cuisine)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_cuisine)))).^Res_beta_bioref(k);
-	Res_part_bio(k,1,indice_chauffEau)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_chauffEau)))).^Res_beta_bioref(k);   
+    Res_part_bio(k,1,indice_chauffage)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_chauffage)))).^Res_beta_bioref(k);
+    Res_part_bio(k,1,indice_cuisine)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_cuisine)))).^Res_beta_bioref(k);
+    Res_part_bio(k,1,indice_chauffEau)=Res_gamma_bioref(k).*(max(0,(Res_F2dollars(k)-Res_a_bioref(k,indice_chauffEau)))).^Res_beta_bioref(k);   
 end
 
 ///////////////////////////////////////////
@@ -280,29 +288,29 @@ end
 //taux d'acces au service energetique
 Res_mu_prev=Res_mu;
 for k=6:reg,
-	//seulement usages electricite specifique (le taux d'electrification ne peut pas diminuer) elasticite du taux d'eletrification au revenu de 0.4
-	for j=indice_clim:indice_electromenager,
-		Res_mu(k,1,j)=min(1,Res_mu_prev(k,1,j)*(max(1,(GDP(k)/(Ltot_prev(k)*price_index(k)))/(realGDP_prev_stock(k)/Ltot_prev_stock(k))))^0.4);
-	end
+    //seulement usages electricite specifique (le taux d'electrification ne peut pas diminuer) elasticite du taux d'eletrification au revenu de 0.4
+    for j=indice_clim:indice_electromenager,
+        Res_mu(k,1,j)=min(1,Res_mu_prev(k,1,j)*(max(1,(GDP(k)/(Ltot_prev(k)*price_index(k)))/(realGDP_prev_stock(k)/Ltot_prev_stock(k))))^0.4);
+    end
 end
 
 //taux d'equipement:description du rattrapage de lambda (equipement effectif) sur mu (acces)
 //seuls les usages specifiques a l'electricite sont concernes, pour les autres le taux d'equipement est constant et egal a 1
 //evolution de l'elasticite en fonction de la distance a l'asymptote qui est ici l'acces (Res_mu)
 for k=1:reg,
-	for j=indice_clim:indice_electromenager,
-		if Res_lambda(k,1,j)/Res_mu(k,1,j)>0.7 then elast_lambda=0.5;
-			elseif Res_lambda(k,1,j)/Res_mu(k,1,j)<0.3 then elast_lambda=1.3;
-			elseif Res_lambda(k,1,j)/Res_mu(k,1,j)<0.5 then elast_lambda=1;
-			elseif Res_lambda(k,1,j)/Res_mu(k,1,j)<0.7 then elast_lambda=0.7;
-		end
-		//pour les frigos et, dans une moindre mesure les autres appareils electromenagers, le rattrapage est plus rapide
-		if j==indice_frigo then elast_lambda=elast_lambda*1.5;
-			elseif j==indice_electromenager then elast_lambda=elast_lambda*1.3;
-		end
-	//actualisation du taux d'equipement comme une elasticite revenu
-	Res_lambda(k,1,j)=min(Res_mu(k,1,j),Res_lambda_prev(k,1,j)*(max(1,(Rdisp(k)/(Ltot_prev(k)*price_index(k)))/(Rdisp_real_prev(k)/Ltot_prev_stock(k))))^elast_lambda);
-	end
+    for j=indice_clim:indice_electromenager,
+        if Res_lambda(k,1,j)/Res_mu(k,1,j)>0.7 then elast_lambda=0.5;
+        elseif Res_lambda(k,1,j)/Res_mu(k,1,j)<0.3 then elast_lambda=1.3;
+        elseif Res_lambda(k,1,j)/Res_mu(k,1,j)<0.5 then elast_lambda=1;
+        elseif Res_lambda(k,1,j)/Res_mu(k,1,j)<0.7 then elast_lambda=0.7;
+        end
+        //pour les frigos et, dans une moindre mesure les autres appareils electromenagers, le rattrapage est plus rapide
+        if j==indice_frigo then elast_lambda=elast_lambda*1.5;
+        elseif j==indice_electromenager then elast_lambda=elast_lambda*1.3;
+        end
+        //actualisation du taux d'equipement comme une elasticite revenu
+        Res_lambda(k,1,j)=min(Res_mu(k,1,j),Res_lambda_prev(k,1,j)*(max(1,(Rdisp(k)/(Ltot_prev(k)*price_index(k)))/(Rdisp_real_prev(k)/Ltot_prev_stock(k))))^elast_lambda);
+    end
 end	
 ////////////////////////////
 ////variable de volume
@@ -432,12 +440,12 @@ Res_N_oil(:,:,indice_eclairage)=Ltot.*(1-Res_mu(:,:,indice_clim));
 
 //il ne faut pas que Res_N s'annule pour le calcul des efficacites
 for k=1:reg
-	for j=1:nb_usage_res
-		if Res_N_coal(k,1,j)==0 then Res_N_coal(k,1,j)=0.0000001;end
-		if Res_N_gas(k,1,j)==0 then Res_N_gas(k,1,j)=0.0000001;end
-		if Res_N_oil(k,1,j)==0 then Res_N_oil(k,1,j)=0.0000001;end
-		if Res_N_elec(k,1,j)==0 then Res_N_elec(k,1,j)=0.0000001;end
-	end
+    for j=1:nb_usage_res
+        if Res_N_coal(k,1,j)==0 then Res_N_coal(k,1,j)=0.0000001;end
+        if Res_N_gas(k,1,j)==0 then Res_N_gas(k,1,j)=0.0000001;end
+        if Res_N_oil(k,1,j)==0 then Res_N_oil(k,1,j)=0.0000001;end
+        if Res_N_elec(k,1,j)==0 then Res_N_elec(k,1,j)=0.0000001;end
+    end
 end
 
 //equations d'evolution de l'efficacite moyenne du parc d'equipement
@@ -455,12 +463,12 @@ Res_rho_elec=(Res_rho_elec_prev.*Res_N_elec_prev.*(1-Res_delta_elec)+Res_rho_ele
 
 //remise a 0 des valeurs de Res_N (pour celles qui etaient nulles avant la manipulation ci-dessus)
 for k=1:reg
-	for j=1:nb_usage_res
-		if Res_N_coal(k,1,j)==0.0000001 then Res_N_coal(k,1,j)=0;end
-		if Res_N_gas(k,1,j)==0.0000001 then Res_N_gas(k,1,j)=0;end
-		if Res_N_oil(k,1,j)==0.0000001 then Res_N_oil(k,1,j)=0;end
-		if Res_N_elec(k,1,j)==0.0000001 then Res_N_elec(k,1,j)=0;end
-	end
+    for j=1:nb_usage_res
+        if Res_N_coal(k,1,j)==0.0000001 then Res_N_coal(k,1,j)=0;end
+        if Res_N_gas(k,1,j)==0.0000001 then Res_N_gas(k,1,j)=0;end
+        if Res_N_oil(k,1,j)==0.0000001 then Res_N_oil(k,1,j)=0;end
+        if Res_N_elec(k,1,j)==0.0000001 then Res_N_elec(k,1,j)=0;end
+    end
 end
 
 ////evolution des parts des energies dans le parc d'equipement total

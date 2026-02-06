@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Adrien Vogt-Schilb, Nicolas Graves, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Nicolas Graves, Adrien Vogt-Schilb, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -120,4 +120,15 @@ if ind_exo_afforestation==1
         mat=csvRead(path_data_inequalities+".."+sep+"AFOLU_BAU_2015_2100.csv",'|',[],[],[],'/\/\//'); //BAU scenario
         exo_CO2_AFOLU(2:$) = mat;
     end
+    E_AFOLU = exo_CO2_AFOLU(1) .* sum(E_reg_use(:,:),2)./sum(E_reg_use(:,:)); // AFOLU emissions are allocated pro-rata of E_reg_use
 end
+
+// CO2 emissions that are not taxed (mostly exogenous), but which has to be taken into account in the CO2 emission trajectoiry when set as an objective
+if ind_exo_afforestation==1
+    CO2_untaxed = (exo_CO2_indus_process(:,2) + exo_CO2_AFOLU(2) .* sum(E_reg_use(:,:),2)./sum(E_reg_use(:,:))) * 1e6;
+else
+    CO2_untaxed = (exo_CO2_agri_direct(:,2) + exo_CO2_LUCCCF(:,2) + exo_CO2_indus_process(:,2)) * 1e6;
+end
+
+
+

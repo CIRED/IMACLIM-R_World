@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Adrien Vogt-Schilb, Ruben Bibas
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 // diagnostic of scenarios
 exec (MODEL+"diagnostic.sce");
 
@@ -14,7 +22,7 @@ end
 
 //Inequalities module
 if ind_inequality == 1
-        exec(MODEL+"nexus.inequalities.sce");
+    exec(MODEL+"nexus.inequalities.sce");
 end
 
 exec(MODEL+"extraction.outputs."+ETUDEOUTPUT+".sce");

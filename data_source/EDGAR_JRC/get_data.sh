@@ -3,7 +3,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Florian Leblanc
+#     Rémi Prudhomme, Florian Leblanc
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -35,3 +35,10 @@ wget https://www.gtap.agecon.purdue.edu/resources/download/10041.pdf
 wget https://github.com/openclimatedata/globalwarmingpotentials/archive/refs/heads/main.zip
 unzip main.zip
 rm main.zip
+
+# download NH emissions for 2010
+(cd download
+wget https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v81_FT2022_AP/NH3/TOTALS/emi_nc/v8.1_FT2022_AP_NH3_2010_TOTALS_emi_nc.zip
+
+wget https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v81_FT2022_AP/NOx/TOTALS/emi_nc/v8.1_FT2022_AP_NOx_2010_TOTALS_emi_nc.zip
+)

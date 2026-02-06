@@ -2,7 +2,7 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Thibault Briera, Ruben Bibas, Florian Leblanc
+#     Ruben Bibas, Florian Leblanc, Thibault Briera
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -75,7 +75,7 @@ do
       for tax2100 in 1375
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -101,7 +101,7 @@ do
       for tax2100 in 2900
       do
  
-      for mshbio in 20
+      for mshbio in 10
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -127,7 +127,7 @@ do
       for tax2100 in 1575
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -153,7 +153,7 @@ do
       for tax2100 in 3100
       do
  
-      for mshbio in 206
+      for mshbio in 106
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -179,7 +179,7 @@ do
       for tax2100 in 1600
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
     
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"  
@@ -205,7 +205,7 @@ do
       for tax2100 in 4100
       do
 
-      for mshbio in 65
+      for mshbio in 33
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"

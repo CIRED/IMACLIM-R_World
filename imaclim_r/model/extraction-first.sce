@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -28,17 +28,13 @@ sg_add(["Conso"
 "taxCO2_DI"
 "taxMKT"])
 
-//Normalisons une bonne fois pour toutes
-//Attention a ma definition du num
+//normalisation by the numeraire
 num=p(1,indice_composite);
 p=p./num;
 w=w./num;
 Rdisp=Rdisp./num;
 wpEner=wpEner./num;
 
-////////////////////////////////////////////////////
-// Julie : sorties pétrole et LF
-////////////////////////////////////////////////////
 Q_biofuel=zeros ( reg,TimeHorizon+1);
 share_NC_sav=zeros(1,TimeHorizon+1);
 
@@ -71,14 +67,13 @@ num=p(1,indice_composite)*ones(reg,sec);
 
 DF = DFinduite(Conso,Tautomobile);
 
-charge =   Q./Cap;
+charge =   A.*Q./Cap; 
 
-FCC = aRD+bRD.*tanh(cRD.*(Q./Cap-1));
-FCCmarkup = ((1/0.8).*(Q./Cap));
-FCCmarkup=((markup_lim_oil-markupref)/(1-0.8).*(Q./Cap-0.8*ones(reg,sec))+markupref)./markup;
-//FCCmarkup = ones(reg,sec);
+FCC = aRD+bRD.*tanh(cRD.*(A.*Q./Cap-1));
+FCCmarkup = ((1/0.8).*(A.*Q./Cap));
+FCCmarkup=((markup_lim_oil-markupref)/(1-0.8).*(A.*Q./Cap-0.8*ones(reg,sec))+markupref)./markup;
 
-//////////// secteurs non-energetiques ////////////////
+//////////// non energy sectors ////////////////
 wp = zeros(1,sec);
 wp(:,sec-nb_secteur_conso+1:sec) = sum((weight.^(ones(reg,1)*eta)).*((p(:,sec-nb_secteur_conso+1:sec).*(1+xtax(:,sec-nb_secteur_conso+1:sec))).^(1-ones(reg,1)*eta)),"r").^(ones(1,nb_secteur_conso)./(1-eta));
 wpTI = zeros(1,nb_trans);
@@ -117,7 +112,7 @@ partDomDI(:,indice_elec) = partDomDIref(:,indice_elec);
 // partDomDG(:,indice_Et)=partDomDGref(:,indice_Et);
 // partDomDI(:,indice_Et)=partDomDIref(:,indice_Et);
 
-//cas particulier de l'oil: on empeche les régions qui ont un taux de charge trop important de consommer le pétrole produit domestiquement
+//oil specific case: region with high load rate cannot consume their own pdocution
 mult_oil=max(0.000001,a4_mult_oil.*min(charge(:,indice_oil),0.999).^4+ a3_mult_oil.*min(charge(:,indice_oil),0.999).^3 +a2_mult_oil.*min(charge(:,indice_oil),0.999).^2+ a1_mult_oil.*min(charge(:,indice_oil),0.999)+a0_mult_oil);
 
 partDomDF(:,indice_oil)=min(partDomDF(:,indice_oil).*mult_oil,partDomDF(:,indice_oil));
@@ -129,17 +124,17 @@ partDomDG(:,indice_oil)=max(0,partDomDG(:,indice_oil));
 partDomDI(:,indice_oil)=min(partDomDI(:,indice_oil).*mult_oil,partDomDI(:,indice_oil));
 partDomDI(:,indice_oil)=max(0,partDomDI(:,indice_oil));
 
-mult_gaz=max(0.000001,a4_mult_gaz.*min(charge(:,indice_gaz),0.999).^4+ a3_mult_gaz.*min(charge(:,indice_gaz),0.999).^3 +a2_mult_gaz.*min(charge(:,indice_gaz),0.999).^2+ a1_mult_gaz.*min(charge(:,indice_gaz),0.999)+a0_mult_gaz);
+mult_gaz=max(0.000001,a4_mult_gaz.*min(charge(:,indice_gas),0.999).^4+ a3_mult_gaz.*min(charge(:,indice_gas),0.999).^3 +a2_mult_gaz.*min(charge(:,indice_gas),0.999).^2+ a1_mult_gaz.*min(charge(:,indice_gas),0.999)+a0_mult_gaz);
 
 
-partDomDF(:,indice_gaz)=min(partDomDF(:,indice_gaz).*mult_gaz,partDomDF(:,indice_gaz));
-partDomDF(:,indice_gaz)=max(0,partDomDF(:,indice_gaz));
+partDomDF(:,indice_gas)=min(partDomDF(:,indice_gas).*mult_gaz,partDomDF(:,indice_gas));
+partDomDF(:,indice_gas)=max(0,partDomDF(:,indice_gas));
 
-partDomDG(:,indice_gaz)=min(partDomDG(:,indice_gaz).*mult_gaz,partDomDG(:,indice_gaz));
-partDomDG(:,indice_gaz)=max(0,partDomDG(:,indice_gaz));
+partDomDG(:,indice_gas)=min(partDomDG(:,indice_gas).*mult_gaz,partDomDG(:,indice_gas));
+partDomDG(:,indice_gas)=max(0,partDomDG(:,indice_gas));
 
-partDomDI(:,indice_gaz)=min(partDomDI(:,indice_gaz).*mult_gaz,partDomDI(:,indice_gaz));
-partDomDI(:,indice_gaz)=max(0,partDomDI(:,indice_gaz));
+partDomDI(:,indice_gas)=min(partDomDI(:,indice_gas).*mult_gaz,partDomDI(:,indice_gas));
+partDomDI(:,indice_gas)=max(0,partDomDI(:,indice_gas));
 
 partDomDF(:,1:nbsecteurenergie)=partDomDF(:,1:nbsecteurenergie)*inertia_share+partDomDF_stock(:,1:nbsecteurenergie)*(1-inertia_share);
 partDomDG(:,1:nbsecteurenergie)=partDomDG(:,1:nbsecteurenergie)*inertia_share+partDomDG_stock(:,1:nbsecteurenergie)*(1-inertia_share);
@@ -157,8 +152,8 @@ for k = 1:reg,
     partDomCI(indice_oil,:,k)=min(partDomCI(indice_oil,:,k)*mult_oil(k),partDomCI(indice_oil,:,k));
     partDomCI(indice_oil,:,k)=max(0,partDomCI(indice_oil,:,k));
 
-    partDomCI(indice_gaz,:,k)=min(partDomCI(indice_gaz,:,k)*mult_gaz(k),partDomCI(indice_gaz,:,k));
-    partDomCI(indice_gaz,:,k)=max(0,partDomCI(indice_gaz,:,k));
+    partDomCI(indice_gas,:,k)=min(partDomCI(indice_gas,:,k)*mult_gaz(k),partDomCI(indice_gas,:,k));
+    partDomCI(indice_gas,:,k)=max(0,partDomCI(indice_gas,:,k));
 
     partDomCI(1:nbsecteurenergie,:,k)=partDomCI(1:nbsecteurenergie,:,k)*inertia_share+partDomCI_stock(1:nbsecteurenergie,:,k)*(1-inertia_share);
     partImpCI(1:nbsecteurenergie,:,k) = 1-partDomCI(1:nbsecteurenergie,:,k);
@@ -167,17 +162,17 @@ end
 
 marketshare(:,1:nbsecteurenergie) = bmarketshareener.*((p(:,1:nbsecteurenergie).*(1+xtax(:,1:nbsecteurenergie))./(p_stock(:,1:nbsecteurenergie).*(1+xtaxref(:,1:nbsecteurenergie)))).^(ones(reg,1)*etamarketshareener))./(ones(reg,1)*sum(bmarketshareener.*((p(:,1:nbsecteurenergie).*(1+xtax(:,1:nbsecteurenergie))./(p_stock(:,1:nbsecteurenergie).*(1+xtaxref(:,1:nbsecteurenergie)))).^(ones(reg,1)*etamarketshareener)),'r'));
 if new_Et_msh_computation ==1
-  marketshare(:,4) = weightEt_new .* (( taxCO2_DF(:,4).* new_Et_msh_computation .* coef_Q_CO2_Et_prod .* num(:,4)  + p(:,indice_Et).*(1+xtax(:,indice_Et)) ) .^ etaEtnew) ./ sum( weightEt_new .* (( taxCO2_DF(:,4).* new_Et_msh_computation .* coef_Q_CO2_Et_prod .* num(:,4) +p(:,indice_Et).*(1+xtax(:,indice_Et))) .^ etaEtnew));
+    marketshare(:,4) = weightEt_new .* (( taxCO2_DF(:,4).* new_Et_msh_computation .* coef_Q_CO2_Et_prod .* num(:,4)  + p(:,indice_Et).*(1+xtax(:,indice_Et)) ) .^ etaEtnew) ./ sum( weightEt_new .* (( taxCO2_DF(:,4).* new_Et_msh_computation .* coef_Q_CO2_Et_prod .* num(:,4) +p(:,indice_Et).*(1+xtax(:,indice_Et))) .^ etaEtnew));
 end
 
-//correction pour l'oil: on empeche les pays au taux de charge important (>0.98) d'exporter
+//oil market correction: region with a high load rate do not export
 marketshare(:,indice_oil)=min(marketshare(:,indice_oil).*mult_oil,marketshare(:,indice_oil));
 marketshare(:,indice_oil)=max(0.00000001,marketshare(:,indice_oil));
 marketshare(:,indice_oil)=marketshare(:,indice_oil)/(sum(marketshare(:,indice_oil),'r'));
 
-marketshare(:,indice_gaz)=min(marketshare(:,indice_gaz).*mult_gaz,marketshare(:,indice_gaz));
-marketshare(:,indice_gaz)=max(0.00000001,marketshare(:,indice_gaz));
-marketshare(:,indice_gaz)=marketshare(:,indice_gaz)/(sum(marketshare(:,indice_gaz),'r'));
+marketshare(:,indice_gas)=min(marketshare(:,indice_gas).*mult_gaz,marketshare(:,indice_gas));
+marketshare(:,indice_gas)=max(0.00000001,marketshare(:,indice_gas));
+marketshare(:,indice_gas)=marketshare(:,indice_gas)/(sum(marketshare(:,indice_gas),'r'));
 
 wp(:,1:nbsecteurenergie) = wpEner;
 
@@ -191,8 +186,7 @@ end
 pArmDF = pArmDF.*(1+Ttax);
 //pArmDF=pArmDF+(Ttax1);
 
-/////////// indice de prix des consommations des menages  /////////////////
-
+/////////// consumption price index
 //pind = sum(pArmDF.*(pArmDF.*DF./((Rdisp.*(1-IR).*ptc)*ones(1,sec))),"c");
 pind=(sum(pArmDF.*DF,'c')./sum(pArmDFref.*DF,'c').*sum(pArmDF.*DFref,'c')./sum(pArmDFref.*DFref,'c')).^(1/2);
 pind_prod=(sum(p.*Q,'c')./sum(pref.*Q,'c').*sum(p.*Qref,'c')./sum(pref.*Qref,'c')).^(1/2);
@@ -201,37 +195,36 @@ GRB = ones(reg,1);
 GRB = Rdisp.*(1-IR).*(1-ptc)+(1-div).*sum(p.*Q.*markup.*(FCC.*energ_sec+non_energ_sec),'c');
 NRB = ones(reg,1);
 NRB = (GRB.*(1-partExpK)+partImpK.*(ones(reg,1)*sum(GRB.*partExpK)));
-DI = DIinfra + DIprodref.*(((NRB-sum(DIinfra.*pArmDI,'c'))./sum(DIprodref.*pArmDI,'c'))*ones(1,sec));
+DI = DIinfra + DIprod.*(((NRB-sum(DIinfra.*pArmDI,'c'))./sum(DIprod.*pArmDI,'c'))*ones(1,sec));
 
-/////////// calcul intermediaire des exportations, importations ///////////
-
+/////////// exports & imports
 QCdom = ones(reg,sec);
-QCdom = [(A(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1))');
-(A(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2))');
-(A(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3))');
-(A(4,:).*Q(4,:))*((CI(:,:,4).*partDomCI(:,:,4))');
-(A(5,:).*Q(5,:))*((CI(:,:,5).*partDomCI(:,:,5))');
-(A(6,:).*Q(6,:))*((CI(:,:,6).*partDomCI(:,:,6))');
-(A(7,:).*Q(7,:))*((CI(:,:,7).*partDomCI(:,:,7))');
-(A(8,:).*Q(8,:))*((CI(:,:,8).*partDomCI(:,:,8))');
-(A(9,:).*Q(9,:))*((CI(:,:,9).*partDomCI(:,:,9))');
-(A(10,:).*Q(10,:))*((CI(:,:,10).*partDomCI(:,:,10))');
-(A(11,:).*Q(11,:))*((CI(:,:,11).*partDomCI(:,:,11))');
-(A(12,:).*Q(12,:))*((CI(:,:,12).*partDomCI(:,:,12))')]+DF.*partDomDF+DG.*partDomDG+DI.*partDomDI;
+QCdom = [(A_CI(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1))');
+(A_CI(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2))');
+(A_CI(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3))');
+(A_CI(4,:).*Q(4,:))*((CI(:,:,4).*partDomCI(:,:,4))');
+(A_CI(5,:).*Q(5,:))*((CI(:,:,5).*partDomCI(:,:,5))');
+(A_CI(6,:).*Q(6,:))*((CI(:,:,6).*partDomCI(:,:,6))');
+(A_CI(7,:).*Q(7,:))*((CI(:,:,7).*partDomCI(:,:,7))');
+(A_CI(8,:).*Q(8,:))*((CI(:,:,8).*partDomCI(:,:,8))');
+(A_CI(9,:).*Q(9,:))*((CI(:,:,9).*partDomCI(:,:,9))');
+(A_CI(10,:).*Q(10,:))*((CI(:,:,10).*partDomCI(:,:,10))');
+(A_CI(11,:).*Q(11,:))*((CI(:,:,11).*partDomCI(:,:,11))');
+(A_CI(12,:).*Q(12,:))*((CI(:,:,12).*partDomCI(:,:,12))')]+DF.*partDomDF+DG.*partDomDG+DI.*partDomDI;
 
 Imp = ones(reg,sec);
-Imp = [(A(1,:).*Q(1,:))*((CI(:,:,1).*(partImpCI(:,:,1)))');
-(A(2,:).*Q(2,:))*((CI(:,:,2).*(partImpCI(:,:,2)))');
-(A(3,:).*Q(3,:))*((CI(:,:,3).*(partImpCI(:,:,3)))');
-(A(4,:).*Q(4,:))*((CI(:,:,4).*(partImpCI(:,:,4)))');
-(A(5,:).*Q(5,:))*((CI(:,:,5).*(partImpCI(:,:,5)))');
-(A(6,:).*Q(6,:))*((CI(:,:,6).*(partImpCI(:,:,6)))');
-(A(7,:).*Q(7,:))*((CI(:,:,7).*(partImpCI(:,:,7)))');
-(A(8,:).*Q(8,:))*((CI(:,:,8).*(partImpCI(:,:,8)))');
-(A(9,:).*Q(9,:))*((CI(:,:,9).*(partImpCI(:,:,9)))');
-(A(10,:).*Q(10,:))*((CI(:,:,10).*(partImpCI(:,:,10)))');
-(A(11,:).*Q(11,:))*((CI(:,:,11).*(partImpCI(:,:,11)))');
-(A(12,:).*Q(12,:))*((CI(:,:,12).*(partImpCI(:,:,12)))')]+DF.*(partImpDF)+DG.*(partImpDG)+DI.*(partImpDI);
+Imp = [(A_CI(1,:).*Q(1,:))*((CI(:,:,1).*(partImpCI(:,:,1)))');
+(A_CI(2,:).*Q(2,:))*((CI(:,:,2).*(partImpCI(:,:,2)))');
+(A_CI(3,:).*Q(3,:))*((CI(:,:,3).*(partImpCI(:,:,3)))');
+(A_CI(4,:).*Q(4,:))*((CI(:,:,4).*(partImpCI(:,:,4)))');
+(A_CI(5,:).*Q(5,:))*((CI(:,:,5).*(partImpCI(:,:,5)))');
+(A_CI(6,:).*Q(6,:))*((CI(:,:,6).*(partImpCI(:,:,6)))');
+(A_CI(7,:).*Q(7,:))*((CI(:,:,7).*(partImpCI(:,:,7)))');
+(A_CI(8,:).*Q(8,:))*((CI(:,:,8).*(partImpCI(:,:,8)))');
+(A_CI(9,:).*Q(9,:))*((CI(:,:,9).*(partImpCI(:,:,9)))');
+(A_CI(10,:).*Q(10,:))*((CI(:,:,10).*(partImpCI(:,:,10)))');
+(A_CI(11,:).*Q(11,:))*((CI(:,:,11).*(partImpCI(:,:,11)))');
+(A_CI(12,:).*Q(12,:))*((CI(:,:,12).*(partImpCI(:,:,12)))')]+DF.*(partImpDF)+DG.*(partImpDG)+DI.*(partImpDI);
 
 
 
@@ -240,31 +233,31 @@ Exp = marketshare.*(ones(reg,1)*sum(Imp,"r"));
 ExpTI = zeros(reg,sec);
 ExpTI(:,indice_transport_1:indice_transport_2)=marketshareTI.*(ones(reg,1)*(sum(Imp.*nit)*partTIref));
 
-QCdom_noDI= [(A(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1))');
-(A(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2))');
-(A(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3))');
-(A(4,:).*Q(4,:))*((CI(:,:,4).*partDomCI(:,:,4))');
-(A(5,:).*Q(5,:))*((CI(:,:,5).*partDomCI(:,:,5))');
-(A(6,:).*Q(6,:))*((CI(:,:,6).*partDomCI(:,:,6))');
-(A(7,:).*Q(7,:))*((CI(:,:,7).*partDomCI(:,:,7))');
-(A(8,:).*Q(8,:))*((CI(:,:,8).*partDomCI(:,:,8))');
-(A(9,:).*Q(9,:))*((CI(:,:,9).*partDomCI(:,:,9))');
-(A(10,:).*Q(10,:))*((CI(:,:,10).*partDomCI(:,:,10))');
-(A(11,:).*Q(11,:))*((CI(:,:,11).*partDomCI(:,:,11))');
-(A(12,:).*Q(12,:))*((CI(:,:,12).*partDomCI(:,:,12))')]+DF.*partDomDF+DG.*partDomDG;
+QCdom_noDI= [(A_CI(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1))');
+(A_CI(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2))');
+(A_CI(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3))');
+(A_CI(4,:).*Q(4,:))*((CI(:,:,4).*partDomCI(:,:,4))');
+(A_CI(5,:).*Q(5,:))*((CI(:,:,5).*partDomCI(:,:,5))');
+(A_CI(6,:).*Q(6,:))*((CI(:,:,6).*partDomCI(:,:,6))');
+(A_CI(7,:).*Q(7,:))*((CI(:,:,7).*partDomCI(:,:,7))');
+(A_CI(8,:).*Q(8,:))*((CI(:,:,8).*partDomCI(:,:,8))');
+(A_CI(9,:).*Q(9,:))*((CI(:,:,9).*partDomCI(:,:,9))');
+(A_CI(10,:).*Q(10,:))*((CI(:,:,10).*partDomCI(:,:,10))');
+(A_CI(11,:).*Q(11,:))*((CI(:,:,11).*partDomCI(:,:,11))');
+(A_CI(12,:).*Q(12,:))*((CI(:,:,12).*partDomCI(:,:,12))')]+DF.*partDomDF+DG.*partDomDG;
 
-Imp_noDI = [(A(1,:).*Q(1,:))*((CI(:,:,1).*(partImpCI(:,:,1)))');
-(A(2,:).*Q(2,:))*((CI(:,:,2).*(partImpCI(:,:,2)))');
-(A(3,:).*Q(3,:))*((CI(:,:,3).*(partImpCI(:,:,3)))');
-(A(4,:).*Q(4,:))*((CI(:,:,4).*(partImpCI(:,:,4)))');
-(A(5,:).*Q(5,:))*((CI(:,:,5).*(partImpCI(:,:,5)))');
-(A(6,:).*Q(6,:))*((CI(:,:,6).*(partImpCI(:,:,6)))');
-(A(7,:).*Q(7,:))*((CI(:,:,7).*(partImpCI(:,:,7)))');
-(A(8,:).*Q(8,:))*((CI(:,:,8).*(partImpCI(:,:,8)))');
-(A(9,:).*Q(9,:))*((CI(:,:,9).*(partImpCI(:,:,9)))');
-(A(10,:).*Q(10,:))*((CI(:,:,10).*(partImpCI(:,:,10)))');
-(A(11,:).*Q(11,:))*((CI(:,:,11).*(partImpCI(:,:,11)))');
-(A(12,:).*Q(12,:))*((CI(:,:,12).*(partImpCI(:,:,12)))')]+DF.*(partImpDF)+DG.*(partImpDG);
+Imp_noDI = [(A_CI(1,:).*Q(1,:))*((CI(:,:,1).*(partImpCI(:,:,1)))');
+(A_CI(2,:).*Q(2,:))*((CI(:,:,2).*(partImpCI(:,:,2)))');
+(A_CI(3,:).*Q(3,:))*((CI(:,:,3).*(partImpCI(:,:,3)))');
+(A_CI(4,:).*Q(4,:))*((CI(:,:,4).*(partImpCI(:,:,4)))');
+(A_CI(5,:).*Q(5,:))*((CI(:,:,5).*(partImpCI(:,:,5)))');
+(A_CI(6,:).*Q(6,:))*((CI(:,:,6).*(partImpCI(:,:,6)))');
+(A_CI(7,:).*Q(7,:))*((CI(:,:,7).*(partImpCI(:,:,7)))');
+(A_CI(8,:).*Q(8,:))*((CI(:,:,8).*(partImpCI(:,:,8)))');
+(A_CI(9,:).*Q(9,:))*((CI(:,:,9).*(partImpCI(:,:,9)))');
+(A_CI(10,:).*Q(10,:))*((CI(:,:,10).*(partImpCI(:,:,10)))');
+(A_CI(11,:).*Q(11,:))*((CI(:,:,11).*(partImpCI(:,:,11)))');
+(A_CI(12,:).*Q(12,:))*((CI(:,:,12).*(partImpCI(:,:,12)))')]+DF.*(partImpDF)+DG.*(partImpDG);
 
 Exp_noDI = marketshare.*(ones(reg,1)*sum(Imp_noDI,"r"));
 
@@ -273,100 +266,100 @@ Q_noDI=QCdom_noDI+Exp_noDI+ExpTI;
 EBE = p.*Q.*markup.*(FCC.*energ_sec+non_energ_sec);
 
 taxCI_dom = [
-sum((p(1,:)'*ones(1,sec)).*taxCIdom(:,:,1).*partDomCI(:,:,1).*CI(:,:,1).*(ones(sec,1)*(A(1,:).*Q(1,:))), 'c')';
-sum((p(2,:)'*ones(1,sec)).*taxCIdom(:,:,2).*partDomCI(:,:,2).*CI(:,:,2).*(ones(sec,1)*(A(2,:).*Q(2,:))), 'c')';
-sum((p(3,:)'*ones(1,sec)).*taxCIdom(:,:,3).*partDomCI(:,:,3).*CI(:,:,3).*(ones(sec,1)*(A(3,:).*Q(3,:))), 'c')';
-sum((p(4,:)'*ones(1,sec)).*taxCIdom(:,:,4).*partDomCI(:,:,4).*CI(:,:,4).*(ones(sec,1)*(A(4,:).*Q(4,:))), 'c')';
-sum((p(5,:)'*ones(1,sec)).*taxCIdom(:,:,5).*partDomCI(:,:,5).*CI(:,:,5).*(ones(sec,1)*(A(5,:).*Q(5,:))), 'c')';
-sum((p(6,:)'*ones(1,sec)).*taxCIdom(:,:,6).*partDomCI(:,:,6).*CI(:,:,6).*(ones(sec,1)*(A(6,:).*Q(6,:))), 'c')';
-sum((p(7,:)'*ones(1,sec)).*taxCIdom(:,:,7).*partDomCI(:,:,7).*CI(:,:,7).*(ones(sec,1)*(A(7,:).*Q(7,:))), 'c')';
-sum((p(8,:)'*ones(1,sec)).*taxCIdom(:,:,8).*partDomCI(:,:,8).*CI(:,:,8).*(ones(sec,1)*(A(8,:).*Q(8,:))), 'c')';
-sum((p(9,:)'*ones(1,sec)).*taxCIdom(:,:,9).*partDomCI(:,:,9).*CI(:,:,9).*(ones(sec,1)*(A(9,:).*Q(9,:))), 'c')';
-sum((p(10,:)'*ones(1,sec)).*taxCIdom(:,:,10).*partDomCI(:,:,10).*CI(:,:,10).*(ones(sec,1)*(A(10,:).*Q(10,:))), 'c')';
-sum((p(11,:)'*ones(1,sec)).*taxCIdom(:,:,11).*partDomCI(:,:,11).*CI(:,:,11).*(ones(sec,1)*(A(11,:).*Q(11,:))), 'c')';
-sum((p(12,:)'*ones(1,sec)).*taxCIdom(:,:,12).*partDomCI(:,:,12).*CI(:,:,12).*(ones(sec,1)*(A(12,:).*Q(12,:))), 'c')'];
+sum((p(1,:)'*ones(1,sec)).*taxCIdom(:,:,1).*partDomCI(:,:,1).*CI(:,:,1).*(ones(sec,1)*(A_CI(1,:).*Q(1,:))), 'c')';
+sum((p(2,:)'*ones(1,sec)).*taxCIdom(:,:,2).*partDomCI(:,:,2).*CI(:,:,2).*(ones(sec,1)*(A_CI(2,:).*Q(2,:))), 'c')';
+sum((p(3,:)'*ones(1,sec)).*taxCIdom(:,:,3).*partDomCI(:,:,3).*CI(:,:,3).*(ones(sec,1)*(A_CI(3,:).*Q(3,:))), 'c')';
+sum((p(4,:)'*ones(1,sec)).*taxCIdom(:,:,4).*partDomCI(:,:,4).*CI(:,:,4).*(ones(sec,1)*(A_CI(4,:).*Q(4,:))), 'c')';
+sum((p(5,:)'*ones(1,sec)).*taxCIdom(:,:,5).*partDomCI(:,:,5).*CI(:,:,5).*(ones(sec,1)*(A_CI(5,:).*Q(5,:))), 'c')';
+sum((p(6,:)'*ones(1,sec)).*taxCIdom(:,:,6).*partDomCI(:,:,6).*CI(:,:,6).*(ones(sec,1)*(A_CI(6,:).*Q(6,:))), 'c')';
+sum((p(7,:)'*ones(1,sec)).*taxCIdom(:,:,7).*partDomCI(:,:,7).*CI(:,:,7).*(ones(sec,1)*(A_CI(7,:).*Q(7,:))), 'c')';
+sum((p(8,:)'*ones(1,sec)).*taxCIdom(:,:,8).*partDomCI(:,:,8).*CI(:,:,8).*(ones(sec,1)*(A_CI(8,:).*Q(8,:))), 'c')';
+sum((p(9,:)'*ones(1,sec)).*taxCIdom(:,:,9).*partDomCI(:,:,9).*CI(:,:,9).*(ones(sec,1)*(A_CI(9,:).*Q(9,:))), 'c')';
+sum((p(10,:)'*ones(1,sec)).*taxCIdom(:,:,10).*partDomCI(:,:,10).*CI(:,:,10).*(ones(sec,1)*(A_CI(10,:).*Q(10,:))), 'c')';
+sum((p(11,:)'*ones(1,sec)).*taxCIdom(:,:,11).*partDomCI(:,:,11).*CI(:,:,11).*(ones(sec,1)*(A_CI(11,:).*Q(11,:))), 'c')';
+sum((p(12,:)'*ones(1,sec)).*taxCIdom(:,:,12).*partDomCI(:,:,12).*CI(:,:,12).*(ones(sec,1)*(A_CI(12,:).*Q(12,:))), 'c')'];
 
 taxCI_imp = [
-sum(((wp.*(1+mtax(1,:))+nit(1,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,1).*(partImpCI(:,:,1)).*CI(:,:,1).*(ones(sec,1)*(A(1,:).*Q(1,:))), 'c')';
-sum(((wp.*(1+mtax(2,:))+nit(2,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,2).*(partImpCI(:,:,2)).*CI(:,:,2).*(ones(sec,1)*(A(2,:).*Q(2,:))), 'c')';
-sum(((wp.*(1+mtax(3,:))+nit(3,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,3).*(partImpCI(:,:,3)).*CI(:,:,3).*(ones(sec,1)*(A(3,:).*Q(3,:))), 'c')';
-sum(((wp.*(1+mtax(4,:))+nit(4,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,4).*(partImpCI(:,:,4)).*CI(:,:,4).*(ones(sec,1)*(A(4,:).*Q(4,:))), 'c')';
-sum(((wp.*(1+mtax(5,:))+nit(5,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,5).*(partImpCI(:,:,5)).*CI(:,:,5).*(ones(sec,1)*(A(5,:).*Q(5,:))), 'c')';
-sum(((wp.*(1+mtax(6,:))+nit(6,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,6).*(partImpCI(:,:,6)).*CI(:,:,6).*(ones(sec,1)*(A(6,:).*Q(6,:))), 'c')';
-sum(((wp.*(1+mtax(7,:))+nit(7,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,7).*(partImpCI(:,:,7)).*CI(:,:,7).*(ones(sec,1)*(A(7,:).*Q(7,:))), 'c')';
-sum(((wp.*(1+mtax(8,:))+nit(8,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,8).*(partImpCI(:,:,8)).*CI(:,:,8).*(ones(sec,1)*(A(8,:).*Q(8,:))), 'c')';
-sum(((wp.*(1+mtax(9,:))+nit(9,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,9).*(partImpCI(:,:,9)).*CI(:,:,9).*(ones(sec,1)*(A(9,:).*Q(9,:))), 'c')';
-sum(((wp.*(1+mtax(10,:))+nit(10,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,10).*(partImpCI(:,:,10)).*CI(:,:,10).*(ones(sec,1)*(A(10,:).*Q(10,:))), 'c')';
-sum(((wp.*(1+mtax(11,:))+nit(11,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,11).*(partImpCI(:,:,11)).*CI(:,:,11).*(ones(sec,1)*(A(11,:).*Q(11,:))), 'c')';
-sum(((wp.*(1+mtax(12,:))+nit(12,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,12).*(partImpCI(:,:,12)).*CI(:,:,12).*(ones(sec,1)*(A(12,:).*Q(12,:))), 'c')'];
+sum(((wp.*(1+mtax(1,:))+nit(1,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,1).*(partImpCI(:,:,1)).*CI(:,:,1).*(ones(sec,1)*(A_CI(1,:).*Q(1,:))), 'c')';
+sum(((wp.*(1+mtax(2,:))+nit(2,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,2).*(partImpCI(:,:,2)).*CI(:,:,2).*(ones(sec,1)*(A_CI(2,:).*Q(2,:))), 'c')';
+sum(((wp.*(1+mtax(3,:))+nit(3,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,3).*(partImpCI(:,:,3)).*CI(:,:,3).*(ones(sec,1)*(A_CI(3,:).*Q(3,:))), 'c')';
+sum(((wp.*(1+mtax(4,:))+nit(4,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,4).*(partImpCI(:,:,4)).*CI(:,:,4).*(ones(sec,1)*(A_CI(4,:).*Q(4,:))), 'c')';
+sum(((wp.*(1+mtax(5,:))+nit(5,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,5).*(partImpCI(:,:,5)).*CI(:,:,5).*(ones(sec,1)*(A_CI(5,:).*Q(5,:))), 'c')';
+sum(((wp.*(1+mtax(6,:))+nit(6,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,6).*(partImpCI(:,:,6)).*CI(:,:,6).*(ones(sec,1)*(A_CI(6,:).*Q(6,:))), 'c')';
+sum(((wp.*(1+mtax(7,:))+nit(7,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,7).*(partImpCI(:,:,7)).*CI(:,:,7).*(ones(sec,1)*(A_CI(7,:).*Q(7,:))), 'c')';
+sum(((wp.*(1+mtax(8,:))+nit(8,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,8).*(partImpCI(:,:,8)).*CI(:,:,8).*(ones(sec,1)*(A_CI(8,:).*Q(8,:))), 'c')';
+sum(((wp.*(1+mtax(9,:))+nit(9,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,9).*(partImpCI(:,:,9)).*CI(:,:,9).*(ones(sec,1)*(A_CI(9,:).*Q(9,:))), 'c')';
+sum(((wp.*(1+mtax(10,:))+nit(10,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,10).*(partImpCI(:,:,10)).*CI(:,:,10).*(ones(sec,1)*(A_CI(10,:).*Q(10,:))), 'c')';
+sum(((wp.*(1+mtax(11,:))+nit(11,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,11).*(partImpCI(:,:,11)).*CI(:,:,11).*(ones(sec,1)*(A_CI(11,:).*Q(11,:))), 'c')';
+sum(((wp.*(1+mtax(12,:))+nit(12,:).*wpTIagg)'*ones(1,sec)).*taxCIimp(:,:,12).*(partImpCI(:,:,12)).*CI(:,:,12).*(ones(sec,1)*(A_CI(12,:).*Q(12,:))), 'c')'];
 
-TAXCO2_dom=[(A(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1).*taxCO2_CI(:,:,1).*coef_Q_CO2_CI(:,:,1).*(num(1,1)*ones(sec,sec)))');
-(A(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2).*taxCO2_CI(:,:,2).*coef_Q_CO2_CI(:,:,2).*(num(2,1)*ones(sec,sec)))');
-(A(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3).*taxCO2_CI(:,:,3).*coef_Q_CO2_CI(:,:,3).*(num(3,1)*ones(sec,sec)))');
-(A(4,:).*Q(4,:))*((CI(:,:,4).*partDomCI(:,:,4).*taxCO2_CI(:,:,4).*coef_Q_CO2_CI(:,:,4).*(num(4,1)*ones(sec,sec)))');
-(A(5,:).*Q(5,:))*((CI(:,:,5).*partDomCI(:,:,5).*taxCO2_CI(:,:,5).*coef_Q_CO2_CI(:,:,5).*(num(5,1)*ones(sec,sec)))');
-(A(6,:).*Q(6,:))*((CI(:,:,6).*partDomCI(:,:,6).*taxCO2_CI(:,:,6).*coef_Q_CO2_CI(:,:,6).*(num(6,1)*ones(sec,sec)))');
-(A(7,:).*Q(7,:))*((CI(:,:,7).*partDomCI(:,:,7).*taxCO2_CI(:,:,7).*coef_Q_CO2_CI(:,:,7).*(num(7,1)*ones(sec,sec)))');
-(A(8,:).*Q(8,:))*((CI(:,:,8).*partDomCI(:,:,8).*taxCO2_CI(:,:,8).*coef_Q_CO2_CI(:,:,8).*(num(8,1)*ones(sec,sec)))');
-(A(9,:).*Q(9,:))*((CI(:,:,9).*partDomCI(:,:,9).*taxCO2_CI(:,:,9).*coef_Q_CO2_CI(:,:,9).*(num(9,1)*ones(sec,sec)))');
-(A(10,:).*Q(10,:))*((CI(:,:,10).*partDomCI(:,:,10).*taxCO2_CI(:,:,10).*coef_Q_CO2_CI(:,:,10).*(num(10,1)*ones(sec,sec)))');
-(A(11,:).*Q(11,:))*((CI(:,:,11).*partDomCI(:,:,11).*taxCO2_CI(:,:,11).*coef_Q_CO2_CI(:,:,11).*(num(11,1)*ones(sec,sec)))');
-(A(12,:).*Q(12,:))*((CI(:,:,12).*partDomCI(:,:,12).*taxCO2_CI(:,:,12).*coef_Q_CO2_CI(:,:,12).*(num(12,1)*ones(sec,sec)))')]+DF.*partDomDF.*taxCO2_DF.*coef_Q_CO2_DF.*num+DG.*partDomDG.*taxCO2_DG.*coef_Q_CO2_DG.*num+DI.*partDomDI.*taxCO2_DI.*coef_Q_CO2_DI.*num;
+TAXCO2_dom=[(A_CI(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1).*taxCO2_CI(:,:,1).*coef_Q_CO2_CI(:,:,1).*(num(1,1)*ones(sec,sec)))');
+(A_CI(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2).*taxCO2_CI(:,:,2).*coef_Q_CO2_CI(:,:,2).*(num(2,1)*ones(sec,sec)))');
+(A_CI(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3).*taxCO2_CI(:,:,3).*coef_Q_CO2_CI(:,:,3).*(num(3,1)*ones(sec,sec)))');
+(A_CI(4,:).*Q(4,:))*((CI(:,:,4).*partDomCI(:,:,4).*taxCO2_CI(:,:,4).*coef_Q_CO2_CI(:,:,4).*(num(4,1)*ones(sec,sec)))');
+(A_CI(5,:).*Q(5,:))*((CI(:,:,5).*partDomCI(:,:,5).*taxCO2_CI(:,:,5).*coef_Q_CO2_CI(:,:,5).*(num(5,1)*ones(sec,sec)))');
+(A_CI(6,:).*Q(6,:))*((CI(:,:,6).*partDomCI(:,:,6).*taxCO2_CI(:,:,6).*coef_Q_CO2_CI(:,:,6).*(num(6,1)*ones(sec,sec)))');
+(A_CI(7,:).*Q(7,:))*((CI(:,:,7).*partDomCI(:,:,7).*taxCO2_CI(:,:,7).*coef_Q_CO2_CI(:,:,7).*(num(7,1)*ones(sec,sec)))');
+(A_CI(8,:).*Q(8,:))*((CI(:,:,8).*partDomCI(:,:,8).*taxCO2_CI(:,:,8).*coef_Q_CO2_CI(:,:,8).*(num(8,1)*ones(sec,sec)))');
+(A_CI(9,:).*Q(9,:))*((CI(:,:,9).*partDomCI(:,:,9).*taxCO2_CI(:,:,9).*coef_Q_CO2_CI(:,:,9).*(num(9,1)*ones(sec,sec)))');
+(A_CI(10,:).*Q(10,:))*((CI(:,:,10).*partDomCI(:,:,10).*taxCO2_CI(:,:,10).*coef_Q_CO2_CI(:,:,10).*(num(10,1)*ones(sec,sec)))');
+(A_CI(11,:).*Q(11,:))*((CI(:,:,11).*partDomCI(:,:,11).*taxCO2_CI(:,:,11).*coef_Q_CO2_CI(:,:,11).*(num(11,1)*ones(sec,sec)))');
+(A_CI(12,:).*Q(12,:))*((CI(:,:,12).*partDomCI(:,:,12).*taxCO2_CI(:,:,12).*coef_Q_CO2_CI(:,:,12).*(num(12,1)*ones(sec,sec)))')]+DF.*partDomDF.*taxCO2_DF.*coef_Q_CO2_DF.*num+DG.*partDomDG.*taxCO2_DG.*coef_Q_CO2_DG.*num+DI.*partDomDI.*taxCO2_DI.*coef_Q_CO2_DI.*num;
 
-TAXCO2_imp=[(A(1,:).*Q(1,:))*((CI(:,:,1).*partImpCI(:,:,1).*taxCO2_CI(:,:,1).*coef_Q_CO2_CI(:,:,1).*(num(1,1)*ones(sec,sec)))');
-(A(2,:).*Q(2,:))*((CI(:,:,2).*partImpCI(:,:,2).*taxCO2_CI(:,:,2).*coef_Q_CO2_CI(:,:,2).*(num(2,1)*ones(sec,sec)))');
-(A(3,:).*Q(3,:))*((CI(:,:,3).*partImpCI(:,:,3).*taxCO2_CI(:,:,3).*coef_Q_CO2_CI(:,:,3).*(num(3,1)*ones(sec,sec)))');
-(A(4,:).*Q(4,:))*((CI(:,:,4).*partImpCI(:,:,4).*taxCO2_CI(:,:,4).*coef_Q_CO2_CI(:,:,4).*(num(4,1)*ones(sec,sec)))');
-(A(5,:).*Q(5,:))*((CI(:,:,5).*partImpCI(:,:,5).*taxCO2_CI(:,:,5).*coef_Q_CO2_CI(:,:,5).*(num(5,1)*ones(sec,sec)))');
-(A(6,:).*Q(6,:))*((CI(:,:,6).*partImpCI(:,:,6).*taxCO2_CI(:,:,6).*coef_Q_CO2_CI(:,:,6).*(num(6,1)*ones(sec,sec)))');
-(A(7,:).*Q(7,:))*((CI(:,:,7).*partImpCI(:,:,7).*taxCO2_CI(:,:,7).*coef_Q_CO2_CI(:,:,7).*(num(7,1)*ones(sec,sec)))');
-(A(8,:).*Q(8,:))*((CI(:,:,8).*partImpCI(:,:,8).*taxCO2_CI(:,:,8).*coef_Q_CO2_CI(:,:,8).*(num(8,1)*ones(sec,sec)))');
-(A(9,:).*Q(9,:))*((CI(:,:,9).*partImpCI(:,:,9).*taxCO2_CI(:,:,9).*coef_Q_CO2_CI(:,:,9).*(num(9,1)*ones(sec,sec)))');
-(A(10,:).*Q(10,:))*((CI(:,:,10).*partImpCI(:,:,10).*taxCO2_CI(:,:,10).*coef_Q_CO2_CI(:,:,10).*(num(10,1)*ones(sec,sec)))');
-(A(11,:).*Q(11,:))*((CI(:,:,11).*partImpCI(:,:,11).*taxCO2_CI(:,:,11).*coef_Q_CO2_CI(:,:,11).*(num(11,1)*ones(sec,sec)))');
-(A(12,:).*Q(12,:))*((CI(:,:,12).*partImpCI(:,:,12).*taxCO2_CI(:,:,12).*coef_Q_CO2_CI(:,:,12).*(num(12,1)*ones(sec,sec)))')]+DF.*partImpDF.*taxCO2_DF.*coef_Q_CO2_DF.*num+DG.*partImpDG.*taxCO2_DG.*coef_Q_CO2_DG.*num+DI.*partImpDI.*taxCO2_DI.*coef_Q_CO2_DI.*num;
+TAXCO2_imp=[(A_CI(1,:).*Q(1,:))*((CI(:,:,1).*partImpCI(:,:,1).*taxCO2_CI(:,:,1).*coef_Q_CO2_CI(:,:,1).*(num(1,1)*ones(sec,sec)))');
+(A_CI(2,:).*Q(2,:))*((CI(:,:,2).*partImpCI(:,:,2).*taxCO2_CI(:,:,2).*coef_Q_CO2_CI(:,:,2).*(num(2,1)*ones(sec,sec)))');
+(A_CI(3,:).*Q(3,:))*((CI(:,:,3).*partImpCI(:,:,3).*taxCO2_CI(:,:,3).*coef_Q_CO2_CI(:,:,3).*(num(3,1)*ones(sec,sec)))');
+(A_CI(4,:).*Q(4,:))*((CI(:,:,4).*partImpCI(:,:,4).*taxCO2_CI(:,:,4).*coef_Q_CO2_CI(:,:,4).*(num(4,1)*ones(sec,sec)))');
+(A_CI(5,:).*Q(5,:))*((CI(:,:,5).*partImpCI(:,:,5).*taxCO2_CI(:,:,5).*coef_Q_CO2_CI(:,:,5).*(num(5,1)*ones(sec,sec)))');
+(A_CI(6,:).*Q(6,:))*((CI(:,:,6).*partImpCI(:,:,6).*taxCO2_CI(:,:,6).*coef_Q_CO2_CI(:,:,6).*(num(6,1)*ones(sec,sec)))');
+(A_CI(7,:).*Q(7,:))*((CI(:,:,7).*partImpCI(:,:,7).*taxCO2_CI(:,:,7).*coef_Q_CO2_CI(:,:,7).*(num(7,1)*ones(sec,sec)))');
+(A_CI(8,:).*Q(8,:))*((CI(:,:,8).*partImpCI(:,:,8).*taxCO2_CI(:,:,8).*coef_Q_CO2_CI(:,:,8).*(num(8,1)*ones(sec,sec)))');
+(A_CI(9,:).*Q(9,:))*((CI(:,:,9).*partImpCI(:,:,9).*taxCO2_CI(:,:,9).*coef_Q_CO2_CI(:,:,9).*(num(9,1)*ones(sec,sec)))');
+(A_CI(10,:).*Q(10,:))*((CI(:,:,10).*partImpCI(:,:,10).*taxCO2_CI(:,:,10).*coef_Q_CO2_CI(:,:,10).*(num(10,1)*ones(sec,sec)))');
+(A_CI(11,:).*Q(11,:))*((CI(:,:,11).*partImpCI(:,:,11).*taxCO2_CI(:,:,11).*coef_Q_CO2_CI(:,:,11).*(num(11,1)*ones(sec,sec)))');
+(A_CI(12,:).*Q(12,:))*((CI(:,:,12).*partImpCI(:,:,12).*taxCO2_CI(:,:,12).*coef_Q_CO2_CI(:,:,12).*(num(12,1)*ones(sec,sec)))')]+DF.*partImpDF.*taxCO2_DF.*coef_Q_CO2_DF.*num+DG.*partImpDG.*taxCO2_DG.*coef_Q_CO2_DG.*num+DI.*partImpDI.*taxCO2_DI.*coef_Q_CO2_DI.*num;
 
 TAXCO2=sum(TAXCO2_imp+TAXCO2_dom,'c');
 //TAXCO2 = sum(taxCO2.*num.*coef_Q_CO2.*(QCdom+Imp),'c');
 
 TAX_sect = taxCI_dom + taxCI_imp + TAXCO2_imp + TAXCO2_dom + Exp.*p.*xtax+...
-(p.*taxDFdom.*partDomDF+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDFimp.*(partImpDF)).*DF+...
-(p.*taxDGdom.*partDomDG+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDGimp.*(partImpDG)).*DG+...
-(p.*taxDIdom.*partDomDI+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDIimp.*(partImpDI)).*DI+...
-(ones(reg,1)*wp).*mtax.*Imp+...
-DF.*pArmDF.*Ttax./(1+Ttax)+...
-Q.*p.*qtax./(1+qtax)+...
+    (p.*taxDFdom.*partDomDF+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDFimp.*(partImpDF)).*DF+...
+    (p.*taxDGdom.*partDomDG+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDGimp.*(partImpDG)).*DG+...
+    (p.*taxDIdom.*partDomDI+((ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit).*taxDIimp.*(partImpDI)).*DI+...
+    (ones(reg,1)*wp).*mtax.*Imp+...
+    DF.*pArmDF.*Ttax./(1+Ttax)+...
+    Q.*p.*qtax./(1+qtax)+...
 A.*Q.*w.*l.*sigma.*(energ_sec+FCC.*non_energ_sec);
 
 sumtax = sum(TAX_sect,"c");
 
 TAXSAL0 = sum(sigma.*A.*w.*l.*Q.*(energ_sec+FCC.*non_energ_sec),"c");
 
-E_CO2_dom = [(A(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1).*coef_Q_CO2_CI(:,:,1))');
-(A(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2).*coef_Q_CO2_CI(:,:,2))');
-(A(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3).*coef_Q_CO2_CI(:,:,3))');
-(A(4,:).*Q(4,:))*((CI(:,:,4).*partDomCI(:,:,4).*coef_Q_CO2_CI(:,:,4))');
-(A(5,:).*Q(5,:))*((CI(:,:,5).*partDomCI(:,:,5).*coef_Q_CO2_CI(:,:,5))');
-(A(6,:).*Q(6,:))*((CI(:,:,6).*partDomCI(:,:,6).*coef_Q_CO2_CI(:,:,6))');
-(A(7,:).*Q(7,:))*((CI(:,:,7).*partDomCI(:,:,7).*coef_Q_CO2_CI(:,:,7))');
-(A(8,:).*Q(8,:))*((CI(:,:,8).*partDomCI(:,:,8).*coef_Q_CO2_CI(:,:,8))');
-(A(9,:).*Q(9,:))*((CI(:,:,9).*partDomCI(:,:,9).*coef_Q_CO2_CI(:,:,9))');
-(A(10,:).*Q(10,:))*((CI(:,:,10).*partDomCI(:,:,10).*coef_Q_CO2_CI(:,:,10))');
-(A(11,:).*Q(11,:))*((CI(:,:,11).*partDomCI(:,:,11).*coef_Q_CO2_CI(:,:,11))');
-(A(12,:).*Q(12,:))*((CI(:,:,12).*partDomCI(:,:,12).*coef_Q_CO2_CI(:,:,12))')]+DF.*partDomDF.*coef_Q_CO2_DF+DG.*partDomDG.*coef_Q_CO2_DG+DI.*partDomDI.*coef_Q_CO2_DI;
+E_CO2_dom = [(A_CI(1,:).*Q(1,:))*((CI(:,:,1).*partDomCI(:,:,1).*coef_Q_CO2_CI(:,:,1))');
+(A_CI(2,:).*Q(2,:))*((CI(:,:,2).*partDomCI(:,:,2).*coef_Q_CO2_CI(:,:,2))');
+(A_CI(3,:).*Q(3,:))*((CI(:,:,3).*partDomCI(:,:,3).*coef_Q_CO2_CI(:,:,3))');
+(A_CI(4,:).*Q(4,:))*((CI(:,:,4).*partDomCI(:,:,4).*coef_Q_CO2_CI(:,:,4))');
+(A_CI(5,:).*Q(5,:))*((CI(:,:,5).*partDomCI(:,:,5).*coef_Q_CO2_CI(:,:,5))');
+(A_CI(6,:).*Q(6,:))*((CI(:,:,6).*partDomCI(:,:,6).*coef_Q_CO2_CI(:,:,6))');
+(A_CI(7,:).*Q(7,:))*((CI(:,:,7).*partDomCI(:,:,7).*coef_Q_CO2_CI(:,:,7))');
+(A_CI(8,:).*Q(8,:))*((CI(:,:,8).*partDomCI(:,:,8).*coef_Q_CO2_CI(:,:,8))');
+(A_CI(9,:).*Q(9,:))*((CI(:,:,9).*partDomCI(:,:,9).*coef_Q_CO2_CI(:,:,9))');
+(A_CI(10,:).*Q(10,:))*((CI(:,:,10).*partDomCI(:,:,10).*coef_Q_CO2_CI(:,:,10))');
+(A_CI(11,:).*Q(11,:))*((CI(:,:,11).*partDomCI(:,:,11).*coef_Q_CO2_CI(:,:,11))');
+(A_CI(12,:).*Q(12,:))*((CI(:,:,12).*partDomCI(:,:,12).*coef_Q_CO2_CI(:,:,12))')]+DF.*partDomDF.*coef_Q_CO2_DF+DG.*partDomDG.*coef_Q_CO2_DG+DI.*partDomDI.*coef_Q_CO2_DI;
 
-E_CO2_imp = [(A(1,:).*Q(1,:))*((CI(:,:,1).*(partImpCI(:,:,1).*coef_Q_CO2_CI(:,:,1)))');
-(A(2,:).*Q(2,:))*((CI(:,:,2).*(partImpCI(:,:,2).*coef_Q_CO2_CI(:,:,2)))');
-(A(3,:).*Q(3,:))*((CI(:,:,3).*(partImpCI(:,:,3).*coef_Q_CO2_CI(:,:,3)))');
-(A(4,:).*Q(4,:))*((CI(:,:,4).*(partImpCI(:,:,4).*coef_Q_CO2_CI(:,:,4)))');
-(A(5,:).*Q(5,:))*((CI(:,:,5).*(partImpCI(:,:,5).*coef_Q_CO2_CI(:,:,5)))');
-(A(6,:).*Q(6,:))*((CI(:,:,6).*(partImpCI(:,:,6).*coef_Q_CO2_CI(:,:,6)))');
-(A(7,:).*Q(7,:))*((CI(:,:,7).*(partImpCI(:,:,7).*coef_Q_CO2_CI(:,:,7)))');
-(A(8,:).*Q(8,:))*((CI(:,:,8).*(partImpCI(:,:,8).*coef_Q_CO2_CI(:,:,8)))');
-(A(9,:).*Q(9,:))*((CI(:,:,9).*(partImpCI(:,:,9).*coef_Q_CO2_CI(:,:,9)))');
-(A(10,:).*Q(10,:))*((CI(:,:,10).*(partImpCI(:,:,10)).*coef_Q_CO2_CI(:,:,10))');
-(A(11,:).*Q(11,:))*((CI(:,:,11).*(partImpCI(:,:,11)).*coef_Q_CO2_CI(:,:,11))');
-(A(12,:).*Q(12,:))*((CI(:,:,12).*(partImpCI(:,:,12)).*coef_Q_CO2_CI(:,:,12))')]+DF.*(partImpDF).*coef_Q_CO2_DF+DG.*(partImpDG).*coef_Q_CO2_DG+DI.*(partImpDI).*coef_Q_CO2_DI;
+E_CO2_imp = [(A_CI(1,:).*Q(1,:))*((CI(:,:,1).*(partImpCI(:,:,1).*coef_Q_CO2_CI(:,:,1)))');
+(A_CI(2,:).*Q(2,:))*((CI(:,:,2).*(partImpCI(:,:,2).*coef_Q_CO2_CI(:,:,2)))');
+(A_CI(3,:).*Q(3,:))*((CI(:,:,3).*(partImpCI(:,:,3).*coef_Q_CO2_CI(:,:,3)))');
+(A_CI(4,:).*Q(4,:))*((CI(:,:,4).*(partImpCI(:,:,4).*coef_Q_CO2_CI(:,:,4)))');
+(A_CI(5,:).*Q(5,:))*((CI(:,:,5).*(partImpCI(:,:,5).*coef_Q_CO2_CI(:,:,5)))');
+(A_CI(6,:).*Q(6,:))*((CI(:,:,6).*(partImpCI(:,:,6).*coef_Q_CO2_CI(:,:,6)))');
+(A_CI(7,:).*Q(7,:))*((CI(:,:,7).*(partImpCI(:,:,7).*coef_Q_CO2_CI(:,:,7)))');
+(A_CI(8,:).*Q(8,:))*((CI(:,:,8).*(partImpCI(:,:,8).*coef_Q_CO2_CI(:,:,8)))');
+(A_CI(9,:).*Q(9,:))*((CI(:,:,9).*(partImpCI(:,:,9).*coef_Q_CO2_CI(:,:,9)))');
+(A_CI(10,:).*Q(10,:))*((CI(:,:,10).*(partImpCI(:,:,10)).*coef_Q_CO2_CI(:,:,10))');
+(A_CI(11,:).*Q(11,:))*((CI(:,:,11).*(partImpCI(:,:,11)).*coef_Q_CO2_CI(:,:,11))');
+(A_CI(12,:).*Q(12,:))*((CI(:,:,12).*(partImpCI(:,:,12)).*coef_Q_CO2_CI(:,:,12))')]+DF.*(partImpDF).*coef_Q_CO2_DF+DG.*(partImpDG).*coef_Q_CO2_DG+DI.*(partImpDI).*coef_Q_CO2_DI;
 
 E_CO2 = E_CO2_dom+E_CO2_imp;
 //E_CO2 = (QCdom+Imp).*coef_Q_CO2;
@@ -384,12 +377,11 @@ pK = ones(reg,sec);
 for k = 1:reg,  
     pK(k,:)  =  pArmDI(k,:)*Beta(:,:,k);
 end
-
-Kval = pK.*K;
-rsec = (markup.*p./pK).*(charge/0.8);
-rreg = sum(rsec.*EBE./(sum(EBE,'c')*ones(1,sec)),'c');
-rw = sum(EBE)/sum(Kval);
-partImpK = ((rreg.*bImpK).^etaImpK)./sum((rreg.*bImpK).^etaImpK);
+Kval = pK.*K; // Value of installed K
+rsec = (markup.*p./pK).*(charge/0.8); //Average return on capital, considering that the value of installed capital is not that of K but that of K*0.8.
+rreg = sum(rsec.*EBE./(sum(EBE,'c')*ones(1,sec)),'c'); // Average regional return on capital.
+rw = sum(EBE)/sum(Kval); //  Global average return on capital
+partImpK = ((rreg.*bImpK).^etaImpK)./sum((rreg.*bImpK).^etaImpK); //'logit' update of partImpK to reflect the update of regional average return rates. very low impact
 partInvFin = (((rsec./rsecref).*bInvFin).^(etaInvFin*ones(1,sec)))./(sum(((rsec./rsecref).*bInvFin).^(etaInvFin*ones(1,sec)),"c")*ones(1,sec));
 
 price_index=(sum(pArmDF.*DF,'c')./sum(pArmDFref.*DF,'c').*sum(pArmDF.*DFref,'c')./sum(pArmDFref.*DFref,'c')).^(1/2);
@@ -416,13 +408,14 @@ GrowthNominalMER = GDP ./ GDP_ref; // Growth multiplier nominal GDP MER
 PPP_factors = GDP_ref./GDP_PPP_WB; // Price level ratio of PPP conversion factor (GDP) to market exchange rate (2014)
 
 fisherQuantityIndex = 1;
-chainedFisherQuantIndex  = 1;
-chainedFisherQuantIndex = chainedFisherQuantIndex .* fisherQuantityIndex;
-GrowthRealMER = chainedFisherQuantIndex; //Growth multiplier real GDP MER
+chainedFisherQIndex_prev  = 1;
+chainedFisherQIndex = chainedFisherQIndex_prev .* fisherQuantityIndex;
+GrowthRealMER = chainedFisherQIndex; //Growth multiplier real GDP MER
 
 GDP_MER_nominal  = GrowthNominalMER .* GDP_ref; // From calibration.gdp.sce base GDP (exogenous)
 GDP_MER_real     = GrowthRealMER    .* GDP_ref; // From calibration.gdp.sce base GDP (exogenous)
 GDP_PPP_constant = GDP_MER_real     ./ PPP_factors; 
+GDP_PPP_constant_ref = GDP_PPP_constant;
 GPP_secMER_real = (GDP_MER_real*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_sect, "c")*ones(1,sec)));
 GDP_secPPP_constant = (GDP_PPP_constant*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_sect, "c")*ones(1,sec)));
 
@@ -445,13 +438,13 @@ GDP_secPPP_constant = (GDP_PPP_constant*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_s
 // CINV = CRF(:,:,1).*CINV_MW(:,:,1);
 // for k = 1:reg
 // 	priceCoalElec(k,1+nb_year_expect) = pArmCI(indice_coal,indice_elec,k);
-// 	priceGazElec(k,1+nb_year_expect) = pArmCI(indice_gaz,indice_elec,k);
+// 	priceGazElec(k,1+nb_year_expect) = pArmCI(indice_gas,indice_elec,k);
 // 	priceEtElec(k,1+nb_year_expect) = pArmCI(indice_Et,indice_elec,k);
 // end
 
 // for k = 1:reg
 // 	tendance_Coal(k) = ((pArmCI(indice_coal,indice_elec,k)/priceCoalElec(k,1)).^(1/nb_year_expect))-1;
-// 	tendance_Gaz(k)  = ((pArmCI(indice_gaz ,indice_elec,k)/priceGazElec(k,1) ).^(1/nb_year_expect))-1;
+// 	tendance_Gaz(k)  = ((pArmCI(indice_gas ,indice_elec,k)/priceGazElec(k,1) ).^(1/nb_year_expect))-1;
 // 	tendance_Et(k)   = ((pArmCI(indice_Et  ,indice_elec,k)/priceEtElec(k,1)  ).^(1/nb_year_expect))-1;
 // end
 
@@ -460,7 +453,7 @@ GDP_secPPP_constant = (GDP_PPP_constant*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_s
 // 	pArmCI_no_taxCO2(1:nbsecteurenergie,:,k)=(pArmCI(1:nbsecteurenergie,:,k)-(taxCO2_CI(1:nbsecteurenergie,:,k).*coef_Q_CO2_CI(1:nbsecteurenergie,:,k)).*(num(k,1:nbsecteurenergie)'*ones(1,sec)));
 // end
 
-// //on anticipe des prix sur la duree (current_time_im,current_time_im+Life_time_max) et on les stocke
+// //prices are expected over the long-run (current_time_im,current_time_im+Life_time_max) and are saved in this vector
 // pArmCI_anticip_taxCO2=zeros(sec*sec*reg,Life_time_max+1);
 // croyance_taxe=ones(reg,1);
 
@@ -471,14 +464,14 @@ GDP_secPPP_constant = (GDP_PPP_constant*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_s
 // 	for k=1:reg
 // 		taxCO2_CI_temp=(taxVAL_temp(k)*1e-6)*ones(sec,sec);
 // 		coef_Q_CO2_CI_temp=coef_Q_CO2_CI(1:nbsecteurenergie,:,k);
-// 		//on traite le probleme de l'écran du à la séquestration
+// 		//specific traitment for sequestration
 // 		coef_Q_CO2_CI_temp(indice_coal,indice_elec)=coef_Q_CO2_CIref(indice_coal,indice_elec,k);
 // 		pArmCIantTxCO2_temp(1:nbsecteurenergie,:,k)=(pArmCI(1:nbsecteurenergie,:,k)+(croyance_taxe(k)*(taxCO2_CI_temp(1:nbsecteurenergie,:)-taxCO2_CI(1:nbsecteurenergie,:,k)).*coef_Q_CO2_CI_temp(1:nbsecteurenergie,:)).*(num(k,1:nbsecteurenergie)'*ones(1,sec)));
 // 	end
 // 	pArmCI_anticip_taxCO2(:,j)=matrix(pArmCIantTxCO2_temp,sec*sec*reg,1);
 // end
 // 	
-// /////////////////////////on fait des anticipations sur les prix en prennant en compte la croyance sur la valeur de la taxe
+// ///////////////////////// price expectations based the expected / belief in future carbon price
 // p_Coal_anticip_CCS=zeros(reg,Life_time_max);
 // p_Gaz_anticip_CCS=zeros(reg,Life_time_max);
 
@@ -486,19 +479,19 @@ GDP_secPPP_constant = (GDP_PPP_constant*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_s
 // 	for j=1:Life_time_max
 // 		pArmCIantTxCO2_temp=matrix(pArmCI_anticip_taxCO2(:,j),sec,sec,reg);
 // 		p_Coal_anticip(k,j)=pArmCIantTxCO2_temp(indice_coal,indice_elec,k)/11630;
-// 		p_Gaz_anticip(k,j)=pArmCIantTxCO2_temp(indice_gaz,indice_elec,k)/11630;
+// 		p_Gaz_anticip(k,j)=pArmCIantTxCO2_temp(indice_gas,indice_elec,k)/11630;
 // 		p_Et_anticip(k,j)=pArmCIantTxCO2_temp(indice_Et,indice_elec,k)/11630;
 // 		p_Coal_anticip_CCS(k,j)=pArmCI_no_taxCO2(indice_coal,indice_elec,k)/11630;
-// 		p_Gaz_anticip_CCS(k,j)=pArmCI_no_taxCO2(indice_gaz,indice_elec,k)/11630;
+// 		p_Gaz_anticip_CCS(k,j)=pArmCI_no_taxCO2(indice_gas,indice_elec,k)/11630;
 // 	end
 // end
 
 
 // for k=1:reg
-// 	for j=1:technoCoal
+// 	for j=technoElecCoal
 // 		CFuel(k,j)=(sum(p_Coal_anticip(k,1:Life_time(k,j,current_time_im)))/Life_time(k,j,current_time_im))/rho_elec(k,j,current_time_im);
 // 	end
-// 	for j=technoCoal+1:technoCoal+technoGas
+// 	for j=technoElecGas 
 // 		CFuel(k,j)=(sum(p_Gaz_anticip(k,1:Life_time(k,j,current_time_im)))/Life_time(k,j,current_time_im))/rho_elec(k,j,current_time_im);
 // 	end
 // 	for j=technoCoal+technoGas+1:technoFF
@@ -507,8 +500,8 @@ GDP_secPPP_constant = (GDP_PPP_constant*ones(1,sec)) .* ( GDP_sect ./ (sum(GDP_s
 // 	for j=technoFF+1:techno_elec
 // 		CFuel(k,j)=0;
 // 	end
-// /////////////////////////////////////on traite à part le cas de la sequestration, on le prix des combustibles ne doit pas 
-// /////////////////////////////////////etre soumis à la taxe sur le CO2
+// ///////////////////////////////////// specific case for sequestration, for which the fossil fuel price
+// ///////////////////////////////////// should not face the CO2 tax
 // 	j=indice_PSS;
 // 	CFuel(k,j)=(sum(p_Coal_anticip_CCS(k,1:Life_time(k,j,current_time_im)))/Life_time(k,j,current_time_im))/rho_elec(k,j,current_time_im);
 // 	j=indice_CGS;
@@ -531,17 +524,17 @@ share_ENR_prod_elec = zeros(reg,1);
 share_NUC_prod_elec = zeros(reg,1);
 share_HYD_prod_elec = zeros(reg,1);
 
-////////////////////Calcul des matrices énergétiques
+//////////////////// energy balances
 energy_balance=zeros(indice_matEner,8,reg);
-//for k=1:reg
-//    energy_balance(:,:,k)=matrix(bilan_energetique(CI,Q,DF,Imp,Exp,k),indice_matEner,8);
-//    TPES(k)=sum(energy_balance(5,:,k));
-//    TFC(k) =sum(energy_balance(9,:,k));
-//end
+for k=1:reg
+    energy_balance(:,:,k)=matrix(bilan_energetique(CI,Q,DF,Imp,Exp,k),indice_matEner,8);
+    TPES(k)=sum(energy_balance(5,:,k));
+    TFC(k) =sum(energy_balance(9,:,k));
+end
 energy_balance_stock=matrix(energy_balance,reg*indice_matEner*8,1);
 Energy_balance_temp=energy_balance;
 
-///////////////////// Pour le nexus automobile
+///////////////////// For nexus.cars.sce
 GDP_MER_real_prev = GDP_MER_real;
 Ltot_prev_stock=Ltot0;
 
@@ -597,7 +590,7 @@ pArmCI_wo_CCS_indu_p_p_p=pArmCI_wo_CCS_indu;
 
 
 if ind_NLU >=1
-  Q_biofuel_real = share_biofuel .* Q(:,indice_Et);
+    Q_biofuel_real = share_biofuel .* Q(:,indice_Et);
 end
 
 pImp = (ones(reg,1)*wp).*(1+mtax)+(ones(reg,sec)*wpTIagg).*nit;

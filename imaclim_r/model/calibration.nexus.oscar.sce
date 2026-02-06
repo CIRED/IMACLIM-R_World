@@ -18,7 +18,7 @@ N_2_N2O = (2*Nitrogen_molar + Oxygen_molar) / Nitrogen_molar;
 
 // path Oscar and script to launch it
 pathoscar="../externals/OSCAR/";
-pathoscar_plugins="../externals/oscar_plugins/";
+    pathoscar_plugins="../externals/oscar_plugins/";
 pythonscript2run="launch_oscar_for_imaclim_tpt.py";
 
 // parameter of the study

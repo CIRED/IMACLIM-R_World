@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Ruben Bibas
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 //Sommaire
 //Tous les fichiers qui s'occupent de faire du combi->parametre ont étés regroupés ici.
 //Cette feuille est divisée en quatre chapitres
@@ -24,19 +32,6 @@ output_specific_ar6=%f;
 usd2001_2005=1/0.907;
 
 ind_inequality = 0;
-
-ind_AMPERE_harm = 0;
-// Indice utilisé quand on veut harmoniser les PIB pour le projet AMPERE
-// Cet indice a pour effet de :
-// - Harmoniser les populations totales (calibration.growthdrivers.sce)
-// - Harmoniser les taux de croisssance de la population active (calibration.growthdrivers.sce)
-// - Prendre les taux de croissance de la productivité du travail (TC_l) qui font coller les PIB réels PPP (calibration.growthdrivers.sce)
-// - Diminuer les prix du charbon à court terme (Dynamic.sce)
-
-ind_harm_FE = 0;
-// ind_harm_FE = 0: pas d'harmonisation de l'energie finale (cas de WP3 d'AMPERE)
-// ind_harm_FE = 1: harmonisation de l'energie finale sur le cas REF (AMPERE)
-// ind_harm_FE = 2: harmonisation de l'energie finale sur le cas LOW (AMPERE)
 
 // Tax_max et taxmin dans res_dyn_loop: limitent les variations de la taxe d'une année à l'autre
 cff_taxmax = 0.2;
@@ -74,19 +69,6 @@ TC_EEI_decarb_endo=1;
 
 ///////Spécificités progres technique pour les batiments TBE
 TC_TBE_endo=1;
-
-///////Spécificités croissance endogène avec politique
-indice_TC_l_endo=0;
-indice_ATC_calib_REF=1;
-if indice_TC_l_endo==1&indice_ATC_calib_REF==1
-    pause;
-end
-
-//boucles de test
-
-if TC_elec_ATC_pol==1&TC_elec_endo==1
-    pause;
-end
 
 /////Variantes ONERC
 indice_E=1;
@@ -133,10 +115,6 @@ gamma_ress_coal = 2;
 obj_charge_coal = 0.8;
 ind_coal_ress = 0; //ind_coal_ress = 0 means pessimistic case ("low" resources, used in EMF24 2nd round study), ind_coal_ress = 1 means optimistic case (higher resources)
 
-//Simulation d'une excise type TIPP dans les taxes là où les données étaient disponibles
-//ajustement_taxes.sce dans WORKDIR joue avec ça (recomended value is %t)
-imaNewTaxes = %t;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //               COMBI TO BIG PARAMETERS PART
@@ -171,9 +149,9 @@ is_bau = (ind_climat==0);
 baseline_combi = switch_indice_in_combi(combi,[ 1 9 10 12 13 14 15 16 18 19] ,[0 0 0 0 1 1 1 0 0 0]); //1: first indice is ind_climat, 0 is it's baseline value
 
 if ind_oscar >=2
-  ind_aff=ind_oscar-1;
+    ind_aff=ind_oscar-1;
 else
-  ind_aff=0;
+    ind_aff=0;
 end
 
 
@@ -186,7 +164,7 @@ end
 
 // ind_behavior : define behavioral, comportment style.. 1 is the baseline, 2 is the case of laxist behabior taken in the branches/ssp_2 scenarios, 0 for soberty
 if ~isdef("ind_behavior")
-	ind_behavior = 1;
+    ind_behavior = 1;
 end 
 
 //autres indices, valeurs forcees
@@ -194,9 +172,9 @@ ind_oilandMO = 1;
 ind_charbo = 1;
 ind_altern = 1;
 if ind_behavior==0
-	ind_develo = ind_behavior;
+    ind_develo = ind_behavior;
 else 
-	ind_develo=1;
+    ind_develo=1;
 end
 ind_VE = 1;
 ind_techno = 1;
@@ -239,11 +217,7 @@ ind_sbc_opt = ind_biofuel;
 ind_ctl_opt = ind_altern;
 
 //Evolution des technologies
-ind_lrc_opt = ind_techno;//inutilise?
 ind_frt_opt = ind_techno;
-ind_pch_opt = ind_techno;//inutilise?
-ind_aee_opt = ind_techno;//inutilise?
-ind_itx_opt = ind_techno;//inutilise?
 ind_lrt_opt = ind_techno;
 ind_bau_opt = ind_techno;
 ind_ela_opt = ind_techno; // reféfinit indice_tech_OT
@@ -256,9 +230,6 @@ ind_asp_opt = ind_develo;
 ind_msp_opt = ind_develo;
 ind_res_opt = ind_develo;
 ind_hdf_opt = ind_develo;
-
-//Croissance
-ind_cri_opt = 0; // a un effet si indice_TC_l_endo=0
 
 //Stratégie du MO
 ind_prf_opt = ind_straMO;
@@ -308,7 +279,7 @@ if ~isdef("ind_debug_SC_nlu")
     ind_debug_SC_nlu=%f;
 end
 if ~isdef("ind_NLU")
-	ind_NLU =0;
+    ind_NLU =0;
 end
 ind_NLU_CI = 0; // nexus.leontief, nexus.capital)
 ind_NLU_EI = 0; // calibration.nexus.eei.sce)
@@ -333,19 +304,19 @@ case 3
 end
 
 if ~isdef('ind_NLU_bioener')
-	ind_NLU_bioener = 0;
+    ind_NLU_bioener = 0;
 end
 if ~isdef('ind_NLUhyp')
-	ind_NLUhyp = 1; // nexus.landuse, hypothesis of value added share : 0:'fixed margin' 1:'fixed share of labor and profit in added value'
+    ind_NLUhyp = 1; // nexus.landuse, hypothesis of value added share : 0:'fixed margin' 1:'fixed share of labor and profit in added value'
 end
 if ~isdef('ind_NLU_ferti')
-	ind_NLU_ferti = 0; // nexus.landuse, if=1: coupling on gas/coal consumtpion du to fertilizers production (CI)
+    ind_NLU_ferti = 0; // nexus.landuse, if=1: coupling on gas/coal consumtpion du to fertilizers production (CI)
 end
 if ~isdef('ind_NLU_fertiFAO')
-	ind_NLU_fertiFAO = 0; // nexus.landuse : using in nexus land use FAO (1) or gtap (0) for fertilizer consumption
+    ind_NLU_fertiFAO = 0; // nexus.landuse : using in nexus land use FAO (1) or gtap (0) for fertilizer consumption
 end
 if ~isdef('ind_NLU_force_AG0')
-	ind_NLU_force_AG0 = 0; // calibration.nexus.landuse, if =1 : food scenario AG0 instead of FAO for business as usual
+    ind_NLU_force_AG0 = 0; // calibration.nexus.landuse, if =1 : food scenario AG0 instead of FAO for business as usual
 end
 
 if combi >= 13
@@ -409,48 +380,9 @@ ind_productivity=2;
 ind_productivity_st=0;
 ind_catchup=2; 
 
-ind_productivity_leader=ind_productivity;//exogenous trend over time of labor productivity growth in leading country (USA)
-ind_productivity_li=ind_catchup;
-ind_productivity_mi=ind_catchup;
-ind_productivity_hi=ind_productivity;
-
-if ~isdef("ind_ssp")
-    ind_growth_drivers = ind_AMPERE_harm;
-else
-    ind_growth_drivers = 2;
-    // labor productivity growth and population growth of ssp
-    if ind_ssp==1
-        //ind_productivity_leader=2;
-        //ind_productivity=2;
-        ind_pop=1;
-    elseif ind_ssp==2
-        //ind_productivity_leader=1;
-        //ind_productivity=1;
-        ind_pop=2;
-    elseif ind_ssp==3
-        //ind_productivity_leader=0;
-        //ind_productivity=0;
-        ind_pop=3;
-    elseif ind_ssp==4
-        //ind_productivity_leader=0;
-        //ind_productivity=0;
-        ind_pop=4;
-    elseif ind_ssp==5
-        //ind_productivity_leader=0;
-        //ind_productivity=0;
-        ind_pop=5;
-    end
-end
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////****************         Marche des capitaux     *******************/////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-if isdef("ind_K")
-    ind_partExpK = ind_K; // trade balance evolution
-else
-    ind_partExpK = 0;
-end
 begin_rebalance_K = 1; // start date to re-balance local capital markets
 
 ///////////////////////////// Offre de biens énergétiques fossiles///////////////////////////////////////
@@ -497,11 +429,11 @@ end  //fraction des réserves restantes à partir de laquelle se déclenche la d
 point_equilibre_gaz = 0; //tx de croissance de la prod qui annule le tx de croissance du prix
 
 if ind_gaz_opt == 1
-    pente_gaz_2 = 0.3;
-    pente_gaz_1 = pente_gaz_2;
+    slope_gas_2 = 0.3;
+    slope_gas_1 = slope_gas_2;
 else
-    pente_gaz_1 = 1;
-    pente_gaz_2 = 4;
+    slope_gas_1 = 1;
+    slope_gas_2 = 4;
 end
 
 // charbon
@@ -510,11 +442,11 @@ point_equilibre_coal=0; //tx de croissance de la prod qui annule le tx de croiss
 
 select ind_coa_opt
 case 0
-    pente_coal_1_sc = 1;
-    pente_coal_2_sc = 4;
+    slope_coal_1_sc = 1;
+    slope_coal_2_sc = 4;
 case 1
-    pente_coal_1_sc = 1;     //elasticité de la croissance du prix à la croissance de la prod si sous cff_col_price_1
-    pente_coal_2_sc = 1.5;   //elasticité de la croissance du prix à la croissance de la prod si sur cff_col_price_1
+    slope_coal_1_sc = 1;     //elasticité de la croissance du prix à la croissance de la prod si sous cff_col_price_1
+    slope_coal_2_sc = 1.5;   //elasticité de la croissance du prix à la croissance de la prod si sur cff_col_price_1
 else
     error("ind_coa_opt is ill-defined");
 end
@@ -580,7 +512,7 @@ end
 
 select ind_MSHBioSup
 case 0
-    elecBiomassInitial.MSHBioSup = 0.8;
+    elecBiomassInitial.MSHBioSup = 0.018;
 case 1
     elecBiomassInitial.MSHBioSup = 0.3;
 else
@@ -676,7 +608,7 @@ case 1
     cff_lea  = 0.98; //(1-cff_lea) = exogenous EEI rate of the leader at fixed energy prices
     max_eei  = 1.5;
     max_aeei = 1.5;
-    cff_y    = 0.01; //Level of EEI gained by the laggards in XRef years (defines speed of convergence)
+    cff_y    = 0.01; //The EEI gap between leader and laggards is multiplied by cff_y after X years (defines speed of convergence: the higher cff_y, the slower the convergence).
     fin_lev  = 0.99; //Final level (share of the leader's EEI) targeted by laggards
 case 0
     cff_lea  = 0.98685; //(1-cff_lea) = exogenous EEI rate of the leader at fixed energy prices
@@ -740,24 +672,6 @@ else
     lr_car=0.07;
 end; //Learning rates techno auto
 
-
-/////////////////////// Usages substituables.
-
-//industrie, services, agriculture : Voir aussi le fichier calibration.fuel.substitution
-
-if ind_aee_opt == 1
-    aee_cff=1.25;
-else
-    aee_cff=1;
-end; //coefficient multiplicateur de l'AEEI
-
-if ind_itx_opt==1
-    itx_cff=[ 0.08 75 0.025 1];
-else
-    itx_cff=[ 0.03 60 0.01 0];
-end; //[taux d'apprentissage, asymptote sur la réactivité à la taxe, asymptote sur les gains d'efficacité]
-
-
 //bâtiments
 
 if ind_lrt_opt==1
@@ -786,15 +700,15 @@ end; //coefficient multiplicateur de l'income growth multiplier des PVD
 if isdef("ind_develo_car")
     select ind_develo_car
     case 0
-    igm_cff=[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
+        igm_cff=[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
     case 1
-    igm_cff=0.9*[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
+        igm_cff=0.9*[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
     case 2
-    igm_cff=0.8*[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
+        igm_cff=0.8*[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
     case 3
-    igm_cff=0.7*[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
+        igm_cff=0.7*[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
     case 4
-    igm_cff=0.6*[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
+        igm_cff=0.6*[1; 1 ;1 ;1 ;1 ;1; 1; 1; 1; 1; 1; 1]; //=ones(reg,1);
     end
 end
 
@@ -827,34 +741,17 @@ else
     hdf_cff = [ 1.5;1.5;1.5;1.5;3;3;3;3;3;3;3;3];
 end; //niveau de saturation demande finale des ménages
 
-////////////////////////Croissance économique
-
-// Crise courte croissance forte VS crise longue croissance molle  ************ATTENTION CHANGEMENT CRISE PLUS FORTE***************
-crise = ones(1,TimeHorizon);
-
-if ind_AMPERE_harm == 0 // Les TC_l sont directement modifiés dans AMPERE pour décrire la crise
-    if ind_cri_opt == 1 then
-        for tt=7:9
-            crise(tt) = 0; // la crise dure 2 ans
-        end
-    else
-        for tt=7:12
-            crise(tt) = 0; // la crise dure 5 ans
-        end
-    end
-end
-
 //////////////////////// Labour market flexibility
 /// wage-unemployment curve elasticity
 select ind_labour
-    case 0
-        ew = -0.55;
-    case 1
-        ew = -1;
-    case 2
-        ew = -2;
-    case 3
-        ew = -0.2;
+case 0
+    ew = -0.55;
+case 1
+    ew = -1;
+case 2
+    ew = -2;
+case 3
+    ew = -0.2;
 end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -969,13 +866,13 @@ taxParams.endTime        = TimeHorizon+1+taxParams.duration;
 taxParams.priceSignal    = zeros(nbMKT,taxParams.endTime);
 // exponential profile
 taxParams.priceSignal(:,startExo:taxParams.endTime) = ..
-(ones(nbMKT,1) * exp( (startExo:taxParams.endTime) ./ taxParams.slopeParameter )) ..
-./ exp( (taxParams.endTime) ./ taxParams.slopeParameter ) ..
+    (ones(nbMKT,1) * exp( (startExo:taxParams.endTime) ./ taxParams.slopeParameter )) ..
+    ./ exp( (taxParams.endTime) ./ taxParams.slopeParameter ) ..
 .* ( taxParams.finalLevel * ones(1,taxParams.endTime - startExo + 1));
 // tanh profile
 taxParams.priceSignal(:,startExo:taxParams.endTime) = ..
-taxParams.finalLevel / 2 ..
-.* ( ones(nbMKT,1) * tanh(((1:taxParams.endTime-startExo+1)-50)/35) ) ..
+    taxParams.finalLevel / 2 ..
+    .* ( ones(nbMKT,1) * tanh(((1:taxParams.endTime-startExo+1)-50)/35) ) ..
 + taxParams.finalLevel / 2 * ( 1 - tanh((1-50)/35) - 1) ;
 
 if ind_climat~=0 & ind_climat~=2 & ind_expectations == 1
@@ -1062,30 +959,30 @@ if ~is_bau // case 0 is the baseline
             taxMKTexo(1,:) = linspace(0,100,TimeHorizon+1)*1e-6;
             taxMKTexo(2,:) = linspace(0,200,TimeHorizon+1)*1e-6;
         case 9
-        no_output_price_carbon=%t;
-        // copenhagen pledges
-	nbMKT=7;
-        //Definition des marches
-        whichMKT_reg_use(:)=7;  //Le marché 7 est defini par exclusion: no carbon price
-        whichMKT_reg_use([ind_usa],:)=1; 
-		whichMKT_reg_use([ind_eur ind_jan],:)=2; 
-        whichMKT_reg_use([ind_chn],:)=3; 
-		whichMKT_reg_use([ind_ras],:)=4; 
-		whichMKT_reg_use([ind_ral],:)=5; 
-		whichMKT_reg_use([ind_can],:)=6; 
-		is_quota_MKT = [%f;%f;%f;%f;%f;%f;%f];
-		is_taxexo_MKT = [%t;%t;%t;%t;%t;%t;%t];
-                corr_tax_2020 = 0.5;
-                taxMKTexo(1,:)=interpln([ 1 4 14 19 39 TimeHorizon+1; 0 0 0 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(2,:)=interpln([ 1 4 14 19 34 TimeHorizon+1; 0 0 0 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(3,:)=interpln([ 1 9 14 19 29 49 TimeHorizon+1; 0 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(4,:)=interpln([ 1 14 19 29 49 TimeHorizon+1; 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(5,:)=interpln([ 1 14 19 29 34 TimeHorizon+1; 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(6,:)=interpln([ 1 14 19 34 TimeHorizon+1; 0 0 5 5 0],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(7,:)=interpln([ 1 14 19 TimeHorizon+1; 0 0 5 5],(1:TimeHorizon+1)) ;
-		CO2_obj_MKT = ones(nbMKT,TimeHorizon+1)*%nan;
-		MKT_start_year = 10*ones(nbMKT,1);	
-                taxMKTexo = taxMKTexo *1e-6 / usd2001_2005;
+            no_output_price_carbon=%t;
+            // copenhagen pledges
+            nbMKT=7;
+            //Definition des marches
+            whichMKT_reg_use(:)=7;  //Le marché 7 est defini par exclusion: no carbon price
+            whichMKT_reg_use([ind_usa],:)=1; 
+            whichMKT_reg_use([ind_eur ind_jan],:)=2; 
+            whichMKT_reg_use([ind_chn],:)=3; 
+            whichMKT_reg_use([ind_ras],:)=4; 
+            whichMKT_reg_use([ind_ral],:)=5; 
+            whichMKT_reg_use([ind_can],:)=6; 
+            is_quota_MKT = [%f;%f;%f;%f;%f;%f;%f];
+            is_taxexo_MKT = [%t;%t;%t;%t;%t;%t;%t];
+            corr_tax_2020 = 0.5;
+            taxMKTexo(1,:)=interpln([ 1 4 14 19 39 TimeHorizon+1; 0 0 0 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(2,:)=interpln([ 1 4 14 19 34 TimeHorizon+1; 0 0 0 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(3,:)=interpln([ 1 9 14 19 29 49 TimeHorizon+1; 0 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(4,:)=interpln([ 1 14 19 29 49 TimeHorizon+1; 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(5,:)=interpln([ 1 14 19 29 34 TimeHorizon+1; 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(6,:)=interpln([ 1 14 19 34 TimeHorizon+1; 0 0 5 5 0],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(7,:)=interpln([ 1 14 19 TimeHorizon+1; 0 0 5 5],(1:TimeHorizon+1)) ;
+            CO2_obj_MKT = ones(nbMKT,TimeHorizon+1)*%nan;
+            MKT_start_year = 10*ones(nbMKT,1);	
+            taxMKTexo = taxMKTexo *1e-6 / usd2001_2005;
             
 
             // varying tax for 2020-2100
@@ -1115,9 +1012,9 @@ if ~is_bau // case 0 is the baseline
             end
             if TimeHorizon==99
                 if isdef('paramy2050')
-                for ii=51:(TimeHorizon+1)
-                    tax_exo_tpt(ii) =  tax_exo_tpt(ii-1) * (1.0 + paramy2100/1000);
-                end
+                    for ii=51:(TimeHorizon+1)
+                        tax_exo_tpt(ii) =  tax_exo_tpt(ii-1) * (1.0 + paramy2100/1000);
+                    end
                 end
             end
             // 6 years catch up with the logit profil :
@@ -1149,29 +1046,29 @@ if ~is_bau // case 0 is the baseline
             end
             taxMKTexo = taxMKTexo / usd2001_2005;
         case 12
-        // copenhagen pledges
-	nbMKT=7;
-        //Definition des marches
-        whichMKT_reg_use(:)=7;  //Le marché 7 est defini par exclusion: no carbon price
-        whichMKT_reg_use([ind_usa],:)=1; 
-		whichMKT_reg_use([ind_eur ind_jan],:)=2; 
-        whichMKT_reg_use([ind_chn],:)=3; 
-		whichMKT_reg_use([ind_ras],:)=4; 
-		whichMKT_reg_use([ind_ral],:)=5; 
-		whichMKT_reg_use([ind_can],:)=6; 
-		is_quota_MKT = [%f;%f;%f;%f;%f;%f;%f];
-		is_taxexo_MKT = [%t;%t;%t;%t;%t;%t;%t];
-                corr_tax_2020 = 0.5;
-                taxMKTexo(1,:)=interpln([ 1 4 14 19 39 TimeHorizon+1; 0 0 0 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(2,:)=interpln([ 1 4 14 19 34 TimeHorizon+1; 0 0 0 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(3,:)=interpln([ 1 9 14 19 29 49 TimeHorizon+1; 0 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(4,:)=interpln([ 1 14 19 29 49 TimeHorizon+1; 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(5,:)=interpln([ 1 14 19 29 34 TimeHorizon+1; 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(6,:)=interpln([ 1 14 19 34 TimeHorizon+1; 0 0 5 5 0],(1:TimeHorizon+1)) * corr_tax_2020;
-                taxMKTexo(7,:)=interpln([ 1 14 19 TimeHorizon+1; 0 0 5 5],(1:TimeHorizon+1)) ;
-		CO2_obj_MKT = ones(nbMKT,TimeHorizon+1)*%nan;
-		MKT_start_year = 10*ones(nbMKT,1);	
-                taxMKTexo = taxMKTexo *1e-6 / usd2001_2005;
+            // copenhagen pledges
+            nbMKT=7;
+            //Definition des marches
+            whichMKT_reg_use(:)=7;  //Le marché 7 est defini par exclusion: no carbon price
+            whichMKT_reg_use([ind_usa],:)=1; 
+            whichMKT_reg_use([ind_eur ind_jan],:)=2; 
+            whichMKT_reg_use([ind_chn],:)=3; 
+            whichMKT_reg_use([ind_ras],:)=4; 
+            whichMKT_reg_use([ind_ral],:)=5; 
+            whichMKT_reg_use([ind_can],:)=6; 
+            is_quota_MKT = [%f;%f;%f;%f;%f;%f;%f];
+            is_taxexo_MKT = [%t;%t;%t;%t;%t;%t;%t];
+            corr_tax_2020 = 0.5;
+            taxMKTexo(1,:)=interpln([ 1 4 14 19 39 TimeHorizon+1; 0 0 0 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(2,:)=interpln([ 1 4 14 19 34 TimeHorizon+1; 0 0 0 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(3,:)=interpln([ 1 9 14 19 29 49 TimeHorizon+1; 0 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(4,:)=interpln([ 1 14 19 29 49 TimeHorizon+1; 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(5,:)=interpln([ 1 14 19 29 34 TimeHorizon+1; 0 0 5 5 5 5],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(6,:)=interpln([ 1 14 19 34 TimeHorizon+1; 0 0 5 5 0],(1:TimeHorizon+1)) * corr_tax_2020;
+            taxMKTexo(7,:)=interpln([ 1 14 19 TimeHorizon+1; 0 0 5 5],(1:TimeHorizon+1)) ;
+            CO2_obj_MKT = ones(nbMKT,TimeHorizon+1)*%nan;
+            MKT_start_year = 10*ones(nbMKT,1);	
+            taxMKTexo = taxMKTexo *1e-6 / usd2001_2005;
             
 
             // varying tax for 2020-2100
@@ -1302,8 +1199,8 @@ if ~is_bau // case 0 is the baseline
 
         //niveaux en 2020
         Emissions_Group2_2020=sum(CO2_base_reg([ind_afr;ind_ras;ind_ral],19),"r")+...  //baselines pour les petits pays
-        (1-red_intensity_2020_CHN)*GDP_base_PPP_nominal(ind_chn,19)/GDP_base_PPP_nominal(ind_chn,4)*CO2_base_reg(ind_chn,4)+... //pledges pour les autres
-        (1-red_intensity_2020_IND)*GDP_base_PPP_nominal(ind_ind,19)/GDP_base_PPP_nominal(ind_ind,4)*CO2_base_reg(ind_ind,4)+...
+            (1-red_intensity_2020_CHN)*GDP_base_PPP_nominal(ind_chn,19)/GDP_base_PPP_nominal(ind_chn,4)*CO2_base_reg(ind_chn,4)+... //pledges pour les autres
+            (1-red_intensity_2020_IND)*GDP_base_PPP_nominal(ind_ind,19)/GDP_base_PPP_nominal(ind_ind,4)*CO2_base_reg(ind_ind,4)+...
         (1-red_absolu_2020_BRA)* CO2_base_reg(ind_bra,19);
 
         //part de 0 et va au bon pourcentage en 2020

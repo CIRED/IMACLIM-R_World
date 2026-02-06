@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -11,22 +11,28 @@
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 // trade elasticities for energy sectors
+alpha_partDX_coal=-7;
+
 alpha_partDF=-7*ones(reg,nbsecteurenergie);
 alpha_partDF(:,indice_Et)=-7*ones(reg,1);
 alpha_partDF(:,indice_elec)=-1*ones(reg,1);
+alpha_partDF(:,indice_coal)=alpha_partDX_coal*ones(reg,1);
 
 alpha_partDG=-7*ones(reg,nbsecteurenergie);
 alpha_partDG(:,indice_Et)=-7*ones(reg,1);
 alpha_partDG(:,indice_elec)=-1*ones(reg,1);
+alpha_partDG(:,indice_coal)=alpha_partDX_coal*ones(reg,1);
 
 alpha_partDI=-7*ones(reg,nbsecteurenergie);
 alpha_partDI(:,indice_Et)=-7*ones(reg,1);
 alpha_partDI(:,indice_elec)=-1*ones(reg,1);
+alpha_partDI(:,indice_coal)=alpha_partDX_coal*ones(reg,1);
 
 alpha_partCI=-7*ones(nbsecteurenergie,sec,reg);
 for k=1:reg,
     alpha_partCI(indice_Et,:,k)=-7*ones(1,sec);
     alpha_partCI(indice_elec,:,k)=-1*ones(1,sec);
+    alpha_partCI(indice_coal,:,k)=alpha_partDX_coal*ones(1,sec);
 end
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -243,3 +249,5 @@ end
 for k=1:reg,
     //disp(max(abs(checkCI(:,:,k)./(CItotref(:,:,k)+1e-12*ones(sec,sec)))),'=', k, 'maximum error on CI');
 end
+
+CI0ref=CIref;

@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Thomas Le-Gallic, Aurélie Méjean, Nicolas Graves, Céline Guivarch
+//     Florian Leblanc, Nicolas Graves, Thomas Le Gallic, Aurélie Méjean, Céline Guivarch
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -31,9 +31,9 @@ carnames = ["ICE","BEV","HYDROGEN"];
 
 //Use only 2 technologies in the default setting, 3 including fuel cells if the Land-Use nexus (NLU) is linked to IMACLIM 
 if (ind_NLU == 1 & ind_hydrogen == 1)
-  indice_cars2consider = [carsWithoutHydr indice_CAR_HYD];
+    indice_cars2consider = [carsWithoutHydr indice_CAR_HYD];
 else
-  indice_cars2consider = carsWithoutHydr;
+    indice_cars2consider = carsWithoutHydr;
 end
 
 //conversion factors
@@ -50,6 +50,14 @@ L_to_toe=9.55E-4;
 //Hao, Han, HeWu Wang, MingGao Ouyang, and Fei Cheng. 2011. “Vehicle Survival Patterns in China.” Science China Technological Sciences 54 (3): 625–29. https://doi.org/10.1007/s11431-010-4256-1.
 //Held, Maximilian, Nicolas Rosat, Gil Georges, Hermann Pengg, and Konstantinos Boulouchos. 2021. “Lifespans of Passenger Cars in Europe: Empirical Modelling of Fleet Turnover Dynamics.” European Transport Research Review 13 (1): 9. https://doi.org/10.1186/s12544-020-00464-0.)
 lifetime_cars = 15; // lifetime common to all cars, including existing park at calibration year
+
+// Life_time_LCC replaces Life_time when computing truncated LCC components
+if ind_short_term_hor== 1
+    Life_time_cars_LCC = min(lifetime_cars, nb_year_expect_LCC); 
+else
+    Life_time_cars_LCC = lifetime_cars;
+end
+
 LIFE_time_cars= lifetime_cars*ones(nb_regions,nb_techno_cars);
 
 //Heterogeneity parameter used in the logit function of technology choices 
@@ -85,8 +93,8 @@ MSHmax_HYD =0.3*ones(nb_regions,1); //Fuel cell powered vehicles could in theory
 
 //Specification of the S-curve in the optimistic scenario for HYD car technologies (fuel-cell powered vehicles)
 if ind_cars_hyd == 1
-        Tstart_HYD = 10*ones(nb_regions,1);
-        Tniche_HYD = 30*ones(nb_regions,1);
+    Tstart_HYD = 10*ones(nb_regions,1);
+    Tniche_HYD = 30*ones(nb_regions,1);
 end
 
 //Initialization of upper bound of market share by technology
@@ -118,9 +126,9 @@ EFF_HYD=zeros(nb_regions,TimeHorizon+1);   //Hydrogen Fuel energy Intensity Mtoe
 
 data_EFF_ICE_2014 = "consistent"; //EDIT Navigate 3.5: we replaced the data below by those extracted from the energy efficiency indicators dataset (IEA). Both datasets come from IEA and they are not fully consitent. We chose this one to be consistent with the computation of energy consumption from road transport, household and pkm. TO BE DISCUSSED as we could also adapt the initial values to be consistent with the other set of data.
 if data_EFF_ICE_2014 == "consistent"
-EFF_ICE_2014 = conso_unitaire_Mtoe_vkm; 
+    EFF_ICE_2014 = conso_unitaire_Mtoe_vkm; 
 else
-EFF_ICE_2014 = csvRead(DATA_CARS +"EFF_ICE.csv",'|',[],[],[],'/\/\//'); // Values estimated using data from the IEA report Fuel Economy in Major Car Markets Technology and Policy Drivers 2005-2017: https://www.iea.org/reports/fuel-economy-in-major-car-markets // Note that the use of this dataset reached to weird efficiency trajectories as they were higher than the initial values.
+    EFF_ICE_2014 = csvRead(DATA_CARS +"EFF_ICE.csv",'|',[],[],[],'/\/\//'); // Values estimated using data from the IEA report Fuel Economy in Major Car Markets Technology and Policy Drivers 2005-2017: https://www.iea.org/reports/fuel-economy-in-major-car-markets // Note that the use of this dataset reached to weird efficiency trajectories as they were higher than the initial values.
 end
 EFF_BEV_2014 = csvRead(DATA_CARS +"EFF_BEV.csv",'|',[],[],[],'/\/\//'); // PATH TO BE UPDATED: change "DATA_CARS" into "path_cars_eff"
 
@@ -133,7 +141,7 @@ EFF_BEV(:,1)= repmat(EFF_BEV_2014,nb_regions,1); //same fuel efficiency in all r
 //From Figure 3 page 16 and Table KF1 page 5 of the IEA report Fuel Economy in Major Car Markets Technology and Policy Drivers 2005-2017: https://www.iea.org/reports/fuel-economy-in-major-car-markets
 //We take two points: average of countries with high fuel prices (average 1.4 USD/l) that over 2005-2017 reduced the gap to 2l/100km by 2.9%/yr on average, and average of countries with low fuel proces (average 0.8 USD/l) that reduced the gap by 2.6%/yr on average.
 //Annual reduction of gap (in %)=0.5*price (in USD/l)+2.2
-EFF_ICE_floor=2*L_to_Mtoe/100;
+EFF_ICE_floor=2*L_to_Mtoe/100*ones(reg,1);
 autonomous_EFF_ICE=2.2; // Value for the years before 2020 (start year policy)
 price_induced_EFF_ICE=0.5;
 
@@ -149,7 +157,7 @@ EFF_HYD(:,30:50)  = ones(nb_regions,1) * linspace(energyUsePerKm_hyd_2030,energy
 EFF_HYD(:,50:TimeHorizon+1) = energyUsePerKm_hyd_2050 ;
 
 ///Discounting factor
-CRF_cars = disc_cars./(1-(1+disc_cars).^(-lifetime_cars*ones(nb_regions,nb_techno_cars))); //This value is not sourced. Alternative value could be 23% from Kalai et al. 2018. “Integration of Behavioral Effects from Vehicle Choice Models into Long-Term Energy Systems Optimization Models.” Energy Economics 74 (August): 663–76. https://doi.org/10.1016/j.eneco.2018.06.028.
+CRF_cars = disc_cars./(1-(1+disc_cars).^(-Life_time_cars_LCC*ones(nb_regions,nb_techno_cars))); //This value is not sourced. Alternative value could be 23% from Kalai et al. 2018. “Integration of Behavioral Effects from Vehicle Choice Models into Long-Term Energy Systems Optimization Models.” Energy Economics 74 (August): 663–76. https://doi.org/10.1016/j.eneco.2018.06.028.
 
 ///Calibration of the shares of each technology in the existing fleet at reference year
 MSH_cars_ref=csvRead(DATA_CARS+"MSH_cars_ref_2014.csv",'|',[],[],[],'/\/\//'); //PATH TO BE UPDATED: change "DATA_CARS" into "path_cars_capital"
@@ -199,12 +207,18 @@ OM_cost_var_cars = repmat(OM_cost_2014,nb_regions,1)*1e-6; // costs converted to
 //////Calibration of EV investment costs, including intangible costs (range anxiety, etc), to reproduce first year market shares in sales
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+MSH_BEV_hist = csvRead(DATA_CARS+"EV_MSH__iea.csv",'|',[],[],[],'/\/\//'); //PATH TO BE UPDATED: change "DATA_CARS" into "path_cars_capital"
+header_tpt = MSH_BEV_hist(1,:);
+ind_baseyear = find(header_tpt==base_year_simulation);
+MSH_BEV_hist = MSH_BEV_hist(2:$, ind_baseyear:$);
+
 MSH_cars_year1=csvRead(DATA_CARS+"MSH_cars_ref_2015.csv",'|',[],[],[],'/\/\//'); //PATH TO BE UPDATED: change "DATA_CARS" into "path_cars_capital"
+MSH_cars_year1(:,indice_CAR_BEV) = MSH_BEV_hist(:,1);
+MSH_cars_year1(:,indice_CAR_ICE) = 1 - sum(MSH_cars_year1(:,[indice_CAR_BEV,indice_CAR_HYD]), 'c');
+
 //Share of EV in sales the first year
 MSH_BEV_year1=MSH_cars_year1(:,indice_CAR_BEV);
 //Lifecycle cost of ICE car (per vkm)
 LCC_ICE_year1=CRF_cars(:,indice_CAR_ICE).*CINV_cars_nexus_ref(:,indice_CAR_ICE)./average_km_per_year+OM_cost_var_cars(:,indice_CAR_ICE)./average_km_per_year+pArmDFref(:,indice_Et).*EFF_ICE(:,1);
 CINV_BEV_year1=average_km_per_year./CRF_cars(:,indice_CAR_ICE).*((MSH_BEV_year1./(ones(nb_regions,1)-MSH_BEV_year1).*LCC_ICE_year1.^(-var_hom_cars)).^(-ones(nb_regions,1)./var_hom_cars)-OM_cost_var_cars(:,indice_CAR_BEV)./average_km_per_year-pArmDFref(:,indice_elec).*EFF_BEV(:,1));
 CINV_cars_nexus_ref(:,indice_CAR_BEV)=CINV_BEV_year1;
-
-

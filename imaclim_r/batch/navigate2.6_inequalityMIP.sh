@@ -2,11 +2,11 @@
 # Contact: <imaclim.r.world@gmail.com>
 # Licence: AGPL-3.0
 # Authors:
-#     Ruben Bibas, Florian Leblanc
+#     Florian Leblanc, Ruben Bibas, Thibault Briera
 #     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 # =============================================
 
-#/nc@inari batchbin/bash
+/nc@inari batchbin/bash
 # META-IMACLIM-R
 # Permet d'exécuter plusieurs fois imaclim-r en fonction dess *combis* pertinentes dans le cadre d'une *ETUDE*
 
@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -41,8 +41,21 @@ chmod a+x run_scenario.sh
 
 # Scenarios submitted for NAVIGATE T2.6, 22-10-2023
 # run with r31998
-#          & svn update -r32011 model/diagnostic.sce
-# 	   & svn update -r32058 lib/diagnostic.sce
+#          & svn update -r32058 lib/diagnostic.sce
+#          & svn update -r32090 model/extraction-first.sce model/nexus.climatePolicy2.sce study_frames/base.sce study_frames/matrice_base.csv 
+#          & svn update -r32726 lib/npi_ndc.sci lib/compute_emi_ccs.sci lib/diagnostic.sce
+# 	   & svn update -r32722 model/res_dyn_loop.sce model/extraction.outputs.inequalitymips.region.sce lib/save_load_lib.sci model/extraction.inequalitymips.sce model/terminate.sce outputs/export_imaclim_csv_2_ar6excel.py 
+#	   & svn update -r32719 model/extraction.inequalitymips.sce model/extraction.inequalitymips.init.sce model/extraction.outputs.inequalitymips.landuse.sce model/extraction.outputs.inequalitymips.region.landuse.sce model/extraction.outputs.inequalitymips.sce model/extraction.outputs.inequalitymips.region.sce model/extraction.outputs.inequalitymips.world.sce
+#	   & svn update -r32723 model/diagnostic.sce model/extraction-generic.sce 
+# 	   & svn update -r31998 model/plugins.sce
+#	   & svn update batch/navigate2.6_inequalityMIP.sh 
+#	   & svn update patch/
+#	patch -p0 -i patch/patch_inequalityMIP_r31998.patch
+
+# data, do
+#unzip -o /data/public_results/ImaclimR/input_data/input_data-Imaclim2.0-r32070.zip
+#unzip -o /data/public_results/ImaclimR/input_data/input_data-Imaclim2.0-r31996.zip
+
 
 (
 
@@ -51,7 +64,7 @@ for i in  11
 do
   for taxinc in 0 
   do
-      for maxmshbiom in 5 
+      for maxmshbiom in 5
       do
  
       runname="$i-$taxinc-$maxmshbiom"
@@ -75,7 +88,7 @@ do
       for tax2100 in 1375
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -101,7 +114,7 @@ do
       for tax2100 in 2900
       do
  
-      for mshbio in 20
+      for mshbio in 10
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -127,7 +140,7 @@ do
       for tax2100 in 1575
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -153,7 +166,7 @@ do
       for tax2100 in 3100
       do
  
-      for mshbio in 206
+      for mshbio in 106
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"
@@ -179,7 +192,7 @@ do
       for tax2100 in 1600
       do
  
-      for mshbio in 35
+      for mshbio in 18
       do
     
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"  
@@ -205,7 +218,7 @@ do
       for tax2100 in 4100
       do
 
-      for mshbio in 65
+      for mshbio in 33
       do
 
       runname="$i-$tax2019-$taxbreak_1-$tax2100-$mshbio"

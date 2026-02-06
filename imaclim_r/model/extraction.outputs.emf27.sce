@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Nicolas Graves
+//     Nicolas Graves, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -56,8 +56,8 @@ line_BIGCCS = 43;
 line_BIGCC  = 44;
 line_biofuels = 59;
 prodBiomassSolidReg = ..
-+ outputs_temp(nbLines*[0:11] + line_BIGCCS,current_time_im) ./ rho_elec_nexus(:,indice_BIGCCS) ..
-+ outputs_temp(nbLines*[0:11] + line_BIGCC,current_time_im) ./ rho_elec_nexus(:,indice_BIGCC);
+    + outputs_temp(nbLines*[0:11] + line_BIGCCS,current_time_im) ./ rho_elec_nexus(:,indice_BIS) ..
++ outputs_temp(nbLines*[0:11] + line_BIGCC,current_time_im) ./ rho_elec_nexus(:,indice_BIG);
 lineEMF = 141;
 indexee = outputs_temp(nbLines*[0:11] + lineEMF,current_time_im);
 nanIndex = ~isnan(indexee);
@@ -68,8 +68,8 @@ else
 end
 // Price|Biomass|Primary Level
 prodBiomassReg = outputs_temp(nbLines*[0:11]   + line_biofuels,current_time_im) ..
-+ outputs_temp(nbLines*[0:11] + line_BIGCCS,current_time_im) ./ rho_elec_nexus(:,indice_BIGCCS) ..
-+ outputs_temp(nbLines*[0:11] + line_BIGCC,current_time_im) ./ rho_elec_nexus(:,indice_BIGCC);
+    + outputs_temp(nbLines*[0:11] + line_BIGCCS,current_time_im) ./ rho_elec_nexus(:,indice_BIS) ..
++ outputs_temp(nbLines*[0:11] + line_BIGCC,current_time_im) ./ rho_elec_nexus(:,indice_BIG);
 lineEMF = 142;
 indexee = outputs_temp(nbLines*[0:11] + lineEMF,current_time_im);
 nanIndex = ~isnan(indexee);
@@ -121,10 +121,10 @@ else
 end
 //LCOE|Electricity|Nuclear   US$2005/MWh
 lineEMF = 149;;
-if sum(prod_elec_techno(:,technoElecNuke)) ~= 0
+if sum(prod_elec_techno(:,technoNuke)) ~= 0
     indexee = outputs_temp(nbLines*[0:11] + lineEMF,current_time_im);
     nanIndex = ~isnan(indexee);
-    outputs_temp(nbLines*reg+lineEMF,current_time_im) = sum(sum(prod_elec_techno(nanIndex,technoElecNuke),2) .* indexee(nanIndex))./sum(prod_elec_techno(nanIndex,technoElecNuke));
+    outputs_temp(nbLines*reg+lineEMF,current_time_im) = sum(sum(prod_elec_techno(nanIndex,technoNuke),2) .* indexee(nanIndex))./sum(prod_elec_techno(nanIndex,technoNuke));
 else
     outputs_temp(nbLines*reg+lineEMF,current_time_im) = %nan;
 end
@@ -164,19 +164,19 @@ else
 end
 //LCOE|Electricity|Biomass|w/ CCS   US$2005/MWh
 lineEMF = 155;
-if sum(prod_elec_techno(:,indice_BIGCCS)) ~= 0
+if sum(prod_elec_techno(:,indice_BIS)) ~= 0
     indexee = outputs_temp(nbLines*[0:11] + lineEMF,current_time_im);
     nanIndex = ~isnan(indexee);
-    outputs_temp(nbLines*reg+lineEMF,current_time_im) = sum(sum(prod_elec_techno(nanIndex,indice_BIGCCS),2) .* indexee(nanIndex))./sum(prod_elec_techno(nanIndex,indice_BIGCCS));
+    outputs_temp(nbLines*reg+lineEMF,current_time_im) = sum(sum(prod_elec_techno(nanIndex,indice_BIS),2) .* indexee(nanIndex))./sum(prod_elec_techno(nanIndex,indice_BIS));
 else
     outputs_temp(nbLines*reg+lineEMF,current_time_im) = %nan;
 end
 //LCOE|Electricity|Biomass|w/o CCS   US$2005/MWh
 lineEMF = 156;
-if sum(prod_elec_techno(:,indice_BIGCC)) ~= 0
+if sum(prod_elec_techno(:,indice_BIG)) ~= 0
     indexee = outputs_temp(nbLines*[0:11] + lineEMF,current_time_im);
     nanIndex = ~isnan(indexee);
-    outputs_temp(nbLines*reg+lineEMF,current_time_im) = sum(sum(prod_elec_techno(nanIndex,indice_BIGCC),2) .* indexee(nanIndex))./sum(prod_elec_techno(nanIndex,indice_BIGCC));
+    outputs_temp(nbLines*reg+lineEMF,current_time_im) = sum(sum(prod_elec_techno(nanIndex,indice_BIG),2) .* indexee(nanIndex))./sum(prod_elec_techno(nanIndex,indice_BIG));
 else
     outputs_temp(nbLines*reg+lineEMF,current_time_im) = %nan;
 end
@@ -238,10 +238,10 @@ end
 outputs_temp(nbLines*reg+lineEMF,current_time_im) = %nan;
 // Capital Cost|Electricity|Nuclear $/kW
 lineEMF = 175;
-if sum(prod_elec_techno(:,technoElecNuke)) ~= 0
+if sum(prod_elec_techno(:,technoNuke)) ~= 0
     indexee = outputs_temp(nbLines*[0:11] + lineEMF,current_time_im);
     nanIndex = ~isnan(indexee);
-    outputs_temp(nbLines*reg+lineEMF,current_time_im) = sum(sum(prod_elec_techno(nanIndex,technoElecNuke),2) .* indexee(nanIndex))./sum(prod_elec_techno(nanIndex,technoElecNuke));
+    outputs_temp(nbLines*reg+lineEMF,current_time_im) = sum(sum(prod_elec_techno(nanIndex,technoNuke),2) .* indexee(nanIndex))./sum(prod_elec_techno(nanIndex,technoNuke));
 else
     outputs_temp(nbLines*reg+lineEMF,current_time_im) = %nan;
 end

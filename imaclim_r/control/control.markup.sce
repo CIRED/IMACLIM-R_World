@@ -7,7 +7,7 @@
 // =============================================
 
 disp([..
-["markup",secnames'];..
-[regnames],..
-[string(squeeze(round( markup*100)))],..
+    ["markup",secnames'];..
+    [regnames],..
+    [string(squeeze(round( markup*100)))],..
 ]);

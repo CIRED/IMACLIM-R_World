@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Thomas Le Gallic, Thibault Briera, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 ////////////////////////////////////////////////////////////////////////
 ////////////////Nexus Liquid Fuels////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -5,9 +13,9 @@
 // update the weight for new market share computation
 // the name of the variable - with zeroing - is quite misleading, but the idea is indeed to make this weight go to one
 if current_time_im >1
-  if new_Et_msh_computation==1
-    weightEt_new = weightEt_new - (weightEt_new-1) / time_zeroing_weightEt_new ;
-  end
+    if new_Et_msh_computation==1
+        weightEt_new = weightEt_new - (weightEt_new-1) / time_zeroing_weightEt_new ;
+    end
 end
 
 exec(MODEL+"nexus.Et.coststruct.sce");
@@ -45,13 +53,13 @@ for k=1:reg
     // Account for CCS in industry
     sumEmi_temp = 0;
     sumCap_temp = 0;
-	for i=1:nb_sectors_industry
-		for j=1:dureedevieindustrie
-			sumEmi_temp = sumEmi_temp + (~CCS_in_industrie_vintage(2,k,i,current_time_im+j) + (1-CCS_efficiency_industry)*CCS_in_industrie_vintage(2,k,i,current_time_im+j)) .* coef_Q_CO2_CI( indice_Et,indice_industries(i),k) .* Capvintageindustries(k,i,current_time_im+j);
-			sumCap_temp = sumCap_temp + Capvintageindustries(k,i,current_time_im+j);
-		end
-	coef_Q_CO2_CI( indice_Et,indice_industries(i),k) = sumEmi_temp / sumCap_temp;
-	end
+    for i=1:nb_sectors_industry
+        for j=1:dureedevieindustrie
+            sumEmi_temp = sumEmi_temp + (~CCS_in_industrie_vintage(2,k,i,current_time_im+j) + (1-CCS_efficiency_industry)*CCS_in_industrie_vintage(2,k,i,current_time_im+j)) .* coef_Q_CO2_CI( indice_Et,indice_industries(i),k) .* Capvintageindustries(k,i,current_time_im+j);
+            sumCap_temp = sumCap_temp + Capvintageindustries(k,i,current_time_im+j);
+        end
+        coef_Q_CO2_CI( indice_Et,indice_industries(i),k) = sumEmi_temp / sumCap_temp;
+    end
 end
 
 // average share of biofuel and CTL in the pool and local consumption
@@ -104,11 +112,11 @@ end
 for k=1:reg
     coef_Q_CO2_CI(indice_coal,indice_elec,k)= coef_Q_CO2_CI(indice_coal,indice_elec,k)  * inertia_coefCO2coal_elec  ..
     + (1-inertia_coefCO2coal_elec) * (coef_Q_CO2_CIref(indice_coal,indice_elec,k)*(1-sh_CCS_col_Q_col(k)*CCS_efficiency));
-    coef_Q_CO2_CI(indice_gaz,indice_elec,k)= coef_Q_CO2_CI(indice_gaz,indice_elec,k) * inertia_coefCO2coal_elec ..
-    + (1-inertia_coefCO2coal_elec) * (       coef_Q_CO2_CIref(indice_gaz,indice_elec,k)*(1-sh_CCS_gaz_Q_gaz(k)*CCS_efficiency));
+    coef_Q_CO2_CI(indice_gas,indice_elec,k)= coef_Q_CO2_CI(indice_gas,indice_elec,k) * inertia_coefCO2coal_elec ..
+    + (1-inertia_coefCO2coal_elec) * (       coef_Q_CO2_CIref(indice_gas,indice_elec,k)*(1-sh_CCS_gaz_Q_gaz(k)*CCS_efficiency));
     coef_Q_CO2_CI(indice_coal,indice_Et,k)=coef_Q_CO2_CI(indice_coal,indice_Et,k)*(1-share_CCS_CTL(k)*CCS_efficiency);
     coef_Q_CO2_CI(indice_coal,indice_coal,k)=(Cap_prev(k,indice_coal).*(1-delta(k,indice_coal)).*coef_Q_CO2_CI(indice_coal,indice_coal,k)+ DeltaK(k,indice_coal).*coef_Q_CO2_CIref(indice_coal,indice_coal,k)*(1-share_CCS_CTL(k)*CCS_efficiency))./(Cap_prev(k,indice_coal).*(1-delta(k,indice_coal))+DeltaK(k,indice_coal));
     coef_Q_CO2_CI(indice_oil,indice_oil,k)  =(Cap_prev(k,indice_oil).* (1-delta(k,indice_oil)).*coef_Q_CO2_CI(indice_oil,indice_oil,k) +  DeltaK(k,indice_oil) .*coef_Q_CO2_CIref(indice_oil,indice_oil,k)*(1-share_CCS_CTL(k)*CCS_efficiency)  )./(Cap_prev(k,indice_oil).*  (1-delta(k,indice_oil))+DeltaK(k,indice_oil) );
-    coef_Q_CO2_CI(indice_gaz,indice_gaz,k)  =(Cap_prev(k,indice_gaz).* (1-delta(k,indice_gaz)).*coef_Q_CO2_CI(indice_gaz,indice_gaz,k) +  DeltaK(k,indice_gaz) .*coef_Q_CO2_CIref(indice_gaz,indice_gaz,k)*(1-share_CCS_CTL(k)*CCS_efficiency)  )./(Cap_prev(k,indice_gaz).*  (1-delta(k,indice_gaz))+DeltaK(k,indice_gaz) );
+    coef_Q_CO2_CI(indice_gas,indice_gas,k)  =(Cap_prev(k,indice_gas).* (1-delta(k,indice_gas)).*coef_Q_CO2_CI(indice_gas,indice_gas,k) +  DeltaK(k,indice_gas) .*coef_Q_CO2_CIref(indice_gas,indice_gas,k)*(1-share_CCS_CTL(k)*CCS_efficiency)  )./(Cap_prev(k,indice_gas).*  (1-delta(k,indice_gas))+DeltaK(k,indice_gas) );
     coef_Q_CO2_CI(indice_Et,indice_Et,k)    =(Cap_prev(k,indice_Et).*  (1-delta(k,indice_Et)).*coef_Q_CO2_CI(indice_Et,indice_Et,k) +    DeltaK(k,indice_Et)  .*coef_Q_CO2_CIref(indice_Et,indice_Et,k)*(1-share_CCS_CTL(k)*CCS_efficiency)    )./(Cap_prev(k,indice_Et).*    (1-delta(k,indice_Et))+DeltaK(k,indice_Et)  );
 end

@@ -45,7 +45,7 @@ delta_debt_share = 0.1; //penalty on the maximum share of debt achievable in dev
 
 climfin_loan = zeros(length(emerging_reg),1);
 share_climfin_Inv = 0.2*ones(length(emerging_reg),1);
-for techno=techno_ENR
+for techno=techno_RE_names
     execstr("cumul_climfin_"+techno+"= zeros(length(emerging_reg),1);") //cumulated climate finance investments
     execstr("mobil_index_"+techno+"= zeros(length(emerging_reg),1);")
     execstr("inv_share_total_"+techno+"= ones(length(emerging_reg),1);")
@@ -135,14 +135,14 @@ share_portfolio = strtod(share_portfolio_tot(2:$,2)) / 100;//since Brazil is exc
 // yields the total annual portfolio per region
 total_portfolio =   [repmat(climfin_port,length(emerging_reg),1).*repmat(share_portfolio,1,nb_year_climfin).*ones(length(emerging_reg),nb_year_climfin),zeros(length(share_portfolio),TimeHorizon-nb_year_climfin)];
 
-for techno = techno_ENR
+for techno = techno_RE_names
     execstr("WACC_"+techno+"_derisked = zeros(reg,1)")
     execstr("WACC_"+techno+"_unrisked = zeros(reg,1)")
 end
 
-for techno = techno_ENR
-execstr("risk_sharing_pu_"+techno+" = zeros(reg,1)");
-execstr("incr_leverage_"+techno+" = zeros(reg,1)");
+for techno = techno_RE_names
+    execstr("risk_sharing_pu_"+techno+" = zeros(reg,1)");
+    execstr("incr_leverage_"+techno+" = zeros(reg,1)");
 end
 
 if ind_climfin==4 //convergence case
@@ -155,7 +155,7 @@ if ind_climfin==4 //convergence case
     ldsav("WACC_WND_sav","",combi_climfin);
     ldsav("WACC_WNO_sav","",combi_climfin);
 
-    for techno = techno_ENR
+    for techno = techno_RE_names
         execstr("WACC_"+techno+"_sup = WACC_"+techno+"_sav");
     end
     

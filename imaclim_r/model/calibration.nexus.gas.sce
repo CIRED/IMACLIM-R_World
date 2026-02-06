@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Florian Leblanc, Thibault Briera, Nicolas Graves
+//     Florian Leblanc, Nicolas Graves, Thibault Briera
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -15,7 +15,7 @@
 //   ---*---   PARAMETERS / INITIALISATION with no source   ---*---   
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-//pace of xtax decrease : set the year when xtax(ind_cis,indice_gaz) reaches 0 after start_decr_xtax years have passed
+//pace of xtax decrease : set the year when xtax(ind_cis,indice_gas) reaches 0 after start_decr_xtax years have passed
 //CAREFUL : this can introduce huge issues ~ 2016, so it can be increased if the model stops running
 // by the way, this changes the resolution of the macro equilibrium, but does not modify the electricity nexus in the first ~ ten years
 //so lets be nice with the macro
@@ -64,8 +64,7 @@ RP_ratio_depletion = 15;
 coef_gaz=ones(nb_regions,1);//initialisation
 
 
-//définition des réserves de gaz disponibles en début de simulation
-
+// reserve & ressource definitions
 Ress_gaz_ref=csvRead(path_gas_ress + 'gasReserves.csv','|',[],[],[],'/\/\//');;
 Ress_gaz  = Ress_gaz_ref;
 Q_cum_gaz = Qref(:,gaz);
@@ -94,7 +93,7 @@ deplet_gaz=0;
 //    cum_quant_temp = [cum_quant_temp cum_quant_temp(:,$)+supply_curves.gas.quantities(:,c+1)];
 //end
 //cum_quant_temp = cum_quant_temp /mtoe2ej;
-// lissage de la courbe d'offre:
+// smoothing the supply curves
 //supply_curves.gas.costs_CACC = ones(nb_regions,1) * linspace(min(supply_curves.gas.costs( supply_curves.gas.costs<>0)), max(supply_curves.gas.costs), int(max(supply_curves.gas.costs)/0.01) );
 //supply_curves.gas.quant_CACC = [];
 //for r=1:nb_regions

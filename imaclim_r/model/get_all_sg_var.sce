@@ -2,24 +2,23 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Adrien Vogt-Schilb
+//     Florian Leblanc, Adrien Vogt-Schilb, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
-//rustine pour pouvoir utiliser Extraction.sce sans changer le no nom des variables existantes, tout en utilisant save_generic à la place de resdyn
+// allow to use extraction.sce without changing the name of existing variables
 
-
-//PREAMBULE
+//PREAMBLE
 exec (".."+filesep()+"preamble.sce");
 
 if ~isdef("SAVEDIR")
     SAVEDIR = uigetdir(OUTPUT,"SAVEDIR please") 
 end
 
-//Recuperation des variables dont le nom fini par REF (en gros)
-exec ( MODEL +"make_calib.sav.sce");
+// get variable which end by REF
+exec ( MODEL +"make_calib.dat.sce");
 
-//Recupere la liste des variables utilisées dans Extraction.sce
+// get variable used in Extraction.sce
 sg_varnams_list=[
 "alphaEtauto"
 "alphaair"

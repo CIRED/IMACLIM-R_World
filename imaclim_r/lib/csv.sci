@@ -13,7 +13,7 @@ function [matValue,matString] = csvread(str)
     else
         matString = read_csv(str,";");
         matValue  = evstr(matString(strstr(matString(:,1),"//")=="",:));
-        matString = strsubst(matString(~strstr(matString(:,1),"//")=="",:),"//","");
+        matString = strsubst(matString(~(strstr(matString(:,1),"//")==""),:),"//","");
     end
 
 endfunction
@@ -43,7 +43,7 @@ function mat2latex(mat,fileName,titleRow)
         outLatex(1,:) = "\begin{tabular}{ | "+strcat(repmat("c | ",1,nCol))+"}\hline "+strcat(titleCat)
     end
 
-for linNb = 1:nRaw
+    for linNb = 1:nRaw
         outLatex(linNb+1,1) = strcat(latexMat(linNb,:));
     end
     outLatex(nRaw+2) = "\end{tabular}";

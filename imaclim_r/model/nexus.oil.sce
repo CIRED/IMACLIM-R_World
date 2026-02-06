@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 // Goods requirement for capital formation
 // follows rise of markup (to ensure that new capital becomes more expensive as resources get exhausted)
 //txmarkup(:,indice_oil) = markup(:,indice_oil) ./ markup_prev(:,indice_oil) - 1;
@@ -8,24 +16,17 @@
 // end
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////courbe de hubbert:cas particulier de l'oil/////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 wp_oil = wp(oil) / tep2oilbarrels ;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////données préliminaires qui seront nécessaires
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//capacite de production par  categorie de couts
+////// preliminary data
+// production capacities per cost category
 Cap_util_oil_prev=Cap_util_oil;
 Cap_util_heavy_prev=Cap_util_heavy;
 Cap_util_shale_prev=Cap_util_shale;
 
-//on va avoir besoin des quantités d'oil restantes pour chaque région et chaque catégorie
-//quantité de petrole produite par catégorie de cout.
-
+//remaining oil in each regon and category
+// production per cost category
 Q_oil_parcategorie=zeros(reg,nb_cat_oil);
 Q_heavy_parcategorie=zeros(reg,nb_cat_heavy);
 Q_shale_parcategorie=zeros(reg,nb_cat_shale);
@@ -48,13 +49,13 @@ for k=1:reg
     end
 end
 
-//on va avoir besoin des quantités d'oil restantes pour chaque région et chaque catégorie
-//quantite cummulee de petrole extraite par categorie de cout
+//remaining oil in each regon and category
+//cumulative oil extracted by cost category
 Q_cum_oil=Q_cum_oil+Q_oil_parcategorie;
 Q_cum_heavy=Q_cum_heavy+Q_heavy_parcategorie;
 Q_cum_shale=Q_cum_shale+Q_shale_parcategorie;
 
-//on retranche ce qui a ete exploite des reserves
+//removing from resource
 Ress_oil=Ress_0_oil-Q_cum_oil;
 Ress_oil=max(Ress_oil,0);
 
@@ -65,14 +66,11 @@ Ress_shale=Ress_0_shale-Q_cum_shale;
 Ress_shale=max(Ress_shale,0);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////petrole conventionnel
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////décisions de mise en exploitation
+////// conventionnal oil
 test_premexploit_oil;
-//décision de première mise en exploitation des puits
+// test for production ignition
 testPremExploitOilprev=test_premexploit_oil;
 
-//boucle pour actualiser la variable booleene de premiere mise en exploitation
 for k=fatal_producer,
     for j=1:nb_cat_oil,
         if ((test_premexploit_oil(k,j)==0)&((wp(indice_oil))>wp_lim(j)*tep2oilbarrels))
@@ -81,7 +79,7 @@ for k=fatal_producer,
     end
 end
 
-//décision de mise en exploitation des puits
+// decision to exploite an oil well
 for k=fatal_producer,
     for j=1:nb_cat_oil,
         if ((wp(indice_oil))>wp_lim(j)*tep2oilbarrels)
@@ -92,9 +90,7 @@ for k=fatal_producer,
     end
 end
 
-
-///////////////////calibration des courbes
-//calibration des courbes de hubbert pour la première mise en exploitation
+/////////////////// Hubbert curve calibration for first production
 if current_time_im>1
     pente_hubbert;
     Cap_0;
@@ -103,42 +99,41 @@ for k=fatal_producer,
     for j=1:nb_cat_oil,
         if (test_premexploit_oil(k,j)==1)&(testPremExploitOilprev(k,j)==0)
             if Ress_infini_oil(k,j)<>0
-                //Si la reserve est non nulle, on calcule les parametres de la courbe de hubbert
+                // For non-zero reserve we compute the Hubbert curve parameters
                 id_oil(k,j)=current_time_im;
                 pente_hubbert(k,j)=pente_conv;
                 Cap_0(k,j)= Ress_infini_oil(k,j)/base_charge_noFCC(indice_oil);
                 Ress_0_oil(k,j) = share_ress_HubbertCurves * Ress_infini_oil(k,j);
                 exp_temp(k,j)=(Ress_0_oil(k,j)/Ress_infini_oil(k,j))/(1-Ress_0_oil(k,j)/Ress_infini_oil(k,j));
-                //date du pic pour la categorie consideree
+                //Production peak date
                 i_hubbert(k,j)=log(exp_temp(k,j))/pente_hubbert(k,j)+current_time_im;
 
 
                 Cap_hubbert_suivant(k,j)=hs_oil*Cap_0(k,j)*pente_hubbert(k,j)/4;
             else
-                //S'il la reserve est nulle, la courbe de hubbert est nulle
+                //For zero reserve, no Hubbert curves
                 id_oil(k,j)=current_time_im;
                 pente_hubbert(k,j)=pente_conv;
                 Cap_0(k,j)= Ress_infini_oil(k,j)/base_charge_noFCC(indice_oil);
                 Ress_0_oil(k,j)=1;
                 exp_temp(k,j)=2;
-                //date du pic pour la categorie consideree
+                //Production peak date
                 i_hubbert(k,j)=log(exp_temp(k,j))/pente_hubbert(k,j)+current_time_im;
-
                 Cap_hubbert_suivant(k,j)=hs_oil*Cap_0(k,j)*pente_hubbert(k,j)/4;
             end
         end
     end
 end
 
-//calibration des courbes de Hubbert pour les nappes déjà en exploitation
+//Hubebrt curve calibration for category already in production
 half_extraction_prev=half_extraction;
 
 for k=fatal_producer,
     for j=1:nb_cat_oil
 
-        ////////1er cas: on a envie de mettre les puits en exploitation
+        ////////first case: we cant to exploite the category
         if (test_exploit_oil(k,j)==1)
-            ////quand on vient d'exploiter la moitié des ressources, on recalibre les paramètres des courbes de Hubbert pour la décroissance ...
+            ////passing half of the ressource, we recalibrate the Hubbert curves parameters for the degrowth phase
             if (Ress_oil(k,j)<0.5*Ress_infini_oil(k,j))&(half_extraction(k,j)==0)
                 i_hubbert(k,j)=current_time_im;
                 half_extraction(k,j)=1;
@@ -147,7 +142,7 @@ for k=fatal_producer,
                 Cap_0(k,j)=Cap_max_hubbert(k,j)*4/pente_hubbert(k,j);
             end
 
-            //recalcul de la pente à la décroissance
+            //recomputing the Hubbert slope for degrowth
             if (half_extraction(k,j)==1)&(current_time_im>i_hubbert(k,j)+1)&Ress_oil(k,j)>0
                 pente_hubbert(k,j)=fsolve(pente_hubbert(k,j),hubbert_slope);
                 exp_temp=max(exp(-(pente_hubbert(k,j)*(current_time_im-i_hubbert(k,j)))),%eps);
@@ -156,27 +151,27 @@ for k=fatal_producer,
 
             Cap_hubbert_suivant(k,j)=Cap_0(k,j)*pente_hubbert(k,j)*exp(-(pente_hubbert(k,j)*(current_time_im+1-i_hubbert(k,j))))/(1+exp(-(pente_hubbert(k,j)*(current_time_im+1-i_hubbert(k,j)))))^2;
 
-            ////si on a exploité les ressources moins vite que "prévu", on a un plateau avant la décroissance
+            ////If the category has been exploited less quickly than expected, we have a 'plateau' before degrowth
 
             if (Ress_oil(k,j)>0.5*Ress_infini_oil(k,j))&(current_time_im>i_hubbert(k,j))
                 Cap_hubbert_suivant(k,j)=Cap_util_oil_prev(k,j);
             end
-            //on lisse les mises en services de capacites
+            // smoothing production ignition
             if (j>3)&(current_time_im>id_oil(k,j)-1)&(current_time_im<id_oil(k,j)+5)
                 Cap_hubbert_suivant(k,j)=(current_time_im-id_oil(k,j))/4*Cap_0(k,j)*pente_hubbert(k,j)*exp(-(pente_hubbert(k,j)*(id_oil(k,j)+4-i_hubbert(k,j))))/(1+exp(-(pente_hubbert(k,j)*(id_oil(k,j)+4-i_hubbert(k,j)))))^2;
             end
         end
 
 
-        ////////2eme cas: on n'a pas envie de mettre les puits en exploitation
+        ////////second case: we do not want to exploite the category
         if (test_exploit_oil(k,j)==0)
-            // si on n'est pas contraint par la déplétion, on garde le même niveau de capacités...
+            // without depletion constriant, we keep the same capacity level
 
             if (Ress_oil(k,j)>0.5*Ress_infini_oil(k,j))
                 Cap_hubbert_suivant(k,j)=Cap_util_oil_prev(k,j);
             end
 
-            //...sinon on est forcé de suivre la décroissance
+            //...else we go to degrowth
 
             if (Ress_oil(k,j)<0.5*Ress_infini_oil(k,j))
                 if (half_extraction(k,j)==0)
@@ -194,18 +189,17 @@ for k=fatal_producer,
         end
     end
 end
-//capacités mises en service par les "fatal producers":courbes de hubbert
+//capacity exploited by "fatal producers"
 
 Cap_util_oil=Cap_hubbert_suivant;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//pétrole non conventionnel
+//non conventional oil
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Ceci est completement arbitraire et devrait etre corrigé
-taxval_nex_oil = max(taxCO2_CI(:,indice_oil,:))*1e6; //taxval_nex_oil en $/t, taxCO2_CI en M$/t
+taxval_nex_oil = max(taxCO2_CI(:,indice_oil,:))*1e6; //taxval_nex_oil in $/t, taxCO2_CI in M$/t
 
-if current_time_im==2
+if current_time_im==2 & verbose>=1
     warning("taxval is is set to max(taxCO2_CI(:,indice_oil,:))*1e6 in nexus.oil")
 end
 
@@ -213,16 +207,16 @@ end
 //HEAVY OIL
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 price_lag_heavy=1;
-//valeurs limites de rentabilité des catégories
+//bearkeven price
 wp_lim_heavy=(prodcost_heavy+min(taxval_nex_oil,40)*emission_heavy)*price_lag_heavy;
 //wp_lim_heavy=(prodcost_heavy+0*TAXVAL_Poles(1,min(current_time_im,size_TAXVAL(2)))*emission_heavy)*price_lag_heavy;
 
-//////////////////décisions de mise en exploitation
-//décision de première mise en exploitation des puits
+//////////////////exploitation decision
+//decision for the first category exploitation
 test_heavy_prev=test_heavy;
 test_prem_heavy_prev=test_prem_heavy;
 
-//boucle pour actualiser la variable booleene de première mise en exploitation
+//keep track of the first exploitation
 for k=1:reg,
     for j=1:nb_cat_heavy,
         if ((test_prem_heavy(k,j)==0)&(wp(indice_oil))>wp_lim_heavy(j)*tep2oilbarrels)
@@ -231,7 +225,6 @@ for k=1:reg,
     end
 end
 
-//boucle pour actualiser la variable booleene de mise en exploitation
 for k=1:reg,
     for j=1:nb_cat_heavy,
         if ((test_prem_heavy(k,j)==1)&((wp(indice_oil))>wp_lim_heavy(j)*tep2oilbarrels))
@@ -242,9 +235,7 @@ for k=1:reg,
     end
 end
 
-
-
-//boucle pour actualiser la variable booleene de redemarrage de la mise en exploitation en phase de croissance
+//keep track for launching back a second or more exploitation phase
 for k=1:reg,
     for j=1:nb_cat_heavy,
         if (test_prem_heavy_prev(k,j)==1)&(test_heavy_prev(k,j)==0)&(test_heavy(k,j)==1)&(half_heavy(k,j)==0)
@@ -254,13 +245,13 @@ for k=1:reg,
         end
     end
 end
-//////////calibration des courbes de Hubbert pour la première mise en exploitation
 
+//////////Hubbert curve for the first time exploitation
 for k=1:reg,
     for j=1:nb_cat_heavy,
         if (test_prem_heavy(k,j)==1)&(test_prem_heavy_prev(k,j)==0)
             if Ress_infini_heavy(k,j)<>0
-                //Si la reserve est non nulle, on calcule les parametres de la courbe de hubbert
+                //For non-zero reserves, we compute the Hubbert curve parameters
                 id_heavy(k,j)=current_time_im;
                 pente_heavy(k,j)=pente_unconv;
                 Cap_heavy_0(k,j)= Ress_infini_heavy(k,j)/base_charge_noFCC(indice_oil);
@@ -268,19 +259,19 @@ for k=1:reg,
                 // Ress_0_heavy(k,j)=exp_temp(k,j)/(1+exp_temp(k,j))*Ress_infini_heavy(k,j);
                 Ress_0_heavy(k,j)= share_ress_HubbertCurves *Ress_infini_heavy(k,j);
                 exp_temp(k,j)=(Ress_0_heavy(k,j)/Ress_infini_heavy(k,j))/(1-Ress_0_heavy(k,j)/Ress_infini_heavy(k,j));
-                //date du pic pour la categorie consideree
+                //production peak date
                 i_heavy(k,j)=log(exp_temp(k,j))/pente_heavy(k,j)+current_time_im;
 
 
                 Cap_heavy_suivant(k,j)=hs_heavy*Cap_heavy_0(k,j)*pente_heavy(k,j)/4;
             else
-                //S'il la reserve est nulle, la courbe de hubbert est nulle
+                //For null reserve, the Hubbert curve is zero
                 id_heavy(k,j)=current_time_im;
                 pente_heavy(k,j)=pente_unconv;
                 Cap_heavy_0(k,j)= 0;
                 Ress_0_heavy(k,j)=1;
                 exp_temp(k,j)=2;
-                //date du pic pour la categorie consideree
+                //production peak date
                 i_heavy(k,j)=log(exp_temp(k,j))/pente_heavy(k,j)+current_time_im;
 
                 Cap_heavy_suivant(k,j)=hs_heavy*Cap_heavy_0(k,j)*pente_heavy(k,j)/4;
@@ -289,7 +280,7 @@ for k=1:reg,
     end
 end
 
-///////////calibration des courbes de Hubbert pour les nappes déjà en exploitation
+/////////// Hubbert curves calibration for category already under exploitation
 half_heavy_prev=half_heavy;
 for k=1:reg,
     for j=1:nb_cat_heavy
@@ -299,11 +290,11 @@ for k=1:reg,
 
             elseif (current_time_im>=id_heavy(k,j)+5)
 
-                if test_redem_heavy(k,j)==0 // pour les nappes qui n'ont pas été arretees à la période précédente
+                if test_redem_heavy(k,j)==0 // for category that were not stopped in the previous period
 
-                    ////////1er cas: on a envie de mettre les puits en exploitation
+                    ////////First case: we want to put catergory under exploitation
                     if (test_heavy(k,j)==1)
-                        ////quand on vient d'exploiter la moitié des ressources, on recalibre les paramètres des courbes de Hubbert pour la décroissance ...
+                        //// passing hald of reserves, we recalibrate the Hubbert curve for degrowth
                         if (Ress_heavy(k,j)<0.5*Ress_infini_heavy(k,j))&(half_heavy(k,j)==0)
                             i_heavy(k,j)=current_time_im;
                             half_heavy(k,j)=1;
@@ -312,23 +303,22 @@ for k=1:reg,
                             Cap_heavy_0(k,j)=Cap_max_heavy(k,j)*4/pente_heavy(k,j);
                         end
 
-                        //recalcul de la pente à la décroissance
+                        //recomputing the slope for the degrowth phase
                         if (half_heavy(k,j)==1)&(current_time_im>i_heavy(k,j)+1)&Ress_heavy(k,j)>0
                             pente_heavy(k,j)=fsolve(pente_heavy(k,j),hubbert_heavy_slope);
                             exp_temp=exp(-(pente_heavy(k,j)*(current_time_im-i_heavy(k,j))));
                             Cap_heavy_0(k,j)=Ress_heavy(k,j)/0.9*1/(1-1/(1+exp_temp));
                         end
-                        ////...sinon on garde les paramètres définis à la mise en service
+                        ////...else we keep parameters as is
 
                         Cap_heavy_suivant(k,j)=Cap_heavy_0(k,j)*pente_heavy(k,j)*exp(-(pente_heavy(k,j)*(current_time_im+1-i_heavy(k,j))))/(1+exp(-(pente_heavy(k,j)*(current_time_im+1-i_heavy(k,j)))))^2;
 
-                        ////si on a exploité les ressources moins vite que "prévu", on a un plateau avant la décroissance
-
+                        ////In the case we exploited the resource slowier than expected, we have a 'plateau' before degrowth
                         if (Ress_heavy(k,j)>0.5*Ress_infini_heavy(k,j))&(current_time_im>i_heavy(k,j))
                             Cap_heavy_suivant(k,j)=Cap_util_heavy_prev(k,j);
                         end
 
-                        //on lisse la mise en service des nouvelles capacites
+                        //smoothing the ignition of new capacities
                         if j>2
                             if (current_time_im>id_heavy(k,j)-1)&(current_time_im<id_heavy(k,j)+5)
                                 Cap_heavy_suivant(k,j)=(current_time_im-id_heavy(k,j)+1)/5*Cap_heavy_0(k,j)*pente_heavy(k,j)*exp(-(pente_heavy(k,j)*(id_heavy(k,j)+4-i_heavy(k,j))))/(1+exp(-(pente_heavy(k,j)*(id_heavy(k,j)+4-i_heavy(k,j)))))^2;
@@ -336,15 +326,15 @@ for k=1:reg,
                         end
                     end
 
-                    ////////2eme cas: on n'a pas envie de mettre les puits en exploitation
+                    ////////Second case: we do not want to run categories under exploitation
                     if (test_heavy(k,j)==0)
-                        // si on n'est pas contraint par la déplétion, on garde le même niveau de capacités...
+                        // In the case with no depletion constraint, we keep the same capacity level
 
                         if (Ress_heavy(k,j)>0.5*Ress_infini_heavy(k,j))
                             Cap_heavy_suivant(k,j)=Cap_util_heavy_prev(k,j);
                         end
 
-                        //...sinon on est forcé de suivre la décroissance
+                        //...else we have to go to the degrowht phase
 
                         if (Ress_heavy(k,j)<0.5*Ress_infini_heavy(k,j))
                             if (half_heavy(k,j)==0)
@@ -364,17 +354,17 @@ for k=1:reg,
                     end
                 end
 
-                ///////////calibration des courbes de Hubbert pour les nappes déjà en exploitation et qui ont été arretees à la période précédente
-                //quand on est en phase de croissance, il faut redéfinir les paramètres de la courbe
+                ///////////Hubbert curves calibration for categories already under exploitation and that did not stop in the previous time step
+                //During the growth phase, the Hubbert curves parameters have to be recomputed
 
                 if (test_redem_heavy(k,j)==1)&(Cap_util_heavy_prev(k,j)<>0)
                     if (current_time_im>=id_heavy(k,j)+5)
                         pente_heavy(k,j)=pente_unconv;
-                        //condition de continuité
+                        //continuity condition
                         rapport_temp=pente_heavy(k,j)*Ress_heavy(k,j)/0.9/Cap_util_heavy_prev(k,j);
                         exp_heavy_temp=rapport_temp-1;
 
-                        //on en déduit la nouvelle valeur de i_heavy et de Cap_0
+                        //we reduce the value of i_heavy and Cap_0
                         i_heavy(k,j)=log(exp_heavy_temp)/pente_heavy(k,j)+current_time_im;
                         Cap_heavy_0(k,j)=Ress_heavy(k,j)/0.9*(1+exp_heavy_temp)/exp_heavy_temp;
                         Cap_heavy_suivant(k,j)=Cap_heavy_0(k,j)*pente_heavy(k,j)*exp(-(pente_heavy(k,j)*(current_time_im-i_heavy(k,j))))/(1+exp(-(pente_heavy(k,j)*(current_time_im-i_heavy(k,j)))))^2;
@@ -383,7 +373,7 @@ for k=1:reg,
             end
 
 
-            //en fin d'exploitation, la décroissance est forcée par les réserves restantes
+            //at the end of produciton, degrowth is forced by remaining reserves
 
             if (Ress_heavy(k,j)<fract_exhausted*Ress_infini_heavy(k,j))
                 if Cap_exhausted_heavy(k,j)==0
@@ -415,7 +405,7 @@ Cap_util_heavy=Cap_heavy_suivant;
 // Cap_util_heavy=Cap_heavy_suivant;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-//Julie : modif Total : limitation de la croissance des non conventionnels à 0.4mbd/an au Canada
+//limitation of the growth of non conventional to 0.4mbarrels/year in Canada
 //Cap_util_heavy( 2,:) = min ( Cap_heavy_suivant( 2,:), Cap_util_heavy_prev( 2,:)+0.4*365/tep2oilbarrels);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -423,15 +413,15 @@ Cap_util_heavy=Cap_heavy_suivant;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 price_lag_shale=1;
 
-//valeurs limites de rentabilité des catégories
+//breakeven prices
 wp_lim_shale=(prodcost_shale+0*taxval_nex_oil*emission_shale)*price_lag_shale;
 
-//////////////////décisions de mise en exploitation
-//décision de première mise en exploitation des puits
+//////////////////ddecision to run a category under exploitation
+//decision for the first exploitatin
 test_shale_prev=test_shale;
 test_prem_shale_prev=test_prem_shale;
 
-//boucle pour actualiser la variable booleene de première mise en exploitation
+//keep track of first exploitation
 for k=1:reg,
     for j=1:nb_cat_shale,
         if ((test_prem_shale(k,j)==0)&(wp(indice_oil))>wp_lim_shale(j)*tep2oilbarrels)
@@ -441,19 +431,16 @@ for k=1:reg,
     end
 end
 
-//boucle pour actualiser la variable booleene de mise en exploitation
 for k=1:reg,
     for j=1:nb_cat_shale,
         if ((test_prem_shale(k,j)==1)&((wp(indice_oil))>wp_lim_shale(j)*tep2oilbarrels)&(current_time_im>=i_test_prem_shale(k,j)))
             test_shale(k,j)=1;
         else
-        test_shale(k,j)=0;end
+            test_shale(k,j)=0;end
     end
 end
 
-
-
-//boucle pour actualiser la variable booleene de redemarrage de la mise en exploitation en phase de croissance
+//keep track of runing under exploitation again a category of oil, during the growth phase
 for k=1:reg,
     for j=1:nb_cat_shale,
         if (test_prem_shale_prev(k,j)==1)&(test_shale_prev(k,j)==0)&(test_shale(k,j)==1)&(half_shale(k,j)==0)
@@ -463,31 +450,31 @@ for k=1:reg,
         end
     end
 end
-//////////calibration des courbes de Hubbert pour la première mise en exploitation
+//////////hubbert curve calibration for the first exploitation
 Cap_shale_suivant;
 for k=1:reg,
     for j=1:nb_cat_shale,
         if (test_prem_shale(k,j)==1)&(test_prem_shale_prev(k,j)==0)
             if Ress_infini_shale(k,j)<>0
-                //Si la reserve est non nulle, on calcule les parametres de la courbe de hubbert
+                //For non zero reserve, we compute thje parameters of the Hubebrt curves
                 id_shale(k,j)=current_time_im;
                 pente_shale(k,j)=pente_unconv;
                 Cap_shale_0(k,j)= Ress_infini_shale(k,j)/base_charge_noFCC(indice_oil);
                 exp_temp(k,j)=(2/hs_shale-1)+2/hs_shale*(1-hs_shale)^0.5;
                 Ress_0_shale(k,j)=exp_temp(k,j)/(1+exp_temp(k,j))*Ress_infini_shale(k,j);
-                //date du pic pour la categorie consideree
+                //production peak date
                 i_shale(k,j)=log(exp_temp(k,j))/pente_shale(k,j)+current_time_im;
 
 
                 Cap_shale_suivant(k,j)=hs_shale*Cap_shale_0(k,j)*pente_shale(k,j)/4;
             else
-                //S'il la reserve est nulle, la courbe de hubbert est nulle
+                //For null reserves, no Hubbert curves
                 id_shale(k,j)=current_time_im;
                 pente_shale(k,j)=pente_unconv;
                 Cap_shale_0(k,j)= 0;
                 Ress_0_shale(k,j)=1;
                 exp_temp(k,j)=2;
-                //date du pic pour la categorie consideree
+                //production peak date
                 i_shale(k,j)=log(exp_temp(k,j))/pente_shale(k,j)+current_time_im;
 
                 Cap_shale_suivant(k,j)=hs_shale*Cap_shale_0(k,j)*pente_shale(k,j)/4;
@@ -496,14 +483,14 @@ for k=1:reg,
     end
 end
 
-///////////calibration des courbes de Hubbert pour les nappes déjà en exploitation et qui n'ont pas été arretees à la période précédente
+///////////Hubbert curves calibration for caterogy already under exploitation and that were not stopped in the previous period
 half_shale_prev=half_shale;
 for k=1:reg,
     for j=1:nb_cat_shale
         if test_redem_shale(k,j)==0
-            ////////1er cas: on a envie de mettre les puits en exploitation
+            ////////First case: we want to put under exploitaton the category
             if (test_shale(k,j)==1)
-                ////quand on vient d'exploiter la moitié des ressources, on recalibre les paramètres des courbes de Hubbert pour la décroissance ...
+                ////past half of reserves, we recalibrate the Hubbert curves for degrowth
                 if (Ress_shale(k,j)<0.5*Ress_infini_shale(k,j))&(half_shale(k,j)==0)
                     i_shale(k,j)=current_time_im;
                     half_shale(k,j)=1;
@@ -511,38 +498,37 @@ for k=1:reg,
                     pente_shale(k,j)=pente_unconv;
                     Cap_shale_0(k,j)=Cap_max_shale(k,j)*4/pente_shale(k,j);
                 end
-                //recalcul de la pente à la décroissance
+                //recomputing the slope for degrowth
                 if (half_shale(k,j)==1)&(current_time_im>i_shale(k,j)+1)&Ress_shale(k,j)>0
                     pente_shale(k,j)=fsolve(pente_shale(k,j),hubbert_shale_slope);
                     exp_temp=exp(-(pente_shale(k,j)*(current_time_im-i_shale(k,j))));
                     Cap_shale_0(k,j)=Ress_shale(k,j)/0.9*1/(1-1/(1+exp_temp));
                 end
-                ////...sinon on garde les paramètres définis à la mise en service
+                ////...else we keep parameters as is
 
                 Cap_shale_suivant(k,j)=Cap_shale_0(k,j)*pente_shale(k,j)*exp(-(pente_shale(k,j)*(current_time_im+1-i_shale(k,j))))/(1+exp(-(pente_shale(k,j)*(current_time_im+1-i_shale(k,j)))))^2;
 
-                ////si on a exploité les ressources moins vite que "prévu", on a un plateau avant la décroissance
+                ////In the case we exploited the ressource not as fast as expected, we have a producton 'plateau' before degrowth
 
                 if (Ress_shale(k,j)>0.5*Ress_infini_shale(k,j))&(current_time_im>i_shale(k,j))
                     Cap_shale_suivant(k,j)=Cap_util_shale_prev(k,j);
                 end
 
-                //on lisse la mise en service des nouvelles capacites
-
+                //smoothing new capacity entrance
                 if (current_time_im>id_shale(k,j)-1)&(current_time_im<id_shale(k,j)+5)
                     Cap_shale_suivant(k,j)=(current_time_im-id_shale(k,j))/4*Cap_shale_0(k,j)*pente_shale(k,j)*exp(-(pente_shale(k,j)*(id_shale(k,j)+4-i_shale(k,j))))/(1+exp(-(pente_shale(k,j)*(id_shale(k,j)+4-i_shale(k,j)))))^2;
                 end
             end
-            ////////2eme cas: on n'a pas envie de mettre les puits en exploitation
+            ////////Second case: we do not want to put the category under exploitation
             if (test_shale(k,j)==0)
                 if (current_time_im>id_shale(k,j)-1)&(current_time_im>id_shale(k,j)+5)
-                    // si on n'est pas contraint par la déplétion, on garde le même niveau de capacités...
+                    // Without depletion constraint, we keep the same capacity level
 
                     if (Ress_shale(k,j)>0.5*Ress_infini_shale(k,j))
                         Cap_shale_suivant(k,j)=Cap_util_shale_prev(k,j);
                     end
 
-                    //...sinon on est forcé de suivre la décroissance
+                    //...else we have to degrow
 
                     if (Ress_shale(k,j)<0.5*Ress_infini_shale(k,j))
                         if (half_shale(k,j)==0)
@@ -562,19 +548,19 @@ for k=1:reg,
         end
     end
 end
-///////////calibration des courbes de Hubbert pour les nappes déjà en exploitation et qui ont été arretees à la période précédente
-//quand on est en phase de croissance, il faut redéfinir les paramètres de la courbe
+///////////calibration of Hubbert curves for category under exploitatin that did not stop producing in the previous tilme step
+// during the growth phase: we recomute Huibbert curves parameters
 for k=1:reg,
     for j=1:nb_cat_shale
         if (current_time_im>id_shale(k,j)-1)&(current_time_im>id_shale(k,j)+5)
             if (test_redem_shale(k,j)==1)&(Cap_util_shale_prev(k,j)<>0)
 
                 pente_shale(k,j)=pente_unconv;
-                //condition de continuité
+                //continuity
                 rapport_temp=pente_shale(k,j)*Ress_shale(k,j)/0.9/Cap_util_shale_prev(k,j);
                 exp_shale_temp=rapport_temp-1;
 
-                //on en déduit la nouvelle valeur de i_shale et de Cap_0
+                //implies new values for i_shale and Cap_0
                 i_shale(k,j)=log(exp_shale_temp)/pente_shale(k,j)+current_time_im;
                 Cap_shale_0(k,j)=Ress_shale(k,j)/0.9*(1+exp_shale_temp)/exp_shale_temp;
                 Cap_shale_suivant(k,j)=Cap_shale_0(k,j)*pente_shale(k,j)*exp(-(pente_shale(k,j)*(current_time_im-i_shale(k,j))))/(1+exp(-(pente_shale(k,j)*(current_time_im-i_shale(k,j)))))^2;
@@ -583,7 +569,7 @@ for k=1:reg,
     end
 end
 
-//en fin d'exploitation, la décroissance est forcée par les réserves restantes
+//at the end of exploitatin, degrowth id forced by remaining reserces
 for k=1:reg,
     for j=1:nb_cat_shale
 
@@ -602,7 +588,7 @@ end
 
 Cap_util_shale=Cap_shale_suivant;
 
-// //on met de l'inertie sur le déploiement des non Conv
+// //Inertia on the deployment of non conventional capacities
 // if current_time_im<21
 // inert_cap_non_conv_ref=0.95;
 // for k=1:reg
@@ -633,18 +619,18 @@ else
 end
 
 //////////////////////////////////////////////////////////////////
-//////////cas particulier du MO
+////////// Specific case for Middle East
 //////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////
-//données préliminaires
+//preliminarly data
 
-//on va avoir besoin de la quantité de pétrole restant à la date i
+//remaining resource
 Q_cum_oil_MO=Q_cum_oil_MO+Q( ind_mde, indice_oil);
 Ress_oil_MO=Ress_0_oil_MO-Q_cum_oil_MO;
 
-//on définit la capacité maximale qui pourra être atteinte à la période suivante (contrainte de Hubbert):on définit la courbe de Hubbert qui passe par la valeur Cap_MO à la date i
-
+//we define the maximum capacity of production that could be reached during the next period (Hubbert constraint)
+// we define the Hubbert curves that passe by the value Cap_MO at time current_time_Im
 half_extraction_MO_prev=half_extraction_MO;
 if Ress_oil_MO<Ress_infini_oil_MO*dmo_cff
     half_extraction_MO=1;
@@ -673,17 +659,17 @@ if depletion_finale_MO==1
     Cap_hubbert_MO_max=0.95*Cap_prev(ind_mde,indice_oil);
 end
 
-//maintenant on décrit le comportement du MO quand il est en phase de croissance de Hubbert
+//M%iddle East behavior during the growht phase along the Hubbert curve
 Cap_MO_prev=Cap_MO;
 
-// /////////////premiere version, le moyen orient vise une part de marché
+///////////////First Middle East strategy: targeting a market share
 
 if scenario_oil_MSMO==1
     if current_time_im>1
-    Dem_oil_ant=sum(Q(:,indice_oil),"r")*(1+(sum(Q(:,indice_oil),"r")-sum(Q_prev(:,indice_oil),"r"))/sum(Q_prev(:,indice_oil),"r"));end //anticipation d'un taux de croissance constant de la demande de pétrole mondiale
+        Dem_oil_ant=sum(Q(:,indice_oil),"r")*(1+(sum(Q(:,indice_oil),"r")-sum(Q_prev(:,indice_oil),"r"))/sum(Q_prev(:,indice_oil),"r"));end // constant growth rate expectation for global oil demand
     charge_ant=sum(Q(:,indice_oil).*charge(:,indice_oil),"r")/sum(Q(:,indice_oil),"r");//charge anticipée constante
 
-    ///////////comportement du MO
+    ///////////Middle East behavior
     if current_time_im>1
     else  Cap_MO=Cap( ind_mde,indice_oil)*(1+txCap(ind_mde,indice_oil));
     end
@@ -698,8 +684,8 @@ if scenario_oil_MSMO==0
 
     overshoot_taux_oil_prix = p(ind_mde,indice_oil) / pref(ind_mde,indice_oil)./taux_oil_prix_prev_obj / p(1,indice_composite);
 
-    //////////////deuxieme version, le MO adapte sa capacite pour viser un prix mondial donne
-    //on anticipe la quantité de petrole produite a l'annee suivante
+    //////////////Second Middle East strategy: targeting a global price by adjusting its producing capacities
+    //next year oil produciton expectation
     if current_time_im==1
         Cap_MO_prev=Cap( ind_mde,indice_oil);
     end
@@ -707,20 +693,20 @@ if scenario_oil_MSMO==0
     Q_oil_anticip=Q(:,indice_oil).*taux_Q_nexus(:,indice_oil);
     Q_oil_anticip_world=sum(Q_oil_anticip);
 
-    //on anticipe la quantité de pétrole que devra produire la moyen orient
+    //Expected oil prodcution for Middle East
     Q_oil_anticip_MO=Q_oil_anticip_world;
     for k=fatal_producer
         Q_oil_anticip_MO=Q_oil_anticip_MO-K_expected(k,indice_oil).*charge(k,indice_oil);
     end
 
-    //anticipation parfaite
+    //Perfect expectation
     if current_time_im<7
         taux_oil_prix_obj=(100/pref(ind_mde,indice_oil)*tep2oilbarrels-1)/(6-1)*(current_time_im-1)+1;
         taux_oil_prix=taux_oil_prix_obj;
     else
         taux_oil_prix_obj=prf_cff/pref(ind_mde,indice_oil)*tep2oilbarrels;
         taux_oil_prix=taux_oil_prix_obj;
-        if ~is_bau & mean(taxval_nex_oil)>5 & current_time_im >= start_year_strong_policy-base_year_simulation // l'incitation par la taxe commence avec la taxe et pas 2001
+        if ~is_bau & mean(taxval_nex_oil)>5 & current_time_im >= start_year_strong_policy-base_year_simulation // The tax incentive begins after start_year_strong_policy
             if half_extraction_MO==1
                 //taux_oil_prix_obj=(interpln([[i_hubbert_MO,i_hubbert_MO+35];[70,100]],current_time_im))/pref(ind_mde,indice_oil)*tep2oilbarrels;
                 taux_oil_prix_obj=(interpln([[i_hubbert_MO,i_hubbert_MO+35];[80,100]],current_time_im))/pref(ind_mde,indice_oil)*tep2oilbarrels;
@@ -756,22 +742,18 @@ if scenario_oil_MSMO==0
     // 				   Q(:,indice_oil);
     // 				   charge(:,indice_oil);
     // 				   p(:,indice_oil)/p(1,7);
-    // 				   p(:,indice_gaz)/p(1,7);
+    // 				   p(:,indice_gas)/p(1,7);
     // 				   wp(indice_oil)/p(1,7)];
     // 	fprintfMat(SAVEDIR+"etude_oil_price_MO.csv",etude_oil_price_MO,"%5.8e");
 end
 
 //////////////////////////////////////////////////////////////////////////////////////
-////**Julie: pour Total, on empêche une croissance trop forte des capacités du MO**///
-//////////////////////////////////////////////////////////////////////////////////////
-
-//txCapMOmax défini dans alternatives_scenar_Total en Mdb
+////Preventing for a too fast increase of Middle East capacities: txCapMOmax 
 Cap_MO=min(Cap_MO,Cap_prev( ind_mde,indice_oil)+txCapMOmax*365/tep2oilbarrels);
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-//on lisse la variation de Cap_MO au voisinage du pic
-
+//smoothing Cap_MO variations around the production peak
 if half_extraction_MO==0
     if Ress_oil_MO<Ress_infini_oil_MO*(dmo_cff+0.1)
         //Cap_MO=min(Cap_MO,Cap_MO_prev*max(min(interpln([[Ress_infini_oil_MO*0.6,Ress_infini_oil_MO*0.5];[1.04,1]],Ress_oil_MO),1.1),1));
@@ -780,18 +762,14 @@ if half_extraction_MO==0
 end
 
 ////////////////////////////////////////////////////////////////
-//Finalement, les capacités mises en service par le MO en tenant compte des contraintes de hubbert
+// Finallky we apply Hubbert curves constraint on top on the Middle East strategy
 if half_extraction_MO==1
     //Cap_MO=min(interpln([[Cap_MO,Cap_hubbert_MO_max,Cap_hubbert_MO_max];[i_hubbert_MO,i_hubbert_MO+5,TimeHorizon+1]],current_time_im),Cap_MO);
     Cap_MO=min (Cap_MO,Cap_hubbert_MO_max);
 end
 
-//si on est en fin de période, on empèche les décroissances trop brusques de la capacité MO
-// modif: was after 2050, but leads to a decrease in capacity too important (todo: discuss model when Cap(MDE) << Cap(RoW) )
-// if current_time_im>50
+// We prevent for fast decreease in Middle East production capacities
 Cap_MO=max(Cap_MO,Cap_prev( ind_mde,indice_oil) * max_decrease_MO_cap);
-// end
-
 
 K_expected( ind_mde, indice_oil)=Cap_MO;
 
@@ -802,8 +780,7 @@ else
 end
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////évolution des CI
-////////////évolution des alpha_oil
+/////////////// intermediate consumptin CI evolution
 for k=1:reg
     for j=1:nb_cat_oil
 
@@ -827,8 +804,3 @@ end
 alpha_barre(ind_mde)=alpha_oil_MO;
 //disp(alpha_barre./alpha_barre_ref,'alpha_barre./alpha_barre_ref');
 
-// for k=1:reg
-// 	CI(:,indice_oil,k)=(alpha_barre(k)/alpha_barre_ref(k))*CI_oil(:,k);
-// //on coupe les CI d'interconsommation
-// 	CI(indice_oil,indice_oil,k)=CI_oil(indice_oil,k);
-// end

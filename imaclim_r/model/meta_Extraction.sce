@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Julie Rozenberg
+//     Julie Rozenberg, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -19,14 +19,13 @@ exec(".."+filesep()+"model"+filesep()+"preamble.sce");
 function exec_extraction(SAVEDIR)
     //	exec (MODEL+"extraction."+ETUDEOUTPUT+".sce"); //Results from extraction will be stored in the hard drive
     //    sg_reload(SAVEDIR)
-    metaRecMessOn = %t;
     clearglobal()
     sg_clear();
     message(SAVEDIR);
     exec(PARENT+"externals"+sep+"pdfExtraction"+sep+"extraction.pdf.sce");
 endfunction
 
-//Execution d'extraction pour chaque SAVEDIR
+//Execution of extraction for each SAVEDIR folder present in outputs/
 for SAVEDIR = get_dirlist()'
     exec_extraction();
 end

@@ -2,13 +2,32 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Nicolas Graves, Florian Leblanc
+//     Florian Leblanc, Nicolas Graves, Ruben Bibas
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
 
 counterLine = 0 ;
 
+varname = 'GDP|PPP'; // billion billion US$2010/yr
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)=GDP_PPP_constant(k)/ 1e3*usd_year1_year2;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";
+end;
+
+
+if ind_climat > 2
+    varname = 'Policy Cost|GDP Loss';
+    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+if current_time_im==yr_start & k==1;list_output_comments(counterLine)="GDP MER";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (GDP_MER_real(k) - GDP_base_MER_real(k,current_time_im+1)) / 1e3*usd_year1_year2; // negative numbers requested by EM
+else
+    varname_temp = 'Policy Cost|GDP Loss';
+    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname_temp; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "billion US$2010/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = %nan;
+end
 
 varname = 'Final Energy'; //  EJ/yr
 counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
@@ -22,6 +41,24 @@ outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = energy_balance(conso
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
+varname = 'Primary Energy|Biomass|w/o CCS'; //  EJ/yr
+counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = - energy_balance(refi_eb,enr_eb,k) * Mtoe_EJ / hoogwick_bioEt_efficienc(current_time_im) + sum(qBiomExaJ(k,1));
+if current_time==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
+end;
+
+varname = 'Primary Energy|Biomass|w/ CCS'; //  EJ/yr
+counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = sum(qBiomExaJ(k,2));
+if current_time==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
+end;
+
+varname = 'Primary Energy|Biomass'; //  EJ/yr
+counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = sum(qBiomExaJ(k,2)) - energy_balance(refi_eb,enr_eb,k) * Mtoe_EJ / hoogwick_bioEt_efficienc(current_time_im) + sum(qBiomExaJ(k,1));
+if current_time==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
+end;
+
 varname = 'Primary Energy|Coal'; // EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = energy_balance(tpes_eb,coal_eb,k)*Mtoe_EJ;
@@ -31,10 +68,10 @@ end;
 varname = 'Primary Energy|Coal|w/ CCS'; //  EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (..
-        - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // raffineries (ctl)
-        - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. //autoconsommation de charbon dans la production de charbon pour le CTL
-        - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. //coal to elec
-        )*Mtoe_EJ;
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // raffineries (ctl)
+    - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. //autoconsommation de charbon dans la production de charbon pour le CTL
+    - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. //coal to elec
+)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
@@ -43,34 +80,35 @@ varname = 'Primary Energy|Coal|w/o CCS'; // EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (..
-        energy_balance(tpes_eb,coal_eb,k) ..
-        - (..
-            - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // affineries (ctl)
-            - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. // autoconsommation de charbon dans la production de charbon pour le CTL
-            - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. //coal to elec
-          )..
-        )*Mtoe_EJ;
+    energy_balance(tpes_eb,coal_eb,k) ..
+    - (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) .. // affineries (ctl)
+    - energy_balance(losses_eb,coal_eb,k) * share_CCS_CTL(k) .. // autoconsommation de charbon dans la production de charbon pour le CTL
+    - energy_balance(pwplant_eb,coal_eb,k) * sh_CCS_col_Q_col(k) .. //coal to elec
+    )..
+)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
+
 varname = 'Primary Energy|Gas'; //  EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = energy_balance(tpes_eb,gaz_eb,k)*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = energy_balance(tpes_eb,gas_eb,k)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
 varname = 'Primary Energy|Gas|w/ CCS'; //   EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = - energy_balance(pwplant_eb,gaz_eb,k) * sh_CCS_gaz_Q_gaz(k) * Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = - energy_balance(pwplant_eb,gas_eb,k) * sh_CCS_gaz_Q_gaz(k) * Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
 varname = 'Primary Energy|Gas|w/o CCS'; //  EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)=(..
-        energy_balance(tpes_eb,gaz_eb,k) ..
-        - ( - energy_balance(pwplant_eb,gaz_eb,k)) * sh_CCS_gaz_Q_gaz(k) ..
-        )*Mtoe_EJ;
+    energy_balance(tpes_eb,gas_eb,k) ..
+    - ( - energy_balance(pwplant_eb,gas_eb,k)) * sh_CCS_gaz_Q_gaz(k) ..
+)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
@@ -83,6 +121,12 @@ end;
 varname = 'Primary Energy|Hydro'; //    EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = sum(msh_elec_techno(k,technoElecHydro)./[1 1]) * Q(k,elec)*Mtoe_EJ;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
+end;
+
+varname = 'Primary Energy|Non-Biomass Renewables'; //   EJ/yr
+counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = sum(msh_elec_techno(k,technoNonBiomassRen)./[1 1 1 1 1 1 1]) * Q(k,elec)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
@@ -131,27 +175,20 @@ end;
 varname = 'Primary Energy|Wind'; // EJ/yr
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = sum(msh_elec_techno(k,technoWind)./[1 1]) * Q(k,elec)*Mtoe_EJ;
-if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
+end;
+
 
 if ind_NLU ==0
-  varname = 'Primary Energy'; //  EJ/yr
-  counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-  outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = (sum(energy_balance(tpes_eb,primary_eb,k)))*Mtoe_EJ;
-  if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
+    varname = 'Primary Energy'; //  EJ/yr
+    counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = 0;
+for var=['Non-Biomass Renewables','Biomass','Nuclear','Coal','Gas','Oil']
+    lineVAR = find_index_list( list_output_str, 'Primary Energy|'+var);
+    outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) = outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) + outputs_temp(nbLines*(k-1)+lineVAR,current_time+1);
 end
-
-//from doi:10.1016/j.biombioe.2008.04.005
-varname = 'Primary Energy|Biomass|w/o CCS'; //  EJ/yr
-counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = - energy_balance(refi_eb,enr_eb,k) * Mtoe_EJ / hoogwick_bioEt_efficienc(current_time_im) + sum(qBiomExaJ(k,1));
-if current_time==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
-end;
-
-varname = 'Primary Energy|Biomass|w/ CCS'; //  EJ/yr
-counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = sum(qBiomExaJ(k,2));
-if current_time==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
-end;
+end
 
 varname = 'Resource|Extraction|Coal'; // EJ
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
@@ -161,7 +198,7 @@ end;
 
 varname = 'Resource|Extraction|Gas'; //  EJ
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) =  Q(k,indice_gaz)*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1) =  Q(k,indice_gas)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";
 end;
 
@@ -240,18 +277,18 @@ end;
 varname = 'Carbon Sequestration|CCS|Fossil';
 counterLine =counterLine+ 1; if current_time_im==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time_im+1)= ( ..
-+ coef_Q_CO2_ref(k,coal) * (..
-- energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb,k)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
-- energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
-) ..
-- coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
-- coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
-+ coef_Q_CO2_ref(k,gaz) * (..
-- energy_balance(refi_eb,   gaz_eb,k) * share_CCS_CTL(k) ..
-- energy_balance(losses_eb, gaz_eb,k) * share_CCS_CTL(k) ..
-+ energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
-) ..
+    + coef_Q_CO2_ref(k,coal) * (..
+    - energy_balance(refi_eb,coal_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb,k)* sum(msh_elec_techno(k,[indice_PSS indice_CGS])) ..
+    - energy_balance(losses_eb,coal_eb,k)* share_CCS_CTL(k)..
+    ) ..
+    - coef_Q_CO2_ref(k,et)  * energy_balance(losses_eb,et_eb,k) * share_CCS_CTL(k) ..
+    - coef_Q_CO2_ref(k,oil) * energy_balance(losses_eb,oil_eb,k) * share_CCS_CTL(k) ..
+    + coef_Q_CO2_ref(k,gaz) * (..
+    - energy_balance(refi_eb,   gas_eb,k) * share_CCS_CTL(k) ..
+    - energy_balance(losses_eb, gas_eb,k) * share_CCS_CTL(k) ..
+    + energy_balance(pwplant_eb,elec_eb,k)  * sum(msh_elec_techno(k,[indice_GGS])) ..
+    ) ..
 )/1e6;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";
 end;
@@ -357,7 +394,7 @@ if current_time_im==yr_start & k==1; list_output_unit($+1) = "Mt CO2/yr";end;
 
 varname = 'Final Energy|Transportation|International Transport|International Shipping'; // EJ/yr 
 counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = CI(indice_Et,indice_mer,k)*Q(k,indice_mer)*Mtoe_EJ;
+outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = CI(indice_Et,indice_mer,k)*Q(k,indice_mer)*Mtoe_EJ+FE_shipping_HYD(k)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
 
 varname = 'Final Energy|Transportation|International Transport|International Shipping|Conventional marine fuels'; // EJ/yr 
@@ -397,10 +434,16 @@ if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
 
 varname = 'Final Energy|Transportation|International Transport|International Shipping|Hydrogen and ammonia'; // EJ/yr 
 counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
-outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = 0;
+outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = FE_shipping_HYD(k)*Mtoe_EJ;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
 
 varname = 'Final Energy|Transportation|International Transport|International Shipping|Electricity'; // EJ/yr 
 counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
 outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = 0;
 if current_time_im==yr_start & k==1; list_output_unit($+1) = "EJ/yr";end;
+
+varname = 'Production|Transportation|International Transport|International Shipping'; // EJ/yr 
+counterLine =counterLine+ 1; if current_time==yr_start & k==1; list_output_str($+1) = varname; end;
+outputs_temp(nbLines*(k-1)+counterLine,current_time+1) = %nan;
+if current_time_im==yr_start & k==1; list_output_unit($+1) = "Index (2020 = 1)";end;
+

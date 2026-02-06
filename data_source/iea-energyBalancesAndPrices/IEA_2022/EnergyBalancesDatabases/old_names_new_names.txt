@@ -1,0 +1,11 @@
+IEA changed the names of the .TXT and .IVT files when updated the database.
+You need to update the name in your script accordingly
+WBIG.TXT is a concatenation, so the name is kept
+
+Here are the old names (release 29-07-2021):
+
+WBAL.ivt  WBIG1.TXT  WBIG2.TXT  WBIG.ivt  WBIG.TXT  WCONV.ivt  WIND.ivt  WORLDBAL.TXT
+
+Here are the new names (release 02-08-2022):
+
+WORLDBIG1.TXT  WORLDIND.TXT CONV.TXT  WBAL.IVT  WBIG.IVT   WCONV.IVT  WIND.IVT   WORLDBAL.TXT  WORLDBIG2.TXT

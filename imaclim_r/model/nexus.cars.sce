@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Thomas Le Gallic, Thibault Briera, Aurélie Méjean, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 ////////////////////////////////////////////////////////////////////////////
 ////// Reduced representation of households vehicle choices
 // //This nexus makes the following parameters evolve between two static equilibria: 
@@ -39,12 +47,12 @@ CINV_cars_temp =zeros (1,nb_techno_cars);
 
 // Learning rates in the optimistic scenario for BEV and HYD car technologies: the more optimistic assumption aims to represent public investment in R&D
 if current_time_im >= start_year_strong_policy-base_year_simulation
-	if indice_ldv_electri == 1   
-	LR_ITC_cars(indice_CAR_BEV)=0.18; //0.12 ; was 0.16 in ind_VE previous version
-      LR_ITC_cars(indice_CAR_HYD)=0.3;
-	else
-	LR_ITC_cars(indice_CAR_BEV)=0.12;
-	end
+    if indice_ldv_electri == 1   
+        LR_ITC_cars(indice_CAR_BEV)=0.18; //0.12 ; was 0.16 in ind_VE previous version
+        LR_ITC_cars(indice_CAR_HYD)=0.3;
+    else
+        LR_ITC_cars(indice_CAR_BEV)=0.12;
+    end
 end
 
 //Cumulated sales over time
@@ -63,9 +71,9 @@ end
 
 // Here we represent public support for the purchase of electric vehicles, in order to value the least negative externalities (air pollution, noise pollution). It's indexed to public spending per person in the services sector.
 if indice_ldv_electri == 1 & current_time_im >= start_year_strong_policy-base_year_simulation
-	for k=1:nb_regions
-    CINV_cars_nexus(k,indice_CAR_BEV) =CINV_cars_nexus_ref(k,indice_CAR_BEV)*(1-0.3*((DG(k,indice_composite)/Ltot(k))/max(DG(:,indice_composite)./Ltot(:))))*(1-LR_ITC_cars(indice_CAR_BEV))^( log2 (Cum_Inv_cars(indice_CAR_BEV)/Cum_Inv_cars_ref(indice_CAR_BEV)));
-	end
+    for k=1:nb_regions
+        CINV_cars_nexus(k,indice_CAR_BEV) =CINV_cars_nexus_ref(k,indice_CAR_BEV)*(1-0.3*((DG(k,indice_composite)/Ltot(k))/max(DG(:,indice_composite)./Ltot(:))))*(1-LR_ITC_cars(indice_CAR_BEV))^( log2 (Cum_Inv_cars(indice_CAR_BEV)/Cum_Inv_cars_ref(indice_CAR_BEV)));
+    end
 end
 
 //Minimum bound on purshase cost (representing a technical asymptote)
@@ -102,40 +110,40 @@ end
 //Autonomous energy efficiency improvement of BEV
 
 if ind_transportefficiency == 1 & current_time_im >= start_year_strong_policy-base_year_simulation
-EFF_BEV_time=60; // This drives the pace of energy efficiency improvement (-50% in 30 year with EFF_BEV_time=60 years). NB: it used to be the default value.
+    EFF_BEV_time=60; // This drives the pace of energy efficiency improvement (-50% in 30 year with EFF_BEV_time=60 years). NB: it used to be the default value.
 else
-EFF_BEV_time=120; // New default value, introduced to meet the task 3.5 NAVIGATE objectives.  We add a pessimistic assumption here to introduce some contrast (we halve the speed of improvement). The divergence starts after 2020.
+    EFF_BEV_time=120; // New default value, introduced to meet the task 3.5 NAVIGATE objectives.  We add a pessimistic assumption here to introduce some contrast (we halve the speed of improvement). The divergence starts after 2020.
 end
 
 if ind_transportefficiency == 1 & current_time_im >= start_year_strong_policy-base_year_simulation
-autonomous_EFF_ICE=2.2;  //NB: it used to be the default value, now it is the pessimistic assumption. The divergence starts after 2020.
+    autonomous_EFF_ICE=2.2;  //NB: it used to be the default value, now it is the pessimistic assumption. The divergence starts after 2020.
 else
-autonomous_EFF_ICE=0; // Pessimistic assumption
+    autonomous_EFF_ICE=0; // Pessimistic assumption
 end
 
 //Assumption the energy efficiency is improved linearly to reach its asymptote of 100 Wh/km (ie half of the calibration value) in 30 years
-EFF_BEV(:,current_time_im)=max(EFF_BEV_floor,(1-current_time_im/EFF_BEV_time)*EFF_BEV(:,1));
+EFF_BEV(:,current_time_im)=max(EFF_BEV_floor.*dynForc_effCar,(1-current_time_im/EFF_BEV_time)*EFF_BEV(:,1));
 
 //Endogenous and price induced energy efficiency improvement of ICE
 //We represent that the gap between the energy efficiency and a floor of 2L/100km for ICE is reduced as a linear function of fuel prices (the higher the price, the faster the gap is reduced)
 annual_gap_reduction=autonomous_EFF_ICE+price_induced_EFF_ICE*pArmDF(:,et)*L_to_toe;
 if current_time_im==1
-	GAP_EFF_ICE=EFF_ICE(:,1)-EFF_ICE_floor*ones(reg,1);
+    GAP_EFF_ICE=EFF_ICE(:,1)-EFF_ICE_floor.*dynForc_effCar;
 else
-	GAP_EFF_ICE=EFF_ICE(:,current_time_im-1)-EFF_ICE_floor*ones(reg,1);
+    GAP_EFF_ICE=EFF_ICE(:,current_time_im-1)-EFF_ICE_floor.*dynForc_effCar;
 end
-EFF_ICE(:,current_time_im)=EFF_ICE_floor*ones(reg,1)+(ones(reg,1)-annual_gap_reduction/100).*GAP_EFF_ICE;
+EFF_ICE(:,current_time_im)=EFF_ICE_floor.*dynForc_effCar+(ones(reg,1)-annual_gap_reduction/100).*GAP_EFF_ICE;
 
 
 //Computing average fuel cost (anticipated) per vehicle.kilometer over the vehicle lifetime
 for k=1:nb_regions
     for j=1:nb_techno_cars
         if sum(carnames(j)== ["ICE"]) == 1
-            CFuel_cars(k,j)= mean (p_Et_cars_anticip  (k,1:LIFE_time_cars(k,j)))*  EFF_ICE(k,current_time_im) ;
+            CFuel_cars(k,j)= mean (p_Et_cars_anticip  (k,1:Life_time_cars_LCC))*  EFF_ICE(k,current_time_im) ;
         elseif sum(carnames(j)== ["BEV"]) == 1
-            CFuel_cars(k,j) = mean (p_elec_cars_anticip(k,1:LIFE_time_cars(k,j)))*EFF_BEV(k,current_time_im);
+            CFuel_cars(k,j) = mean (p_elec_cars_anticip(k,1:Life_time_cars_LCC))*EFF_BEV(k,current_time_im);
         elseif sum(carnames(j)== ["HYDROGEN"]) == 1
-            CFuel_cars(k,j)= max( mean (p_H2_cars_anticip  (k,1:LIFE_time_cars(k,j)))*  EFF_HYD(k,current_time_im), 0);
+            CFuel_cars(k,j)= max( mean (p_H2_cars_anticip(k,1:Life_time_cars_LCC))*  EFF_HYD(k,current_time_im), 0);
         end
     end
 end
@@ -158,19 +166,19 @@ for k=1:nb_regions
 end
 
 //Adding some constraints on the market share of electric vehicles
-for k=1:nb_regions
-    //Maximum share following the S-curve of penetration
-    msh_cars_sup(k,indice_CAR_BEV)=MSH_limit_newtechno(Tstart_EV(k),Tniche_EV(k),Tgrowth_EV(k),Tmature_EV(k),MSHmax_EV(k),current_time_im);
-    //actual limitation
-	delta_loc = MSH_cars(k, indice_CAR_BEV)-msh_cars_sup(k,indice_CAR_BEV);
-    if delta_loc>0
-        MSH_cars(k, indice_CAR_BEV) = msh_cars_sup(k,indice_CAR_BEV);
-	  //rebalancing sum of markets shares to 1
-      if ind_hydrogen == 0 | ind_NLU == 0 
-       MSH_cars(k,indice_CAR_ICE) = MSH_cars(k,indice_CAR_ICE).*(1+(delta_loc)./sum(MSH_cars(k,indice_CAR_ICE)));
-      end
-    end
-end
+//for k=1:nb_regions
+//Maximum share following the S-curve of penetration
+//msh_cars_sup(k,indice_CAR_BEV)=MSH_limit_newtechno(Tstart_EV(k),Tniche_EV(k),Tgrowth_EV(k),Tmature_EV(k),MSHmax_EV(k),current_time_im);
+//actual limitation
+//	 delta_loc = MSH_cars(k, indice_CAR_BEV)-msh_cars_sup(k,indice_CAR_BEV);
+//if delta_loc>0
+//    MSH_cars(k, indice_CAR_BEV) = msh_cars_sup(k,indice_CAR_BEV);
+//	  //rebalancing sum of markets shares to 1
+//  if ind_hydrogen == 0 | ind_NLU == 0 
+//   MSH_cars(k,indice_CAR_ICE) = MSH_cars(k,indice_CAR_ICE).*(1+(delta_loc)./sum(MSH_cars(k,indice_CAR_ICE)));
+//  end
+//end
+//end
 
 //Adding some constraints on the market share of hydrogen vehicles (in the case this option is activated)
 for k=1:nb_regions
@@ -180,19 +188,34 @@ for k=1:nb_regions
     delta_loc = MSH_cars(k,indice_CAR_HYD) - msh_cars_sup(k,indice_CAR_HYD);
 
     if delta_loc > 0
-		MSH_cars(k,indice_CAR_HYD) = msh_cars_sup(k,indice_CAR_HYD);
-		MSH_cars(k,indice_CAR_HYD) = max( MSH_cars(k,indice_CAR_HYD), 1e-3);
+        MSH_cars(k,indice_CAR_HYD) = msh_cars_sup(k,indice_CAR_HYD);
+        MSH_cars(k,indice_CAR_HYD) = max( MSH_cars(k,indice_CAR_HYD), 1e-3);
     end
 end
 if ind_hydrogen == 0 | ind_NLU == 0
-      MSH_cars(:,indice_CAR_HYD) = zeros(nb_regions,1);
+    MSH_cars(:,indice_CAR_HYD) = zeros(nb_regions,1);
 else
-  //rebalancing sum of markets shares to 1
-  for k=1:nb_regions
-      MSH_cars(k,indice_CAR_ICE) = MSH_cars(k,indice_CAR_ICE) ./ sum(MSH_cars(k,indice_CAR_ICE)) * ( 1 - sum(MSH_cars(k, [indice_CAR_BEV, indice_CAR_HYD] )) ) ;
-  end
+    //rebalancing sum of markets shares to 1
+    for k=1:nb_regions
+        MSH_cars(k,indice_CAR_ICE) = MSH_cars(k,indice_CAR_ICE) ./ sum(MSH_cars(k,indice_CAR_ICE)) * ( 1 - sum(MSH_cars(k, [indice_CAR_BEV, indice_CAR_HYD] )) ) ;
+    end
 end
 
+// Historical path for BEV
+if current_time_im+1 <= size(MSH_BEV_hist,'c')
+    MSH_cars(:,indice_CAR_BEV) = MSH_BEV_hist(:, 1+current_time_im);
+    MSH_cars(:,indice_CAR_ICE) = 1 - sum(MSH_cars(:,[indice_CAR_BEV,indice_CAR_HYD]), 'c');
+    CINV_BEV_year = average_km_per_year./CRF_cars(:,indice_CAR_ICE).*(( MSH_cars(:,indice_CAR_BEV)./(ones(nb_regions,1)-MSH_cars(:,indice_CAR_BEV)).*LCC_cars(:,indice_CAR_ICE).^(-var_hom_cars)).^(-ones(nb_regions,1)./var_hom_cars)-OM_cost_var_cars(:,indice_CAR_BEV)./average_km_per_year-pArmDFref(:,indice_elec).*EFF_BEV(:,1));
+    CINV_cars_nexus(:,indice_CAR_BEV)=CINV_BEV_year;
+    if verbose>=1
+        disp( [regnames, string(CINV_cars_nexus(:,indice_CAR_BEV)), string(CINV_cars_nexus(:,indice_CAR_BEV) ./ CINV_cars_nexus(:,indice_CAR_ICE))], "[regnames, string(CINV_cars_nexus_ref(:,indice_CAR_BEV)), string(CINV_cars_nexus_ref(:,indice_CAR_ICE) ./ CINV_cars_nexus_ref(:,indice_CAR_BEV))]")
+    end
+end
+
+if current_time_im+1 == size(MSH_BEV_hist,'c')
+    Cum_Inv_cars_ref(:,indice_CAR_BEV) = Cum_Inv_cars(:,indice_CAR_BEV);
+    CINV_cars_nexus_ref(:,indice_CAR_BEV) = CINV_cars_nexus(:,indice_CAR_BEV);
+end
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////Updating technical coefficients of the vehicle fleet////////////////////////////////
@@ -235,20 +258,20 @@ test_nb_auto_vintage=zeros(nb_regions,1);
 stovartemp = zeros(nb_regions, nb_techno_cars);
 
 for k=1:nb_regions 
-        for j_time=0:Life_time_max_cars
-            if (current_time_im-j_time)>0 then
-                if (current_time_im-j_time+LIFE_time_cars(k,j_tech))>current_time_im then	
-				    alphaEtauto_temp(k)=alphaEtauto_temp(k)+stockVintageAutoTechno(k,indice_CAR_ICE,current_time_im-j_time).*(EFF_ICE(k,current_time_im-j_time)./(tauxderemplissageauto(k))); 
-                    alphaelecauto_temp(k)=alphaelecauto_temp(k)+stockVintageAutoTechno(k,indice_CAR_BEV,current_time_im-j_time).*(EFF_BEV(k,current_time_im-j_time)./(tauxderemplissageauto(k)));
-                    alphaHYDauto_temp(k)=alphaHYDauto_temp(k)+stockVintageAutoTechno(k,indice_CAR_HYD,current_time_im-j_time).*(EFF_HYD(k,current_time_im-j_time)./(tauxderemplissageauto(k)));
-					for j_tech=1:nb_techno_cars                
-					alphaCompositeauto_temp(k)=alphaCompositeauto_temp(k)+stockVintageAutoTechno(k,j_tech,current_time_im-j_time).*OM_cost_var_cars(k,j_tech)./average_km_per_year;
-						test_nb_auto_vintage(k)= test_nb_auto_vintage(k)+stockVintageAutoTechno(k,j_tech,current_time_im-j_time);
-						stovartemp(k,j_tech) =  stovartemp(k,j_tech) + stockVintageAutoTechno(k,j_tech,current_time_im-j_time);
-					end
-				end
+    for j_time=0:Life_time_max_cars
+        if (current_time_im-j_time)>0 then
+            if (current_time_im-j_time+LIFE_time_cars(k,j_tech))>current_time_im then	
+                alphaEtauto_temp(k)=alphaEtauto_temp(k)+stockVintageAutoTechno(k,indice_CAR_ICE,current_time_im-j_time).*(EFF_ICE(k,current_time_im-j_time)./(tauxderemplissageauto(k))); 
+                alphaelecauto_temp(k)=alphaelecauto_temp(k)+stockVintageAutoTechno(k,indice_CAR_BEV,current_time_im-j_time).*(EFF_BEV(k,current_time_im-j_time)./(tauxderemplissageauto(k)));
+                alphaHYDauto_temp(k)=alphaHYDauto_temp(k)+stockVintageAutoTechno(k,indice_CAR_HYD,current_time_im-j_time).*(EFF_HYD(k,current_time_im-j_time)./(tauxderemplissageauto(k)));
+                for j_tech=1:nb_techno_cars                
+                    alphaCompositeauto_temp(k)=alphaCompositeauto_temp(k)+stockVintageAutoTechno(k,j_tech,current_time_im-j_time).*OM_cost_var_cars(k,j_tech)./average_km_per_year;
+                    test_nb_auto_vintage(k)= test_nb_auto_vintage(k)+stockVintageAutoTechno(k,j_tech,current_time_im-j_time);
+                    stovartemp(k,j_tech) =  stovartemp(k,j_tech) + stockVintageAutoTechno(k,j_tech,current_time_im-j_time);
+                end
             end
-        end    
+        end
+    end    
 end
 
 //Average technical characteristics of the all fleet, accounting for remaining vehicles from the calibration year (if any) and generations that have not reached the end of their lifetime

@@ -15,7 +15,7 @@ then
     scilabExe='/home/bibas/bin/scilab-5.4.1/bin/scilab'
 elif [ $HOSTNAME = "inari.centre-cired.fr" ]
 then
-    scilabExe='/data/software/scilab-5.4.1/bin/scilab'
+    scilabExe='/data/software/scilab-2024.1.0/bin/scilab'
 else
     scilabExe='scilab'
 fi
@@ -45,7 +45,7 @@ for i in  3001
 do
   for taxinc in 400 500 600 
   do
-      for maxmshbiom in 25 75 125
+      for maxmshbiom in 13 39 64
       do
  
       runname="$i-$taxinc-$maxmshbiom"

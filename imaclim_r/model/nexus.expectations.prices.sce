@@ -1,3 +1,11 @@
+// =============================================
+// Contact: <imaclim.r.world@gmail.com>
+// Licence: AGPL-3.0
+// Authors:
+//     Florian Leblanc, Nicolas Graves, Thibault Briera, Ruben Bibas
+//     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
+// =============================================
+
 //--------------------------------------------------------------------//
 //-------------------- PRICE EXPECTATIONS----------------------------//
 //--------------------------------------------------------------------//
@@ -50,10 +58,29 @@ p_gaz_anticip = p(:,gaz);
 
 //expected tax on fuels
 //T.B. : why would we use an average of current + expected (t+10)?
-expectedTaxEtDF = ( taxCO2_DF(:,indice_Et) + expected.taxCO2_DF(:,et,expectations.horizon.et) ) / 2 ;
-expectedTaxGazDF = ( taxCO2_DF(:,indice_gaz) + expected.taxCO2_DF(:,gaz,expectations.horizon.et) ) / 2 ;
-expectedTaxEtCI = ( taxCO2_CI(:,indice_Et,:) + expected.taxCO2_CI(:,et,:,expectations.horizon.et) ) / 2 ;
-expectedTaxGazCI = ( taxCO2_CI(:,indice_gaz,:) + expected.taxCO2_CI(:,gaz,:,expectations.horizon.et) ) / 2 ;
+expectedTaxEtDF = zeros(reg,1);
+expectedTaxGazDF = zeros(reg,1);
+expectedTaxEtCI = zeros(reg,1,sec);
+expectedTaxGazCI = zeros(reg,1,sec);
+
+disc_rate_et = 0.1*ones(reg,1);
+
+if test_expect_prices == 1
+    for k=1:reg //
+        expectedTaxEtDF(k) = sum([taxCO2_DF(k,indice_Et);squeeze(expected.taxCO2_DF(k,et,1:expectations.horizon.et))]'./ (1+disc_rate_et (k))^(1:(expectations.horizon.et+1)))/sum((1+disc_rate_et(k))^(1:(expectations.horizon.et+1)));
+        expectedTaxGazDF(k) = sum([taxCO2_DF(k,indice_gas);squeeze(expected.taxCO2_DF(k,gaz,1:expectations.horizon.et)) ]'./ (1+disc_rate_et(k))^(1:(expectations.horizon.et+1)))/sum((1+disc_rate_et(k))^(1:(expectations.horizon.et+1)));
+        for j=1:sec
+            expectedTaxEtCI(k,:,j) = sum([taxCO2_CI(k,indice_Et,j); squeeze(expected.taxCO2_CI(k,et,j,1:expectations.horizon.et))]'./ (1+disc_rate_et(k))^(1:(expectations.horizon.et+1)))/sum((1+disc_rate_et(k))^(1:(expectations.horizon.et+1)))   ;
+            expectedTaxGazCI(k,:,j)= sum([taxCO2_CI(k,indice_gas,j); squeeze(expected.taxCO2_CI(k,gaz,j,1:expectations.horizon.et))]'./ (1+disc_rate_et(k))^(1:(expectations.horizon.et+1)))/sum((1+disc_rate_et(k))^(1:(expectations.horizon.et+1)))  ;
+        end
+    end
+else
+    expectedTaxEtDF = ( taxCO2_DF(:,indice_Et) + expected.taxCO2_DF(:,et,expectations.horizon.et) ) / 2 ;
+    expectedTaxGazDF = ( taxCO2_DF(:,indice_gas) + expected.taxCO2_DF(:,gaz,expectations.horizon.et) ) / 2 ;
+    expectedTaxEtCI = ( taxCO2_CI(:,indice_Et,:) + expected.taxCO2_CI(:,et,:,expectations.horizon.et) ) / 2 ;
+    expectedTaxGazCI = ( taxCO2_CI(:,indice_gas,:) + expected.taxCO2_CI(:,gaz,:,expectations.horizon.et) ) / 2 ;
+end
+
 
 
 //regional prices
@@ -66,7 +93,7 @@ pEtOilExpWldTxBiodies=sum(pEtOilExpTxBiodies.*Q(:,indice_Et))./sum(Q(:,indice_Et
 p_Et_oil_anticip_world=sum(p_Et_oil_anticip.*Q(:,indice_Et))./sum(Q(:,indice_Et))*lge2Mtoe*10^6;
 
 p_et_anticip_reg = p_Et_oil_anticip+(coef_Q_CO2_ref(:,indice_Et)).* expectedTaxEtDF;
-p_gaz_anticip_reg = p_gaz_anticip+(coef_Q_CO2_ref(:,indice_gaz)).* expectedTaxGazDF;
+p_gaz_anticip_reg = p_gaz_anticip+(coef_Q_CO2_ref(:,indice_gas)).* expectedTaxGazDF;
 wp_et_anticip_nlu = sum(p_et_anticip_reg.*Q(:,indice_Et))./sum(Q(:,indice_Et));
 wp_et_exp_anticip_nlu = sum(p_et_anticip_reg.*Exp(:,indice_Et))./sum(Exp(:,indice_Et));
-wp_gaz_anticip_nlu = sum(p_gaz_anticip_reg.*Q(:,indice_gaz))./sum(Q(:,indice_gaz));
+wp_gaz_anticip_nlu = sum(p_gaz_anticip_reg.*Q(:,indice_gas))./sum(Q(:,indice_gas));

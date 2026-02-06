@@ -2,7 +2,7 @@
 // Contact: <imaclim.r.world@gmail.com>
 // Licence: AGPL-3.0
 // Authors:
-//     Ruben Bibas, Adrien Vogt-Schilb, Céline Guivarch, Olivier Crassous, Henri Waisman, Olivier Sassi
+//     Florian Leblanc, Adrien Vogt-Schilb, Ruben Bibas, Céline Guivarch, Renaud Crassous, Henri Waisman, Olivier Sassi
 //     (CIRED - CNRS/AgroParisTech/ENPC/EHESS/CIRAD)
 // =============================================
 
@@ -22,32 +22,32 @@ function mkcsv(varname,SAVEDIR,varargin)
     //SAVEDIR is optional (level_N-1 variable SAVEDIR is used instead)
 
     
-//Options default values
+    //Options default values
     forcem_ =%f;
     append_combi = %t;
 
-//Lecture des options    
+    //reading options
     if argn(2)>2
         for imk = 1:size(varargin)
             select varargin(imk)
             case "forcem"
-                forcem_ = %t //oblige mkcsv a appeller m_machin plutot que machin le csv
+                forcem_ = %t //force mkcsv to call "m_machin" instead of "machin" on the csv
             case "nocombi"
-                append_combi = %f //ne rajoute pas le numero de combi a la fin
+                append_combi = %f //do not add the number 'combi' at the end
             end
         end
     end
     
-    //attention de bien garder isdef et pas argn(2): mkcsv est appele tel quel, et on veut qu'il utilise le SAVEDIR courant
+    //beware of keeping "isdef" and not "argn(2)": mkcsv is called this way, and we want it to use the current folder SAVEDIR 
     if ~isdef("SAVEDIR")
         SAVEDIR=""
     end
-    if ~isdef("combi") //pour le ca sou on appendcombi. Si savedir est vide, ça va retourner 0
+    if ~isdef("combi") //case in which we appendcombi. is SAVEDIR is empty, retunr 0
         combi = run_name2combi(SAVEDIR)
     end
     
     //Correcting frequent errors
-    varname= stripblanks (varname,%t); //supprime les tab et les espaces
+    varname= stripblanks (varname,%t); //delete spaces and tabs
     varname= strsubst (varname,".tsv","");
     varname= strsubst (varname,".csv","");
     if varname==[] | varname=="" then 
@@ -59,44 +59,44 @@ function mkcsv(varname,SAVEDIR,varargin)
     end
     SAVEDIR = pathconvert(SAVEDIR,%t)
         
-        //checking if the variable whos name is varname is a string
-        if evstr ("type("+varname+"(1))" )==10 //it is a string
-            isString = %t
-        else //assume it is a number
-            isString = %f
-        end
+    //checking if the variable whos name is varname is a string
+    if evstr ("type("+varname+"(1))" )==10 //it is a string
+        isString = %t
+    else //assume it is a number
+        isString = %f
+    end
         
-        filename = varname;
-        //vire le "m_" sur les noms des fichiers pour 
-        if ~forcem_ & part(varname,1:2)=="m_"
-            filename = part(varname,3:length(varname))
-        end        
-        //zjoute le numero de la combi au nom du tsv
-        if append_combi
-           filename = filename+fit_combi(combi);
-        end        
+    filename = varname;
+    //delete "m_" on file names
+    if ~forcem_ & part(varname,1:2)=="m_"
+        filename = part(varname,3:length(varname))
+    end        
+    //add the number "combi" to the .tsv file name
+    if append_combi
+        filename = filename+fit_combi(combi);
+    end        
                 
-        //standard case
-        nb_iter=0;
-        ier=1;
+    //standard case
+    nb_iter=0;
+    ier=1;
         
-        while ier~=0 & nb_iter<5 do
-            sleep (1+nb_iter*50); //Dans cette boucle, on laisse le temps au disque dur d'être disponible et on réessaye l'écriture
-            if isString
-                ier = execstr ( "write_csv("+varname+",SAVEDIR+filename+"".tsv"");","errcatch" );
-            else
-                ier=execstr ( "fprintfMat(SAVEDIR+filename+"".tsv"","+varname+",""%1.4g""+ascii(9));" ,"errcatch" );
-            end
-            nb_iter = nb_iter+1;
+    while ier~=0 & nb_iter<5 do
+        sleep (1+nb_iter*50); //In this loop, we let time to the harddrive to be available, then we retry writting
+        if isString
+            ier = execstr ( "csvWrite("+varname+",SAVEDIR+filename+"".csv"",""|"",[],""%.12e"");","errcatch" );
+        else
+            ier = execstr ( "csvWrite("+varname+",SAVEDIR+filename+"".csv"",""|"",[],""%.12e"");","errcatch" );
         end
-        if ier~=0, disp("!mkcsv could  not save " + varname); mkalert("error"); disp(lasterror(%f));
-            if ier==240, disp("Check attribs of SAVEDIR (look for read only)");disp("winopen(OUTPUT)"); end
-        elseif nb_iter>1, disp("!mkcsv just saved us form an error: ier "+ ier+" nb_iter: "+nb_iter +"varname :"+varname); end
+        nb_iter = nb_iter+1;
+    end
+    if ier~=0, disp("!mkcsv could  not save " + varname); mkalert("error"); disp(lasterror(%f));
+        if ier==240, disp("Check attribs of SAVEDIR (look for read only)");disp("winopen(OUTPUT)"); end
+    elseif nb_iter>1, disp("!mkcsv just saved us form an error: ier "+ ier+" nb_iter: "+nb_iter +"varname :"+varname); end
 
 endfunction
 
 function ldcsv(varname,SAVEDIR)
-    //Loads the variable whos name is varname (given as a string) in CSV format from SAVEDIR+varname.tsv
+    //Loads the variable whos name is varname (given as a string) in CSV format from SAVEDIR+varname.csv
     //SAVEDIR is optional (level_N-1 variable SAVEDIR used instead)
     //may correct level_N-1 variable SAVEDIR (adds / at the end) if SAVEDIR is not given as an argument
 
@@ -132,12 +132,12 @@ function ldcsv(varname,SAVEDIR)
 endfunction
 
 function mksav(varname,calibString,SAVEDIR)
-    //Saves the variables whos name are varname(i) (given as strings) in Scilab binar format to SAVEDIRsave/varname(i).sav
+    //Saves the variables whos name are varname(i) (given as strings) in Scilab binar format to SAVEDIRsave/varname(i).dat
     //if used with "calib", saves in CALIB instead of SAVEDIR/save
     //SAVEDIR is optional (level_N-1 variable SAVEDIR used instead)
    
     varname= stripblanks (varname,%t); 
-    varname= strsubst (varname,".sav","");
+    varname= strsubst (varname,".dat","");
     if varname==[] then return; end
 
     if argn(2)<2
@@ -156,7 +156,7 @@ function mksav(varname,calibString,SAVEDIR)
     //comparing sizes
     if size(varname,"*")~=size(calibString,"*")
         if size(calibString,"*")==1 
-            calibString=emptystr(varname) + calibString; //on autorise mksav([var1 var2 var3],"calib")
+            calibString=emptystr(varname) + calibString; //we allow mksav([var1 var2 var3],"calib")
         else
             disp("!! mksav("+varname+","+calibString+"): sizes don-t match"); mkalert("error"); return;
         end
@@ -176,7 +176,7 @@ function mksav(varname,calibString,SAVEDIR)
     nb_iter=0;
     ier=1;
     while ier~=0 & nb_iter<5 do
-        sleep (1+nb_iter*50); //Dans cette boucle, on laisse le temps au disque dur d'être disponible et on réessaye l'écriture
+        sleep (1+nb_iter*50); //In this loop, we let time to the harddrive to be available, then we retry writting
         ier=trytosave()
         nb_iter = nb_iter+1
     end
@@ -192,22 +192,22 @@ function ier=trytosave
         if ~isdef(varname(i)) then disp("!!In mksav, unknown variable :"+varname(i)); mkalert("error"); end
         if calibString =="calib" then
             trace_id=run_id;
-            ier=execstr ("save(CALIB+varname(i)+"".sav"","""+varname(i)+""",trace_id);","errcatch"); //save(CALIB/varname.sav,varname)
-            disp ("!" +"Saving " + strsubst( CALIB,PARENT,"") + varname(i) +".sav" );
+            ier=execstr ("save(CALIB+varname(i)+"".dat"","""+varname(i)+""",trace_id);","errcatch"); //save(CALIB/varname.dat,varname)
+            disp ("!" +"Saving " + strsubst( CALIB,PARENT,"") + varname(i) +".dat" );
         else 
-            ier=execstr ("save(SAVEDIR+""save/""+varname(i)+"".sav"","""+varname(i)+""");","errcatch");	//save(SAVEDIR+"save/varname.sav",varname)
+            ier=execstr ("save(SAVEDIR+""save/""+varname(i)+"".dat"","""+varname(i)+""");","errcatch");	//save(SAVEDIR+"save/varname.dat",varname)
         end
     end
 endfunction
 
 function ldsav(varname,calibString,SAVEDIR,suffix2combi)
-    //Loads the i variables whos name are varname(i) (given as strings) from Scilab binar format SAVEDIR+save/varname(i).sav
+    //Loads the i variables whos name are varname(i) (given as strings) from Scilab binar format SAVEDIR+save/varname(i).dat
     //if used with "calib" %t or 1, loads from CALIB instead of SAVEDIR+save
     //SAVEDIR is optional (level_N-1 variable SAVEDIR used instead)
     //may correct SAVEDIR (adds / at the end) if SAVEDIR is not given as an argument
 
     varname= stripblanks (varname,%t); 
-    varname= strsubst (varname,".sav","");
+    varname= strsubst (varname,".dat","");
     if varname==[] 
         return
     end
@@ -220,7 +220,7 @@ function ldsav(varname,calibString,SAVEDIR,suffix2combi)
         suffix2combi = "";
     end 
     foundsavedir = %t;
-    //cas ou on donne une combi comme 3eme argument
+    //case in which "combi' is given as a third argument
     if typeof(SAVEDIR)=="constant"
         foundsavedir = %f;
         combi = SAVEDIR
@@ -229,13 +229,13 @@ function ldsav(varname,calibString,SAVEDIR,suffix2combi)
             [nam combiList wasdone wastooManysubs isdoubledone]=classify_dirlist(%t,OUTPUT);
             ind_temp = find( strsubst(nam, string(combi) + suffix2combi ,'') <> nam); // find the folder
             if (wasdone(ind_temp)) <> []
-                 ind_temp = ind_temp (wasdone(ind_temp));
+                ind_temp = ind_temp (wasdone(ind_temp));
             end
             if ind_temp <> []
                 SAVEDIR = nam(ind_temp(1));
                 foundsavedir = %t
             end
-    else
+        else
             if isdir(liste_savedir(combi));
                 SAVEDIR = liste_savedir(combi)
                 foundsavedir = %t;
@@ -278,20 +278,22 @@ function ldsav(varname,calibString,SAVEDIR,suffix2combi)
 
     for i=1:size(varname,"*")
         if calibString=="calib"
-            load(CALIB+varname(i)+".sav");
+            load(CALIB+varname(i)+".dat");
             if ~isdef("trace_id")
                 trace_id ="unknown run";
             end
-            printf("Loading " + strsubst( CALIB+ varname(i) ,PARENT,"") +" from " + trace_id + "\n");
+            if verbose>=1
+                printf("Loading " + strsubst( CALIB+ varname(i) ,PARENT,"") +" from " + trace_id + "\n");
+            end
         else 
             if calibString~=""
                 disp("!!ldsav: Unknown (2,"+i+")th argument : "+string(calibString(i))+" has been ignored" );
             end
             
-            if isfile (SAVEDIR+"save/"+varname(i)+".sav")
-                load(SAVEDIR+"save/"+varname(i)+".sav");
+            if isfile (SAVEDIR+"save/"+varname(i)+".dat")
+                load(SAVEDIR+"save/"+varname(i)+".dat");
             else
-                warning ("inexistant file: "+ SAVEDIR+"save/"+varname(i)+".sav")
+                warning ("inexistant file: "+ SAVEDIR+"save/"+varname(i)+".dat")
                 disp(whereami())
             end
         end 
@@ -309,9 +311,9 @@ function ldsav(varname,calibString,SAVEDIR,suffix2combi)
 endfunction
 
 function dir_hide(the_dir)
-//Hides a directory if runing on MSDOS, else does nothing
-// This function handles dirty paths (like c:/MYDIR\adir/
-// the_dir : The dir to hide (relatevie or absolute path).
+    //Hides a directory if runing on MSDOS, else does nothing
+    // This function handles dirty paths (like c:/MYDIR\adir/
+    // the_dir : The dir to hide (relatevie or absolute path).
     if getos()=="Windows"
 
         the_dir = pathconvert(the_dir,%f) //gets the correct file separator and removes the last one. (scilab function)
@@ -320,7 +322,7 @@ function dir_hide(the_dir)
             part(the_dir,1:length(the_dir)-1)
         end
 
-        unix ( "attrib +h """+ the_dir+"""");//met le "hidden" du dossier de sortie.
+        unix ( "attrib +h """+ the_dir+"""");//add the "hidden" of output folder
 
     end
 endfunction
@@ -330,7 +332,7 @@ function dir_unhide(the_dir)
     // This function handles dirty paths (like c:/MYDIR\adir/
     // the_dir : The dir to hide (relatevie or absolute path). 
 
-     if getos()=="Windows"
+    if getos()=="Windows"
 
         the_dir = pathconvert(the_dir,%f) //gets the correct file separator and removes the last one. (scilab function)
 
@@ -338,17 +340,17 @@ function dir_unhide(the_dir)
             part(the_dir,1:length(the_dir)-1)
         end
 
-        unix ( "attrib -h """+ the_dir+"""");//enlève le "hidden" du dossier de sortie.
+        unix ( "attrib -h """+ the_dir+"""");//remove the "hidden" of output folder
 
     end
 
 endfunction
 
 function bigsave_del()
-//Deletes bigsave, before making a new one,...
-    //If not, variables are concatenated in bigsave.sav and various variables with the same nam appear in level_0 memory (love you, scilab team).
-//...or when stabilisation is done, so SAVEDIR is a light(ko) dir
-    deletefile (pathconvert(SAVEDIR,%t)+"bigsave.sav");
+    //Deletes bigsave, before making a new one,...
+    //If not, variables are concatenated in bigsave.dat and various variables with the same nam appear in level_0 memory (love you, scilab team).
+    //...or when stabilisation is done, so SAVEDIR is a light(ko) dir
+    deletefile (pathconvert(SAVEDIR,%t)+"bigsave.dat");
 endfunction
 
 function bigsave(bigs_nb_sys_var,i)
@@ -363,7 +365,7 @@ function bigsave(bigs_nb_sys_var,i)
         error ("A  bigs_nb_sys_var should be provided. One of the firsts line of the code should be precedent disp. Ideal is first line of preamble") 
     end
 
-    //If not, variables are concatenated in bigsave.sav and various variables with the same nam appear in level_0 memory (love you, scilab team).
+    //If not, variables are concatenated in bigsave.dat and various variables with the same nam appear in level_0 memory (love you, scilab team).
     bigsave_del()
 
     //Reminds when this was done
@@ -380,24 +382,24 @@ function bigsave(bigs_nb_sys_var,i)
     end
     //we remove the last coma
     bigs_str_end = part(bigs_str_end,1:(length(bigs_str_end)-1));
-    //we execute something like save(SAVEDIR+"bigsave.sav",p,q,CI)
+    //we execute something like save(SAVEDIR+"bigsave.dat",p,q,CI)
 
     //... we manage here the disk access exceptions when a lot of imaclim are runing at the same time.
     nb_iter=0;
     ier=1;
     while ier~=0 & nb_iter<5 do
-        sleep (1+nb_iter*50); //Dans cette boucle, on laisse le temps au disque dur d'être disponible et on réessaye l'écriture
-        ier=execstr ("save(SAVEDIR+""bigsave.sav"",bigs_str_end)","errcatch") //actual bisave
+        sleep (1+nb_iter*50); //In this loop, we let time to the harddrive to be available, then we retry writting
+        ier=execstr ("save(SAVEDIR+""bigsave.dat"",bigs_str_end)","errcatch") //actual bisave
         nb_iter = nb_iter+1
     end
-    if ier~=0, disp("!bigsave could  not save in bigsave.sav"); mkalert("error"); disp(lasterror(%f));
+    if ier~=0, disp("!bigsave could  not save in bigsave.dat"); mkalert("error"); disp(lasterror(%f));
         if ier==240, disp("Check attribs of SAVEDIR+""save/"" (look for read only)"); end
     elseif nb_iter>1, disp("\\o//	 mkcsv just saved us form an error "); end
 
 endfunction
 
 function rldsav(varname,combi)
-    //Loads the i variables whos name are varname(i) (given as strings) from Scilab binar format SAVEDIR+save/varname(i).sav
+    //Loads the i variables whos name are varname(i) (given as strings) from Scilab binar format SAVEDIR+save/varname(i).dat
     //if used with "calib" %t or 1, loads from CALIB instead of SAVEDIR+save
     //SAVEDIR is optional (level_N-1 variable SAVEDIR used instead)
     //may correct SAVEDIR (adds / at the end) if SAVEDIR is not given as an argument
@@ -413,7 +415,7 @@ function rldsav(varname,combi)
                 message("rldsav will use tooManySubs("+combi+")")
                 SAVEDIR = tooManySubs(combi)
                 foundsavedir = %t;
-    	    wasTooManySubs = %t;
+                wasTooManySubs = %t;
             end
         end
     end
@@ -426,16 +428,16 @@ function rldsav(varname,combi)
     rigtreturn ="=return(";
 
     for i=1:size(varname,"*")
-            if isfile (SAVEDIR+"save/"+varname(i)+".sav")
-                load(SAVEDIR+"save/"+varname(i)+".sav");
-		if wasTooManySubs
-                    load(SAVEDIR+"save/last_done_year.sav");
-		    execstr(varname(i)+"(:,"+last_done_year+"+1:$)=%nan;");
-		end
-            else
-                warning ("inexistant file: "+ SAVEDIR+"save/"+varname(i)+".sav")
-                disp(whereami())
+        if isfile (SAVEDIR+"save/"+varname(i)+".dat")
+            load(SAVEDIR+"save/"+varname(i)+".dat");
+            if wasTooManySubs
+                load(SAVEDIR+"save/last_done_year.dat");
+                execstr(varname(i)+"(:,"+last_done_year+"+1:$)=%nan;");
             end
+        else
+            warning ("inexistant file: "+ SAVEDIR+"save/"+varname(i)+".dat")
+            disp(whereami())
+        end
         //updating
         leftreturn = leftreturn + varname(i) +" ,";
         rigtreturn = rigtreturn + varname(i) +" ,";

@@ -9,6 +9,7 @@
 
 
 mkdir -p download
+mkdir -p extracted
 
 (cd download &&
 
@@ -16,7 +17,7 @@ mkdir -p download
 wget -N http://www.cepii.fr/DATA_DOWNLOAD/baseline/v2.0/EconMap_2.4_reference.xls
 wget -N http://www.cepii.fr/DATA_DOWNLOAD/baseline/v2.0/EconMap_2.4.xls
 wget -N http://www.cepii.fr/DATA_DOWNLOAD/baseline/v2.0/EconMap_2.4_csv.rar
-unrar x EconMap_2.4_csv.rar
+unrar x EconMap_2.4_csv.rar ../extracted/
 )
 )
 
